@@ -73,7 +73,7 @@ def simple_sequence():
             pc.go_to(0.0, 0.0, 0.5)
             cf.param.set_value('ring.fadeColor', '0x6060A0')
             def antani():
-                
+                print ('antani')
 
 
 if __name__ == '__main__':
