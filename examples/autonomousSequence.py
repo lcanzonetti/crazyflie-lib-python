@@ -46,16 +46,33 @@ uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
 # Change the sequence according to your setup
 #             x    y    z  YAW
+# sequence = [
+#     (2.5, 2.5, 1.2, 0),
+#     (1.5, 2.5, 1.2, 0),
+#     (2.5, 2.0, 1.2, 0),
+#     (3.5, 2.5, 1.2, 0),
+#     (2.5, 3.0, 1.2, 0),
+#     (2.5, 2.5, 1.2, 0),
+#     (2.5, 2.5, 0.4, 0),
+# ]
+# sequence = [
+#     (0.5, 0.5, 1.2, 0),
+#     (0.5, 0.5, 1.2, 0),
+#     (0.5, 2.0, 1.2, 0),
+#     (0.5, 0.5, 1.2, 0),
+#     (0.5, 0.0, 1.2, 0),
+#     (0.5, 0.5, 1.2, 0),
+#     (0.5, 0.5, 0.4, 0),
+# ]
 sequence = [
-    (2.5, 2.5, 1.2, 0),
-    (1.5, 2.5, 1.2, 0),
-    (2.5, 2.0, 1.2, 0),
-    (3.5, 2.5, 1.2, 0),
-    (2.5, 3.0, 1.2, 0),
-    (2.5, 2.5, 1.2, 0),
-    (2.5, 2.5, 0.4, 0),
+    (0, 0.5, 0, 180),
+    # (1.5, 2.5, 1.2, 0),
+    # (2.5, 2.0, 1.2, 0),
+    # (3.5, 2.5, 1.2, 0),
+    # (2.5, 3.0, 1.2, 0),
+    # (2.5, 2.5, 1.2, 0),
+    # (2.5, 2.5, 0.4, 0),
 ]
-
 
 def wait_for_position_estimator(scf):
     print('Waiting for estimator to find position...')
@@ -148,5 +165,5 @@ if __name__ == '__main__':
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
         reset_estimator(scf)
-        # start_position_printing(scf)
+        start_position_printing(scf)
         run_sequence(scf, sequence)

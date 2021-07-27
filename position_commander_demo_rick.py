@@ -65,7 +65,7 @@ def simple_sequence():
             cf.param.set_value('ring.fadeColor', '0x00A0A0')
             pc.go_to(0.0, -0.5, 1.0)
             cf.param.set_value('ring.fadeColor', '0x00A0A0')
-
+            time.sleep(120)
             pc.go_to(0.0, -0.2, 0.8)
             cf.param.set_value('ring.fadeColor', '0x008080')
             pc.go_to(0.0, -0.2, 0.5)
