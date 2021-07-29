@@ -1,8 +1,8 @@
 
 import logging
 import time
-import threading
-import OSCSend
+import OSCSend2
+import win_ctrl_c
 
 import cflib.crtp
 from   cflib.crazyflie               import Crazyflie
@@ -19,7 +19,9 @@ logging.basicConfig(level=logging.ERROR)
 
 def log_stab_callback(timestamp, data, logconf):
     # print('[%d][%s]: %s' % (timestamp, logconf, data))
-    OSCSend.sendRotation(1, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
+    OSCSend2.sendRotation(1, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
+    OSCSend2.sendPose    (1, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
+
     # print(data)
 
 def loggalo(scf, logconf):
@@ -51,6 +53,9 @@ def main():
     lg_stab.add_variable('stabilizer.roll', 'float')
     lg_stab.add_variable('stabilizer.pitch', 'float')
     lg_stab.add_variable('stabilizer.yaw', 'float')
+    lg_stab.add_variable('lighthouse.x', 'float')
+    lg_stab.add_variable('lighthouse.y', 'float')
+    lg_stab.add_variable('lighthouse.z', 'float')
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
 
@@ -100,7 +105,7 @@ if __name__ == '__main__':
     # cflib.crtp.init_drivers()
     cflib.crtp.init_drivers(enable_debug_driver=False)
     # start timer
-    timer = RepeatedTimer(0.05, OSCSend.osc_process)
+    # timer = RepeatedTimer(0.01, OSCSend.osc_process)
     # def cazzone():
     #     msg = OSCSend.oscbuildparse.OSCMessage("/test/me", ",sif", ["text", 672, 8.871])
     #     OSCSend.osc_send(msg, "drognoBack")
