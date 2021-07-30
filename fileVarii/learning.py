@@ -1,8 +1,13 @@
 
 import logging
 import time
-import OSCSend2
+import OSCStuff
 import win_ctrl_c
+import threading
+from threading import *
+import logging
+
+# logging.basicConfig(level=logging.DEBUG,format='(%(threadName)-9s) %(message)s',)
 
 import cflib.crtp
 from   cflib.crazyflie               import Crazyflie
@@ -13,39 +18,34 @@ from   cflib.crazyflie.log           import LogConfig
 
 # URI to the Crazyflie to connect to
 # uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
-uri = 'radio://0/80/2M/E7E7E7E7E7'
+uris = [
+        # 'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://0/80/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E4',
+        # 'radio://0/80/2M/E7E7E7E7E5',
+        # 'radio://0/80/2M/E7E7E7E7E6',
+        'radio://0/80/2M/E7E7E7E7E7',
+        'radio://0/80/2M/E7E7E7E7E8'
+        # 'radio://0/80/2M/E7E7E7E7E9',
+        ]
+drogni = []
+
+
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
 
-def log_stab_callback(timestamp, data, logconf):
-    # print('[%d][%s]: %s' % (timestamp, logconf, data))
-    OSCSend2.sendRotation(1, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
-    OSCSend2.sendPose    (1, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
-
-    # print(data)
-
-def loggalo(scf, logconf):
-    cf = scf.cf
-    cf.log.add_config(logconf)
-    logconf.data_received_cb.add_callback(log_stab_callback)
-    logconf.start()
-    print('loggo!', logconf)
-    while True:
-        pass
-    # time.sleep(5)
-    # logconf.stop()
-
+  
 def crazyflie_connected():
     print('ho connesso un krezi flaio')
     # crazyflie.close_link()
 
 def main():
-    
     crazyflie = Crazyflie()
     crazyflie.connected.add_callback(crazyflie_connected)
-
-    available = cflib.crtp.scan_interfaces()
-    for i in available:
+    availableRadios = cflib.crtp.scan_interfaces()
+    for i in availableRadios:
         print (i)
         print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
 
@@ -56,24 +56,42 @@ def main():
     lg_stab.add_variable('lighthouse.x', 'float')
     lg_stab.add_variable('lighthouse.y', 'float')
     lg_stab.add_variable('lighthouse.z', 'float')
-
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
-
-        # treddoDelLog = threading.Thread(target=loggalo, args=[scf, lg_stab])
-        # treddoDelLog.daemon = True
-        # treddoDelLog.start()
-        loggalo(scf, lg_stab)
-
-    while True:
-        pass
         
+    for iddio in range (len(uris)):
+        print('oddio!', iddio)
+        drogni.append(Drogno(iddio, lg_stab))
+        drogni[iddio].connect(uris[iddio])
+    
+    # while True:
+    #     pass
+        
+class Drogno:
+    def __init__(self, ID, logSettings):
+        self.ID          = ID
+        self.logSettings = logSettings
+        print(f'ciao, sono un drogno, mi sono inizializzato con id {ID}')
+    
+    def sendNewHighLevelCommand():
+        pass
+    def connect(self, urio):
+        with SyncCrazyflie(urio, cf=Crazyflie(rw_cache='./cache')) as scf:
+             threading.Thread(target=self.loggalo,args=[scf, self.logSettings],daemon=True).start()
+            # self.loggalo(scf, self.logSettings)
 
-# # Properly close the system.
-# OSCSend.osc_terminate()
+    def log_stab_callback(self, timestamp, data, logconf):
+        # print('[%d][%s]: %s' % (timestamp, logconf, data))
+        OSCStuff.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
+        OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
 
-
-
-from threading import Event, Thread
+    def loggalo(self, scf, logconf):
+        cf = scf.cf
+        cf.log.add_config(logconf)
+        logconf.data_received_cb.add_callback(self.log_stab_callback)
+        logconf.start()
+        print('loggo!', logconf)
+        # while True:
+        #     pass
+        return
 
 class RepeatedTimer:
 
@@ -101,7 +119,9 @@ class RepeatedTimer:
         self.event.set()
         self.thread.join()
 
+
 if __name__ == '__main__':
+
     # cflib.crtp.init_drivers()
     cflib.crtp.init_drivers(enable_debug_driver=False)
     # start timer
