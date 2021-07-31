@@ -36,17 +36,17 @@ def start_server(ip, port):
     thread.start()
  
 def sendRotation(droneID, roll, pitch, yaw):
-    client.send_message("/drogni/drone"+str(droneID+1)+"_rot_x", roll)
-    client.send_message("/drogni/drone"+str(droneID+1)+"_rot_y", pitch)
-    client.send_message("/drogni/drone"+str(droneID+1)+"_rot_z", yaw)
+    client.send_message("/drogni/drone"+str(droneID)+"_rot_x", roll)
+    client.send_message("/drogni/drone"+str(droneID)+"_rot_y", pitch)
+    client.send_message("/drogni/drone"+str(droneID)+"_rot_z", yaw)
     # print (droneID, roll, pitch, yaw)
 
 
 def sendPose(droneID, x, y, z):
-    client.send_message("/drogni/drone"+str(droneID+1)+"_pos_x", x)
-    client.send_message("/drogni/drone"+str(droneID+1)+"_pos_y", y)
-    client.send_message("/drogni/drone"+str(droneID+1)+"_pos_z", z)
-    client.send_message("/drogni/t/", uniform(2.5, 10.0)  )
+    client.send_message("/drogni/drone"+str(droneID)+"_pos_x", x)
+    client.send_message("/drogni/drone"+str(droneID)+"_pos_y", y)
+    client.send_message("/drogni/drone"+str(droneID)+"_pos_z", z)
+    # client.send_message("/drogni/t/", uniform(2.5, 10.0)  )
     # print (x, y, z)
 
 

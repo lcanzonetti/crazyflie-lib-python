@@ -36,7 +36,8 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from cflib.utils import uri_helper
 
-uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+uri1 = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+uri2 = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -101,7 +102,7 @@ class LoggingExample:
             print('Could not add Stabilizer log config, bad configuration.')
 
         # Start a timer to disconnect in 10s
-        t = Timer(5, self._cf.close_link)
+        # t = Timer(5, self._cf.close_link)
         t.start()
 
     def _stab_log_error(self, logconf, msg):
@@ -136,10 +137,13 @@ if __name__ == '__main__':
     # Initialize the low-level drivers
     cflib.crtp.init_drivers()
 
-    le = LoggingExample(uri)
+    le1 = LoggingExample(uri1)
+    le2 = LoggingExample(uri2)
 
     # The Crazyflie lib doesn't contain anything to keep the application alive,
     # so this is where your application should do something. In our case we
     # are just waiting until we are disconnected.
-    while le.is_connected:
+    while le1.is_connected:
+        time.sleep(1)
+    while le2.is_connected:
         time.sleep(1)
