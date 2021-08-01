@@ -1,19 +1,20 @@
 
 import logging
 import time
-import OSCStuff
 import win_ctrl_c
 import threading
 from threading import *
 import logging
 import concurrent.futures
-
 import cflib.crtp
-from   cflib.crazyflie               import Crazyflie
-from   cflib.crazyflie.syncCrazyflie import SyncCrazyflie
-from   cflib.utils                   import uri_helper
-from   cflib.crazyflie.syncLogger    import SyncLogger
-from   cflib.crazyflie.log           import LogConfig
+from   cflib.crazyflie                            import Crazyflie
+from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
+from   cflib.utils                                import uri_helper
+from   cflib.crazyflie.syncLogger                 import SyncLogger
+from   cflib.crazyflie.log                        import LogConfig
+from   cflib.positioning.position_hl_commander import PositionHlCommander
+from   console.utils import wait_key
+import OSCStuff
 
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
@@ -22,7 +23,7 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E3',
         # 'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://0/80/2M/E7E7E7E7E6',
+        'radio://0/80/2M/E7E7E7E7E6',
         'radio://0/80/2M/E7E7E7E7E7',
         'radio://0/80/2M/E7E7E7E7E8'
         # 'radio://0/80/2M/E7E7E7E7E9',
@@ -32,53 +33,52 @@ drogni = []
 logging.basicConfig(level=logging.ERROR)
 
 def main():
-   
     availableRadios = cflib.crtp.scan_interfaces()
     for i in availableRadios:
         print (i)
         print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
-
+ 
     # lg_stab.add_variable('lighthouse.x', 'float')
     # lg_stab.add_variable('lighthouse.y', 'float')
     # lg_stab.add_variable('lighthouse.z', 'float')
         
     for uro in uris:
         iddio = int(uro[-1])
-        print('oddio!', iddio)
         drogni.append(Drogno(iddio, uro))
     
-    for drogno in drogni:
-        if drogno.is_connected:
-            # time.sleep(1)
-            pass
-        else:
-            print('na? se so sconnessi tutti')
+    OSCStuff.svormo = drogni
+
+    # for drogno in drogni:
+    #     if drogno.is_connected:
+    #         # time.sleep(1)
+    #         return
+    #     else:
+    #         print('na? se so sconnessi tutti')
         
 class Drogno():
     def __init__(self, ID, link_uri):
         self.ID  = ID
+        self.commander = None
+        self.link_uri = link_uri
+        self.recconnectionAttempts = 0
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
-
         # Try to connect to the Crazyflie
+        self.is_connected = False
+        print(f'Provo a connettermi al drone {ID} all\'indirizzo {link_uri} ')
         self._cf.open_link(link_uri)
-        print('Mi connetto a %s' % link_uri)
-
-        # Variable used to keep main loop occupied until disconnect
-        self.is_connected = True
-
         # self.logSettings = logSettings
-        print(f'ciao, sono una classe drogno, mi sono inizializzato con id {ID}')
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
-
+        # Variable used to keep main loop occupied until disconnect
+        self.is_connected = True
         # The definition of the logconfig can be made before connecting
         self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=50)
         self._lg_stab.add_variable('stateEstimate.x', 'float')
@@ -106,11 +106,21 @@ class Drogno():
                   '{} not found in TOC'.format(str(e)))
         except AttributeError:
             print('Could not add Stabilizer log config, bad configuration.')
+            with PositionHlCommander(
+                self._cf,
+                x=0.0, y=0.0, z=0.0,
+                default_velocity=0.3,
+                default_height=0.5,
+                controller=PositionHlCommander.CONTROLLER_PID) as pc:
+                self.commander = pc
+
+
+
 
         # Start a timer to disconnect in 10s
         # t = Timer(5, self._cf.close_link)
         # t.start()
-
+        
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
@@ -128,11 +138,16 @@ class Drogno():
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
         at the specified address)"""
-        print('Connection to %s failed: %s' % (link_uri, msg))
+        print('Connessione la drogno %s fallita: %s' % (self.ID, msg))
         self.is_connected = False
-        time.sleep(0.5)
-        self._cf.open_link(link_uri)
-
+        if self.recconnectionAttempts < 10:
+            print('Aspetto 2 secondi')
+            time.sleep(2)
+            print('provo a riaprire la connessione con il drogno %s ' % self.ID)
+            self.recconnectionAttempts+=1
+            self._cf.open_link(self.link_uri)
+        else:
+            print('con il drogno %s ho perso le speranze' % self.ID)
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -146,8 +161,8 @@ class Drogno():
         time.sleep(0.5)
         self._cf.open_link(link_uri)
 
-    def sendNewHighLevelCommand():
-        pass
+    def goTo(self,x,y,z):
+        self.commander.go_to(x,y,z)
 
 class RepeatedTimer:
 
@@ -160,7 +175,7 @@ class RepeatedTimer:
         self.kwargs = kwargs
         self.start = time.time()
         self.event = Event()
-        self.thread = Thread(target=self._target)
+        self.thread = Thread(target=self._target) 
         self.thread.start()
 
     def _target(self):
@@ -178,7 +193,7 @@ class RepeatedTimer:
 
 if __name__ == '__main__':
 
-    # cflib.crtp.init_drivers()
+    OSCStuff.start_server()
     cflib.crtp.init_drivers(enable_debug_driver=False)
     # start timer
     # timer = RepeatedTimer(0.01, OSCSend.osc_process)
