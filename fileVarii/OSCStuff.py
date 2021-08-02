@@ -6,38 +6,67 @@ from pythonosc import osc_server
 from pythonosc import dispatcher
 from pythonosc import udp_client
 from random import uniform
+import repeatedTimer as rp
 
-sendingIP     = "192.168.10.101"
+sendingIP     = "192.168.10.255"
 sendingPort   = 9201
 receivingPort = 9200
 
 svormo = []
 isSendEnabled = False
 
-
-print("Starting Client")
 client     = udp_client.SimpleUDPClient(sendingIP, sendingPort)
-# testClient = udp_client.SimpleUDPClient(sendingIP, 9200)
-print('osc initalized on', sendingIP, sendingPort, receivingPort)
+copmpanionClient = udp_client.SimpleUDPClient(sendingIP, 12321)
+print('osc initalized on', sendingIP, sendingPort)
 
 
 def printCoordinates(unused_addr, args, x,y,z, ID):
     print ('il drone %s dovrebbe andare a %s %s %s' %( ID, x,y,z))
+
     if isSendEnabled:
         mandacelo(ID, x, y, z)
+    else:
+        print('ma i comandi di movimento disabilitati')
 
 def mandacelo(ID, x, y, z):
-    svormo[ID].goTo(x,y,z)
+    try:
+        svormo[ID].goTo(x,y,z)
+    except:
+        print('il drogno %s è scollegato' % ID)
 
+ 
+def setSendEnabled(unused_addr, args, isEnabled):
+    isSendEnabled = isEnabled
+    print('me dici:')
+    print(unused_addr, args, isEnabled)
 
+def getSendEnabled():
+    return isSendEnabled
 
-def tipo(roba):
-    print (roba)
+def comè(uno): # è booleano oppure no?
+    uno = uno *1
+    return uno
+def updateCompanion():
+    def daje ():
+        if not isSendEnabled:
+            copmpanionClient.send_message("/style/bgcolor/10/5", [10, 235, 10])
+            copmpanionClient.send_message("/style/text/10/5",  "non mando")
+        else:
+            copmpanionClient.send_message("/style/bgcolor/10/5", [235, 10, 10])
+            copmpanionClient.send_message("/style/text/10/5",  "mando")
 
+      # start timer
+    timer = rp.RepeatedTimer(1, daje)
+    # Press button 5 on page 1 down and hold
+updateCompanion()
+ 
 # listen to addresses and print changes in values 
 dispatcher = dispatcher.Dispatcher()
 dispatcher.map("/d3/drone/pos", printCoordinates, 'pos')
 dispatcher.map("/d3/drone/rot", printCoordinates, 'rot')
+dispatcher.map("/companion/isSendEnabled", setSendEnabled, 'companion')
+
+
 
 def receiveNewTarget(id,x,y,z,yaw, speed):
     print('dico al drone [%s] di andare a [%s] [%s] [%s], rivolgendosi a [%s], con velocità [%s]', id,x,y,z,yaw, speed )
@@ -48,7 +77,7 @@ def start_server():
     print("Server OSC partito {}".format(server.server_address))
     thread = threading.Thread(target=server.serve_forever)
     thread.start()
-
+start_server()
 # feedbacksssssssss
 # 
 #  
@@ -56,7 +85,7 @@ def sendRotation(droneID, roll, pitch, yaw):
     client.send_message("/drogni/drone"+str(droneID)+"_rot_x", roll)
     client.send_message("/drogni/drone"+str(droneID)+"_rot_y", pitch)
     client.send_message("/drogni/drone"+str(droneID)+"_rot_z", yaw)
-    # print (droneID, roll, pitch, yaw)
+    print (droneID, roll, pitch, yaw)
 
 def sendPose(droneID, x, y, z):
     client.send_message("/drogni/drone"+str(droneID)+"_pos_x", x)
