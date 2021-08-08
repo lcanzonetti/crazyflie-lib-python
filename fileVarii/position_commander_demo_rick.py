@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import threading
 import cflib.crtp
 import time
 
@@ -8,7 +9,21 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.position_hl_commander import PositionHlCommander
 
 # URI to the Crazyflie to connect to
-uri = 'radio://0/80/2M/E7E7E7E7E7'
+drogni = [
+        # 'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://0/80/2M/E7E7E7E7E3',
+        'radio://0/80/2M/E7E7E7E7E4',
+        'radio://0/80/2M/E7E7E7E7E5',
+        'radio://0/80/2M/E7E7E7E7E6',
+        # 'radio://0/80/2M/E7E7E7E7E7',
+        'radio://0/80/2M/E7E7E7E7E8'
+        # 'radio://0/80/2M/E7E7E7E7E9',
+        ]
+
+SPACING = 0.25
+
 
 def slightly_more_complex_usage():
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
@@ -37,44 +52,59 @@ def slightly_more_complex_usage():
 
 
 def simple_sequence():
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
-        with PositionHlCommander(scf) as pc:
-            cf = scf.cf
-            # Set black color effect
-            cf.param.set_value('ring.effect', '0')
-            cf.param.set_value('ring.effect', '14')
-            cf.param.set_value('ring.fadeTime', '1.0')
-            time.sleep(1)
+    indice = 0.0
 
-            # pc.forward(1.0)
-            # pc.left(1.0)
-            # pc.back(1.0)
-            pc.go_to(0.0, 0.3, 0.5)
-            pc.go_to(0.0, 0.5, 0.7)
-            pc.go_to(0.0, 0.7, 0.9)
-            cf.param.set_value('ring.fadeColor', '0x0000A0')
-            pc.go_to(0.0, 0.9, 1.5)
-            cf.param.set_value('ring.fadeColor', '0x00A000')
-            pc.go_to(0.0, 0.6, 1.3)
-            cf.param.set_value('ring.fadeColor', '0xA0A000')
-            pc.go_to(0.0, 0.2, 1.1)
-            pc.set_default_velocity(0.9)
-            pc.go_to(1.5, 0, 1.1)
-            pc.go_to(-1.5, 0, 1.1)
-            pc.set_default_velocity(0.3)
-            cf.param.set_value('ring.fadeColor', '0x00A0A0')
-            pc.go_to(0.0, -0.5, 1.0)
-            cf.param.set_value('ring.fadeColor', '0x00A0A0')
-            time.sleep(120)
-            pc.go_to(0.0, -0.2, 0.8)
-            cf.param.set_value('ring.fadeColor', '0x008080')
-            pc.go_to(0.0, -0.2, 0.5)
-            cf.param.set_value('ring.fadeColor', '0x307070')
-            pc.go_to(0.0, 0.0, 0.5)
-            cf.param.set_value('ring.fadeColor', '0x6060A0')
-            def antani():
-                print ('antani')
+    for flaio in drogni:
+        indice += 1
+        relativeSpacing = SPACING * indice
+        
+        def daje():
+            with SyncCrazyflie(flaio, cf=Crazyflie(rw_cache='./cache')) as scf:
+                with PositionHlCommander(scf) as pc:
+                    cf = scf.cf
+                    # Set black color effect
+                    # cf.param.set_value('ring.effect', '0')
+                    # cf.param.set_value('ring.effect', '14')
+                    # cf.param.set_value('ring.fadeTime', '1.0')
+                    # time.sleep(1)
 
+                    # pc.forward(1.0)
+                    # pc.left(1.0)
+                    # pc.back(1.0)
+                    pc.go_to(0.0, 0.0, 1)
+                    print('1')
+            
+                    pc.go_to(0.0, 1+relativeSpacing, 1)
+                    print('2')
+                    time.sleep(1)
+
+                    cf.param.set_value('ring.fadeColor', '0x008080')
+                    pc.go_to(1+relativeSpacing, 1+relativeSpacing, 1)
+                    print('3')
+                    time.sleep(1)
+
+                    cf.param.set_value('ring.fadeColor', '0x307070')
+                    pc.go_to(1.0+relativeSpacing, 0.0+relativeSpacing, 1)
+                    print('4')
+                    time.sleep(2)
+                    
+                    pc.go_to(0.0+relativeSpacing, 0.0+relativeSpacing, 1)
+                    print('end')
+                    # cf.param.set_value('ring.fadeColor', '0x307070')
+                    # pc.go_to(0.0, 0.0, 1.3)
+                    # print('5')
+                    # time.sleep(2)
+
+                    # cf.param.set_value('ring.fadeColor', '0xFFFFFF')
+                    # cf.param.set_value('ring.fadeColor', '0xFF00FF')
+                    # cf.param.set_value('ring.fadeColor', '0xFF0000')
+                    # cf.param.set_value('ring.fadeColor', '0x000000')
+                    # print('6')
+                    # cf.param.set_value('ring.fadeColor', '0x6060A0')
+                    def antani():
+                        print ('antani')
+        t= threading.Thread(target=daje)
+        t.start()
 
 if __name__ == '__main__':
     cflib.crtp.init_drivers(enable_debug_driver=False)

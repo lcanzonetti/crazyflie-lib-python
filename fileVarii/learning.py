@@ -2,12 +2,11 @@
 import logging
 import time
 import win_ctrl_c
-import threading
 from threading import *
 import logging
 import concurrent.futures
 import cflib.crtp
-from   cflib.crazyflie                            import Crazyflie
+from   cflib.crazyflie                            import Crazyflie, commander
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
@@ -22,16 +21,16 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://0/80/2M/E7E7E7E7E3',
         # 'radio://0/80/2M/E7E7E7E7E4',
-        # 'radio://0/80/2M/E7E7E7E7E5',
+        'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
-        'radio://0/80/2M/E7E7E7E7E7',
-        'radio://0/80/2M/E7E7E7E7E8',
+        # 'radio://0/80/2M/E7E7E7E7E7',
+        # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 drogni = {}
-# DEFAULT_HEIGHT = 0.5
-# BOX_LIMIT = 0.5
-# position_estimate = [0, 0]
+DEFAULT_HEIGHT = 0.5
+BOX_LIMIT = 1.2
+position_estimate = [0, 0]
 logging.basicConfig(level=logging.ERROR)
 
 
@@ -72,15 +71,67 @@ class Drogno():
         # self.logSettings = logSettings
     def connect(self):
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri} ')
-        if self.recconnectionAttempts < 10:
+        if (self.recconnectionAttempts < 10) :
             print('Aspetto 1 secondo')
-            time.sleep(0.1)
+            time.sleep(1)
             print(f'provo a riaprire la connessione con il drogno {self.ID} dopo {self.recconnectionAttempts} tentativi.')
             self.recconnectionAttempts+=1
             self._cf.open_link( self.link_uri)
 
         else:
             print('con il drogno %s ho perso le speranze' % self.ID)
+
+
+    def activate_mellinger_controller(self, use_mellinger):
+        controller = 1
+        if use_mellinger:
+            controller = 2
+        self._cf.cf.param.set_value('stabilizer.controller', controller)
+
+    def wait_for_position_estimator(self):
+        print('Waiting for estimator to find position...')
+
+        log_config = LogConfig(name='Kalman Variance', period_in_ms=500)
+        log_config.add_variable('kalman.varPX', 'float')
+        log_config.add_variable('kalman.varPY', 'float')
+        log_config.add_variable('kalman.varPZ', 'float')
+
+        var_y_history = [1000] * 10
+        var_x_history = [1000] * 10
+        var_z_history = [1000] * 10
+
+        threshold = 0.01
+
+        with SyncLogger(self._cf, log_config) as logger:
+            for log_entry in logger:
+                print(log_entry)
+
+                data = log_entry[1]
+
+                var_x_history.append(data['kalman.varPX'])
+                var_x_history.pop(0)
+                var_y_history.append(data['kalman.varPY'])
+                var_y_history.pop(0)
+                var_z_history.append(data['kalman.varPZ'])
+                var_z_history.pop(0)
+
+                min_x = min(var_x_history)
+                max_x = max(var_x_history)
+                min_y = min(var_y_history)
+                max_y = max(var_y_history)
+                min_z = min(var_z_history)
+                max_z = max(var_z_history)
+
+                print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+
+                if (max_x - min_x) < threshold and (max_y - min_y) < threshold and ( max_z - min_z) < threshold:
+                    break
+
+    def reset_estimator(self):
+        self._cf.param.set_value('kalman.resetEstimation', '1')
+        time.sleep(0.1)
+        self._cf.param.set_value('kalman.resetEstimation', '0')
+        self.wait_for_position_estimator()
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
@@ -96,11 +147,6 @@ class Drogno():
         self._lg_stab.add_variable('stabilizer.roll', 'float')
         self._lg_stab.add_variable('stabilizer.pitch', 'float')
         self._lg_stab.add_variable('stabilizer.yaw', 'float')
-        # self._lg_stab = LogConfig(name='Lighthouse', period_in_ms=50)
-        # self._lg_stab.add_variable('lighthouse.x', 'float')
-        # self._lg_stab.add_variable('lighthouse.y', 'float')
-        # self._lg_stab.add_variable('lighthouse.z', 'float')
-        # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_stab.add_variable('pm.vbat', 'FP16')
 
         # Adding the configuration cannot be done until a Crazyflie is
@@ -113,14 +159,23 @@ class Drogno():
             # This callback will be called on errors
             self._lg_stab.error_cb.add_callback(self._stab_log_error)
             # Start the logging
+            time.sleep(1)
+
             self._lg_stab.start()
-            with PositionHlCommander(
-            self._cf,
-            # x=0.0, y=0.0, z=0.0,
-            # default_velocity=0.3,
-            # default_height=0.5,
-            controller=PositionHlCommander.CONTROLLER_PID) as pc:
-                self.commander = pc
+            self._cf.param.set_value('commander.enHighLevel', '1')
+
+            self.reset_estimator()
+
+            # self.commander = PositionHlCommander( self._cf, x=0.0, y=0.0, z=0.0, default_velocity=0.3, default_height=0.5,
+            # controller=PositionHlCommander.CONTROLLER_PID)
+            self.comandante = self._cf.high_level_commander
+            self.comandante.takeoff(0.45, 2,45)
+            input("enter to continue")
+            self.comandante.go_to(0,0,0.5,45, 2, relative=True)
+
+
+            # time.sleep(1)
+            # self.commander.take_off()
                 # self.sequenzaTest()
 
         except KeyError as e:
@@ -138,7 +193,7 @@ class Drogno():
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
 
-    def _stab_log_data(self, timestamp, data, logconf):
+    def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e smista i dati
         # """Callback from a the log API when data arrives"""
         print(f'[{timestamp}][{logconf.name}]: ', end='')
         for name, value in data.items():
@@ -146,6 +201,7 @@ class Drogno():
         # print()
         OSCStuff.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
         OSCStuff.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'] )
+        self.evaluateBattery(data['pm.vbat'])
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
         # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
 
@@ -171,13 +227,17 @@ class Drogno():
         time.sleep(0.5)
         self.connect()
 
-    def goTo(self,x,y,z):
+    def goTo(self,x,y,z):  #la zeta è in alto!
         self.commander.go_to(x,y,z)
     def sequenzaTest(self):
         # self.commander.go_to(0.0, 0.5, 0.0)
-        self.commander.go_to(0.0, 0.3, 0.1)
-        self.commander.go_to(0.0, 0.3, 0.0)
+        self.commander.go_to(0.0, 0.0, 0.5)
+        self.commander.go_to(0.0, 0.0, 0.8)
         # self.commander.up(1.0)
+    def evaluateBattery(self, level):
+        if level<3.5:
+            print ('ciao, sono il drone %s e ho la batteria scarica' % self.ID)
+        
 
 
 

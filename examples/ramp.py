@@ -35,7 +35,7 @@ import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.utils import uri_helper
 
-uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
 
 logging.basicConfig(level=logging.ERROR)
 

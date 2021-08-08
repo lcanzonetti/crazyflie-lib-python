@@ -6,7 +6,7 @@
 #  +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
 #   ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
 #
-#  Copyright (C) 2019 Bitcraze AB
+#  Copyright (C) 20E9 Bitcraze AB
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -73,8 +73,8 @@ def wait_for_position_estimator(scf):
             min_z = min(var_z_history)
             max_z = max(var_z_history)
 
-            # print("{} {} {}".
-            #       format(max_x - min_x, max_y - min_y, max_z - min_z))
+            print("{} {} {}".
+                  format(max_x - min_x, max_y - min_y, max_z - min_z))
 
             if (max_x - min_x) < threshold and (
                     max_y - min_y) < threshold and (
@@ -131,15 +131,18 @@ def run_shared_sequence(scf):
 
 
 uris = {
-    'radio://0/30/2M/E7E7E7E711',
-    'radio://0/30/2M/E7E7E7E712',
+    'radio://0/80/2M/E7E7E7E7E5',
+    'radio://0/80/2M/E7E7E7E7E6'
     # Add more URIs if you want more copters in the swarm
 }
 
 if __name__ == '__main__':
     cflib.crtp.init_drivers()
     factory = CachedCfFactory(rw_cache='./cache')
-    with Swarm(uris, factory=factory) as swarm:
-        swarm.parallel_safe(activate_high_level_commander)
-        swarm.parallel_safe(reset_estimator)
-        swarm.parallel_safe(run_shared_sequence)
+    try:
+        with Swarm(uris, factory=factory) as swarm:
+            swarm.parallel_safe(activate_high_level_commander)
+            swarm.parallel_safe(reset_estimator)
+            swarm.parallel_safe(run_shared_sequence)
+    except:
+        print('è successa una roba')
