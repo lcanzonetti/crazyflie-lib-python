@@ -108,10 +108,8 @@ def reset_estimator(scf):
     cf.param.set_value('kalman.resetEstimation', '0')
     wait_for_position_estimator(scf)
 
-
 def activate_high_level_commander(scf):
     scf.cf.param.set_value('commander.enHighLevel', '1')
-
 
 def activate_mellinger_controller(scf, use_mellinger):
     controller = 1
@@ -161,7 +159,8 @@ def upload_trajectory(cf, trajectory_id, trajectory):
 
 # TAKE OFF
 DEFAULT_HEIGHT = 0.3
-SPACING = 0.25
+SPACING = 0.4
+
 def take_off(scf, params):
     cf = scf.cf
     commander = cf.high_level_commander
@@ -177,6 +176,7 @@ def take_off(scf, params):
 
 # Do a Loop
 LOOPS = 3
+
 def run_shared_sequence(scf, params):
     cf = scf.cf
 
@@ -190,7 +190,7 @@ def run_shared_sequence(scf, params):
     relative = True
 
     # Delay based on ID
-    time.sleep((d-1)*2)
+    time.sleep((d-1)*3)
 
     # Execute circle trajectory
     for t in range(0, LOOPS):
@@ -201,17 +201,17 @@ def run_shared_sequence(scf, params):
     # Go back to initial position and land again
     commander.go_to(SPACING * (d-1), -(SPACING* (d-1)),DEFAULT_HEIGHT , 0.0 ,2.0)
     time.sleep(2.0)
-    commander.land(0.0, 2.0)
+    commander.land(0.0, 2.5
+    )
     time.sleep(2)
     commander.stop()
 
 # URIS of swarm
 uris = {
-    # 'radio://0/80/2M/E7E7E7E7E4',
-    # 'radio://0/80/2M/E7E7E7E7E5',
-    # 'radio://0/80/2M/E7E7E7E7E6',
-    # 'radio://0/80/2M/E7E7E7E7E8'
-    'radio://0/80/2M/E7E7E7E7E5'
+    'radio://0/80/2M/E7E7E7E7E3',
+    'radio://0/80/2M/E7E7E7E7E4',
+    'radio://0/80/2M/E7E7E7E7E5',
+    'radio://0/80/2M/E7E7E7E7E6'
     # Add more URIs if you want more copters in the swarm
 
 
@@ -220,11 +220,10 @@ uris = {
 # Parameters of Swarm
 
 params = {
-    # 'radio://0/80/2M/E7E7E7E7E4': [{'d': 1}],
-    # 'radio://0/80/2M/E7E7E7E7E5': [{'d': 2}],
-    # 'radio://0/80/2M/E7E7E7E7E6': [{'d': 3}],
-    # 'radio://0/80/2M/E7E7E7E7E8': [{'d': 4}],
-    'radio://0/80/2M/E7E7E7E7E5': [{'d': 1}],
+    'radio://0/80/2M/E7E7E7E7E3': [{'d': 1}],
+    'radio://0/80/2M/E7E7E7E7E4': [{'d': 2}],
+    'radio://0/80/2M/E7E7E7E7E5': [{'d': 3}],
+    'radio://0/80/2M/E7E7E7E7E6': [{'d': 4}],
 }
 
 
@@ -236,11 +235,15 @@ if __name__ == '__main__':
         # Activate HL commander and reset estimator
         swarm.parallel_safe(activate_high_level_commander)
         swarm.parallel_safe(reset_estimator)
+        input("enter to takeoff")
 
         swarm.parallel_safe(take_off, args_dict=params)
-
-        input("enter to continue")
+        swarm.
+        input("enter to start")
 
         swarm.parallel_safe(run_shared_sequence, args_dict=params)
+        while True:
+            pass
+
 
 
