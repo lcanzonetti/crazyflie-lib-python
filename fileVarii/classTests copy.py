@@ -18,24 +18,26 @@ class Drogno (threading.Thread):
       self.statoDiVolo = 'idle'
       self.durataVolo = random.randint(1,4)
       self.exitFlag = 0
+      self.controlThread         = False
+      self.printThread           = False
       self.currentSequenceThread = False
       self.exitingTimer          = False
       self.idleExitTime          = 10
 
     def run(self):
       print ("Starting " + self.name)
-      t = threading.Thread(target=self.checkSequenzaDiVolo).start()
-      self.print_time(self.name, 5, self.counter)      
+      self.controlThread = threading.Thread(target=self.controlThreadRoutine).start()
+      self.printThread   = threading.Thread(target=self.printStatuse).start()
       print ("Exiting " + self.name)
     #   t.join()
 
-    def print_time(self, threadName, counter, delay):
+    def printStatus(self, threadName, counter, delay):
         while not self.exitFlag:
             time.sleep(delay)
             print ("%s: %s" % (threadName, self.statoDiVolo))
             # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
     
-    def checkSequenzaDiVolo(self):
+    def controlThreadRoutine(self):
         while not self.exitFlag:
             if (self.statoDiVolo == 'esecuzione sequenza!'):
                 self.sequenzaDiVolo()
@@ -54,8 +56,7 @@ class Drogno (threading.Thread):
                 # print('exiting in 5 seconds') 
                 
 
-    def sequenzaDiVolo(self):
-            
+    def sequenzaDiVoloSimulata(self):     
         def volo():
             print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
             time.sleep(self.durataVolo)

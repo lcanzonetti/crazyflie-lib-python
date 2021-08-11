@@ -1,9 +1,13 @@
-
-import logging
+import threading
 import time
-from   threading import *
-import logging
+import random
 import concurrent.futures
+from   collections import namedtuple
+#custom modules
+import OSCStuff as OSC
+import timerino as myTimer
+#crazyflie's
+import logging
 import cflib.crtp
 from   cflib.crazyflie                            import Crazyflie, commander
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -11,25 +15,35 @@ from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander import PositionHlCommander
-import OSCStuff
+
+
+we_are_faking_it = True
+
 
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://0/80/2M/E7E7E7E7E3',
-        # 'radio://0/80/2M/E7E7E7E7E4',
+        'radio://0/80/2M/E7E7E7E7E3',
+        'radio://0/80/2M/E7E7E7E7E4',
         'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
         # 'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
-
 drogni = {}
-DEFAULT_HEIGHT = 0.5
-BOX_LIMIT = 1.2
+DEFAULT_HEIGHT   = 0.5
+BOX_LIMIT        = 1.2
+RELATIVE_SPACING = 0.4
 
+
+# Possible commands, all times are in seconds
+Takeoff = namedtuple('Takeoff', ['height', 'time'])
+Land = namedtuple("Land", ['time'])
+Goto = namedtuple('Goto', ['x', 'y', 'z', 'time'])
+Ring = namedtuple('Ring', ['r', 'g', 'b', 'intensity', 'time'])   # RGB [0-255], Intensity [0.0-1.0]
+Quit = namedtuple('Quit', []) # Reserved for the control loop, do not use in sequence
 
 
 
@@ -39,47 +53,114 @@ def main():
         print (i)
         print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
  
-
-        
     for uro in uris:
         iddio = int(uro[-1])
         drogni[int(iddio)] = Drogno(iddio, uro)
+        drogni[int(iddio)].start()
 
-    
-    OSCStuff.svormo = drogni
+    OSC.svormo = drogni
     print('drogni:')
     print(drogni)
 
-    for drogno in drogni:
-        drogni[drogno].connect()
+    
         
-class Drogno():
+class Drogno(threading.Thread):
     def __init__(self, ID, link_uri):
-        self.ID  = ID
-        self.commander = None
-        self.link_uri = link_uri
+        threading.Thread.__init__(self)
+        self.link_uri    = link_uri
+        self.ID          = int(ID)
+        self.name        = 'Drogno_'+str(ID)
+        self.statoDiVolo = 'starting'
+        self.durataVolo  = random.randint(1,4)
+        self.exitFlag    = 0
+        self.controlThread         = False
+        self.printThread           = False
+        self.printRate             = 1     #seconds
+        self.currentSequenceThread = False
+        self.exitingTimer          = False
+        self.idleExitTime          = 10    #seconds
         self.recconnectionAttempts = 0
-        self._cf = Crazyflie(rw_cache='./cache')
+        self.is_connected          = False
+        self.isPositionEstimated   = True
+        self.commander   = None
+        self._cf = Crazyflie(rw_cache='./cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
-        # Try to connect to the Crazyflie
-        self.is_connected = False
-        # self.logSettings = logSettings
+     
+    def run(self):
+        print ("Starting " + self.name)
+
+        if we_are_faking_it:
+            time.sleep(1.5)
+        else:
+            self.connect()
+            self._cf.param.set_value('commander.enHighLevel', '1')
+            self.reset_estimator()
+            self.setRingColor(0,0,0, 0, 0)
+            self._cf.param.set_value('ring.effect', '14')
+
+        self.statoDiVolo   = 'idle'
+        self.controlThread = threading.Thread(target=self.controlThreadRoutine).start()
+        self.printThread   = threading.Thread(target=self.printStatus).start()
+       
+        print ("Exiting "  + self.name)
+
+    def exit(self):
+                print('exitFlag is now set fo drogno %s, bye kiddo' % self.name)       
+                self.exitFlag = 1
+
+    def printStatus(self):
+        while not self.exitFlag:
+            time.sleep(self.printRate)
+            print ("%s: %s" % (self.name, self.statoDiVolo))
+            # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
+    
+    def controlThreadRoutine(self):
+        print('control routine for %s started' % self.name)
+        while not self.exitFlag:
+            if  (self.statoDiVolo == 'sequenza simulata!'):
+                self.sequenzaDiVoloSimulata()
+                if self.exitingTimer != False:
+                    self.exitingTimer.stop()
+                    self.exitFlag = 0
+            elif (self.statoDiVolo == 'landing'):
+                if we_are_faking_it:
+                    time.sleep(2)
+                    self.statoDiVolo = 'idle'
+                else:
+                    self.commander
+              
+                # self.exitingTimer = myTimer.Timer(self.idleExitTime, self.exit).start()
+                # print (self.exitingTimer)
+                # print('exiting in 5 seconds') 
+
+    def sequenzaDiVoloSimulata(self):     
+        def volo():
+            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
+            time.sleep(self.durataVolo)
+            self.statoDiVolo = 'finito sequenza'
+            # self.currentSequenceThread.join()
+
+        if not self.currentSequenceThread:
+            self.currentSequenceThread = threading.Thread(target=volo)
+            self.currentSequenceThread.start()
+            print('start!')
+        # else:
+            # print ('il thread di volo è già iniziato_______')
+
     def connect(self):
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri} ')
-        if (self.recconnectionAttempts < 10) :
-            print('Aspetto 1 secondo')
-            time.sleep(1)
+        if (self.recconnectionAttempts < 10) : 
             print(f'provo a riaprire la connessione con il drogno {self.ID} dopo {self.recconnectionAttempts} tentativi.')
             self.recconnectionAttempts+=1
             self._cf.open_link( self.link_uri)
-
+            print('Aspetto 1 secondo')
+            time.sleep(1)
         else:
             print('con il drogno %s ho perso le speranze' % self.ID)
-
 
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
@@ -103,8 +184,7 @@ class Drogno():
 
         with SyncLogger(self._cf, log_config) as logger:
             for log_entry in logger:
-                print(log_entry)
-
+                # print(log_entry)
                 data = log_entry[1]
 
                 var_x_history.append(data['kalman.varPX'])
@@ -121,10 +201,13 @@ class Drogno():
                 min_z = min(var_z_history)
                 max_z = max(var_z_history)
 
-                print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
-
-                if (max_x - min_x) < threshold and (max_y - min_y) < threshold and ( max_z - min_z) < threshold:
+                # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+                if (max_x - min_x) < threshold and (
+                    max_y - min_y) < threshold and (
+                    max_z - min_z) < threshold:
                     break
+        print('positionEstimated')
+        self.isPositionEstimated = True
 
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
@@ -158,15 +241,12 @@ class Drogno():
             # This callback will be called on errors
             self._lg_stab.error_cb.add_callback(self._stab_log_error)
             # Start the logging
-            time.sleep(1)
+            time.sleep(0.3)
 
             self._lg_stab.start()
-            self._cf.param.set_value('commander.enHighLevel', '1')
+            # self._cf.param.set_value('commander.enHighLevel', '1')
+            # self.reset_estimator()
 
-            self.reset_estimator()
-
-            # self.commander = PositionHlCommander( self._cf, x=0.0, y=0.0, z=0.0, default_velocity=0.3, default_height=0.5,
-            # controller=PositionHlCommander.CONTROLLER_PID)
             self.comandante = self._cf.high_level_commander
             self.comandante.takeoff(0.45, 2,45)
             input("enter to continue")
@@ -226,19 +306,74 @@ class Drogno():
         time.sleep(0.5)
         self.connect()
 
+    def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
+        if we_are_faking_it:
+            time.delay(1)
+        else:
+            self.commander.takeoff(height, time)
+        self.statoDiVolo = 'decollato!'
+
+    def go(self, sequenceNumber=0):
+        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza':
+            if we_are_faking_it:
+                self.statoDiVolo = 'sequenza simulata!'
+            else:
+                self.sequenzaTest(sequenceNumber)
+        else:
+            print('not ready!')
+
+    def land(self):
+        self.statoDiVolo = 'landing'
+
     def goTo(self,x,y,z):  #la zeta è in alto!
         self.commander.go_to(x,y,z)
-    def sequenzaTest(self):
-        # self.commander.go_to(0.0, 0.5, 0.0)
-        self.commander.go_to(0.0, 0.0, 0.5)
-        self.commander.go_to(0.0, 0.0, 0.8)
-        # self.commander.up(1.0)
+    
+    def setRingColor(self, r, g, b, intensity = 1.0, time=1.0):
+        self._cf.param.set_value('ring.fadeTime', str(time))
+        r *= intensity
+        g *= intensity
+        b *= intensity
+        color = (int(r) << 16) | (int(g) << 8) | int(b)
+        self._cf.param.set_value('ring.fadeColor', str(color))
+
+    def sequenzaTest(self,sequenceNumber):
+        if  sequenceNumber == 0:
+            print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
+            self.commander.go_to(0.0, 0.0, 0.5)
+            self.commander.go_to(0.0, 0.0, 1.0)
+            self.commander.go_to(0.0, 0.0, 0.5)
+            print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
+        elif sequenceNumber == 1:
+            print('inizio prima sequenza di test')
+            self.commander.go_to(0.0, 0.0, 1)
+            self.setRingColor(255,   0,   0, 1.0, 1.0)
+            time.sleep(1)
+
+            self.commander.go_to(0.0, 1+RELATIVE_SPACING, 1)
+            self.setRingColor(255,   0,   0, 1.0, 1.0)
+
+            self.commander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 1)
+            self.setRingColor(  0, 255,  0, 1.0, 1.0)
+            
+            self.commander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1)
+            self.setRingColor(  0,   0, 255, 1.0, 1.0)
+
+            self.commander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1)
+            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            time.sleep(1)
+
+            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            time.sleep(1)
+            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            time.sleep(1)
+            print('fine prima sequenza di test')
+
     def evaluateBattery(self, level):
-        if level<3.5:
+        if level<3.54:
             print ('ciao, sono il drone %s e ho la batteria scarica' % self.ID)
+        if level<3.45:
+            print ('ciao, sono il drone %s e sono così scarico che atterrerei.' % self.ID)
         
-
-
 
 
 if __name__ == '__main__':
