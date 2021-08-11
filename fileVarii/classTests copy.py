@@ -3,6 +3,7 @@ import threading
 import time
 import random
 import OSCStuff as OSC
+import timerino as myTimer
 
 exitFlag = 0
 treddi = []
@@ -18,6 +19,8 @@ class Drogno (threading.Thread):
       self.durataVolo = random.randint(1,4)
       self.exitFlag = 0
       self.currentSequenceThread = False
+      self.exitingTimer          = False
+      self.idleExitTime          = 10
 
     def run(self):
       print ("Starting " + self.name)
@@ -36,13 +39,19 @@ class Drogno (threading.Thread):
         while not self.exitFlag:
             if (self.statoDiVolo == 'esecuzione sequenza!'):
                 self.sequenzaDiVolo()
+                if self.exitingTimer != False:
+                    self.exitingTimer.stop()
+                    self.exitFlag = 0
+
             elif (self.statoDiVolo == 'landing'):
                 time.sleep(2)
                 self.statoDiVolo = 'idle'
-                def exit():       
+                def exit():
+                    print('exitFlag is now set, bye kiddo\n')       
                     self.exitFlag = 1
-                T = threading.Timer(5, exit).start()
-                print('exiting in 5 seconds') 
+                # self.exitingTimer = myTimer.Timer(self.idleExitTime, exit).start()
+                # print (self.exitingTimer)
+                # print('exiting in 5 seconds') 
                 
 
     def sequenzaDiVolo(self):
@@ -60,7 +69,6 @@ class Drogno (threading.Thread):
         # else:
             # print ('il thread di volo è già iniziato_______')
 
-
     def takeoff(self):
         self.statoDiVolo = 'decollato!'
 
@@ -69,7 +77,7 @@ class Drogno (threading.Thread):
             self.statoDiVolo = 'esecuzione sequenza!'
         else:
             print('not ready!')
-    
+
     def land(self):
         self.statoDiVolo = 'landing'
         

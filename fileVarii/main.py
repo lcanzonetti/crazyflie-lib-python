@@ -25,11 +25,12 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
+
 drogni = {}
 DEFAULT_HEIGHT = 0.5
 BOX_LIMIT = 1.2
-position_estimate = [0, 0]
-logging.basicConfig(level=logging.ERROR)
+
+
 
 
 def main():
@@ -241,12 +242,7 @@ class Drogno():
 
 
 if __name__ == '__main__':
-
+    logging.basicConfig(level=logging.ERROR)
     cflib.crtp.init_drivers(enable_debug_driver=False)
-   
-    # def cazzone():
-    #     msg = OSCSend.oscbuildparse.OSCMessage("/test/me", ",sif", ["text", 672, 8.871])
-    #     OSCSend.osc_send(msg, "drognoBack")
-    # timer2 = RepeatedTimer(1, cazzone)
     main()
 
