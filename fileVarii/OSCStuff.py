@@ -12,10 +12,10 @@ sendingIP     = "192.168.10.255"
 sendingPort   = 9201
 receivingPort = 9200
 
-svormo = []
+drogni = []
 isSendEnabled = False
 
-client     = udp_client.SimpleUDPClient(sendingIP, sendingPort)
+client           = udp_client.SimpleUDPClient(sendingIP, sendingPort)
 copmpanionClient = udp_client.SimpleUDPClient(sendingIP, 12321)
 print('osc initalized on', sendingIP, sendingPort)
 
@@ -30,10 +30,9 @@ def printCoordinates(unused_addr, args, x,y,z, ID):
 
 def mandacelo(ID, x, y, z):
     try:
-        svormo[ID].goTo(x,y,z)
+        drogni[ID].goTo(x,y,z)
     except:
         print('il drogno %s è scollegato' % ID)
-
  
 def setSendEnabled(unused_addr, args, isEnabled):
     isSendEnabled = isEnabled
@@ -60,15 +59,43 @@ def updateCompanion():
     # Press button 5 on page 1 down and hold
 updateCompanion()
  
+
+
+
+def takeoff(unused_addr, args, isEnabled):
+    # print(unused_addr, args, isEnabled)
+    if not isEnabled:
+        print('chief says we\'re gonna take the fuck off now')
+        for i in range(len(drogni)):
+            drogni[i].takeoff()
+
+def go(unused_addr, args, isEnabled):
+    if not isEnabled:
+        print('chief says we\'re gonna do shit')
+        for i in range(len(drogni)):
+            drogni[i].go()
+
+def land(unused_addr, args, isEnabled):
+    if not isEnabled:
+        print('chief says we\'re gotta be grounded')
+        for i in range(len(drogni)):
+            drogni[i].land()
+
+
 # listen to addresses and print changes in values 
 dispatcher = dispatcher.Dispatcher()
 dispatcher.map("/d3/drone/pos", printCoordinates, 'pos')
 dispatcher.map("/d3/drone/rot", printCoordinates, 'rot')
 dispatcher.map("/companion/isSendEnabled", setSendEnabled, 'companion')
+dispatcher.map("/takeoff", takeoff, 'yo')
+dispatcher.map("/start", go, 'yo')
+dispatcher.map("/land", land, 'yo')
 
+def ping():
+    print('pong')
+    print(drogni)
 
-
-def receiveNewTarget(id,x,y,z,yaw, speed):
+def receiveNewTarget(id,x,y,z,yaw, speed, r,g,b):
     print('dico al drone [%s] di andare a [%s] [%s] [%s], rivolgendosi a [%s], con velocità [%s]', id,x,y,z,yaw, speed )
 
 def start_server():
