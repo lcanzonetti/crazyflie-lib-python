@@ -278,8 +278,8 @@ class Drogno(threading.Thread):
         for name, value in data.items():
             print(f'{name}: {value:3.3f} ', end='')
         # print()
-        OSCStuff.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
-        OSCStuff.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'] )
+        OSC.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
+        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'] )
         self.evaluateBattery(data['pm.vbat'])
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
         # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
