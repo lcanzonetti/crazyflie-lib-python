@@ -56,15 +56,15 @@ Ring = namedtuple('Ring', ['r', 'g', 'b', 'intensity', 'time'])   # RGB [0-255],
 Quit = namedtuple('Quit', []) # Reserved for the control loop, do not use in sequence
 
 uris = [
-    'radio://0/10/2M/E7E7E7E701',  # cf_id 0
-    'radio://0/10/2M/E7E7E7E702',  # cf_id 1
-    'radio://0/10/2M/E7E7E7E703',  # cf_id 3
-    'radio://0/10/2M/E7E7E7E704',  # cf_id 4
-    'radio://0/10/2M/E7E7E7E705',  # cf_id 5
-    'radio://0/10/2M/E7E7E7E706',  # cf_id 6
-    'radio://0/10/2M/E7E7E7E707',  # cf_id 7
-    'radio://0/10/2M/E7E7E7E708',  # cf_id 8
-    'radio://0/10/2M/E7E7E7E709',  # cf_id 9
+    # 'radio://0/10/2M/E7E7E7E701',  # cf_id 0
+    # 'radio://0/10/2M/E7E7E7E702',  # cf_id 1
+    # 'radio://0/80/2M/E7E7E7E7E3',  # cf_id 3
+    # 'radio://0/80/2M/E7E7E7E7E4',  # cf_id 4
+    'radio://0/80/2M/E7E7E7E7E5',  # cf_id 5
+    # 'radio://0/80/2M/E7E7E7E7E6',  # cf_id 6
+    # 'radio://0/80/2M/E7E7E7E7E7',  # cf_id 7
+    # 'radio://0/10/2M/E7E7E7E708',  # cf_id 8
+    # 'radio://0/10/2M/E7E7E7E709',  # cf_id 9
     # Add more URIs if you want more copters in the swarm
 ]
 

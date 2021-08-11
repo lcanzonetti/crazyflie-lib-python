@@ -158,8 +158,9 @@ def upload_trajectory(cf, trajectory_id, trajectory):
 # _______________________________
 
 # TAKE OFF
-DEFAULT_HEIGHT = 0.3
-SPACING = 0.4
+DEFAULT_HEIGHT = 1.0
+SPACING = 0.5
+OFFSET  = -0.7
 
 def take_off(scf, params):
     cf = scf.cf
@@ -199,11 +200,11 @@ def run_shared_sequence(scf, params):
     time.sleep(4-(d-1)*2)
 
     # Go back to initial position and land again
-    commander.go_to(SPACING * (d-1), -(SPACING* (d-1)),DEFAULT_HEIGHT , 0.0 ,2.0)
+    commander.go_to(SPACING * (d-1)-OFFSET, -(SPACING* (d-1)-OFFSET),DEFAULT_HEIGHT , 0.0 ,2.0)
     time.sleep(2.0)
     commander.land(0.0, 2.5
     )
-    time.sleep(2)
+    time.sleep(5)
     commander.stop()
 
 # URIS of swarm
@@ -211,7 +212,8 @@ uris = {
     'radio://0/80/2M/E7E7E7E7E3',
     'radio://0/80/2M/E7E7E7E7E4',
     'radio://0/80/2M/E7E7E7E7E5',
-    'radio://0/80/2M/E7E7E7E7E6'
+    'radio://0/80/2M/E7E7E7E7E6',
+    'radio://0/80/2M/E7E7E7E7E7'
     # Add more URIs if you want more copters in the swarm
 
 
@@ -224,6 +226,7 @@ params = {
     'radio://0/80/2M/E7E7E7E7E4': [{'d': 2}],
     'radio://0/80/2M/E7E7E7E7E5': [{'d': 3}],
     'radio://0/80/2M/E7E7E7E7E6': [{'d': 4}],
+    'radio://0/80/2M/E7E7E7E7E7': [{'d': 5}],
 }
 
 
@@ -238,10 +241,12 @@ if __name__ == '__main__':
         input("enter to takeoff")
 
         swarm.parallel_safe(take_off, args_dict=params)
-        swarm.
+        
         input("enter to start")
 
         swarm.parallel_safe(run_shared_sequence, args_dict=params)
+        swarm.parallel_safe(land, args_dict=params)
+
         while True:
             pass
 

@@ -12,7 +12,7 @@ sendingIP     = "192.168.10.255"
 sendingPort   = 9201
 receivingPort = 9200
 
-drogni = []
+drogni = {}
 isSendEnabled = False
 
 client           = udp_client.SimpleUDPClient(sendingIP, sendingPort)
@@ -65,21 +65,21 @@ updateCompanion()
 def takeoff(unused_addr, args, isEnabled):
     # print(unused_addr, args, isEnabled)
     if not isEnabled:
-        print('chief says we\'re gonna take the fuck off now')
-        for i in range(len(drogni)):
-            drogni[i].takeoff()
+        print('chief says we\'re gonna take the fuck off')
+        for drogno in drogni:
+            drogni[drogno].takeoff(0.45, 2.45)
 
 def go(unused_addr, args, isEnabled):
     if not isEnabled:
         print('chief says we\'re gonna do shit')
-        for i in range(len(drogni)):
-            drogni[i].go()
+        for drogno in drogni:
+            drogni[drogno].go()
 
 def land(unused_addr, args, isEnabled):
     if not isEnabled:
         print('chief says we\'re gotta be grounded')
-        for i in range(len(drogni)):
-            drogni[i].land()
+        for drogno in drogni:
+            drogni[drogno].land()
 
 
 # listen to addresses and print changes in values 
