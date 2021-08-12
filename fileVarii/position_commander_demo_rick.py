@@ -15,10 +15,10 @@ drogni = [
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://0/80/2M/E7E7E7E7E3',
         'radio://0/80/2M/E7E7E7E7E4',
-        'radio://0/80/2M/E7E7E7E7E5',
-        'radio://0/80/2M/E7E7E7E7E6',
-        # 'radio://0/80/2M/E7E7E7E7E7',
-        'radio://0/80/2M/E7E7E7E7E8'
+        # 'radio://0/80/2M/E7E7E7E7E5',
+        # 'radio://0/80/2M/E7E7E7E7E6',
+        'radio://0/80/2M/E7E7E7E7E7',
+        # 'radio://0/80/2M/E7E7E7E7E8'
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 

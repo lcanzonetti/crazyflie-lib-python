@@ -209,11 +209,13 @@ def run_shared_sequence(scf, params):
 
 # URIS of swarm
 uris = {
-    'radio://0/80/2M/E7E7E7E7E3',
-    'radio://0/80/2M/E7E7E7E7E4',
-    'radio://0/80/2M/E7E7E7E7E5',
-    'radio://0/80/2M/E7E7E7E7E6',
-    'radio://0/80/2M/E7E7E7E7E7'
+    # 'radio://0/80/2M/E7E7E7E7E2',
+    # 'radio://0/80/2M/E7E7E7E7E3',
+    # 'radio://0/80/2M/E7E7E7E7E4',
+    # 'radio://0/80/2M/E7E7E7E7E5',
+    # 'radio://0/80/2M/E7E7E7E7E6',
+    # 'radio://0/80/2M/E7E7E7E7E7',
+    'radio://0/80/2M/E7E7E7E7E8',
     # Add more URIs if you want more copters in the swarm
 
 
@@ -222,11 +224,12 @@ uris = {
 # Parameters of Swarm
 
 params = {
-    'radio://0/80/2M/E7E7E7E7E3': [{'d': 1}],
-    'radio://0/80/2M/E7E7E7E7E4': [{'d': 2}],
-    'radio://0/80/2M/E7E7E7E7E5': [{'d': 3}],
-    'radio://0/80/2M/E7E7E7E7E6': [{'d': 4}],
-    'radio://0/80/2M/E7E7E7E7E7': [{'d': 5}],
+    'radio://0/80/2M/E7E7E7E7E8': [{'d': 1}],
+    # 'radio://0/80/2M/E7E7E7E7E4': [{'d': 2}],
+    # 'radio://0/80/2M/E7E7E7E7E4': [{'d': 3}],
+    # 'radio://0/80/2M/E7E7E7E7E5': [{'d': 4}],
+    # 'radio://0/80/2M/E7E7E7E7E6': [{'d': 5}],
+    # 'radio://0/80/2M/E7E7E7E7E7': [{'d': 6}],
 }
 
 
@@ -238,14 +241,14 @@ if __name__ == '__main__':
         # Activate HL commander and reset estimator
         swarm.parallel_safe(activate_high_level_commander)
         swarm.parallel_safe(reset_estimator)
-        input("enter to takeoff")
+        # input("enter to takeoff")
 
         swarm.parallel_safe(take_off, args_dict=params)
         
-        input("enter to start")
+        # input("enter to start")
 
         swarm.parallel_safe(run_shared_sequence, args_dict=params)
-        swarm.parallel_safe(land, args_dict=params)
+        # swarm.parallel_safe(land, args_dict=params)
 
         while True:
             pass

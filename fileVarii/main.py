@@ -24,10 +24,10 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        'radio://0/80/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E3',
         'radio://0/80/2M/E7E7E7E7E4',
-        'radio://0/80/2M/E7E7E7E7E5',
-        'radio://0/80/2M/E7E7E7E7E6',
+        # 'radio://0/80/2M/E7E7E7E7E5',
+        # 'radio://0/80/2M/E7E7E7E7E6',
         'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
@@ -98,7 +98,7 @@ class Drogno(threading.Thread):
     
         self.statoDiVolo   = 'idle'
         self.controlThread = threading.Thread(target=self.controlThreadRoutine).start()
-        # self.printThread   = threading.Thread(target=self.printStatus).start()
+        self.printThread   = threading.Thread(target=self.printStatus).start()
         while not self.exitFlag:
             pass
         print ("Exiting "  + self.name)

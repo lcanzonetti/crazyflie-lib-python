@@ -56,14 +56,14 @@ Ring = namedtuple('Ring', ['r', 'g', 'b', 'intensity', 'time'])   # RGB [0-255],
 Quit = namedtuple('Quit', []) # Reserved for the control loop, do not use in sequence
 
 uris = [
-    # 'radio://0/10/2M/E7E7E7E701',  # cf_id 0
-    # 'radio://0/10/2M/E7E7E7E702',  # cf_id 1
-    # 'radio://0/80/2M/E7E7E7E7E3',  # cf_id 3
-    # 'radio://0/80/2M/E7E7E7E7E4',  # cf_id 4
+    'radio://0/80/2M/E7E7E7E7E1',  # cf_id 0
+    'radio://0/80/2M/E7E7E7E7E2',  # cf_id 1
+    'radio://0/80/2M/E7E7E7E7E3',  # cf_id 3
+    'radio://0/80/2M/E7E7E7E7E4',  # cf_id 4
     'radio://0/80/2M/E7E7E7E7E5',  # cf_id 5
-    # 'radio://0/80/2M/E7E7E7E7E6',  # cf_id 6
-    # 'radio://0/80/2M/E7E7E7E7E7',  # cf_id 7
-    # 'radio://0/10/2M/E7E7E7E708',  # cf_id 8
+    'radio://0/80/2M/E7E7E7E7E6',  # cf_id 6
+    'radio://0/80/2M/E7E7E7E7E7',  # cf_id 7
+    'radio://0/80/2M/E7E7E7E7E8',  # cf_id 8
     # 'radio://0/10/2M/E7E7E7E709',  # cf_id 9
     # Add more URIs if you want more copters in the swarm
 ]
@@ -93,7 +93,7 @@ sequence = [
 
     # Takeoff for center
 
-    ( 5,     8,      Takeoff(Z_center, 3)),
+    # ( 5,     8,      Takeoff(Z_center, 3)),
 
     # Goto starting point
         # Outer square
@@ -109,7 +109,7 @@ sequence = [
     ( 8,     7,      Goto(-X_inner, X_inner, Z_inner, 1)),
 
         # Center
-    ( 8,     8,      Goto(0, 0, Z_center, 1)),
+    # ( 8,     8,      Goto(0, 0, Z_center, 1)),
 
     # Turn lights on
         # Outer square
@@ -128,7 +128,7 @@ sequence = [
 
         # Center
 
-    ( 13,    8,      Ring(255, 0, 255, 1, 0)),    
+    # ( 13,    8,      Ring(255, 0, 255, 1, 0)),    
 
 
     # Start rotation
@@ -192,7 +192,7 @@ sequence = [
 
         # Center
 
-    ( 26.5,    8,      Ring(128, 0, 128, 1, 0)),  
+    # ( 26.5,    8,      Ring(128, 0, 128, 1, 0)),  
 
     # Switch Z for outer and center
 
@@ -201,7 +201,7 @@ sequence = [
     ( 28,     2,      Goto(-X_outer, -X_outer, Z_center, 2.5)),
     ( 28,     3,      Goto(-X_outer, X_outer, Z_center, 2.5)),
 
-    ( 28,     8,      Goto(0, 0, Z_outer, 2.5)),  
+    # ( 28,     8,      Goto(0, 0, Z_outer, 2.5)),  
 
     # Change lights on all crazyflies
 
@@ -213,7 +213,7 @@ sequence = [
     ( 31,    5,      Ring(0, 0, 255, 1, 0)), 
     ( 31,    6,      Ring(0, 0, 255, 1, 0)), 
     ( 31,    7,      Ring(0, 0, 255, 1, 0)), 
-    ( 31,    8,      Ring(0, 0, 255, 1, 0)),  
+    # ( 31,    8,      Ring(0, 0, 255, 1, 0)),  
 
 
     # Start rotation - Opposite way
@@ -270,7 +270,7 @@ sequence = [
     ( 45,    6,      Goto(-X_inner, -X_inner, Z_center, 2.5)),
     ( 45,    7,      Goto(-X_inner, X_inner, Z_center, 2.5)),   
 
-    ( 45,    8,      Goto(0, 0, Z_inner, 2.5)),
+    # ( 45,    8,      Goto(0, 0, Z_inner, 2.5)),
 
 
     # Flash lights after each turn
@@ -283,7 +283,7 @@ sequence = [
     ( 48,    5,      Ring(255, 255, 255, 1, 0)), 
     ( 48,    6,      Ring(255, 255, 255, 1, 0)), 
     ( 48,    7,      Ring(255, 255, 255, 1, 0)), 
-    ( 48,    8,      Ring(255, 255, 255, 1, 0)),
+    # ( 48,    8,      Ring(255, 255, 255, 1, 0)),
 
     # Start rotation in the cube formation - Clockwise
 
@@ -307,7 +307,7 @@ sequence = [
     ( 50,    5,      Ring(0, 255, 0, 1, 0)), 
     ( 50,    6,      Ring(0, 255, 0, 1, 0)), 
     ( 50,    7,      Ring(0, 255, 0, 1, 0)), 
-    ( 50,    8,      Ring(0, 255, 0, 1, 0)),
+    # ( 50,    8,      Ring(0, 255, 0, 1, 0)),
 
     ( 52.5,    0,      Goto(-X_inner, -X_inner, Z_outer, 2.5)),
     ( 52.5,    1,      Goto(-X_inner, X_inner, Z_outer, 2.5)),
@@ -330,7 +330,7 @@ sequence = [
     ( 52.5,    5,      Ring(255, 255, 0, 1, 0)), 
     ( 52.5,    6,      Ring(255, 255, 0, 1, 0)), 
     ( 52.5,    7,      Ring(255, 255, 0, 1, 0)), 
-    ( 52.5,    8,      Ring(255, 255, 0, 1, 0)),
+    # ( 52.5,    8,      Ring(255, 255, 0, 1, 0)),
 
     ( 55,    0,      Goto(-X_inner, X_inner, Z_outer, 2.5)),
     ( 55,    1,      Goto(X_inner, X_inner, Z_outer, 2.5)),
@@ -352,7 +352,7 @@ sequence = [
     ( 55,    5,      Ring(0, 255, 255, 1, 0)), 
     ( 55,    6,      Ring(0, 255, 255, 1, 0)), 
     ( 55,    7,      Ring(0, 255, 255, 1, 0)), 
-    ( 55,    8,      Ring(0, 255, 255, 1, 0)),
+    # ( 55,    8,      Ring(0, 255, 255, 1, 0)),
 
 
     ( 57.5,    0,      Goto(X_inner, X_inner, Z_outer, 2.5)),
@@ -375,7 +375,7 @@ sequence = [
     ( 57.5,    5,      Ring(128, 0, 128, 1, 0)), 
     ( 57.5,    6,      Ring(128, 0, 128, 1, 0)), 
     ( 57.5,    7,      Ring(128, 0, 128, 1, 0)), 
-    ( 57.5,    8,      Ring(128, 0, 128, 1, 0)),    
+    # ( 57.5,    8,      Ring(128, 0, 128, 1, 0)),    
 
     # Goto back to starting formation
     ( 60,     0,      Goto(X_outer, X_outer, Z_outer, 2.5)),
@@ -398,8 +398,8 @@ sequence = [
     ( 69,    6,      Ring(255, 255, 255, 1, 0)),  
     ( 69,    7,      Ring(255, 255, 255, 1, 0)), 
 
-    ( 71,     8,      Goto(0, 0, Z_center, 1)),
-    ( 73,     8,      Ring(255, 255, 255, 1, 0)), 
+    # ( 71,     8,      Goto(0, 0, Z_center, 1)),
+    # ( 73,     8,      Ring(255, 255, 255, 1, 0)), 
 
     # Land all crazyflies
 
@@ -411,7 +411,7 @@ sequence = [
     ( 75,    5,      Land(3)),
     ( 75,    6,      Land(3)),
     ( 75,    7,      Land(3)),
-    ( 75,    8,      Land(3)),
+    # ( 75,    8,      Land(3)),
 
     # Turn off lights on all crazyflies
 
@@ -423,7 +423,7 @@ sequence = [
     ( 78,    5,      Ring(0,0,0,0, 5)), 
     ( 78,    6,      Ring(0,0,0,0, 5)),
     ( 78,    7,      Ring(0,0,0,0, 5)),
-    ( 78,    8,      Ring(0,0,0,0, 5)),
+    # ( 78,    8,      Ring(0,0,0,0, 5)),
 ]
 
 """
