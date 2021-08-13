@@ -108,11 +108,13 @@ start_server()
 # feedbacksssssssss
 # 
 #  
-def sendRotation(droneID, roll, pitch, yaw):
-    client.send_message("/drogni/drone"+str(droneID)+"_rot_x", roll)
-    client.send_message("/drogni/drone"+str(droneID)+"_rot_y", pitch)
+def sendRotation(droneID, yaw):
+# def sendRotation(droneID, roll, pitch, yaw):
+    # client.send_message("/drogni/drone"+str(droneID)+"_rot_x", roll)
+    # client.send_message("/drogni/drone"+str(droneID)+"_rot_y", pitch)
     client.send_message("/drogni/drone"+str(droneID)+"_rot_z", yaw)
-    print (droneID, roll, pitch, yaw)
+    # print (droneID, roll, pitch, yaw)
+    # print (droneID, yaw)
 
 def sendPose(droneID, x, y, z):
     client.send_message("/drogni/drone"+str(droneID)+"_pos_x", x)
