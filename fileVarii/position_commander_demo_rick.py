@@ -17,7 +17,7 @@ drogni = [
         'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
-        'radio://0/80/2M/E7E7E7E7E7',
+        # 'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8'
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
@@ -26,7 +26,7 @@ SPACING = 0.25
 
 
 def slightly_more_complex_usage():
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
+    with SyncCrazyflie(drogni, cf=Crazyflie(rw_cache='./cache')) as scf:
         with PositionHlCommander(
                 scf,
                 x=0.0, y=0.0, z=0.0,
@@ -71,6 +71,7 @@ def simple_sequence():
                     # pc.forward(1.0)
                     # pc.left(1.0)
                     # pc.back(1.0)
+                    input('ready, press a key')
                     pc.go_to(0.0, 0.0, 1)
                     print('1')
             

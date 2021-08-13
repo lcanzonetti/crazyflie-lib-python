@@ -16,7 +16,8 @@ from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
-from   cflib.positioning.position_hl_commander import PositionHlCommander
+from   cflib.positioning.position_hl_commander    import PositionHlCommander
+
 
 
 we_are_faking_it = False
@@ -25,12 +26,12 @@ we_are_faking_it = False
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://0/80/2M/E7E7E7E7E3',
-        'radio://0/80/2M/E7E7E7E7E4',
+        'radio://0/80/2M/E7E7E7E7E2',
+        'radio://1/80/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
-        'radio://0/80/2M/E7E7E7E7E7',
+        # 'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
@@ -51,7 +52,7 @@ DEFAULT_TEST_SEQUENCE = 0
 def main():
     availableRadios = cflib.crtp.scan_interfaces()
     for i in availableRadios:
-        print ('Found %s radios.' % len(availableRadios)))
+        print ('Found %s radios.' % len(availableRadios))
         print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
  
     for uro in uris:
@@ -82,6 +83,7 @@ class Drogno(threading.Thread):
         self.is_connected          = False
         self.isPositionEstimated   = False
         self.HLCommander           = None
+        self.positionHLCommander   = None 
         self._cf = Crazyflie(rw_cache='./cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -127,10 +129,13 @@ class Drogno(threading.Thread):
                     time.sleep(2)
                     self.statoDiVolo = 'idle'
                 else:
-                    self.statoDiVolo = 'yo lando'
                     def confirmLanding():
-                        if
-                    myTimer.Timer(3, )
+                        while self.positionHLCommander._is_flying:
+                              self.statoDiVolo = 'yo lando'
+                        self.statoDiVolo = 'landed'
+                    
+
+                   
               
                 # self.exitingTimer = myTimer.Timer(self.idleExitTime, self.exit).start()
                 # print (self.exitingTimer)
@@ -170,7 +175,7 @@ class Drogno(threading.Thread):
                     time.sleep(1)
             else:
                 print('con il drogno %s ho perso le speranze' % self.ID)
-            self.exit()
+                self.exit()
         tio = 'something'
         tio = threading.Thread(target=mariconnetto())
         tio.start()
@@ -265,6 +270,12 @@ class Drogno(threading.Thread):
             self.setRingColor(0,0,0, 0, 0)
             self._cf.param.set_value('ring.effect', '14')
             self.HLCommander = self._cf.high_level_commander
+            self.positionHLCommander = PositionHlCommander(
+                self._cf,
+                x=0.0, y=0.0, z=0.0,
+                default_velocity=0.3,
+                default_height=0.5,
+                controller=PositionHlCommander.CONTROLLER_MELLINGER) 
             self.isReadyToFly = True
      
         except KeyError as e:
@@ -349,13 +360,14 @@ class Drogno(threading.Thread):
             print('not ready!')
 
     def land(self):
-        if self._cf.commander._is_flying:
+        # if self.positionHLCommander._is_flying:
+        if True:
             if we_are_faking_it:
                 self.statoDiVolo = 'landing'
                 time.sleep(1)
             else:
                 self.statoDiVolo = 'landing'
-                self.HLCommander.land(0.2, 0)
+                self.HLCommander.land(0, 3, 180)
 
             self.isFlyng     = False
             self.isReadyToFly = True
@@ -378,10 +390,10 @@ class Drogno(threading.Thread):
     def sequenzaTest(self,sequenceNumber):
         if  sequenceNumber == 0:
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
-            input("enter to continue")
-            self.HLCommander.go_to(0.0, 0.0, 0.5)
-            self.HLCommander.go_to(0.0, 0.0, 1.0)
-            self.HLCommander.go_to(0.0, 0.0, 0.5)
+            # input("enter to continue")
+            self.HLCommander.go_to(0.0, 0.0, 0.5, 90, 4)
+            self.HLCommander.go_to(0.0, 0.0, 1.0, 180, 4)
+            self.HLCommander.go_to(0.0, 0.0, 0.5, 270, 4)
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
         elif sequenceNumber == 1:
             print('inizio prima sequenza di test')
@@ -389,16 +401,16 @@ class Drogno(threading.Thread):
             self.setRingColor(255,   0,   0, 1.0, 1.0)
             time.sleep(1)
 
-            self.HLCommander.go_to(0.0, 1+RELATIVE_SPACING, 1)
+            self.HLCommander.go_to(0.0, 1+RELATIVE_SPACING, 1,90, 2)
             self.setRingColor(255,   0,   0, 1.0, 1.0)
 
-            self.HLCommander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 1)
+            self.HLCommander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 190, 2)
             self.setRingColor(  0, 255,  0, 1.0, 1.0)
             
-            self.HLCommander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1)
+            self.HLCommander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 190, 2)
             self.setRingColor(  0,   0, 255, 1.0, 1.0)
 
-            self.HLCommander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1)
+            self.HLCommander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 190, 2)
             self.setRingColor(255, 255,   0, 1.0, 1.0)
             time.sleep(1)
 
