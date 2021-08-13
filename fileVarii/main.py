@@ -27,7 +27,7 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/80/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E3',
         # 'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
@@ -39,6 +39,7 @@ drogni = {}
 DEFAULT_HEIGHT        = 0.5
 RELATIVE_SPACING      = 0.4
 DEFAULT_TEST_SEQUENCE = 0
+
 
 # Possible commands, all times are in seconds
 # Takeoff = namedtuple('Takeoff', ['height', 'time'])
@@ -84,6 +85,14 @@ class Drogno(threading.Thread):
         self.isPositionEstimated   = False
         self.HLCommander           = None
         self.positionHLCommander   = None 
+        self.starting_x            = 0
+        self.starting_y            = 0
+        self.starting_z            = 0
+        self.x                     = 0
+        self.y                     = 0 
+        self.z                     = 0
+        self.batteryVoltage        = 100.0
+
         self._cf = Crazyflie(rw_cache='./cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -113,7 +122,7 @@ class Drogno(threading.Thread):
     def printStatus(self):
         while not self.exitFlag:
             time.sleep(self.printRate)
-            print ("%s: %s" % (self.name, self.statoDiVolo))
+            print ("%s: %s : battery %s : pos %s %s %s" % (self.name, self.statoDiVolo, self.batteryVoltage, self.x, self.y, self.z))
             # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
     
     def controlThreadRoutine(self):
@@ -264,7 +273,6 @@ class Drogno(threading.Thread):
             # Start the logging
             time.sleep(0.3)
             self.reset_estimator()
-
             self._lg_stab.start()
             self._cf.param.set_value('commander.enHighLevel', '1')
             self.setRingColor(0,0,0, 0, 0)
@@ -272,7 +280,7 @@ class Drogno(threading.Thread):
             self.HLCommander = self._cf.high_level_commander
             self.positionHLCommander = PositionHlCommander(
                 self._cf,
-                x=0.0, y=0.0, z=0.0,
+                x=self.starting_x, y=self.starting_y, z=self.starting_z,
                 default_velocity=0.3,
                 default_height=0.5,
                 controller=PositionHlCommander.CONTROLLER_MELLINGER) 
@@ -298,9 +306,18 @@ class Drogno(threading.Thread):
         # for name, value in data.items():
         #     print(f'{name}: {value:3.3f} ', end='')
         # print()
+
+        if self.isFlyng == False:
+            self.starting_x = data['stateEstimate.x']
+            self.starting_y = data['stateEstimate.y']
+            self.starting_z = data['stateEstimate.z']
+
         OSC.sendRotation(self.ID, data['stabilizer.yaw'] )
         # OSC.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
-        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'] )
+        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'] )
+        self.x = data['stateEstimate.x']
+        self.z = data['stateEstimate.y']
+        self.x = data['stateEstimate.z']
         self.evaluateBattery(data['pm.vbat'])
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
         # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
@@ -344,18 +361,23 @@ class Drogno(threading.Thread):
         else:
             print('for real')
             if self.isReadyToFly:
+                self.statoDiVolo = 'taking off!'
+
                 self.HLCommander.takeoff(0.45, 2.45)
-                self.statoDiVolo = 'decollato!'
+                self.statoDiVolo = 'idle'
+
                 self.isFlyng     = True
             else:
                 print('BUT NOT READY')
 
     def go(self, sequenceNumber=DEFAULT_TEST_SEQUENCE):
-        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza':
+        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
             if we_are_faking_it:
                 self.statoDiVolo = 'sequenza simulata!'
             else:
+                self.statoDiVolo = 'sequenza!'
                 self.sequenzaTest(sequenceNumber)
+
         else:
             print('not ready!')
 
@@ -366,10 +388,10 @@ class Drogno(threading.Thread):
                 self.statoDiVolo = 'landing'
                 time.sleep(1)
             else:
+                print('coddò')
                 self.statoDiVolo = 'landing'
-                self.HLCommander.land(0, 3, 180)
-
-            self.isFlyng     = False
+                self.positionHLCommander.land(0.1)
+                self.isFlyng     = False
             self.isReadyToFly = True
             self.statoDiVolo = 'idle'
 
@@ -391,10 +413,15 @@ class Drogno(threading.Thread):
         if  sequenceNumber == 0:
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
-            self.HLCommander.go_to(0.0, 0.0, 0.5, 90, 4)
-            self.HLCommander.go_to(0.0, 0.0, 1.0, 180, 4)
-            self.HLCommander.go_to(0.0, 0.0, 0.5, 270, 4)
+            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+            self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
+            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+            
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
+            self.statoDiVolo = 'idle'
+            time.sleep(1)
+            self.sequenzaTest(0)
+
         elif sequenceNumber == 1:
             print('inizio prima sequenza di test')
             self.HLCommander.go_to(0.0, 0.0, 1)
@@ -419,13 +446,27 @@ class Drogno(threading.Thread):
             self.setRingColor(255, 255,   0, 1.0, 1.0)
             time.sleep(1)
             print('fine prima sequenza di test')
+            self.statoDiVolo = 'idle'
+
+        elif  sequenceNumber == 2:
+            print('Drogno: %s. Inizioquadrato di test' % self.ID)
+            # input("enter to continue")
+            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+            self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
+            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+            
+            print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
+            self.statoDiVolo = 'idle'
+
 
     def evaluateBattery(self, level):
-        if level<3.54:
-            print ('ciao, sono il drone %s e ho la batteria scarica' % self.ID)
+        self.batteryVoltage = level
+        if level<3.55:
+            print ('ciao, sono il drone %s e ho la batteria scarica (%s)' % (self.ID, level))
         if level<3.45:
-            print ('ciao, sono il drone %s e sono così scarico che atterrerei.' % self.ID)
+            print ('ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
             self.land()
+
     def killMeSoftly(self):
             self.land()
             self.exit()

@@ -67,19 +67,28 @@ def takeoff(unused_addr, args, isEnabled):
     if not isEnabled:
         print('chief says we\'re gonna take the fuck off')
         for drogno in drogni:
-            drogni[drogno].takeoff(0.45, 2.45)
+            if drogni[drogno].is_connected:
+                drogni[drogno].takeoff(0.45, 2.45)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 
 def go(unused_addr, args, isEnabled):
     if not isEnabled:
         print('chief says we\'re gonna do shit')
         for drogno in drogni:
-            drogni[drogno].go()
+            if drogni[drogno].is_connected:
+                drogni[drogno].go()
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 
 def land(unused_addr, args, isEnabled):
     if not isEnabled:
         print('chief says we\'re gotta be grounded')
         for drogno in drogni:
-            drogni[drogno].land()
+            if drogni[drogno].is_connected:
+                drogni[drogno].land()
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 
 
 # listen to addresses and print changes in values 
