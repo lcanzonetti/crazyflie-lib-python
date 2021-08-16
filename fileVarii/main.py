@@ -3,7 +3,6 @@
 import threading
 import time
 import random
-import concurrent.futures
 from   collections import namedtuple
 #custom modules
 import OSCStuff as OSC
@@ -26,13 +25,13 @@ we_are_faking_it = False
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://0/80/2M/E7E7E7E7E3',
         # 'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
         # 'radio://0/80/2M/E7E7E7E7E7',
-        # 'radio://0/80/2M/E7E7E7E7E8',
+        'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 drogni = {}
@@ -108,7 +107,6 @@ class Drogno(threading.Thread):
         else:
             self.connect()
     
-        self.statoDiVolo   = 'idle'
         self.controlThread = threading.Thread(target=self.controlThreadRoutine).start()
         self.printThread   = threading.Thread(target=self.printStatus).start()
         while not self.exitFlag:
@@ -169,11 +167,13 @@ class Drogno(threading.Thread):
         self._cf.open_link( self.link_uri)
 
     def reconnect(self):
+        self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
                 self._cf.open_link( self.link_uri)
+                print('daje')
 
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
@@ -283,8 +283,9 @@ class Drogno(threading.Thread):
                 x=self.starting_x, y=self.starting_y, z=self.starting_z,
                 default_velocity=0.3,
                 default_height=0.5,
-                controller=PositionHlCommander.CONTROLLER_MELLINGER) 
+                controller=PositionHlCommander.CONTROLLER_PID) 
             self.isReadyToFly = True
+            self.statoDiVolo = 'idle'
      
         except KeyError as e:
             print('Could not start log configuration,'
@@ -377,7 +378,6 @@ class Drogno(threading.Thread):
             else:
                 self.statoDiVolo = 'sequenza!'
                 self.sequenzaTest(sequenceNumber)
-
         else:
             print('not ready!')
 
@@ -390,7 +390,8 @@ class Drogno(threading.Thread):
             else:
                 print('coddò')
                 self.statoDiVolo = 'landing'
-                self.positionHLCommander.land(0.1)
+                self.positionHLCommander.set_landing_height(0.03)
+                self.positionHLCommander.land(0.15)
                 self.isFlyng     = False
             self.isReadyToFly = True
             self.statoDiVolo = 'idle'
@@ -409,18 +410,35 @@ class Drogno(threading.Thread):
         color = (int(r) << 16) | (int(g) << 8) | int(b)
         self._cf.param.set_value('ring.fadeColor', str(color))
 
+    def alternativeSetRingColor(self, rgb ):
+        self._cf.param.set_value('ring.solidRed', '{}'.format(int(rgb[0])))
+        self._cf.param.set_value('ring.solidGreen','{}'.format(int(rgb[1])))
+        self._cf.param.set_value('ring.solidBlue', '{}'.format(int(rgb[2])))
+
     def sequenzaTest(self,sequenceNumber):
         if  sequenceNumber == 0:
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
-            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
-            self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
-            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+            self.alternativeSetRingColor([255,0,0])
+            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 0.5, 0.2)
+            self.alternativeSetRingColor([255,255,0])
+            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.0, 0.2)
+            self.alternativeSetRingColor([255,255,255])
+
+            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 0.5, 0.2)
             
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'idle'
+            print('restarrting in 3')
             time.sleep(1)
-            self.sequenzaTest(0)
+            print('restarrting in 2')
+            time.sleep(1)
+            print('restarrting in 1')
+            time.sleep(1)
+            if self.statoDiVolo != 'landing':
+                self.sequenzaTest(0)
+            else:
+                print ('ah, vuoi atterrrare!')
 
         elif sequenceNumber == 1:
             print('inizio prima sequenza di test')
@@ -457,7 +475,6 @@ class Drogno(threading.Thread):
             
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'idle'
-
 
     def evaluateBattery(self, level):
         self.batteryVoltage = level
