@@ -21,11 +21,11 @@ we_are_faking_it = False
 
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://0/80/2M/E7E7E7E7E3',
         # 'radio://0/80/2M/E7E7E7E7E4',
-        'radio://0/80/2M/E7E7E7E7E5',
+        # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
         # 'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8',
@@ -316,6 +316,7 @@ class Drogno(threading.Thread):
         self.x = data['stateEstimate.x']
         self.y = data['stateEstimate.y']
         self.z = data['stateEstimate.z']
+        self.yaw = data['stabilizer.yaw']
         self.evaluateBattery(data['pm.vbat'])
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
         # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
@@ -404,7 +405,6 @@ class Drogno(threading.Thread):
                 # time.sleep(0.1)
                 
                 self._cf.high_level_commander.land(0.0, 3.0)
-                self._cf.high_level_commander.takeoff()
                 time.sleep(3)
                 # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.05, 180)
                 # time.sleep(0.1)
@@ -436,20 +436,18 @@ class Drogno(threading.Thread):
     def goLeft(self, quanto=0.3):
         newX = float(self.x) - float(quanto)
         print('va bene, vado a %s' % newX)
-        # self._cf.high_level_commander.go_to(newX, self.x, self.z, self.yaw ,1)
-        self.positionHLCommander.left(0.3)
+        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+        # self.positionHLCommander.left(0.3)
 
     def goRight(self, quanto=0.3):
         newX = float(self.x) + float(quanto)
         print('va bene, vado a %s' % newX)
-        # self._cf.high_level_commander.go_to(newX, self.x, self.z, self.yaw ,1)
-        self.positionHLCommander.right(0.3)
+        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+        # self.positionHLCommander.right(0.3)
 
     def goToHome(self, speed=0.5):
         self._cf.high_level_commander.go_to(0,0,1, 0, 2)
 
-
-    
     def setRingColor(self, r, g, b, intensity = 1.0, time=1.0):
         self._cf.param.set_value('ring.fadeTime', str(time))
         r *= intensity

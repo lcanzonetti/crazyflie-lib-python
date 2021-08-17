@@ -116,7 +116,13 @@ def land(unused_addr, args, isEnabled):
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def home(unused_addr, args):
-    pass
+     if isSendEnabled:
+        print('chief says we\'re gonna go home')
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goToHome()
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 
 # listen to addresses and print changes in values 
 dispatcher = dispatcher.Dispatcher()
