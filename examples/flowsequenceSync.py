@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
         for y in range(10):
             cf.commander.send_hover_setpoint(0, 0, 0, y / 25)
+            cf.commander.send_hover_setpoint()
             time.sleep(0.1)
 
         for _ in range(20):

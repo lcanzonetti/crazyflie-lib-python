@@ -2,9 +2,9 @@ import threading
 import time
 
 class Timer(threading.Thread):
-    def __init__(self, count, colbecca, arghi):
+    def __init__(self, count, colbecca, *args):
         threading.Thread.__init__(self)
-        self.arghi
+        self.arghi = args
         self.event = threading.Event()
         self.count = count
         self.colbecca = colbecca
@@ -15,7 +15,12 @@ class Timer(threading.Thread):
             self.count -= 1
             self.event.wait(1)
         if self.count == 0:
-            self.colbecca(self.arghi)
+            if self.arghi:
+                self.colbecca(self.arghi)
+                # print('gli arghi')
+                print(self.arghi)
+            else:
+                self.colbecca()
 
     def stop(self):
         self.event.set()

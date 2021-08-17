@@ -17,27 +17,23 @@ from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 
-
-
-we_are_faking_it = False
-
+we_are_faking_it = True
 
 uris = [
-        # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://0/80/2M/E7E7E7E7E3',
-        # 'radio://0/80/2M/E7E7E7E7E4',
-        # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://0/80/2M/E7E7E7E7E6',
-        # 'radio://0/80/2M/E7E7E7E7E7',
+        'radio://0/80/2M/E7E7E7E7E0',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
+        'radio://0/80/2M/E7E7E7E7E3',
+        'radio://0/80/2M/E7E7E7E7E4',
+        'radio://0/80/2M/E7E7E7E7E5',
+        'radio://0/80/2M/E7E7E7E7E6',
+        'radio://0/80/2M/E7E7E7E7E7',
         'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 drogni = {}
 DEFAULT_HEIGHT        = 0.5
 RELATIVE_SPACING      = 0.4
-DEFAULT_TEST_SEQUENCE = 0
 
 
 # Possible commands, all times are in seconds
@@ -84,13 +80,13 @@ class Drogno(threading.Thread):
         self.isPositionEstimated   = False
         self.HLCommander           = None
         self.positionHLCommander   = None 
-        self.starting_x            = 0
-        self.starting_y            = 0
-        self.starting_z            = 0
-        self.x                     = 0
-        self.y                     = 0 
-        self.z                     = 0
-        self.batteryVoltage        = 100.0
+        self.starting_x            = 'np'
+        self.starting_y            = 'np'
+        self.starting_z            = 'np'
+        self.x                     = 'np'
+        self.y                     = 'np' 
+        self.z                     = 'np'
+        self.batteryVoltage        = 'np'
 
         self._cf = Crazyflie(rw_cache='./cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
@@ -107,8 +103,8 @@ class Drogno(threading.Thread):
         else:
             self.connect()
     
-        self.controlThread = threading.Thread(target=self.controlThreadRoutine).start()
-        self.printThread   = threading.Thread(target=self.printStatus).start()
+        self.controlThread = threading.Thread(target=self.controlThreadRoutine, daemon=True).start()
+        self.printThread   = threading.Thread(target=self.printStatus, , daemon=True).start()
         while not self.exitFlag:
             pass
         print ("Exiting "  + self.name)
@@ -140,6 +136,7 @@ class Drogno(threading.Thread):
                         while self.positionHLCommander._is_flying:
                               self.statoDiVolo = 'yo lando'
                         self.statoDiVolo = 'landed'
+                    pass
                     
 
                    
@@ -285,7 +282,7 @@ class Drogno(threading.Thread):
                 default_height=0.5,
                 controller=PositionHlCommander.CONTROLLER_PID) 
             self.isReadyToFly = True
-            self.statoDiVolo = 'idle'
+            self.statoDiVolo = 'landed'
      
         except KeyError as e:
             print('Could not start log configuration,'
@@ -363,15 +360,13 @@ class Drogno(threading.Thread):
             print('for real')
             if self.isReadyToFly:
                 self.statoDiVolo = 'taking off!'
-
-                self.HLCommander.takeoff(0.45, 2.45)
+                self.HLCommander.takeoff(height, 2.45, 90)
                 self.statoDiVolo = 'idle'
-
                 self.isFlyng     = True
             else:
                 print('BUT NOT READY')
 
-    def go(self, sequenceNumber=DEFAULT_TEST_SEQUENCE):
+    def go(self, sequenceNumber=0):
         if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
             if we_are_faking_it:
                 self.statoDiVolo = 'sequenza simulata!'
@@ -381,26 +376,28 @@ class Drogno(threading.Thread):
         else:
             print('not ready!')
 
-    def land(self):
+    def land(self, speed=0.15, landing_height=0.03):
         # if self.positionHLCommander._is_flying:
         if True:
             if we_are_faking_it:
                 self.statoDiVolo = 'landing'
                 time.sleep(1)
+                self.isReadyToFly = True
+                self.statoDiVolo = 'idle'
             else:
                 print('coddò')
                 self.statoDiVolo = 'landing'
-                self.positionHLCommander.set_landing_height(0.03)
-                self.positionHLCommander.land(0.15)
+                self._cf.commander.send_stop_setpoint()
+                self.positionHLCommander.set_landing_height(landing_height)
+                self.positionHLCommander.land(speed)
                 self.isFlyng     = False
-            self.isReadyToFly = True
-            self.statoDiVolo = 'idle'
-
+                self.isReadyToFly = True
+                self.statoDiVolo = 'idle'
         else:
             print('can\'t land! (not flying)')
 
     def goTo(self,x,y,z,yaw, speed):  #la zeta è in alto!
-        self.HLCommander.go_to(x,y,z)
+        self._cf.commander.send_position_setpoint(0.5, 0.5, 1, 30)
     
     def setRingColor(self, r, g, b, intensity = 1.0, time=1.0):
         self._cf.param.set_value('ring.fadeTime', str(time))
@@ -415,8 +412,8 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.solidGreen','{}'.format(int(rgb[1])))
         self._cf.param.set_value('ring.solidBlue', '{}'.format(int(rgb[2])))
 
-    def sequenzaTest(self,sequenceNumber):
-        if  sequenceNumber == 0:
+    def sequenzaTest(self,sequenceNumber=0,loop=False):
+        def sequenzaZero():
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
             self.alternativeSetRingColor([255,0,0])
@@ -429,18 +426,11 @@ class Drogno(threading.Thread):
             
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'idle'
-            print('restarrting in 3')
-            time.sleep(1)
-            print('restarrting in 2')
-            time.sleep(1)
-            print('restarrting in 1')
-            time.sleep(1)
-            if self.statoDiVolo != 'landing':
-                self.sequenzaTest(0)
+            if loop:
+                self.sequenzaTest(sequenceNumber,loop)
             else:
-                print ('ah, vuoi atterrrare!')
-
-        elif sequenceNumber == 1:
+                print(self.HLCommander._cf.state)
+        def sequenzaUno():
             print('inizio prima sequenza di test')
             self.positionHLCommander.go_to(0.0, 0.0, 1)
             self.setRingColor(255,   0,   0, 1.0, 1.0)
@@ -465,16 +455,35 @@ class Drogno(threading.Thread):
             time.sleep(1)
             print('fine prima sequenza di test')
             self.statoDiVolo = 'idle'
-
-        elif  sequenceNumber == 2:
+        def sequenzaDue():
+            pass
+        def sequenzaTre():
             print('Drogno: %s. Inizioquadrato di test' % self.ID)
             # input("enter to continue")
             self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
             self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
             self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
-            
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'idle'
+        def sequenzaQuattro():
+            print('Drogno: %s. Inizio test a set pointsss' % self.ID)
+            self._cf.commander.send_position_setpoint(0.5, 0.5, 1, 30)
+            self._cf.commander.send_position_setpoint(0.5, -0.5, 1, -30)
+            self._cf.commander.send_position_setpoint(-0.5, -0.5, 1, -90)
+            self._cf.commander.send_position_setpoint(0.5, -0.5, 1, -130)
+            self._cf.commander.send_position_setpoint(0.5, 0.5, 1, -270)
+            self._cf.commander.send_position_setpoint(0.0, 0.0, 1, 180)
+            time.sleep(0.1)
+            self._cf.commander.send_stop_setpoint()
+        
+        sequenzeTest = [sequenzaZero, sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro]
+
+        if not self.currentSequenceThread:
+            self.currentSequenceThread = threading.Thread(target=sequenzeTest[sequenceNumber])
+            self.currentSequenceThread.start()
+            print('non ci sono sequenze in esecuzione, parto con la %s' % sequenceNumber)
+        else:
+           print('la sequenza in esecuzione non può essere fermata. \nMAI')
 
     def evaluateBattery(self, level):
         self.batteryVoltage = level
