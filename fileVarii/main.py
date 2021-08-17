@@ -424,20 +424,20 @@ class Drogno(threading.Thread):
 
         elif sequenceNumber == 1:
             print('inizio prima sequenza di test')
-            self.HLCommander.go_to(0.0, 0.0, 1)
+            self.positionHLCommander.go_to(0.0, 0.0, 1)
             self.setRingColor(255,   0,   0, 1.0, 1.0)
             time.sleep(1)
 
-            self.HLCommander.go_to(0.0, 1+RELATIVE_SPACING, 1,90, 2)
+            self.positionHLCommander.go_to(0.0, 1+RELATIVE_SPACING, 1, 0.2)
             self.setRingColor(255,   0,   0, 1.0, 1.0)
 
-            self.HLCommander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 190, 2)
+            self.positionHLCommander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 1, 0.2)
             self.setRingColor(  0, 255,  0, 1.0, 1.0)
             
-            self.HLCommander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 190, 2)
+            self.positionHLCommander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1, 0.2)
             self.setRingColor(  0,   0, 255, 1.0, 1.0)
 
-            self.HLCommander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 190, 2)
+            self.positionHLCommander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1, 0.2)
             self.setRingColor(255, 255,   0, 1.0, 1.0)
             time.sleep(1)
 
