@@ -13,7 +13,7 @@ sendingPort   = 9201
 receivingPort = 9200
 
 drogni = {}
-isSendEnabled = False
+isSendEnabled = True
 
 client           = udp_client.SimpleUDPClient(sendingIP, sendingPort)
 copmpanionClient = udp_client.SimpleUDPClient(sendingIP, 12321)
@@ -63,7 +63,7 @@ updateCompanion()
 
 
 def takeoff(unused_addr, args, isEnabled):
-    # print(unused_addr, args, isEnabled)
+    print(unused_addr, args, isEnabled)
     if not isEnabled:
         print('chief says we\'re gonna take the fuck off')
         for drogno in drogni:
@@ -74,10 +74,36 @@ def takeoff(unused_addr, args, isEnabled):
 
 def go(unused_addr, args, isEnabled):
     if not isEnabled:
-        print('chief says we\'re gonna do shit')
+        print('chief says we\'re gonna do shit at sequence %s' % args)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].go()
+                drogni[drogno].go(args)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+
+def goTo(unused_addr,robba, x,y,z ):
+    if isSendEnabled:
+        print('chief says we\'re gonna go at sequence %s %s %s' % (x,y,z))
+
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goTo(x,y,z)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+def goLeft(unused_addr,yo, quanto):
+    if isSendEnabled:
+        print('chief says we\'re gonna go leftwards by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goLeft(quanto)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+def goRight(unused_addr, yo, quanto):
+    if isSendEnabled:
+        print('chief says we\'re gonna go rightwards by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goRight(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 
@@ -89,7 +115,8 @@ def land(unused_addr, args, isEnabled):
                 drogni[drogno].land()
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-
+def home(unused_addr, args):
+    pass
 
 # listen to addresses and print changes in values 
 dispatcher = dispatcher.Dispatcher()
@@ -99,6 +126,10 @@ dispatcher.map("/companion/isSendEnabled", setSendEnabled, 'companion')
 dispatcher.map("/takeoff", takeoff, 'yo')
 dispatcher.map("/start", go, 'yo')
 dispatcher.map("/land", land, 'yo')
+dispatcher.map("/home", home, 'yo')
+dispatcher.map("/goTo", goTo, 'yo')
+dispatcher.map("/goLeft", goLeft, 'yo')
+dispatcher.map("/goRight", goRight, 'yo')
 
 def ping():
     print('pong')
