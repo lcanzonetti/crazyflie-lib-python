@@ -106,6 +106,22 @@ def goRight(unused_addr, yo, quanto):
                 drogni[drogno].goRight(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
+def goForward(unused_addr, yo, quanto):
+    if isSendEnabled:
+        print('chief says we\'re gonna go forward by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goForward(quanto)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+def goBack(unused_addr, yo, quanto):
+    if isSendEnabled:
+        print('chief says we\'re gonna go back by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goBack(quanto)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 
 def land(unused_addr, args, isEnabled):
     if not isEnabled:
@@ -136,6 +152,8 @@ dispatcher.map("/home", home, 'yo')
 dispatcher.map("/goTo", goTo, 'yo')
 dispatcher.map("/goLeft", goLeft, 'yo')
 dispatcher.map("/goRight", goRight, 'yo')
+dispatcher.map("/goForward", goForward, 'yo')
+dispatcher.map("/goBack", goBack, 'yo')
 
 def ping():
     print('pong')

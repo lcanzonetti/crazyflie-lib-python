@@ -21,10 +21,10 @@ we_are_faking_it = False
 
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://0/80/2M/E7E7E7E7E3',
-        # 'radio://0/80/2M/E7E7E7E7E4',
+        'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/80/2M/E7E7E7E7E6',
         # 'radio://0/80/2M/E7E7E7E7E7',
@@ -83,10 +83,11 @@ class Drogno(threading.Thread):
         self.starting_x            = 'np'
         self.starting_y            = 'np'
         self.starting_z            = 'np'
-        self.x                     = 'np'
-        self.y                     = 'np' 
-        self.z                     = 'np'
-        self.batteryVoltage        = 'np'
+        self.x                     = 0.0
+        self.y                     = 0.0 
+        self.z                     = 0.0
+        self.yaw                   = 0.0
+        self.batteryVoltage        = 0.0
 
         self._cf = Crazyflie(rw_cache='./cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
@@ -116,9 +117,10 @@ class Drogno(threading.Thread):
     def printStatus(self):
         while not self.exitFlag:
             time.sleep(self.printRate)
-            print ("%s: %s : battery %s : pos %s %s %s" % (self.name, self.statoDiVolo, self.batteryVoltage, self.x, self.y, self.z))
+            print (f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
             # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
-    
+            # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
+
     def controlThreadRoutine(self):
         print('control routine for %s started' % self.name)
         while not self.exitFlag:
@@ -313,11 +315,11 @@ class Drogno(threading.Thread):
         OSC.sendRotation(self.ID, data['stabilizer.yaw'] )
         # OSC.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
         OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'] )
-        self.x = data['stateEstimate.x']
-        self.y = data['stateEstimate.y']
-        self.z = data['stateEstimate.z']
-        self.yaw = data['stabilizer.yaw']
-        self.evaluateBattery(data['pm.vbat'])
+        self.x = float(data['stateEstimate.x'])
+        self.y = float(data['stateEstimate.y'])
+        self.z = float(data['stateEstimate.z'])
+        self.yaw = float(data['stabilizer.yaw'])
+        self.evaluateBattery(float(data['pm.vbat']))
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
         # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
 
@@ -362,7 +364,7 @@ class Drogno(threading.Thread):
             if self.isReadyToFly:
                 self.statoDiVolo = 'taking off!'
                 # self.HLCommander.takeoff(height, 2.45, 90)
-                self.HLCommander.takeoff(0.5,2)
+                self.HLCommander.takeoff(1.1,2)
                 self.statoDiVolo = 'idle'
                 self.isFlyng     = True
             else:
@@ -436,14 +438,22 @@ class Drogno(threading.Thread):
     def goLeft(self, quanto=0.3):
         newX = float(self.x) - float(quanto)
         print('va bene, vado a %s' % newX)
-        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-        # self.positionHLCommander.left(0.3)
+        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 2)
 
     def goRight(self, quanto=0.3):
         newX = float(self.x) + float(quanto)
         print('va bene, vado a %s' % newX)
-        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-        # self.positionHLCommander.right(0.3)
+        self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 2)
+
+    def goForward(self, quanto=0.3):
+        newY = float(self.y) + float(quanto)
+        print('va bene, vado a %s' % newY)
+        self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 2)
+
+    def goBack(self, quanto=0.3):
+        newY = float(self.y) - float(quanto)
+        print('va bene, vado a %s' % newY)
+        self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 2)
 
     def goToHome(self, speed=0.5):
         self._cf.high_level_commander.go_to(0,0,1, 0, 2)
@@ -545,6 +555,10 @@ class Drogno(threading.Thread):
             else:
                 print ('ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
                 self.land()
+                self._cf.high_level_commander.stop()
+                self._cf.commander.send_stop_setpoint()
+                self.statoDiVolo = 'landed'
+                self.isReadyToFly = False
 
     def killMeSoftly(self):
             self.land()
