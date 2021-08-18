@@ -244,7 +244,7 @@ class Drogno(threading.Thread):
         # Variable used to keep main loop occupied until disconnect
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=50)
+        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=30)
         self._lg_stab.add_variable('stateEstimate.x', 'float')
         self._lg_stab.add_variable('stateEstimate.y', 'float')
         self._lg_stab.add_variable('stateEstimate.z', 'float')
@@ -282,7 +282,7 @@ class Drogno(threading.Thread):
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
             self.setRingColor(12,134,255, 2)
-            self._cf.log.
+
      
         except KeyError as e:
             print('Could not start log configuration,'
