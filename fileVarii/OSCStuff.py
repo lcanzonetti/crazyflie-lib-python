@@ -53,9 +53,9 @@ def updateCompanion():
 updateCompanion()
  
 ###########################  whole swarm
-def takeoff(unused_addr, args, isEnabled):
-    print(unused_addr, args, isEnabled)
-    if not isEnabled:
+def takeoff(*args):
+    # print(args)
+    if isSendEnabled:
         print('chief says we\'re gonna take the fuck off')
         for drogno in drogni:
             if drogni[drogno].is_connected:
@@ -111,12 +111,12 @@ def goBack   (unused_addr, yo, quanto):
                 drogni[drogno].goBack(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def land     (unused_addr, args, quanto):
+def land     (*args):
     if isSendEnabled:
         print('chief says we\'re gotta be grounded')
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].land(quanto)
+                drogni[drogno].land()
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def home     (unused_addr, args):
@@ -153,9 +153,14 @@ def printAndSendCoordinates():
         time.sleep(0.5)
         for drogno in drogni:
             iddio = drogni[drogno].ID
-            print ('il drone %s dovrebbe andare a %s %s %s' %( bufferDrone[drogni[drogno].ID].name, bufferDrone[iddio].requested_X,bufferDrone[iddio].requested_Y,bufferDrone[iddio].requested_Z))
+            print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
             if isSendEnabled:
-                drogni[drogno].
+                drogni[drogno].requested_X = bufferone[iddio].requested_X
+                drogni[drogno].requested_Y = bufferone[iddio].requested_Y
+                drogni[drogno].requested_Z = bufferone[iddio].requested_Z
+                drogni[drogno].requested_R = bufferone[iddio].requested_R
+                drogni[drogno].requested_G = bufferone[iddio].requested_G
+                drogni[drogno].requested_B = bufferone[iddio].requested_B
                 drogni[drogno].vacce()
             else:
                 # print('ma i comandi di movimento disabilitati')
@@ -205,7 +210,7 @@ def setRequested(*args):
         if value < 0.3:
             value = 0.30
     
-    bufferDrone[iddio].__dict__[f'requested_{parametro}'] = value
+    bufferone[iddio].__dict__[f'requested_{parametro}'] = value
     # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
     # except:
     #     print('qualche porchiddio')
@@ -256,8 +261,8 @@ def start_server():
     # Properly close the system.
     # osc_terminate()
 if __name__ == '__main__':
-    OSCRefreshThread = threading.Thread(target=start_server,daemon=True).start()
-    OSCRefreshThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
+    OSCRefreshThread     = threading.Thread(target=start_server,daemon=True).start()
+    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
     while True:
         pass
 

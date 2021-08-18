@@ -59,7 +59,9 @@ def main():
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
-    OSCRefreshThread = threading.Thread(target=OSC.start_server,daemon=True).start()
+    OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
+    OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
+
         
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri):
@@ -92,12 +94,12 @@ class Drogno(threading.Thread):
         self.requested_X            = 0.0
         self.requested_Y            = 0.0
         self.requested_Z            = 0.0
-        self.requested_R            = 0.0
-        self.requested_G            = 0.0
-        self.requested_B            = 0.0
+        self.requested_R            = 0
+        self.requested_G            = 0
+        self.requested_B            = 0
         self.yaw                   = 0.0
         self.batteryVoltage        = 0.0
-        self.ringIntensity         = 0.8
+        self.ringIntensity         = 0.4
 
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
         # Connect some callbacks from the Crazyflie API
@@ -284,8 +286,9 @@ class Drogno(threading.Thread):
             self._lg_stab.start()
 
             self._cf.param.set_value('commander.enHighLevel', '1')
-            self.setRingColor(0,0,0, 0)
+            # self.setRingColor(0,0,0, 0)
             self._cf.param.set_value('ring.effect', '14')
+            
             self.HLCommander = self._cf.high_level_commander
             self.positionHLCommander = PositionHlCommander(
                 self._cf,
@@ -295,7 +298,7 @@ class Drogno(threading.Thread):
                 controller=PositionHlCommander.CONTROLLER_PID) 
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
-            self.setRingColor(12,134,255, 2)
+            self.setRingColor(12,200,200, 2)
 
      
         except KeyError as e:
@@ -440,8 +443,8 @@ class Drogno(threading.Thread):
             self.goTo(self.requested_X, self.requested_Y, self.requested_Z)
             # print('io andrei, no?')
             # pass
-        else:
-            print('not ready')
+        # else:
+        #     print('not ready')
         # pass
         if self.is_connected:
             self.setRingColor(self.requested_R, self.requested_G, self.requested_B)
@@ -472,12 +475,14 @@ class Drogno(threading.Thread):
         self._cf.high_level_commander.go_to(0,0,1, 0, 2)
 
     def setRingColor(self, r, g, b, time=1.0):
-        print('how fancy would it be to drone %s to look %s?' % (self.name, [r, g, b] ))
         # self._cf.param.set_value('ring.fadeTime', str(time))
         r *= self.ringIntensity
         g *= self.ringIntensity
         b *= self.ringIntensity
-        color = (int(r) << 16) | (int(g) << 8) | int(b)
+        print('how fancy would it be to drone %s to look %s?' % (self.name, [r, g, b] ))
+
+        # color =  hex(int(r)) + hex(int(g)) + hex(int(b))
+        color = hex((int(r) << 16) | (int(g) << 8) | int(b))
         if self.is_connected:
             print ('vado al colore %s' % color)
             self._cf.param.set_value('ring.fadeColor', str(color))
