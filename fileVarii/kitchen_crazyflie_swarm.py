@@ -200,7 +200,7 @@ def run_shared_sequence(scf, params):
     time.sleep(4-(d-1)*2)
 
     # Go back to initial position and land again
-    commander.go_to(SPACING * (d-1)-OFFSET, -(SPACING* (d-1)-OFFSET),DEFAULT_HEIGHT , 0.0 ,2.0)
+    commander.go_to(SPACING , SPACING,DEFAULT_HEIGHT , 0.0 ,2.0)
     time.sleep(2.0)
     commander.land(0.0, 2.5
     )
@@ -209,12 +209,12 @@ def run_shared_sequence(scf, params):
 
 # URIS of swarm
 uris = {
-    'radio://0/80/2M/E7E7E7E7E1',
+    # 'radio://0/80/2M/E7E7E7E7E1',
     # 'radio://0/80/2M/E7E7E7E7E2',
     # 'radio://0/80/2M/E7E7E7E7E3',
     # 'radio://0/80/2M/E7E7E7E7E4',
     # 'radio://0/80/2M/E7E7E7E7E5',
-    # 'radio://0/80/2M/E7E7E7E7E6',
+    'radio://0/80/2M/E7E7E7E7E6',
     # 'radio://0/80/2M/E7E7E7E7E7',
     # 'radio://0/80/2M/E7E7E7E7E8',
     # Add more URIs if you want more copters in the swarm
@@ -225,7 +225,7 @@ uris = {
 # Parameters of Swarm
 
 params = {
-    'radio://0/80/2M/E7E7E7E7E1': [{'d': 1}],
+    'radio://0/80/2M/E7E7E7E7E6': [{'d': 1}],
     # 'radio://0/80/2M/E7E7E7E7E2': [{'d': 2}],
     # 'radio://0/80/2M/E7E7E7E7E4': [{'d': 3}],
     # 'radio://0/80/2M/E7E7E7E7E5': [{'d': 4}],
