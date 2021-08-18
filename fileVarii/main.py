@@ -90,7 +90,7 @@ class Drogno(threading.Thread):
         self.batteryVoltage        = 0.0
         self.ringIntensity         = 0.7
 
-        self._cf = Crazyflie(rw_cache='./cache'+str(ID))
+        self._cf = Crazyflie(rw_cache='./fileVarii/cache'+str(ID))
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
@@ -153,7 +153,7 @@ class Drogno(threading.Thread):
         # else:
             # print ('il thread di volo è già iniziato_______')
 
-    def connect(self):
+    def connect(self): 
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri} ')
         c = threading.Thread(target=self._cf.open_link,args=self.link_uri).start() 
 
@@ -236,7 +236,7 @@ class Drogno(threading.Thread):
         time.sleep(0.1)
         # self.wait_for_position_estimator()
 
-    def _connected(self, link_uri):
+    def _connected(self, link_uri):   ##########   where a lot of things happen
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
@@ -282,16 +282,13 @@ class Drogno(threading.Thread):
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
             self.setRingColor(12,134,255, 2)
+            self._cf.log.
      
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
         except AttributeError:
             print('Could not add Stabilizer log config, bad configuration.')
-    
-        # Start a timer to disconnect in 10s
-        # t = Timer(5, self._cf.close_link)
-        # t.start()
         
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
@@ -359,6 +356,7 @@ class Drogno(threading.Thread):
         else:
             print('for real')
             if self.isReadyToFly:
+                # self.reset_estimator()
                 self.statoDiVolo = 'taking off!'
                 # self.HLCommander.takeoff(height, 2.45, 90)
                 self.HLCommander.takeoff(1.1,2)
@@ -366,17 +364,6 @@ class Drogno(threading.Thread):
                 self.isFlying     = True
             else:
                 print('BUT NOT READY')
-
-    def go(self, sequenceNumber=0):
-        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
-            if we_are_faking_it:
-                self.statoDiVolo = 'sequenza simulata!'
-            else:
-                self.statoDiVolo = 'sequenza!'
-                print ('eseguo la sequenza %s' % sequenceNumber)
-                self.sequenzaTest(sequenceNumber)
-        else:
-            print('not ready!')
 
     def land(self, speed=0.15, landing_height=0.03):
         # if self.positionHLCommander._is_flying:
@@ -469,6 +456,17 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.solidRed', '{}'.format(int(rgb[0])))
         self._cf.param.set_value('ring.solidGreen','{}'.format(int(rgb[1])))
         self._cf.param.set_value('ring.solidBlue', '{}'.format(int(rgb[2])))
+ 
+    def go(self, sequenceNumber=0):
+        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
+            if we_are_faking_it:
+                self.statoDiVolo = 'sequenza simulata!'
+            else:
+                self.statoDiVolo = 'sequenza!'
+                print ('eseguo la sequenza %s' % sequenceNumber)
+                self.sequenzaTest(sequenceNumber)
+        else:
+            print('not ready!')
 
     def sequenzaTest(self,sequenceNumber=0,loop=False):
         def sequenzaZero():
@@ -571,6 +569,11 @@ class Drogno(threading.Thread):
 
     def killMeSoftly(self):
             self.land()
+            self.exit()
+    def killMeHardly(self):
+            self._cf.high_level_commander.stop()
+            self._cf.commander.send_stop_setpoint()
+            self._cf.loc.send_emergency_stop()
             self.exit()
 
 if __name__ == '__main__':

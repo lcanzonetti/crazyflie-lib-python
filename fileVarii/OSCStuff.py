@@ -117,15 +117,25 @@ def home     (unused_addr, args):
                 drogni[drogno].goToHome()
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def ringColor(unused_addr, args):
+def ringColor(unused_addr, *args):
      if isSendEnabled:
-        print('how fancy would it be to all look %s?' % args )
+        # print('how fancy would it be to all look %s?' % args )
+        print (args[2])
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].setRingColor()
+                drogni[drogno].setRingColor(args[0], args[1], args[2])
+                # drogni[drogno].alternativeSetRingColor(args)
+
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
- 
+def kill     (unused_addr, *args):
+     if isSendEnabled:
+        print('everybody fuck now' % args )
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].killMeHardly()
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
 ###########################  single fella
 
 def receiveNewTarget(id,x,y,z,yaw, speed, r,g,b):
@@ -160,7 +170,7 @@ dispatcher.map("/goLeft",    goLeft,  'yo')
 dispatcher.map("/goRight",   goRight, 'yo')
 dispatcher.map("/goForward", goForward,'yo')
 dispatcher.map("/goBack",    goBack,   'yo')
-dispatcher.map("/ringColor", ringColor,'yo')
+dispatcher.map("/ringColor", ringColor)
 
 ###########################  single fella
 dispatcher.map("/d3/drone/pos", printCoordinates, 'pos')
