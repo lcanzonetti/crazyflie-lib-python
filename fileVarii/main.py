@@ -157,7 +157,7 @@ class Drogno(threading.Thread):
         def volo():
             print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
             time.sleep(self.durataVolo)
-            self.statoDiVolo = 'finito sequenza'
+            self.statoDiVolo = 'hovering'
             # self.currentSequenceThread.join()
 
         if not self.currentSequenceThread:
@@ -317,22 +317,17 @@ class Drogno(threading.Thread):
         # for name, value in data.items():
         #     print(f'{name}: {value:3.3f} ', end='')
         # print()
-
         if self.isFlying == False:
             self.starting_x = data['stateEstimate.x']
             self.starting_y = data['stateEstimate.y']
             self.starting_z = data['stateEstimate.z']
-
-        OSC.sendRotation(self.ID, data['stabilizer.yaw'] )
-        # OSC.sendRotation(self.ID, data['stabilizer.roll'], data['stabilizer.pitch'], data['stabilizer.yaw'] )
-        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'] )
         self.x = float(data['stateEstimate.x'])
         self.y = float(data['stateEstimate.y'])
         self.z = float(data['stateEstimate.z'])
         self.yaw = float(data['stabilizer.yaw'])
         self.evaluateBattery(float(data['pm.vbat']))
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
-        # OSCStuff.sendPose    (self.ID, -2.5+self.ID, 0.02, -2.01 )
+        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -433,23 +428,13 @@ class Drogno(threading.Thread):
             print('can\'t land! (not flying)')
 
     def goTo(self,x,y,z, yaw=0, speed=0.1):  #la zeta è in alto!
-        print('va bene, vado a %s %s %s' % (x,y,z))
-        self.statoDiVolo = 'flying'
-        self._cf.high_level_commander.go_to(x,y,z, yaw,1)
-        self.statoDiVolo = 'hovering'
-
-    def vacce(self):
-        if self.statoDiVolo == 'hovering':
-            self.goTo(self.requested_X, self.requested_Y, self.requested_Z)
-            # print('io andrei, no?')
-            # pass
-        # else:
-        #     print('not ready')
-        # pass
-        if self.is_connected:
-            self.setRingColor(self.requested_R, self.requested_G, self.requested_B)
-            # self.alternativeSetRingColor([self.requested_R, self.requested_G, self.requested_B])
-
+        if self.isFlying:
+            print('va bene, vado a %s %s %s' % (x,y,z))
+            self.statoDiVolo = 'moving'
+            self._cf.high_level_commander.go_to(x,y,z, yaw,1)
+            self.statoDiVolo = 'hovering'
+        else:
+            print('perhaps take off?')
 
     def goLeft(self, quanto=0.3):
         newX = float(self.x) - float(quanto)
@@ -494,7 +479,7 @@ class Drogno(threading.Thread):
             self._cf.param.set_value('ring.solidBlue', '{}'.format(int(rgb[2])))
  
     def go(self, sequenceNumber=0):
-        if self.statoDiVolo == 'decollato!' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
+        if self.statoDiVolo == 'hovering' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
             if we_are_faking_it:
                 self.statoDiVolo = 'sequenza simulata!'
             else:

@@ -1,57 +1,57 @@
-
+#rf 2021
 import threading
 import time
-from pythonosc import osc_bundle_builder
-from pythonosc import osc_message_builder
-from pythonosc import osc_server
-from pythonosc import dispatcher
-from pythonosc import udp_client
-from random import uniform
 import repeatedTimer as rp
 
-sendingIP     = "192.168.10.255"
-sendingPort   = 9201
-receivingPort = 9200
+from   colorama             import Fore, Back, Style  
+from   osc4py3.as_eventloop import *
+from   osc4py3              import oscmethod as osm
+from   osc4py3              import oscbuildparse
+from   random               import uniform
+import logging
 
-drogni = {} 
-bufferone = {}
+OSC_IP           = "192.168.10.255"
+COMPANION_IP     = "192.168.1.255"
+SENDING_PORT     = 9201
+RECEIVING_PORT   = 9200
+COMPANION_PORT   = 12321
+COMPANION_PAGE   = '93'
+COMPANION_BUTTON = '10'
+
+drogni        = {} 
+bufferone     = {}
 isSendEnabled = False
-finished = True
+finished      = False
 
-# client           = udp_client.SimpleUDPClient(sendingIP, sendingPort)
-# companionclient  = udp_client.SimpleUDPClient(sendingIP, 12321)
-
-# Import needed modules from osc4py3
-from osc4py3.as_eventloop import *
-from osc4py3 import oscmethod as osm
-
-  
+###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
-    
-    print('me dici: %s' % isSendEnabled)
+    print(Fore.RED +  'me dici: %s' % isSendEnabled)
     updateCompanion()
-def getSendEnabled(self):
-    return self.isSendEnabled
+def getSendEnabled():
+    return isSendEnabled
 def comè(uno): # è booleano oppure no?
     uno = uno *1
     return uno
 def updateCompanion():
     def daje ():
-        pass
-        # if not isSendEnabled:
-        #     companionclient.send_message("/style/bgcolor/91/21", [10, 235, 10])
-        #     companionclient.send_message("/style/text/91/21",  "non mando")
-        # else:
-        #     companionclient.send_message("/style/bgcolor/91/21", [235, 10, 10])
-        #     companionclient.send_message("/style/text/91/21",  "mando")
+        while not finished:
+            # print(Fore.WHITE +'aggiorno companion')
+            if not isSendEnabled:
+                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_BUTTON, None,  [10, 235, 10])
+                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_BUTTON, None,   ["non mando"])
+                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                osc_send(bandoleon, "companionClient")
 
-      # start timer
-    # timer = rp.RepeatedTimer(1, daje)
-    # Press button 5 on page 1 down and hold
-updateCompanion()
- 
+            else:
+                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_BUTTON, None,  [235, 10, 10])
+                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_BUTTON, None,   ["mando"])
+                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                osc_send(bandoleon, "companionClient")
+            time.sleep(1)
+    nnamo = threading.Thread(target=daje, daemon=True).start()
+
 ###########################  whole swarm
 def takeoff(*args):
     # print(args)
@@ -70,16 +70,7 @@ def go(unused_addr, args, isEnabled):
                 drogni[drogno].go(args)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goTo     (unused_addr,robba, x,y,z ):
-    if isSendEnabled:
-        print('uh, say they want we\'re gonna go at position %s %s %s' % (x,y,z))
-
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goTo(x,y,z)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
-def goLeft   (unused_addr,yo, quanto):
+def goLeft   (quanto):
     if isSendEnabled:
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
         for drogno in drogni:
@@ -87,7 +78,7 @@ def goLeft   (unused_addr,yo, quanto):
                 drogni[drogno].goLeft(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goRight  (unused_addr, yo, quanto):
+def goRight  (quanto):
     if isSendEnabled:
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
         for drogno in drogni:
@@ -95,7 +86,7 @@ def goRight  (unused_addr, yo, quanto):
                 drogni[drogno].goRight(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goForward(unused_addr, yo, quanto):
+def goForward(quanto):
     if isSendEnabled:
         print('chief says we\'re gonna go forward by %s ' % quanto)
         for drogno in drogni:
@@ -103,7 +94,7 @@ def goForward(unused_addr, yo, quanto):
                 drogni[drogno].goForward(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goBack   (unused_addr, yo, quanto):
+def goBack   (quanto):
     if isSendEnabled:
         print('chief says we\'re gonna go back by %s ' % quanto)
         for drogno in drogni:
@@ -134,66 +125,32 @@ def ringColor(unused_addr, *args):
         for drogno in drogni:
             drogni[drogno].setRingColor(args[1], args[2], args[3])
             # drogni[drogno].alternativeSetRingColor(args)
- 
 def kill     (unused_addr, *args):
      if isSendEnabled:
-        print('everybody fuck now' % args )
+        print('everybody fuck now %s' % args )
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].killMeHardly()
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
+                break
+        finished = True
 
 ###########################  single fella
-
-
 def printAndSendCoordinates():
     time.sleep(5)
-    while True:
+    while not finished:
         time.sleep(0.5)
         for drogno in drogni:
             iddio = drogni[drogno].ID
             print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-            if isSendEnabled:
-                drogni[drogno].requested_X = bufferone[iddio].requested_X
-                drogni[drogno].requested_Y = bufferone[iddio].requested_Y
-                drogni[drogno].requested_Z = bufferone[iddio].requested_Z
-                drogni[drogno].requested_R = bufferone[iddio].requested_R
-                drogni[drogno].requested_G = bufferone[iddio].requested_G
-                drogni[drogno].requested_B = bufferone[iddio].requested_B
-                drogni[drogno].vacce()
+            if isSendEnabled and drogni[drogno].is_connected:
+                 drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
+                 drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
             else:
                 # print('ma i comandi di movimento disabilitati')
                 pass
-
  
-
-
-###########################  OSC routing
-# dispatcher = dispatcher.Dispatcher()
-# dispatcher.map("/companion/isSendEnabled", setSendEnabled, 'companion')
-# ###########################  whole swarm routing
-# dispatcher.map("/takeoff",   takeoff, 'yo')
-# dispatcher.map("/start",     go,      'yo')
-# dispatcher.map("/land",      land,    'yo')
-# dispatcher.map("/home",      home)
-# dispatcher.map("/goTo",      goTo,    'yo')
-# dispatcher.map("/goLeft",    goLeft,  'yo')
-# dispatcher.map("/goRight",   goRight, 'yo')
-# dispatcher.map("/goForward", goForward,'yo')
-# dispatcher.map("/goBack",    goBack,   'yo')
-# dispatcher.map("/ringColor", ringColor, 'culo demoniaco')
-
-###########################  single fella
-# dispatcher.map("/d3/drone/pos",  , 'pos')
-# dispatcher.map("/d3/drone/rot",  , 'rot')
-# dispatcher.map("/notch/drone*/X",   setRequested,  'yeah')
-# dispatcher.map("/notch/drone*/Y",   setRequested,  'yeah')
-# dispatcher.map("/notch/drone*/Z",   setRequested,  'yeah')
-# dispatcher.map("/notch/drone*/R",   setRequested,  'yeah')
-# dispatcher.map("/notch/drone*/G",   setRequested,  'yeah')
-# dispatcher.map("/notch/drone*/B",   setRequested,  'yeah')
-
 def setRequested(*args):
     iddio     = int(args[0].split('/')[2][-1])
     parametro = args[0][-1]
@@ -210,28 +167,28 @@ def setRequested(*args):
         if value < 0.3:
             value = 0.30
     
-    bufferone[iddio].__dict__[f'requested_{parametro}'] = value
+    setattr(bufferone[iddio], parametro, value)
     # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
     # except:
     #     print('qualche porchiddio')
 
-
-def start_server():
-    print("Starting OSC Receiving Server")
-    # server = osc_server.ThreadingOSCUDPServer( ('0.0.0.0', receivingPort), dispatcher)
-    # print("Server OSC partito {}".format(server.server_address))
-    # thread = threading.Thread(target=server.serve_forever, daemon=True).start()
-    # ################ init
-
-    # Periodically call osc4py3 processing method in your event loop.
-    # Start the system.
+def start_server():          #### OSC init
+    global finished 
+    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
+    # logger = logging.getLogger("osc")
+    # logger.setLevel(logging.DEBUG)
+    # osc_startup(logger=logger)
     osc_startup()
+    osc_udp_server("0.0.0.0", RECEIVING_PORT,             "receivingServer")
+    osc_broadcast_client(OSC_IP,            SENDING_PORT,   "feedbackClient")
+    osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
+    # osc_udp_client(OSC_IP,    SENDING_PORT,   "companionClient")
 
-    # Make server channels to receive packets.
-    # osc_udp_server("192.168.0.0", 3721, "aservername")
-    osc_udp_server("0.0.0.0", receivingPort, "anotherserver")
-    print('osc initalized on', sendingIP, sendingPort)
+    print(Fore.GREEN + 'osc server initalized on',              RECEIVING_PORT, SENDING_PORT)
+    print(Fore.GREEN + 'osc client to D3 initalized on',        OSC_IP, SENDING_PORT)
+    print(Fore.GREEN + 'osc client to companion initalized on', OSC_IP, COMPANION_PORT)
 
+    ###########################  single fella
     osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/Y",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -239,35 +196,25 @@ def start_server():
     osc_method("/notch/drone*/R",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/G",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/B",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     ###########################  whole swarm routing
-    osc_method("/takeoff",   takeoff, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/start",     go,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/land",      land,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/home",      home,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goTo",      goTo,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goLeft",    goLeft,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goRight",   goRight, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goForward", goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goBack",    goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/ringColor", ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    global finished 
-    finished = False
+    osc_method("/takeoff",          takeoff, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/start",            go,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/land",             land,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/home",             home,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goLeft",           goLeft,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goRight",          goRight, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    updateCompanion()
+
     while not finished:
-        # …
         osc_process()
-        # …
 
+        time.sleep(0.2)
     # Properly close the system.
-    # osc_terminate()
-if __name__ == '__main__':
-    OSCRefreshThread     = threading.Thread(target=start_server,daemon=True).start()
-    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
-    while True:
-        pass
-
-
-
+    osc_terminate()
 
 def faiIlBufferon():
     for i in range (1,20):
@@ -275,6 +222,29 @@ def faiIlBufferon():
     # print ('bufferon')  
     # print (bufferone)
 
+# ################ feedbacksssssssss
+def sendPose(droneID, x, y , z, yaw):
+    ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_x", None, x)
+    ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_y", None, y)
+    zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_z", None, z)
+    yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_rot_z", None, yaw)
+    bun  = oscbuildparse.OSCBundle( oscbuildparse.OSC_IMMEDIATELY, [ixxo, ypso, zeto, yalo])  
+    osc_send(bun, "feedbackClient")
+    # print (droneID, roll, pitch, yaw)
+
+########## main
+if __name__ == '__main__':
+    OSCRefreshThread      = threading.Thread(target=start_server,daemon=True).start()
+    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
+    sendPose(1,2,3,4,5)
+    sendPose(1,2,3,4,5)
+    sendPose(1,2,3,4,5)
+    sendPose(1,2,3,4,5)
+    while not finished:
+        pass
+
+
+ 
 
 class bufferDrone():
     def __init__(self, ID, ):
@@ -288,32 +258,3 @@ class bufferDrone():
         self.requested_G            = 0.0
         self.requested_B            = 0.0
         self.yaw                   = 0.0
-
-
- 
-
-# ################ feedbacksssssssss
-# 
-#  
-def sendRotation(droneID, yaw):
-    pass
-    # client.send_message("/drogni/drone"+str(droneID)+"_rot_x", roll)
-    # client.send_message("/drogni/drone"+str(droneID)+"_rot_y", pitch)
-    # client.send_message("/drogni/drone"+str(droneID)+"_rot_z", yaw)
-    # print (droneID, roll, pitch, yaw)
-    # print (droneID, yaw)
-
-def sendPose(droneID, x, y, z):
-    pass
-    # client.send_message("/drogni/drone"+str(droneID)+"_pos_x", x)
-    # client.send_message("/drogni/drone"+str(droneID)+"_pos_y", y)
-    # client.send_message("/drogni/drone"+str(droneID)+"_pos_z", z)
-    # client.send_message("/drogni/t/", uniform(2.5, 10.0)  )
-    # print (x, y, z)
-
-
-
-
- 
-
-  
