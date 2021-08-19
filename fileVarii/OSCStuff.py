@@ -140,16 +140,17 @@ def kill     (unused_addr, *args):
 def printAndSendCoordinates():
     time.sleep(5)
     while not finished:
-        time.sleep(0.5)
-        for drogno in drogni:
-            iddio = drogni[drogno].ID
-            print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-            if isSendEnabled and drogni[drogno].is_connected:
-                 drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
-                 drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
-            else:
-                # print('ma i comandi di movimento disabilitati')
-                pass
+        time.sleep(0.4)
+        if isSendEnabled:
+            for drogno in drogni:
+                iddio = drogni[drogno].ID
+                print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
+                if drogni[drogno].is_connected:
+                    drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
+                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+        else:
+            # print('ma i comandi di movimento disabilitati')
+            pass
  
 def setRequested(*args):
     iddio     = int(args[0].split('/')[2][-1])

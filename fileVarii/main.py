@@ -18,7 +18,6 @@ from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 
 we_are_faking_it = False
-
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
@@ -32,18 +31,8 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 drogni = {}
-DEFAULT_HEIGHT        = 0.5
+DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
-
-
-# Possible commands, all times are in seconds
-# Takeoff = namedtuple('Takeoff', ['height', 'time'])
-# Land = namedtuple("Land", ['time'])
-# Goto = namedtuple('Goto', ['x', 'y', 'z', 'time'])
-# Ring = namedtuple('Ring', ['r', 'g', 'b', 'intensity', 'time'])   # RGB [0-255], Intensity [0.0-1.0]
-# Quit = namedtuple('Quit', []) # Reserved for the control loop, do not use in sequence
-
-
 
 def main():
     availableRadios = cflib.crtp.scan_interfaces()
@@ -130,7 +119,7 @@ class Drogno(threading.Thread):
         while not self.exitFlag:
             time.sleep(self.printRate)
             print (f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
-            print (f"requested pos {self.requested_X:0.2f} {self.requested_Y:0.2f} {self.requested_Z:0.2f} colore: {self.requested_R:0.2f}  {self.requested_G:0.2f}  {self.requested_B:0.2f}")
+            # print (f"requested pos {self.requested_X:0.2f} {self.requested_Y:0.2f} {self.requested_Z:0.2f} colore: {self.requested_R:0.2f}  {self.requested_G:0.2f}  {self.requested_B:0.2f}")
             # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
             # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
 
@@ -173,7 +162,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'connecting'
             self._cf.open_link(self.link_uri)
             
-        connessione = threading.Thread(target=porcoMondo).start() 
+        connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):
         self._cf.close_link()
