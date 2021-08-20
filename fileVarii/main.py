@@ -37,10 +37,14 @@ BOX_Y                 = 1.5
 BOX_Z                 = 1.9
 DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
+BATTERY_CHECK_RATE    = 1
 RED                   = '0x555500'
 GREEN                 = '0x00AA00'
 BLUE                  = '0x0000AA'
  
+
+        
+
 
 def main():
     try:
@@ -109,12 +113,11 @@ class Drogno(threading.Thread):
      
     def run(self):
         print ("Starting " + self.name)
-
         if we_are_faking_it:
             time.sleep(1.5)
         else:
-            # self.controlThread = threading.Thread(target=self.controlThreadRoutine, daemon=True).start()
             self.printThread   = threading.Thread(target=self.printStatus, daemon=True).start()
+            self.batteryThread = threading.Thread(target=self.evaluateBattery, daemon=True)
             self.connect()
      
     def exit(self):
@@ -242,8 +245,6 @@ class Drogno(threading.Thread):
         self._lg_stab.add_variable('stateEstimate.x', 'float')
         self._lg_stab.add_variable('stateEstimate.y', 'float')
         self._lg_stab.add_variable('stateEstimate.z', 'float')
-        # self._lg_stab.add_variable('stabilizer.roll', 'float')
-        # self._lg_stab.add_variable('stabilizer.pitch', 'float')
         self._lg_stab.add_variable('stabilizer.yaw', 'float')
         self._lg_stab.add_variable('pm.vbat', 'FP16')
  
@@ -256,10 +257,9 @@ class Drogno(threading.Thread):
             self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
             # This callback will be called on errors
             self._lg_stab.error_cb.add_callback(self._stab_log_error)
-            # Start the logging
+            
             time.sleep(0.3)
             self.reset_estimator()
-            self._lg_stab.start()
 
             self._cf.param.set_value('commander.enHighLevel', '1')
             # self.setRingColor(0,0,0, 0)
@@ -272,6 +272,10 @@ class Drogno(threading.Thread):
                 default_velocity=0.3,
                 default_height=0.5,
                 controller=PositionHlCommander.CONTROLLER_PID) 
+            
+            self._lg_stab.start()
+            self.batteryThread.start()
+
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
             self.setRingColor(20,1,1, 2)
@@ -289,11 +293,12 @@ class Drogno(threading.Thread):
 
     def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e smista i dati
       
-        self.x   = float(data['stateEstimate.x'])
-        self.y   = float(data['stateEstimate.y'])
-        self.z   = float(data['stateEstimate.z'])
-        self.yaw = float(data['stabilizer.yaw'])
-        self.evaluateBattery(float(data['pm.vbat']))
+        self.x              = float(data['stateEstimate.x'])
+        self.y              = float(data['stateEstimate.y'])
+        self.z              = float(data['stateEstimate.z'])
+        self.yaw            = float(data['stabilizer.yaw'])
+        self.batteryVoltage = float(data['pm.vbat'])
+
         # OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
 
     def _connection_failed(self, link_uri, msg):
@@ -557,8 +562,8 @@ class Drogno(threading.Thread):
         else:
            print('la sequenza in esecuzione non può essere fermata. \nMAI')
 
-    def evaluateBattery(self, level):
-        self.batteryVoltage = level
+    def evaluateBattery(self):
+        level = self.batteryVoltage 
         if level<3.50:
             print ('ciao, sono il drone %s e ho la batteria scarica (%s)' % (self.ID, level))
         if level<3.40:
@@ -572,6 +577,7 @@ class Drogno(threading.Thread):
                 self.land()
                 self.statoDiVolo = 'landed'
                 self.isReadyToFly = False
+        time.sleep(BATTERY_CHECK_RATE)
 
     def killMeSoftly(self):
             self.land()

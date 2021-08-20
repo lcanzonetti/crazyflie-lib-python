@@ -254,7 +254,7 @@ def faiIlBufferon():
         bufferone[i] = bufferDrone(i)
     # print ('bufferon')  
     # print (bufferone)
-    print(bufferone[0])
+    # print(bufferone[0])
 
 # ################ feedbacksssssssss
 def sendPose(droneID, x, y , z, yaw):
