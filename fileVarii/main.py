@@ -410,13 +410,13 @@ class Drogno(threading.Thread):
         if self.isFlying:
             newX = float(self.x) - float(quanto)
             print('va bene, vado a %s' % newX)
-            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            self._cf.high_level_commander.go_to(-quanto, self.y, self.z, 0, 1, relative=True)
 
     def goRight(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) + float(quanto)
             print('va bene, vado a %s' % newX)
-            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            self._cf.high_level_commander.go_to(quanto, self.y, self.z, 0, 1, relative=True)
 
     def goForward(self, quanto=0.3):
         if self.isFlying:
