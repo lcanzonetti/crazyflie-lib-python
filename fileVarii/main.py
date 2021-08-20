@@ -21,8 +21,8 @@ from   cflib.positioning.position_hl_commander    import PositionHlCommander
 we_are_faking_it = False
 uris = [
         'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://2/80/2M/E7E7E7E7E3',
         'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
@@ -43,10 +43,13 @@ BLUE                  = '0x0000AA'
  
 
 def main():
-    availableRadios = cflib.crtp.scan_interfaces()
-    for i in availableRadios:
-        print ('Found %s radios.' % len(availableRadios))
-        print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
+    try:
+        availableRadios = cflib.crtp.scan_interfaces()
+        for i in availableRadios:
+            print ('Found %s radios.' % len(availableRadios))
+            print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
+    except IndexError:
+        print(IndexError)
  
     for uro in uris:
         iddio = int(uro[-1])
@@ -140,8 +143,12 @@ class Drogno(threading.Thread):
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri} ')
         def porcoMondo():
             self.statoDiVolo = 'connecting'
-            self._cf.open_link(self.link_uri)
-            
+            try:
+                self._cf.open_link(self.link_uri)
+            except IndexError:
+                print('capperi')
+            except:
+                print('no radio pal')
         connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):

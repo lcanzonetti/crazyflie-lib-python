@@ -11,12 +11,12 @@ from   random               import uniform
 import logging
 
 OSC_IP           = "192.168.10.255"
-COMPANION_IP     = "192.168.10.255"
+COMPANION_IP     = "192.168.1.255"
 SENDING_PORT     = 9201
 RECEIVING_PORT   = 9200
 COMPANION_PORT   = 12321
-COMPANION_PAGE   = '90'
-COMPANION_BUTTON = '21'
+COMPANION_PAGE   = '92'
+COMPANION_ENABLE_BUTTON = '25'
 
 drogni        = {} 
 bufferone     = {}
@@ -34,22 +34,45 @@ def getSendEnabled():
 def comè(uno): # è booleano oppure no?
     uno = uno *1
     return uno
+
+def resetCompanion():
+    for i in range(2,9):
+        active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i),   None,   [1, 1, 1])
+        print("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i+2))
+        osc_send(active_col, "companionClient")
+
 def updateCompanion():
     def daje ():
         while not finished:
             # print(Fore.WHITE +'aggiorno companion')
             if not isSendEnabled:
-                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_BUTTON, None,  [10, 235, 10])
-                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_BUTTON, None,   ["non mando"])
+                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
+                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
                 bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                osc_send(bandoleon, "companionClient")
+            else:
+                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
+                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
+                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                osc_send(bandoleon, "companionClient")
+            for drogno in drogni:
+                d = drogni[drogno]
+                active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2),   None,   [13, 244, 244])
+                txt        = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + str(d.ID+2+8), None,   [d.statoDiVolo])
+                scrambleCol = ''
+                scrambleTxt = ''
+                if d.isFlying:
+                    scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [244, 136, 8])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land'])
+                else:
+                    scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + d.ID+2+8+8,   None,   [50, 127, 67])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + d.ID+2+8+8,   None,   ['take off'])
+
+    
+                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, txt, scrambleTxt, scrambleCol])
                 osc_send(bandoleon, "companionClient")
 
-            else:
-                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_BUTTON, None,  [235, 10, 10])
-                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_BUTTON, None,   ["mando"])
-                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
-                osc_send(bandoleon, "companionClient")
-            time.sleep(1)
+            time.sleep(0.5)
     nnamo = threading.Thread(target=daje, daemon=True).start()
 
 ###########################  whole swarm
@@ -217,6 +240,7 @@ def start_server():          #### OSC init
     osc_method("/kill",             kill,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    resetCompanion()
     updateCompanion()
 
     while not finished:
@@ -246,7 +270,6 @@ def sendPose(droneID, x, y , z, yaw):
 if __name__ == '__main__':
     OSCRefreshThread      = threading.Thread(target=start_server,daemon=True).start()
     OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
-    # sendPose(1,2,3,4,5)
     while not finished:
         pass
 
