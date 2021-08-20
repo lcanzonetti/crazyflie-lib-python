@@ -130,28 +130,17 @@ def printAndSendCoordinates():
     global drogni
     time.sleep(4)
     while not finished:
-<<<<<<< HEAD
-        time.sleep(0.4)
-        if isSendEnabled:
-            for drogno in drogni:
-                iddio = drogni[drogno].ID
-                print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-                if drogni[drogno].is_connected:
-                    drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
-                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
-=======
         time.sleep(0.50)
       
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
-                if isSendEnabled and drogni[drogno].is_connected:
+                if drogni[drogno].is_connected:
                     # drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     if  drogni[drogno].isFlying:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
->>>>>>> e84adec6fee9a90ae808fa82c1ed1647b913c28f
         else:
             # print('ma i comandi di movimento disabilitati')
             pass
@@ -160,31 +149,19 @@ def setRequested(*args):
     iddio     = int(args[0].split('/')[2][-1])
     parametro = args[0][-1]
     value     = round(args[1],3)
-
-    # print (iddio, parametro, value)
-    # try:
-    if parametro == 'X' or parametro == 'Y':
-        if value < -2:
-            value = -2
-        if value > 2:
-            value = 2
-    if parametro == 'Z':
-        if value < 0.3:
-            value = 0.30
     parametro = 'requested_' + parametro
     setattr(bufferone[iddio], parametro, value)
     # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
+
 def setRequestedPos(address, args):
     add = address.split(' ')
     iddio     = int(add[0].split('/')[2][-1])
-
-    parametro = add[0][-4:-1]
 
     value1     = round(float(add[1]),3)
     value2     = round(float(add[2]),3)
     value3     = round(float(add[3]),3)
     # if isSendEnabled:
-    #     print (iddio, parametro, value1, value2, value3)
+    #    print('provo a variare il parametro posizione mettendoci %s %s %s' % ( value1, value2, value3))
     bufferone[iddio].requested_X = value1
     bufferone[iddio].requested_Y = value2
     bufferone[iddio].requested_Z = value3
@@ -192,17 +169,11 @@ def setRequestedPos(address, args):
 def setRequestedCol(address, args):
     add = address.split(' ')
     iddio     = int(add[0].split('/')[2][-1])
-
-    parametro = add[0][-4:-1]
-
     value1     = round(float(add[1]),3)
     value2     = round(float(add[2]),3)
     value3     = round(float(add[3]),3)
     # if isSendEnabled:
-    #     print (iddio, parametro, value1, value2, value3)
-
-
-    # print('provo a variare il parametro %s mettendoci %s %s %s' % (parametro, value1, value2, value3))
+    #    print('provo a variare il parametro colore mettendoci %s %s %s' % ( value1, value2, value3))
 
     bufferone[iddio].requested_R = int(value1)
     bufferone[iddio].requested_G = int(value2)
@@ -216,8 +187,8 @@ def start_server():          #### OSC init
     # logger.setLevel(logging.DEBUG)
     # osc_startup(logger=logger)
     osc_startup(execthreadscount=20)
-    osc_udp_server("0.0.0.0", RECEIVING_PORT,             "receivingServer")
-    osc_broadcast_client(OSC_IP,            SENDING_PORT,   "feedbackClient")
+    osc_udp_server("0.0.0.0", RECEIVING_PORT,               "receivingServer")
+    osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
     osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
     # osc_udp_client(OSC_IP,    SENDING_PORT,   "companionClient")
 
@@ -233,16 +204,16 @@ def start_server():          #### OSC init
     # osc_method("/notch/drone*/G",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     # osc_method("/notch/drone*/B",   setRequested,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/pos", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-    # osc_method("/notch/drone*/col", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+    osc_method("/notch/drone*/col", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  whole swarm routing
     osc_method("/takeoff",          takeoff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/start",            go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -250,7 +221,6 @@ def start_server():          #### OSC init
 
     while not finished:
         osc_process()
-
         time.sleep(0.1)
     # Properly close the system.
     osc_terminate()
