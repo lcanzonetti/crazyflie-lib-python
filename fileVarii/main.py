@@ -4,6 +4,7 @@ import threading
 import time
 import random
 from   collections import namedtuple
+from types import BuiltinFunctionType
 #custom modules
 import OSCStuff as OSC
 import timerino as myTimer
@@ -19,20 +20,35 @@ from   cflib.positioning.position_hl_commander    import PositionHlCommander
 
 we_are_faking_it = False
 uris = [
-        # 'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://0/80/2M/E7E7E7E7E3',
-        # 'radio://0/80/2M/E7E7E7E7E4',
+        # 'radio://2/80/2M/E7E7E7E7E3',
+        'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://0/80/2M/E7E7E7E7E6'
-        # 'radio://0/80/2M/E7E7E7E7E7',
+        # 'radio://1/80/2M/E7E7E7E7E6',
+        # 'radio://2/80/2M/E7E7E7E7E7',
         # 'radio://0/80/2M/E7E7E7E7E8',
         # 'radio://0/80/2M/E7E7E7E7E9',
         ]
 drogni = {}
 DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
+<<<<<<< HEAD
+=======
+RED                   = '0x555500'
+GREEN                 = '0x00AA00'
+BLUE                  = '0x0000AA'
+
+# Possible commands, all times are in seconds
+# Takeoff = namedtuple('Takeoff', ['height', 'time'])
+# Land = namedtuple("Land", ['time'])
+# Goto = namedtuple('Goto', ['x', 'y', 'z', 'time'])
+# Ring = namedtuple('Ring', ['r', 'g', 'b', 'intensity', 'time'])   # RGB [0-255], Intensity [0.0-1.0]
+# Quit = namedtuple('Quit', []) # Reserved for the control loop, do not use in sequence
+
+
+>>>>>>> e84adec6fee9a90ae808fa82c1ed1647b913c28f
 
 def main():
     availableRadios = cflib.crtp.scan_interfaces()
@@ -88,7 +104,7 @@ class Drogno(threading.Thread):
         self.requested_B            = 0
         self.yaw                   = 0.0
         self.batteryVoltage        = 0.0
-        self.ringIntensity         = 0.4
+        self.ringIntensity         = 0.2
 
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
         # Connect some callbacks from the Crazyflie API
@@ -103,14 +119,10 @@ class Drogno(threading.Thread):
         if we_are_faking_it:
             time.sleep(1.5)
         else:
-            self.connect()
-            self.controlThread = threading.Thread(target=self.controlThreadRoutine, daemon=True).start()
+            # self.controlThread = threading.Thread(target=self.controlThreadRoutine, daemon=True).start()
             self.printThread   = threading.Thread(target=self.printStatus, daemon=True).start()
-
-        while not self.exitFlag:
-            pass
-        print ("Exiting "  + self.name)
-
+            self.connect()
+     
     def exit(self):
                 print('exitFlag is now set for drogno %s, bye kiddo' % self.name)       
                 self.exitFlag = 1
@@ -119,28 +131,32 @@ class Drogno(threading.Thread):
         while not self.exitFlag:
             time.sleep(self.printRate)
             print (f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
+<<<<<<< HEAD
             # print (f"requested pos {self.requested_X:0.2f} {self.requested_Y:0.2f} {self.requested_Z:0.2f} colore: {self.requested_R:0.2f}  {self.requested_G:0.2f}  {self.requested_B:0.2f}")
+=======
+>>>>>>> e84adec6fee9a90ae808fa82c1ed1647b913c28f
             # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
             # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
 
     def controlThreadRoutine(self):
-        print('control routine for %s started' % self.name)
-        while not self.exitFlag:
-            if  (self.statoDiVolo == 'sequenza simulata!'):
-                self.sequenzaDiVoloSimulata()
-                if self.exitingTimer != False:
-                    self.exitingTimer.stop()
-                    self.exitFlag = 0
-            elif (self.statoDiVolo == 'landing'):
-                if we_are_faking_it:
-                    time.sleep(2)
-                    self.statoDiVolo = 'idle'
-                else:
-                    def confirmLanding():
-                        while self.positionHLCommander._is_flying:
-                              self.statoDiVolo = 'yo lando'
-                        self.statoDiVolo = 'landed'
-                    pass
+        pass
+        # print('control routine for %s started' % self.name)
+        # while not self.exitFlag:
+        #     if  (self.statoDiVolo == 'sequenza simulata!'):
+        #         self.sequenzaDiVoloSimulata()
+        #         if self.exitingTimer != False:
+        #             self.exitingTimer.stop()
+        #             self.exitFlag = 0
+        #     elif (self.statoDiVolo == 'landing'):
+        #         if we_are_faking_it:
+        #             time.sleep(2)
+        #             self.statoDiVolo = 'idle'
+        #         else:
+        #             def confirmLanding():
+        #                 while self.positionHLCommander._is_flying:
+        #                       self.statoDiVolo = 'yo lando'
+        #                 self.statoDiVolo = 'landed'
+        #             pass
                     
     def sequenzaDiVoloSimulata(self):     
         def volo():
@@ -251,7 +267,7 @@ class Drogno(threading.Thread):
         # Variable used to keep main loop occupied until disconnect
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=50)
+        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=500)
         self._lg_stab.add_variable('stateEstimate.x', 'float')
         self._lg_stab.add_variable('stateEstimate.y', 'float')
         self._lg_stab.add_variable('stateEstimate.z', 'float')
@@ -287,7 +303,7 @@ class Drogno(threading.Thread):
                 controller=PositionHlCommander.CONTROLLER_PID) 
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
-            self.setRingColor(12,200,200, 2)
+            self.setRingColor(20,1,1, 2)
 
      
         except KeyError as e:
@@ -316,7 +332,7 @@ class Drogno(threading.Thread):
         self.yaw = float(data['stabilizer.yaw'])
         self.evaluateBattery(float(data['pm.vbat']))
         # OSCStuff.sendPose    (self.ID, data['lighthouse.x'], data['lighthouse.y'], data['lighthouse.z'] )
-        OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
+        # OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -417,8 +433,8 @@ class Drogno(threading.Thread):
             print('can\'t land! (not flying)')
 
     def goTo(self,x,y,z, yaw=0, speed=0.1):  #la zeta è in alto!
-        if self.isFlying:
-            print('va bene, vado a %s %s %s' % (x,y,z))
+        if self.isFlying and self.isReadyToFly:
+            print('%s va a %s %s %s' % (self.name,  x,y,z))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
             self.statoDiVolo = 'hovering'
@@ -448,25 +464,35 @@ class Drogno(threading.Thread):
     def goToHome(self, speed=0.5):
         self._cf.high_level_commander.go_to(0,0,1, 0, 2)
 
-    def setRingColor(self, r, g, b, time=1.0):
-        # self._cf.param.set_value('ring.fadeTime', str(time))
+    def setRingColor(self, r, g, b, speed=1):
         r *= self.ringIntensity
         g *= self.ringIntensity
         b *= self.ringIntensity
         print('how fancy would it be to drone %s to look %s?' % (self.name, [r, g, b] ))
-
+        
         # color =  hex(int(r)) + hex(int(g)) + hex(int(b))
-        color = hex((int(r) << 16) | (int(g) << 8) | int(b))
-        if self.is_connected:
-            print ('vado al colore %s' % color)
-            self._cf.param.set_value('ring.fadeColor', str(color))
+        # color = hex((int(r) << 16) | (int(g) << 8) | int(b))
+        color = '0x'
+        color += hex(int(r))[2:]
+        color += hex(int(g))[2:]
+        color += hex(int(b))[2:]
+
+        print ('vado al colore %s' % color)
+        self._cf.param.set_value('ring.fadeTime', str(speed))
+
+        self._cf.param.set_value('ring.fadeColor', str(color))
+        time.sleep(speed)
 
     def alternativeSetRingColor(self, rgb ):
-        if self.is_connected:
-            self._cf.param.set_value('ring.solidRed', '{}'.format(int(rgb[0])))
-            self._cf.param.set_value('ring.solidGreen','{}'.format(int(rgb[1])))
-            self._cf.param.set_value('ring.solidBlue', '{}'.format(int(rgb[2])))
- 
+        r = int( rgb[0] / 255 * 100 )
+        g = int( rgb[1] / 255 * 100 )
+        b = int( rgb[2] / 255 * 100 )
+
+        self._cf.param.set_value('ring.solidRed',  '{}'.format(r))
+        self._cf.param.set_value('ring.solidGreen','{}'.format(g))
+        self._cf.param.set_value('ring.solidBlue', '{}'.format(b))
+        print ('vado al colore %s %s %s' % (r,g, b))
+
     def go(self, sequenceNumber=0):
         if self.statoDiVolo == 'hovering' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
             if we_are_faking_it:
@@ -584,6 +610,7 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
             self._cf.loc.send_emergency_stop()
+            self._cf.close_link()
             self.exit()
 
 if __name__ == '__main__':
