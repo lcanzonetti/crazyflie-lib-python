@@ -1,5 +1,6 @@
 #rf 2021
 import threading
+import multiprocessing
 import time
 import repeatedTimer as rp
 
@@ -9,6 +10,7 @@ from   osc4py3              import oscmethod as osm
 from   osc4py3              import oscbuildparse
 from   random               import uniform
 import logging
+import OSCaggregator
 
 OSC_IP           = "192.168.10.255"
 COMPANION_IP     = "192.168.1.255"
@@ -151,22 +153,32 @@ def kill     (unused_addr, *args):
 ###########################  single fella
 def printAndSendCoordinates():
     global drogni
-    time.sleep(4)
+    global bufferone
+    # print(bufferone)
+    time.sleep(1)
     while not finished:
-        time.sleep(0.50)
-      
+        time.sleep(0.2)
+        # print ('tipo: ', str(bufferone[0].requested_X))
+        # print ('tipo: ', str(bufferone[1].requested_X))
+        # print ('tipo: ', str(bufferone[2].requested_X))
+        # print ('tipo: ', str(bufferone[3].requested_X))
+        # print ('tipo: ', str(bufferone[4].requested_X))
+        # print ('tipo: ', str(bufferone[5].requested_X))
+        # print ('tipo: ', str(bufferone[6].requested_X))
+        # print ('tipo: ', str(bufferone[7].requested_X))
+        # print ('tipo: ', str(bufferone[8].requested_X))
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                 if drogni[drogno].is_connected:
-                    # drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     if  drogni[drogno].isFlying:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-        else:
-            # print('ma i comandi di movimento disabilitati')
-            pass
+        # else:
+        #     # print('ma i comandi di movimento disabilitati')
+        #     pass
  
 def setRequested(*args):
     iddio     = int(args[0].split('/')[2][-1])
@@ -203,54 +215,69 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_B = int(value3)
     # setattr(bufferone[iddio], parametro, value)
 
-def start_server():          #### OSC init
+def start_server():          #### OSC init    #########    acts as main()
     global finished 
-    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
-    # logger = logging.getLogger("osc")
-    # logger.setLevel(logging.DEBUG)
-    # osc_startup(logger=logger)
-    osc_startup(execthreadscount=20)
-    osc_udp_server("0.0.0.0", RECEIVING_PORT,               "receivingServer")
-    osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
-    osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
-    # osc_udp_client(OSC_IP,    SENDING_PORT,   "companionClient")
+    global bufferone
+    with multiprocessing.Manager() as manager:
 
-    print(Fore.GREEN + 'osc server initalized on',              RECEIVING_PORT, SENDING_PORT)
-    print(Fore.GREEN + 'osc client to D3 initalized on',        OSC_IP, SENDING_PORT)
-    print(Fore.GREEN + 'osc client to companion initalized on', OSC_IP, COMPANION_PORT)
+        # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
+        # logger = logging.getLogger("osc")
+        # logger.setLevel(logging.DEBUG)
+        # osc_startup(logger=logger)
+        osc_startup(execthreadscount=20)
+        osc_udp_server("0.0.0.0",             RECEIVING_PORT,   "receivingServer")
+        osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
+        osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
+        
+        sharedBuffer = manager.dict()
+        sharedBuffer = bufferone
+        print('sharedBuffer:  ')
+        print(sharedBuffer)
+        aggregatore      = OSCaggregator.Aggregator()
+        # aggregoneThread  = multiprocessing.Process(target=aggregatore.main, args=(sharedBuffer,))
+        aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
+        aggregoneThread.start()
+        print('sharedBuffer after:  ')
+        print(sharedBuffer)
 
-    ###########################  single fella
-    # osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/Y",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/Z",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/R",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/G",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/B",   setRequested,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/notch/drone*/pos", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-    osc_method("/notch/drone*/col", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-    ###########################  whole swarm routing
-    osc_method("/takeoff",          takeoff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/start",            go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/kill",             kill,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    resetCompanion()
-    updateCompanion()
+        # aggregoneThread.join()
 
-    while not finished:
-        osc_process()
-        time.sleep(0.1)
-    # Properly close the system.
-    osc_terminate()
+        print(Fore.GREEN + 'osc server initalized on',              RECEIVING_PORT, SENDING_PORT)
+        print(Fore.GREEN + 'osc client to D3 initalized on',        OSC_IP, SENDING_PORT)
+        print(Fore.GREEN + 'osc client to companion initalized on', OSC_IP, COMPANION_PORT)
+
+        ###########################  single fella
+        # osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        # osc_method("/notch/drone*/Y",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        # osc_method("/notch/drone*/Z",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        # osc_method("/notch/drone*/R",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        # osc_method("/notch/drone*/G",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        # osc_method("/notch/drone*/B",   setRequested,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/notch/drone*/pos", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        osc_method("/notch/drone*/col", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        ###########################  whole swarm routing
+        osc_method("/takeoff",          takeoff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/start",            go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/kill",             kill,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        resetCompanion()
+        updateCompanion()
+
+        while not finished:
+            osc_process()
+            time.sleep(0.1)
+        # Properly close the system.
+        osc_terminate()
 
 def faiIlBufferon():
-    for i in range (0,20):
+    for i in range (0,9):
         bufferone[i] = bufferDrone(i)
     # print ('bufferon')  
     # print (bufferone)
@@ -267,15 +294,6 @@ def sendPose(droneID, x, y , z, yaw):
     # print (droneID, roll, pitch, yaw)
 
 ########## main
-if __name__ == '__main__':
-    OSCRefreshThread      = threading.Thread(target=start_server,daemon=True).start()
-    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
-    while not finished:
-        pass
-
-
- 
-
 class bufferDrone():
     def __init__(self, ID, ):
         self.ID          = int(ID)
@@ -288,3 +306,30 @@ class bufferDrone():
         self.requested_G            = 0.0
         self.requested_B            = 0.0
         self.yaw                   = 0.0
+
+
+if __name__ == '__main__':
+    faiIlBufferon()
+    OSCRefreshThread      = threading.Thread(target=start_server,daemon=True).start()
+    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
+    # def fammeNesempio():
+    #     global bufferone
+    #     time.sleep(2)
+    #     while True:
+    #         print ('tipo: ', str(bufferone[0].requested_X))
+    #         print ('tipo: ', str(bufferone[1].requested_X))
+    #         print ('tipo: ', str(bufferone[2].requested_X))
+    #         print ('tipo: ', str(bufferone[3].requested_X))
+    #         print ('tipo: ', str(bufferone[4].requested_X))
+    #         print ('tipo: ', str(bufferone[5].requested_X))
+    #         print ('tipo: ', str(bufferone[6].requested_X))
+    #         print ('tipo: ', str(bufferone[7].requested_X))
+    #         print ('tipo: ', str(bufferone[8].requested_X))
+    #         time.sleep(1)
+    # OSCesempio        = threading.Thread(target=fammeNesempio,daemon=True).start()
+    while not finished:
+        pass
+
+
+ 
+
