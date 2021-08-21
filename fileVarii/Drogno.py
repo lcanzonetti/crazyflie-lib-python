@@ -2,6 +2,10 @@
 import threading
 import time
 import random
+from   colorama             import Fore, Back, Style
+from   colorama             import init as coloInit  
+coloInit(convert=True)
+
 #crazyflie's
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
@@ -34,6 +38,7 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'starting'
         self.durataVolo  = random.randint(1,4)
         self.exitFlag    = 0
+        self.killed      = False
         self.isReadyToFly          = False
         self.isFlying               = False
         self.controlThread         = False
@@ -60,7 +65,7 @@ class Drogno(threading.Thread):
         self.requested_G            = 0
         self.requested_B            = 0
         self.yaw                   = 0.0
-        self.batteryVoltage        = 0.0
+        self.batteryVoltage        = 4.2
         self.ringIntensity         = 0.2
 
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
@@ -75,8 +80,8 @@ class Drogno(threading.Thread):
         if WE_ARE_FAKING_IT:
             time.sleep(1.5)
         else:
-            self.printThread   = threading.Thread(target=self.printStatus, daemon=True).start()
-            self.batteryThread = threading.Thread(target=self.evaluateBattery, daemon=True)
+            self.printThread   = threading.Thread(target=self.printStatus).start()
+            self.batteryThread = threading.Thread(target=self.evaluateBattery)
             self.connect()
      
     def exit(self):
@@ -86,8 +91,10 @@ class Drogno(threading.Thread):
     def printStatus(self):
         while not self.exitFlag:
             time.sleep(self.printRate)
-            print (f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
-            # print ("%s: %s : %s" % (threadName, time.ctime(time.time()), self.statoDiVolo))
+            if self.is_connected:
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
+            else:
+                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
             # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
                     
     def sequenzaDiVoloSimulata(self):     
@@ -111,7 +118,8 @@ class Drogno(threading.Thread):
                 print('capperi')
             except:
                 print('no radio pal')
-        connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
+        if self.killed == False:
+            connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):
         self._cf.close_link()
@@ -237,7 +245,7 @@ class Drogno(threading.Thread):
 
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
-            self.setRingColor(20,1,1, 2)
+            # self.setRingColor(20,1,1, 2)
 
      
         except KeyError as e:
@@ -257,7 +265,6 @@ class Drogno(threading.Thread):
         self.z              = float(data['stateEstimate.z'])
         self.yaw            = float(data['stabilizer.yaw'])
         self.batteryVoltage = float(data['pm.vbat'])
-
         # OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
 
     def _connection_failed(self, link_uri, msg):
@@ -304,6 +311,7 @@ class Drogno(threading.Thread):
                 self.starting_y  = self.y
                 self.statoDiVolo = 'taking off!'
                 self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
+                self.positionHLCommander.take_off()
                 self.statoDiVolo = 'hovering'
                 self.isFlying    = True
             else:
@@ -311,38 +319,17 @@ class Drogno(threading.Thread):
 
     def land(self, speed=0.15, landing_height=0.03):
         def landing_sequence():
-            # self.positionHLCommander.set_landing_height(landing_height)
-                # self.positionHLCommander.land(0.1, 0)
-                # self._cf.param.set_value('commander.enHighLevel', '0')
-                # time.sleep(0.2)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.5)
-                # time.sleep(1)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.3)
-                # time.sleep(0.6)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.2)
-                # time.sleep(0.4)
-                # # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y,  0.5, 180)
-                # # time.sleep(0.2)
-                # # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.3, 180)
-                # # time.sleep(0.1)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.1)
+            self.isFlying     = False
+        
+            self._cf.high_level_commander.land(0.0, 3.0)
+            time.sleep(3)
+            # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.05, 180)
+            # time.sleep(0.1)
 
-                # time.sleep(0.3)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.06)
-                # time.sleep(0.5)
-                # self._cf.commander.send_zdistance_setpoint(0,0,0,0.03)
-                # time.sleep(0.1)
-                
-                self._cf.high_level_commander.land(0.0, 3.0)
-                time.sleep(3)
-                # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.05, 180)
-                # time.sleep(0.1)
+            # self._cf.commander.send_stop_setpoint()
 
-                # self._cf.commander.send_stop_setpoint()
-
-                self.isFlying     = False
-                self.isReadyToFly = True
-                self.statoDiVolo = 'landed'
+            self.isReadyToFly = True
+            self.statoDiVolo = 'landed'
 
         if WE_ARE_FAKING_IT:
             self.statoDiVolo = 'landing'
@@ -354,15 +341,15 @@ class Drogno(threading.Thread):
                 print('%s atterra! ' % self.name)
                 self.statoDiVolo = 'landing'
                 ld = threading.Thread(target=landing_sequence, daemon=True).start()
-                ld.join()
+                # ld.join()
             else:
                 print('%s can\'t land! (not flying)' % self.name)
 
     def goTo(self,x,y,z, yaw=0, speed=0.1):  #la zeta è in alto!
         if self.isFlying:
-            clamp([x], -BOX_X, BOX_X)
-            clamp([y], -BOX_Y, BOX_Y)
-            clamp([z], 0.3   , BOX_Z)
+            clamp(x, -BOX_X, BOX_X)
+            clamp(y, -BOX_Y, BOX_Y)
+            clamp(z, 0.3   , BOX_Z)
             print('%s va a %s %s %s' % (self.name,  x,y,z))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
@@ -415,7 +402,7 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.fadeTime', str(speed))
 
         self._cf.param.set_value('ring.fadeColor', str(color))
-        time.sleep(speed)
+        # time.sleep(speed)
 
     def alternativeSetRingColor(self, rgb ):
         r = int( rgb[0] / 255 * 100 )
@@ -522,26 +509,29 @@ class Drogno(threading.Thread):
            print('la sequenza in esecuzione non può essere fermata. \nMAI')
 
     def evaluateBattery(self):
-        level = self.batteryVoltage 
-        if level<3.50:
-            print ('ciao, sono il drone %s e ho la batteria scarica (%s)' % (self.ID, level))
-        if level<3.40:
-            if self.statoDiVolo == 'landed':
-                print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
-                self.statoDiVolo == 'landed with no battery'
-                # self._cf.high_level_commander.stop()
-                # self._cf.commander.send_stop_setpoint()
-            else:
-                print ('ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                self.land()
-                self.statoDiVolo = 'landed'
-                self.isReadyToFly = False
-        time.sleep(BATTERY_CHECK_RATE)
+        while not self.exitFlag:
+            level = self.batteryVoltage 
+            if level<3.50:
+                print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
+            if level<3.35:
+                if self.statoDiVolo == 'landed':
+                    print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
+                    self.statoDiVolo == 'landed with no battery'
+                    # self._cf.high_level_commander.stop()
+                    # self._cf.commander.send_stop_setpoint()
+                else:
+                    print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
+                    self.land()
+                    self.statoDiVolo = 'landed'
+                    self.isReadyToFly = False
+            time.sleep(BATTERY_CHECK_RATE)
 
     def killMeSoftly(self):
+            self.killed = True
             self.land()
             self.exit()
     def killMeHardly(self):
+            self.killed = True
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
             self._cf.loc.send_emergency_stop()

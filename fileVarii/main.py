@@ -10,13 +10,12 @@ import timerino as myTimer
 import Drogno
 import cflib.crtp
 
-
 uris = [
-        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://2/80/2M/E7E7E7E7E3',
-        'radio://0/80/2M/E7E7E7E7E4',
+        # 'radio://0/80/2M/E7E7E7E7E4',
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://1/80/2M/E7E7E7E7E6',
         # 'radio://2/80/2M/E7E7E7E7E7',
@@ -40,6 +39,7 @@ def main():
         iddio = int(uro[-1])
         drogni[int(iddio)] = Drogno.Drogno(iddio, uro)
         drogni[int(iddio)].start()
+        # drogni[int(iddio)].join()
         print(drogni)
 
     OSC.drogni = drogni
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     # logging.basicConfig(level=logging.ERROR)
     cflib.crtp.init_drivers(enable_debug_driver=False)
     main()
+    while True:
+        pass
 
 
-def clamp(num, min_value, max_value):
-   return max(min(num, max_value), min_value)
