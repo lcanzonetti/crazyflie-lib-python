@@ -308,7 +308,7 @@ class Drogno(threading.Thread):
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'taking off!'
-                self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
+                # self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
                 self.positionHLCommander.take_off()
                 self.statoDiVolo = 'hovering'
                 self.isFlying    = True

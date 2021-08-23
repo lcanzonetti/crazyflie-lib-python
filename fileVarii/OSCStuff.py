@@ -19,9 +19,9 @@ OSC_IP                  = "192.168.10.255"
 RECEIVING_IP            = "0.0.0.0"
 SENDING_PORT            = 9201
 RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.1
+OSC_PROCESS_RATE        = 0.01
 
-COMPANION_IP            = "192.168.1.255"
+COMPANION_IP            = "192.168.10.255"
 COMPANION_PORT          = 12321
 COMPANION_PAGE          = '92'
 COMPANION_ENABLE_BUTTON = '25'
@@ -80,10 +80,10 @@ def updateCompanion():
                 scrambleTxt = ''
                 if d.isFlying:
                     scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [244, 136, 8])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land ' + d.batteryVoltage])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land ' + str(d.batteryVoltage)])
                 else:
                     scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [50, 127, 67])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['take off ' + d.batteryVoltage])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['take off ' + str(d.batteryVoltage)])
 
     
                 bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, txt, scrambleTxt, scrambleCol])
@@ -94,10 +94,12 @@ def updateCompanion():
 
 ###########################  whole swarm
 def takeoff(*args):
-    print (args)
+    global bufferone
     print('chief says we\'re gonna take the fuck off')
     for drogno in drogni:
         if drogni[drogno].is_connected:
+            bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
+            bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
             drogni[drogno].takeoff(0.45, 2.45)
         else:
             print('il drogno %s non è connesso' % drogni[drogno].name)
@@ -198,10 +200,13 @@ def printAndSendCoordinates():
 
 def printHowManyMessages():
     def printa():
-        global msgCount
-        time.sleep(1)
-        print('ho ricevuto % messaggi.' % msgCount)
-        msgCount = 0
+        while not finished:
+            time.sleep(1)
+            global msgCount
+            time.sleep(1)
+            print('ho ricevuto %s messaggi.' % msgCount)
+            msgCount = 0
+
     threading.Thread(target=printa).start()
 
 def setRequested(*args):
@@ -300,6 +305,7 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     resetCompanion()
     updateCompanion()
+    printHowManyMessages()
 
     while not finished:
         osc_process()
@@ -340,7 +346,7 @@ class bufferDrone():
         
         self.requested_X            = 0.0
         self.requested_Y            = 0.0
-        self.requested_Z            = 0.0
+        self.requested_Z            = 1.0
         self.requested_R            = 0.0
         self.requested_G            = 0.0
         self.requested_B            = 0.0
