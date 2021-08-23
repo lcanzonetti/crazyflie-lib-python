@@ -150,7 +150,7 @@ class Drogno(threading.Thread):
             controller = 2
         self._cf.cf.param.set_value('stabilizer.controller', controller)
 
-    def wait_for_position_estimator(self):
+    def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
         print('Waiting for estimator to find position...')
 
         log_config = LogConfig(name='Kalman Variance', period_in_ms=500)
@@ -258,14 +258,12 @@ class Drogno(threading.Thread):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
 
-    def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e smista i dati
-      
+    def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati
         self.x              = float(data['stateEstimate.x'])
         self.y              = float(data['stateEstimate.y'])
         self.z              = float(data['stateEstimate.z'])
         self.yaw            = float(data['stabilizer.yaw'])
         self.batteryVoltage = float(data['pm.vbat'])
-        # OSC.sendPose    (self.ID, data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.y'], data['stabilizer.yaw'] )
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie

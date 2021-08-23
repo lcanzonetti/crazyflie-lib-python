@@ -27,6 +27,8 @@ drogni = {}
 
     
 def main():
+    cflib.crtp.init_drivers(enable_debug_driver=False)
+
     try:
         availableRadios = cflib.crtp.scan_interfaces()
         for i in availableRadios:
@@ -50,7 +52,6 @@ def main():
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.ERROR)
-    cflib.crtp.init_drivers(enable_debug_driver=False)
     main()
     while True:
         pass

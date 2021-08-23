@@ -1,38 +1,48 @@
+# -*- coding: utf-8 -*-
 #rf 2021
 import threading
 import multiprocessing
 import time
 import repeatedTimer as rp
-
-from   colorama             import Fore, Back, Style
-from   colorama import init as coloInit  
-from   osc4py3.as_comthreads import *
-from   osc4py3              import oscmethod as osm
-from   osc4py3              import oscbuildparse
-from   random               import uniform
+from   colorama              import Fore, Back, Style
+from   colorama              import init as coloInit  
+# from   osc4py3.as_comthreads import *
+from   osc4py3.as_eventloop  import *
+from   osc4py3               import oscmethod as osm
+from   osc4py3               import oscbuildparse
+from   random                import uniform
 import logging
+
 # import OSCaggregator
 coloInit(convert=True)
-OSC_IP           = "192.168.10.255"
-COMPANION_IP     = "192.168.10.255"
-RECEIVING_IP     = "0.0.0.0"
-SENDING_PORT     = 9201
-RECEIVING_PORT   = 9200
-COMPANION_PORT   = 12321
-COMPANION_PAGE   = '89'
+OSC_IP                  = "192.168.10.255"
+RECEIVING_IP            = "0.0.0.0"
+SENDING_PORT            = 9201
+RECEIVING_PORT          = 9200
+OSC_PROCESS_RATE        = 0.1
+
+COMPANION_IP            = "192.168.1.255"
+COMPANION_PORT          = 12321
+COMPANION_PAGE          = '92'
 COMPANION_ENABLE_BUTTON = '25'
+COMPANION_UPDATE_RATE   = 0.8
+
+FEEDBACK_ENABLED        = True
+FEEDBACK_RATE           = 0.8
 
 drogni        = {} 
 bufferone     = {}
 isSendEnabled = False
 finished      = False
 
+msgCount =0 
+
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
     print(Fore.RED +  'me dici: %s' % isSendEnabled)
-    updateCompanion()
+    
 def getSendEnabled():
     return isSendEnabled
 def comè(uno): # è booleano oppure no?
@@ -41,9 +51,12 @@ def comè(uno): # è booleano oppure no?
 
 def resetCompanion():
     for i in range(2,9):
-        active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i),   None,   [1, 1, 1])
-        print("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i))
-        osc_send(active_col, "companionClient")
+        active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i),  ",iii",   [1, 80, 1])
+        carlo      = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/" + str(i),   None,   ['drone '+str(i-2)])
+        pino       = oscbuildparse.OSCMessage("/style/color/"+COMPANION_PAGE+"/" + str(i),  ",iii",   [255, 255, 255])
+        bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, carlo, pino]) 
+        osc_send(bandoleon, "companionClient")
+
 
 def updateCompanion():
     def daje ():
@@ -67,20 +80,21 @@ def updateCompanion():
                 scrambleTxt = ''
                 if d.isFlying:
                     scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [244, 136, 8])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land'])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land ' + d.batteryVoltage])
                 else:
                     scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [50, 127, 67])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['take off'])
+                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['take off ' + d.batteryVoltage])
 
     
                 bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, txt, scrambleTxt, scrambleCol])
                 osc_send(bandoleon, "companionClient")
 
-            time.sleep(0.5)
+            time.sleep(COMPANION_UPDATE_RATE)
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
 def takeoff(*args):
+    print (args)
     print('chief says we\'re gonna take the fuck off')
     for drogno in drogni:
         if drogni[drogno].is_connected:
@@ -150,7 +164,7 @@ def kill     (unused_addr, *args):
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
                 break
-        finished = True
+        # finished = True
 
 ###########################  single fella
 def printAndSendCoordinates():
@@ -181,7 +195,15 @@ def printAndSendCoordinates():
         # else:
         #     # print('ma i comandi di movimento disabilitati')
         #     pass
- 
+
+def printHowManyMessages():
+    def printa():
+        global msgCount
+        time.sleep(1)
+        print('ho ricevuto % messaggi.' % msgCount)
+        msgCount = 0
+    threading.Thread(target=printa).start()
+
 def setRequested(*args):
     iddio     = int(args[0].split('/')[2][-1])
     parametro = args[0][-1]
@@ -192,7 +214,8 @@ def setRequested(*args):
     # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
 
 def setRequestedPos(address, args):
-  
+    global msgCount
+    msgCount += 1
     iddio      = int(address[-5])
     value1     = round(float(args[0]),3)
     value2     = round(float(args[1]),3)
@@ -205,7 +228,8 @@ def setRequestedPos(address, args):
  
 def setRequestedCol(address, args):
     iddio     = int(address[-5])
-
+    global msgCount
+    msgCount += 1
     # value1     = round(float(add[1]),3)
     # value2     = round(float(add[2]),3)
     # value3     = round(float(add[3]),3)
@@ -227,12 +251,15 @@ def start_server():          #### OSC init    #########    acts as main()
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
     # osc_startup(logger=logger)
-    # osc_startup(execthreadscount=40)
     osc_startup( )
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
-    # osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
     osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
-    
+    if FEEDBACK_ENABLED:
+        osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
+        sendPose()
+
+     # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
+    # aggregoneThread.start()
     # sharedBuffer = manager.dict()
     # sharedBuffer = bufferone
     # print('sharedBuffer:  ')
@@ -247,8 +274,8 @@ def start_server():          #### OSC init    #########    acts as main()
     # aggregoneThread.join()
 
     print(Fore.GREEN + 'osc server initalized on',              RECEIVING_IP, RECEIVING_PORT)
-    # print(Fore.GREEN + 'osc client to D3 initalized on',        OSC_IP, SENDING_PORT)
-    print(Fore.GREEN + 'osc client to companion initalized on', OSC_IP, COMPANION_PORT)
+    print(Fore.GREEN + 'osc feedback client initalized on',        OSC_IP, SENDING_PORT)
+    print(Fore.GREEN + 'osc client to companion initalized on', COMPANION_IP, COMPANION_PORT)
 
     ###########################  single fella
     # osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -276,7 +303,7 @@ def start_server():          #### OSC init    #########    acts as main()
 
     while not finished:
         osc_process()
-        time.sleep(0.3)
+        time.sleep(OSC_PROCESS_RATE)
         # pass
     # Properly close the system.
     osc_terminate()
@@ -290,14 +317,20 @@ def faiIlBufferon():
     # print(bufferone[0])
 
 # ################ feedbacksssssssss
-def sendPose(droneID, x, y , z, yaw):
-    ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_x", None, x)
-    ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_y", None, y)
-    zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_pos_z", None, z)
-    yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(droneID)+"_rot_z", None, yaw)
-    bun  = oscbuildparse.OSCBundle( oscbuildparse.OSC_IMMEDIATELY, [ixxo, ypso, zeto, yalo])  
-    osc_send(bun, "feedbackClient")
-    # print (droneID, roll, pitch, yaw)
+def sendPose():
+    def treddo():
+        time.sleep(FEEDBACK_RATE)
+        for drogno in drogni:
+            ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
+            ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
+            zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
+            yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
+            bun  = oscbuildparse.OSCBundle( oscbuildparse.OSC_IMMEDIATELY, [ixxo, ypso, zeto, yalo])  
+            osc_send(bun, "feedbackClient")
+            # print (droneID, roll, pitch, yaw) 
+    print(Fore.GREEN + 'starting feedback thread')
+    feedbackTreddo = threading.Thread(target=treddo).start()
+
 
 ########## main
 class bufferDrone():
@@ -318,24 +351,14 @@ if __name__ == '__main__':
     faiIlBufferon()
     OSCRefreshThread      = threading.Thread(target=start_server,daemon=True).start()
     OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates,daemon=True).start()
-    # def fammeNesempio():
-    #     global bufferone
-    #     time.sleep(2)
-    #     while True:
-    #         print ('tipo: ', str(bufferone[0].requested_X))
-    #         print ('tipo: ', str(bufferone[1].requested_X))
-    #         print ('tipo: ', str(bufferone[2].requested_X))
-    #         print ('tipo: ', str(bufferone[3].requested_X))
-    #         print ('tipo: ', str(bufferone[4].requested_X))
-    #         print ('tipo: ', str(bufferone[5].requested_X))
-    #         print ('tipo: ', str(bufferone[6].requested_X))
-    #         print ('tipo: ', str(bufferone[7].requested_X))
-    #         print ('tipo: ', str(bufferone[8].requested_X))
-    #         time.sleep(1)
-    # OSCesempio        = threading.Thread(target=fammeNesempio,daemon=True).start()
+
     while not finished:
         pass
 
+# import keyboard
 
+# while True:
+#     keyboard.wait('q')
+#     keyboard.send('ctrl+6')
  
 
