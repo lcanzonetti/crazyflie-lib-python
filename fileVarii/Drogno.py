@@ -40,7 +40,7 @@ class Drogno(threading.Thread):
         self.exitFlag    = 0
         self.killed      = False
         self.isReadyToFly          = False
-        self.isFlying               = False
+        self.isFlying              = False
         self.controlThread         = False
         self.printThread           = False
         self.printRate             = STATUS_PRINT_RATE
@@ -66,7 +66,7 @@ class Drogno(threading.Thread):
         self.requested_B            = 0
         self.yaw                   = 0.0
         self.batteryVoltage        = 4.2
-        self.ringIntensity         = 0.2
+        self.ringIntensity         = 1
 
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
         # Connect some callbacks from the Crazyflie API
@@ -76,7 +76,7 @@ class Drogno(threading.Thread):
         self._cf.connection_lost.add_callback(self._connection_lost)
      
     def run(self):
-        print ("Starting " + self.name)
+        print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
         if WE_ARE_FAKING_IT:
             time.sleep(1.5)
         else:
@@ -235,13 +235,14 @@ class Drogno(threading.Thread):
             self.HLCommander = self._cf.high_level_commander
             self.positionHLCommander = PositionHlCommander(
                 self._cf,
-                x=self.starting_x, y=self.starting_y, z=self.starting_z,
-                default_velocity=0.3,
-                default_height=0.5,
+                x=self.x, y=self.y, z=0.0,
+                default_velocity=0.5,
+                default_height=0.8,
                 controller=PositionHlCommander.CONTROLLER_PID) 
             
             self._lg_stab.start()
             self.batteryThread.start()
+            self._cf.param.set_value('ring.fadeTime', 0.25)
 
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
@@ -308,8 +309,8 @@ class Drogno(threading.Thread):
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'taking off!'
-                # self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
-                self.positionHLCommander.take_off()
+                self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
+                # self.positionHLCommander.take_off()
                 self.statoDiVolo = 'hovering'
                 self.isFlying    = True
             else:
@@ -317,9 +318,8 @@ class Drogno(threading.Thread):
 
     def land(self, speed=0.15, landing_height=0.03):
         def landing_sequence():
-            self.isFlying     = False
-        
             self._cf.high_level_commander.land(0.0, 3.0)
+            self.isFlying     = False
             time.sleep(3)
             # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.05, 180)
             # time.sleep(0.1)
@@ -382,8 +382,9 @@ class Drogno(threading.Thread):
     def goToHome(self, speed=0.5):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+        print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
-    def setRingColor(self, r, g, b, speed=1):
+    def setRingColor(self, r, g, b, speed=0.25):
         r *= self.ringIntensity
         g *= self.ringIntensity
         b *= self.ringIntensity
@@ -392,14 +393,13 @@ class Drogno(threading.Thread):
         # color =  hex(int(r)) + hex(int(g)) + hex(int(b))
         # color = hex((int(r) << 16) | (int(g) << 8) | int(b))
         color = '0x'
-        color += hex(int(r))[2:]
-        color += hex(int(g))[2:]
-        color += hex(int(b))[2:]
+        color += str ( hex ( int(r) ) ) [2:].zfill(2)
+        color += str ( hex ( int(g) ) ) [2:].zfill(2)
+        color += str ( hex ( int(b) ) ) [2:].zfill(2)
 
-        print ('vado al colore %s' % color)
-        self._cf.param.set_value('ring.fadeTime', str(speed))
+        print ('vado al colore %s' % (color))
 
-        self._cf.param.set_value('ring.fadeColor', str(color))
+        self._cf.param.set_value('ring.fadeColor', color)
         # time.sleep(speed)
 
     def alternativeSetRingColor(self, rgb ):
@@ -530,6 +530,7 @@ class Drogno(threading.Thread):
             self.exit()
     def killMeHardly(self):
             self.killed = True
+            self.setRingColor(0,0,0)
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
             self._cf.loc.send_emergency_stop()
