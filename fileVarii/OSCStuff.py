@@ -23,7 +23,7 @@ OSC_PROCESS_RATE        = 0.01
 
 COMPANION_IP            = "192.168.10.255"
 COMPANION_PORT          = 12321
-COMPANION_PAGE          = '92'
+COMPANION_PAGES         = ['92', '93', '94']
 COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 0.8
 
@@ -51,58 +51,127 @@ def comè(uno): # è booleano oppure no?
 
 def resetCompanion():
     for i in range(2,9):
-        active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(i),  ",iii",   [1, 80, 1])
-        carlo      = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/" + str(i),   None,   ['drone '+str(i-2)])
-        pino       = oscbuildparse.OSCMessage("/style/color/"+COMPANION_PAGE+"/" + str(i),  ",iii",   [255, 255, 255])
-        bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, carlo, pino]) 
-        osc_send(bandoleon, "companionClient")
+        j=0
+        for cp in COMPANION_PAGES:
+            intst         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i),      None,   ['drone '+str(i-2+(j*7))])
+            int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i),    ",iii",   [1, 1, 1])
+            int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i),    ",iii",   [60, 60, 60])
 
+            status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+8),    None,   ['sconnesso'])
+            status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+8),  ",iii",   [1, 1, 1])
+            status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+8),  ",iii",   [120, 120, 120])
+
+            tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+16),   None,   ['take off'])
+            tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+16), ",iii",   [1,    20,   1])
+            tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+16), ",iii",   [60, 60, 60])
+
+            kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+24),   None,   ['kill'])
+            kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+24), ",iii",   [80, 10, 10])
+            kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+24), ",iii",   [60, 60, 60])
+
+            bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
+            osc_send(bandoleon, "companionClient")
+            j+=1
+    # for drogno in drogni:
+    #     cp = COMPANION_PAGES[0]
+    #     iddio=drogni[drogno].ID
+    #     if iddio>= 7 and iddio <14:
+    #         cp = int(cp)  + 1
+    #         iddio -= 7
+    #     if iddio >= 14:    
+    #         cp = int(cp)  + 2
+    #         iddio -= 14
+    #     active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+str(cp)+"/" + str(iddio +2),  ",iii",   [13, 191, 13])
+    #     pino       = oscbuildparse.OSCMessage("/style/color/"+str(cp)+"/"   + str(iddio +2),  ",iii",   [1, 2, 3])
+    #     bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, pino]) 
+    #     osc_send(bandoleon, "companionClient")
 
 def updateCompanion():
+    global bufferone
     def daje ():
         while not finished:
             # print(Fore.WHITE +'aggiorno companion')
-            if not isSendEnabled:
-                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
-                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
-                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
-                osc_send(bandoleon, "companionClient")
+            if not isSendEnabled:                       #*******************  SEND ENABLING
+                for cp in COMPANION_PAGES:
+                    col = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
+                    txt = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
+                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                    osc_send(bandoleon, "companionClient")
             else:
-                col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
-                txt = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
-                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
-                osc_send(bandoleon, "companionClient")
-            for drogno in drogni:
-                d = drogni[drogno]
-                active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2),   None,   [13, 244, 244])
-                txt        = oscbuildparse.OSCMessage("/style/text/"+COMPANION_PAGE+"/"    + str(d.ID+2+8), None,   [d.statoDiVolo])
-                scrambleCol = ''
-                scrambleTxt = ''
-                if d.isFlying:
-                    scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [244, 136, 8])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['land ' + str(d.batteryVoltage)])
-                else:
-                    scrambleCol = oscbuildparse.OSCMessage("/style/bgcolor/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   [50, 127, 67])
-                    scrambleTxt = oscbuildparse.OSCMessage("/style/txt/"+COMPANION_PAGE+"/" + str(d.ID+2+8+8),   None,   ['take off ' + str(d.batteryVoltage)])
+                for cp in COMPANION_PAGES:
+                    col        = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
+                    txt        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
+                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
+                    osc_send(bandoleon, "companionClient")
 
-    
-                bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, txt, scrambleTxt, scrambleCol])
+            for drogno in drogni:               #*******************  singol-drogn               
+                cp   = COMPANION_PAGES[0]
+                iddio= drogni[drogno].ID
+                d    = drogni[drogno]   
+                if iddio>= 7 and iddio <14:
+                    cp = int(cp)  + 1
+                    iddio -= 7
+                if iddio >= 14:    
+                    cp = int(cp)  + 2
+                    iddio -= 14
+                cp = str(cp)
+                flyingStatus = 'take off'
+                if d.isFlying: flyingStatus = 'land'
+
+                int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii",   [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B])
+                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [10,10,10])
+
+                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    None,   [d.statoDiVolo + ' ' + str(round( float(d.batteryVoltage) , 1))]) 
+                status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
+                status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
+
+
+                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [flyingStatus])
+                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   [1, 200,  1])
+                tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
+
+                kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   ['kill'])
+                kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [255, 10, 10])
+                kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [60, 60, 60])
+
+                bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                 osc_send(bandoleon, "companionClient")
 
             time.sleep(COMPANION_UPDATE_RATE)
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
-def takeoff(*args):
+def takeOff(coddii, decollante):
     global bufferone
-    print('chief says we\'re gonna take the fuck off')
-    for drogno in drogni:
-        if drogni[drogno].is_connected:
-            bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
-            bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
-            drogni[drogno].takeoff(0.45, 2.45)
+    print (decollante)
+    print('chief says %s gonna take the fuck off' %(decollante))
+    if decollante == 'all': 
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                if not drogni[drogno].isFlying:
+                    bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
+                    bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
+                    try:
+                        gino = threading.Thread(target=drogni[drogno].takeoff).start()
+                        # drogni[drogno].takeoff(0.45, 2.45)
+                    except Exception:
+                        print('already taking off %s' % Exception)
+                else:
+                    land(decollante)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+    else:
+        if drogni[decollante].is_connected:
+                bufferone[drogni[decollante].ID].requested_X = drogni[decollante].x
+                bufferone[drogni[decollante].ID].requested_Y = drogni[decollante].y
+                try:
+                    gino = threading.Thread(target=drogni[decollante].takeoff).start()
+                    # drogni[decollante].takeoff(0.45, 2.45)
+                except Exception:
+                    print('already taking off %s' % Exception)
         else:
-            print('il drogno %s non è connesso' % drogni[drogno].name)
+            print('il drogno %s non è connesso' % drogni[decollante].name)
+
 def go(unused_addr, args, isEnabled):
         print('chief says we\'re gonna do shit at sequence %s' % args)
         for drogno in drogni:
@@ -138,13 +207,16 @@ def goBack   (quanto):
                 drogni[drogno].goBack(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def land     (*args):
-    print('chief says we\'re gotta be grounded')
-    for drogno in drogni:
-        if drogni[drogno].is_connected:
-            drogni[drogno].land()
-        else:
-            print('il drogno %s non è connesso' % drogni[drogno].name)
+def land     (bullshit, landingCandidate):
+    print('chief says %s gotta be grounded' % (landingCandidate))
+    if landingCandidate == 'all':    
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].land()
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+    else:
+        drogni[landingCandidate].land()
 def home     (unused_addr, args):
         print('chief says we\'re gonna go home')
         for drogno in drogni:
@@ -175,7 +247,7 @@ def printAndSendCoordinates():
     # print(bufferone)
     time.sleep(1)
     while not finished:
-        time.sleep(0.4)
+        time.sleep(0.2)
         # print ('tipo: ', str(bufferone[0].requested_X))
         # print ('tipo: ', str(bufferone[1].requested_X))
         # print ('tipo: ', str(bufferone[2].requested_X))
@@ -188,9 +260,9 @@ def printAndSendCoordinates():
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
-                # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                 if drogni[drogno].is_connected:
-                    # drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
+                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     if  drogni[drogno].isFlying:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                         # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
@@ -201,10 +273,9 @@ def printAndSendCoordinates():
 def printHowManyMessages():
     def printa():
         while not finished:
-            time.sleep(1)
             global msgCount
-            time.sleep(1)
-            print('ho ricevuto %s messaggi.' % msgCount)
+            time.sleep(5)
+            print('ho ricevuto %s messaggi al secondo.' % str(msgCount/5))
             msgCount = 0
 
     threading.Thread(target=printa).start()
@@ -232,26 +303,18 @@ def setRequestedPos(address, args):
     bufferone[iddio].requested_Z = value3
  
 def setRequestedCol(address, args):
-    iddio     = int(address[-5])
     global msgCount
     msgCount += 1
-    # value1     = round(float(add[1]),3)
-    # value2     = round(float(add[2]),3)
-    # value3     = round(float(add[3]),3)
-    # if isSendEnabled:
-    print('provo a variare il parametro del drone %s colore mettendoci %s %s %s' % ( iddio, args[1], args[2], args[3]))
-
-    bufferone[iddio].requested_R = int(args[1])
-    bufferone[iddio].requested_G = int(args[2])
-    bufferone[iddio].requested_B = int(args[3])
-    # setattr(bufferone[iddio], parametro, value)
+    iddio     = int(address[-5])
+    bufferone[iddio].requested_R = int(args[0])
+    bufferone[iddio].requested_G = int(args[1])
+    bufferone[iddio].requested_B = int(args[2])
 
 def start_server():          #### OSC init    #########    acts as main()
     global finished 
     global bufferone
     # with multiprocessing.Manager() as manager:
     # if True:
-
     # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
@@ -292,7 +355,7 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/notch/drone*/pos", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/notch/drone*/col", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  whole swarm routing
-    osc_method("/takeoff",          takeoff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/takeOff",          takeOff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/start",            go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
