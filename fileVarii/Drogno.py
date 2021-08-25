@@ -66,7 +66,8 @@ class Drogno(threading.Thread):
         self.requested_B            = 0
         self.yaw                   = 0.0
         self.batteryVoltage        = 4.2
-        self.ringIntensity         = 1
+        self.ringIntensity         = 0.1
+        self.goToCount             = 0.0
 
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
         # Connect some callbacks from the Crazyflie API
@@ -92,9 +93,10 @@ class Drogno(threading.Thread):
         while not self.exitFlag:
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
+                self.goToCount = 0
             else:
-                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
+                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
             # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
                     
     def sequenzaDiVoloSimulata(self):     
@@ -109,7 +111,7 @@ class Drogno(threading.Thread):
             print('start!')
 
     def connect(self): 
-        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri} ')
+        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
         def porcoMondo():
             self.statoDiVolo = 'connecting'
             try:
@@ -344,11 +346,13 @@ class Drogno(threading.Thread):
                 print('%s can\'t land! (not flying)' % self.name)
 
     def goTo(self,x,y,z, yaw=0, speed=0.1):  #la zeta è in alto!
+        self.goToCount += 1
+
         if self.isFlying:
             clamp(x, -BOX_X, BOX_X)
             clamp(y, -BOX_Y, BOX_Y)
             clamp(z, 0.3   , BOX_Z)
-            print('%s va a %s %s %s' % (self.name,  x,y,z))
+            # print('%s va a %s %s %s' % (self.name,  x,y,z))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
             self.statoDiVolo = 'hovering'
@@ -388,7 +392,7 @@ class Drogno(threading.Thread):
         r *= self.ringIntensity
         g *= self.ringIntensity
         b *= self.ringIntensity
-        print('how fancy would it be to drone %s to look %s?' % (self.name, [r, g, b] ))
+        # print('how fancy would it be to drone %s to look %s?' % (self.name, [r, g, b] ))
         
         # color =  hex(int(r)) + hex(int(g)) + hex(int(b))
         # color = hex((int(r) << 16) | (int(g) << 8) | int(b))
@@ -397,7 +401,7 @@ class Drogno(threading.Thread):
         color += str ( hex ( int(g) ) ) [2:].zfill(2)
         color += str ( hex ( int(b) ) ) [2:].zfill(2)
 
-        print ('vado al colore %s' % (color))
+        # print ('vado al colore %s' % (color))
 
         self._cf.param.set_value('ring.fadeColor', color)
         # time.sleep(speed)

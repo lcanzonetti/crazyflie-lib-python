@@ -247,22 +247,13 @@ def printAndSendCoordinates():
     # print(bufferone)
     time.sleep(1)
     while not finished:
-        time.sleep(0.2)
-        # print ('tipo: ', str(bufferone[0].requested_X))
-        # print ('tipo: ', str(bufferone[1].requested_X))
-        # print ('tipo: ', str(bufferone[2].requested_X))
-        # print ('tipo: ', str(bufferone[3].requested_X))
-        # print ('tipo: ', str(bufferone[4].requested_X))
-        # print ('tipo: ', str(bufferone[5].requested_X))
-        # print ('tipo: ', str(bufferone[6].requested_X))
-        # print ('tipo: ', str(bufferone[7].requested_X))
-        # print ('tipo: ', str(bufferone[8].requested_X))
+        time.sleep(0.18)
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
-                    print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
-                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
+                    # drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     if  drogni[drogno].isFlying:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                         # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
