@@ -15,9 +15,10 @@ import logging
 
 # import OSCaggregator
 coloInit(convert=True)
-OSC_IP                  = "192.168.10.255"
+FEEDBACK_IP             = "192.168.10.255"
+FEEDBACK_PORT           = 9201
+
 RECEIVING_IP            = "0.0.0.0"
-SENDING_PORT            = 9201
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.01
 
@@ -27,7 +28,7 @@ COMPANION_PAGES         = ['92', '93', '94']
 COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 0.8
 
-FEEDBACK_ENABLED        = True
+FEEDBACK_ENABLED        = False
 FEEDBACK_RATE           = 0.8
 
 drogni        = {} 
@@ -136,6 +137,8 @@ def updateCompanion():
 
                 bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                 osc_send(bandoleon, "companionClient")
+                
+
 
             time.sleep(COMPANION_UPDATE_RATE)
     nnamo = threading.Thread(target=daje).start()
@@ -144,8 +147,8 @@ def updateCompanion():
 def takeOff(coddii, decollante):
     global bufferone
     print (decollante)
-    print('chief says %s gonna take the fuck off' %(decollante))
     if decollante == 'all': 
+        print('chief says %s gonna take the fuck off' %(decollante))
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 if not drogni[drogno].isFlying:
@@ -156,12 +159,12 @@ def takeOff(coddii, decollante):
                         # drogni[drogno].takeoff(0.45, 2.45)
                     except Exception:
                         print('already taking off %s' % Exception)
-                else:
-                    land(decollante)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
     else:
         if drogni[decollante].is_connected:
+            if not drogni[decollante].isFlying:
+                print('chief says %s gonna take the fuck off' %(decollante))
                 bufferone[drogni[decollante].ID].requested_X = drogni[decollante].x
                 bufferone[drogni[decollante].ID].requested_Y = drogni[decollante].y
                 try:
@@ -169,6 +172,9 @@ def takeOff(coddii, decollante):
                     # drogni[decollante].takeoff(0.45, 2.45)
                 except Exception:
                     print('already taking off %s' % Exception)
+            else:
+                print('chief says %s gonna land' %(decollante))
+                drogni[decollante].land()
         else:
             print('il drogno %s non è connesso' % drogni[decollante].name)
 
@@ -224,12 +230,13 @@ def home     (unused_addr, args):
                 drogni[drogno].goToHome()
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def ringColor(unused_addr, *args):
-        print('how fancy would it be to all look %s?' % [args] )
-        # print (args[2])
-        for drogno in drogni:
-            drogni[drogno].setRingColor(args[1], args[2], args[3])
-            # drogni[drogno].alternativeSetRingColor(args)
+def ringColor(*args):
+    # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
+    # print (bullshit)
+    # print  (rgb[0])
+    for drogno in drogni:
+        drogni[drogno].setRingColor(args[1][0], args[1][0], args[1][2])
+        # drogni[drogno].alternativeSetRingColor(args)
 def kill     (unused_addr, *args):
         print('everybody fuck now %s' % args )
         for drogno in drogni:
@@ -253,7 +260,7 @@ def printAndSendCoordinates():
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
-                    # drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     if  drogni[drogno].isFlying:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                         # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
@@ -314,7 +321,7 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
     if FEEDBACK_ENABLED:
-        osc_broadcast_client(OSC_IP,            SENDING_PORT,    "feedbackClient")
+        osc_broadcast_client(FEEDBACK_IP,   FEEDBACK_PORT,    "feedbackClient")
         sendPose()
 
      # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
@@ -333,7 +340,7 @@ def start_server():          #### OSC init    #########    acts as main()
     # aggregoneThread.join()
 
     print(Fore.GREEN + 'osc server initalized on',              RECEIVING_IP, RECEIVING_PORT)
-    print(Fore.GREEN + 'osc feedback client initalized on',        OSC_IP, SENDING_PORT)
+    print(Fore.GREEN + 'osc feedback client initalized on',      FEEDBACK_IP, FEEDBACK_PORT)
     print(Fore.GREEN + 'osc client to companion initalized on', COMPANION_IP, COMPANION_PORT)
 
     ###########################  single fella
@@ -354,8 +361,8 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/kill",             kill,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/kill",             kill,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     resetCompanion()
     updateCompanion()
@@ -370,7 +377,7 @@ def start_server():          #### OSC init    #########    acts as main()
 
 def faiIlBufferon():
     global bufferone
-    for i in range (0,9):
+    for i in range (0,20):
         bufferone[i] = bufferDrone(i)
     # print ('bufferon')  
     # print (bufferone)
@@ -379,15 +386,17 @@ def faiIlBufferon():
 # ################ feedbacksssssssss
 def sendPose():
     def treddo():
-        time.sleep(FEEDBACK_RATE)
-        for drogno in drogni:
-            ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
-            ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
-            zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
-            yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
-            bun  = oscbuildparse.OSCBundle( oscbuildparse.OSC_IMMEDIATELY, [ixxo, ypso, zeto, yalo])  
-            osc_send(bun, "feedbackClient")
-            # print (droneID, roll, pitch, yaw) 
+        while not finished:
+            time.sleep(FEEDBACK_RATE)
+            for drogno in drogni:
+                ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
+                ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
+                zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
+                yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
+                bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ ixxo, ypso, zeto, yalo]) 
+                osc_send(bandoleon, "feedbackClient")
+                # osc_process()
+                # print (droneID, roll, pitch, yaw) 
     print(Fore.GREEN + 'starting feedback thread')
     feedbackTreddo = threading.Thread(target=treddo).start()
 
