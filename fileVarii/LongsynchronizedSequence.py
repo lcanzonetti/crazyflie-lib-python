@@ -563,8 +563,7 @@ def crazyflie_control(scf):
                           command.intensity, command.time)
             pass
         else:
-            print("Warning! unknown command {} for uri {}".format(command,
-                                                                  cf.uri))
+            print("Warning! unknown command {} for uri {}".format(command,      cf.uri))
 
 def control_thread():
     pointer = 0
