@@ -386,6 +386,7 @@ class Drogno(threading.Thread):
     def goToHome(self, speed=0.5):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+            self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, r, g, b, speed=0.25):
