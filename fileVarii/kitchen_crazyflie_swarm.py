@@ -249,7 +249,7 @@ if __name__ == '__main__':
         # input("enter to start")
 
         swarm.parallel_safe(run_shared_sequence, args_dict=params)
-        # swarm.parallel_safe(land, args_dict=params)
+        # swarm.parallel_safe()
 
         while True:
             pass
