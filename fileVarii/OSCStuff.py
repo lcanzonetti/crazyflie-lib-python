@@ -35,8 +35,7 @@ drogni        = {}
 bufferone     = {}
 isSendEnabled = False
 finished      = False
-
-msgCount =0 
+msgCount      = 0 
 
 ###########################  companion
 def setSendEnabled (*args):
@@ -73,19 +72,6 @@ def resetCompanion():
             bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
             osc_send(bandoleon, "companionClient")
             j+=1
-    # for drogno in drogni:
-    #     cp = COMPANION_PAGES[0]
-    #     iddio=drogni[drogno].ID
-    #     if iddio>= 7 and iddio <14:
-    #         cp = int(cp)  + 1
-    #         iddio -= 7
-    #     if iddio >= 14:    
-    #         cp = int(cp)  + 2
-    #         iddio -= 14
-    #     active_col = oscbuildparse.OSCMessage("/style/bgcolor/"+str(cp)+"/" + str(iddio +2),  ",iii",   [13, 191, 13])
-    #     pino       = oscbuildparse.OSCMessage("/style/color/"+str(cp)+"/"   + str(iddio +2),  ",iii",   [1, 2, 3])
-    #     bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [active_col, pino]) 
-    #     osc_send(bandoleon, "companionClient")
 
 def updateCompanion():
     global bufferone
