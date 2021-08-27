@@ -169,28 +169,28 @@ def go(unused_addr, args, isEnabled):
                 drogni[drogno].go(args)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goLeft   (quanto):
+def goLeft   (coddii,quanto):
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goLeft(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goRight  (quanto):
+def goRight  (coddii,quanto):
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goRight(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goForward(quanto):
+def goForward(coddii, quanto):
         print('chief says we\'re gonna go forward by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goForward(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goBack   (quanto):
+def goBack   (coddii, quanto):
         print('chief says we\'re gonna go back by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:

@@ -307,7 +307,7 @@ class Drogno(threading.Thread):
         else:
             print('for real')
             if self.isReadyToFly:
-                # self.reset_estimator()
+                self.reset_estimator()
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'taking off!'
@@ -363,29 +363,30 @@ class Drogno(threading.Thread):
         if self.isFlying:
             newX = float(self.x) - float(quanto)
             print('va bene, vado a %s' % newX)
-            self._cf.high_level_commander.go_to(-quanto, self.y, self.z, 0, 1, relative=True)
+            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
 
     def goRight(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) + float(quanto)
             print('va bene, vado a %s' % newX)
-            self._cf.high_level_commander.go_to(quanto, self.y, self.z, 0, 1, relative=True)
+            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
 
     def goForward(self, quanto=0.3):
         if self.isFlying:
             newY = float(self.y) + float(quanto)
             print('va bene, vado a %s' % newY)
-            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
 
     def goBack(self, quanto=0.3):
         if self.isFlying:
             newY = float(self.y) - float(quanto)
             print('va bene, vado a %s' % newY)
-            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
 
     def goToHome(self, speed=0.5):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+            self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, r, g, b, speed=0.25):
