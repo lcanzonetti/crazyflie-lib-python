@@ -91,3 +91,27 @@ if __name__ == '__main__':
 
 
 
+class Uploader:
+    def __init__(self):
+        self._is_done = False
+        self._sucess = True
+
+    def upload(self, trajectory_mem):
+        print('Uploading data')
+        trajectory_mem.write_data(self._upload_done,
+                                  write_failed_cb=self._upload_failed)
+
+        while not self._is_done:
+            time.sleep(0.2)
+
+        return self._sucess
+
+    def _upload_done(self, mem, addr):
+        print('Data uploaded')
+        self._is_done = True
+        self._sucess = True
+
+    def _upload_failed(self, mem, addr):
+        print('Data upload failed')
+        self._is_done = True
+        self._sucess = False

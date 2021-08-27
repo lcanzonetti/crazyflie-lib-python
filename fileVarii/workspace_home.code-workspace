@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../OSC_recorder"
+		},
+		{
+			"path": "../../uav_trajectories"
 		}
 	],
 	"settings": {}
