@@ -3,7 +3,8 @@ import threading
 import time
 import random
 from   colorama             import Fore, Back, Style
-from   colorama             import init as coloInit  
+from   colorama             import init as coloInit
+
 coloInit(convert=True)
 
 #crazyflie's
@@ -14,8 +15,6 @@ from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
-
-WE_ARE_FAKING_IT = False
 
 BOX_X                 = 1.5
 BOX_Y                 = 1.5
@@ -29,15 +28,17 @@ GREEN                 = '0x00AA00'
 BLUE                  = '0x0000AA'
 
 
+
 class Drogno(threading.Thread):
-    def __init__(self, ID, link_uri):
+    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt):
         threading.Thread.__init__(self)
         self.link_uri    = link_uri
         self.ID          = int(ID)
         self.name        = 'Drogno_'+str(ID)
         self.statoDiVolo = 'starting'
         self.durataVolo  = random.randint(1,4)
-        self.exitFlag    = 0
+        self.exitFlag    = exitFlag
+        self.WE_ARE_FAKING_IT = perhapsWeReFakingIt
         self.killed      = False
         self.isReadyToFly          = False
         self.isFlying              = False
@@ -78,7 +79,7 @@ class Drogno(threading.Thread):
      
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
-        if WE_ARE_FAKING_IT:
+        if self.WE_ARE_FAKING_IT:
             time.sleep(1.5)
         else:
             self.printThread   = threading.Thread(target=self.printStatus).start()
@@ -130,7 +131,6 @@ class Drogno(threading.Thread):
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
                 self._cf.open_link( self.link_uri)
-                print('daje')
 
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
@@ -143,7 +143,7 @@ class Drogno(threading.Thread):
                 print('con il drogno %s ho perso le speranze' % self.ID)
                 self.exit()
         tio = 'something'
-        tio = threading.Thread(target=mariconnetto())
+        tio = threading.Thread(target=mariconnetto)
         tio.start()
         
     def activate_mellinger_controller(self, use_mellinger):
@@ -239,7 +239,7 @@ class Drogno(threading.Thread):
                 self._cf,
                 x=self.x, y=self.y, z=0.0,
                 default_velocity=0.5,
-                default_height=0.8,
+                default_height=DEFAULT_HEIGHT,
                 controller=PositionHlCommander.CONTROLLER_PID) 
             
             self._lg_stab.start()
@@ -300,7 +300,7 @@ class Drogno(threading.Thread):
 
     def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
         print('like, now')
-        if WE_ARE_FAKING_IT:
+        if self.WE_ARE_FAKING_IT:
             time.delay(1)
             self.statoDiVolo = 'decollato!'
             self.isFlying  = True
@@ -331,7 +331,7 @@ class Drogno(threading.Thread):
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
-        if WE_ARE_FAKING_IT:
+        if self.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'landing'
             time.sleep(1)
             self.isReadyToFly = True
@@ -340,7 +340,7 @@ class Drogno(threading.Thread):
             if self.isFlying:
                 print('%s atterra! ' % self.name)
                 self.statoDiVolo = 'landing'
-                ld = threading.Thread(target=landing_sequence, daemon=True).start()
+                ld = threading.Thread(target=landing_sequence).start()
                 # ld.join()
             else:
                 print('%s can\'t land! (not flying)' % self.name)
@@ -418,7 +418,7 @@ class Drogno(threading.Thread):
 
     def go(self, sequenceNumber=0):
         if self.statoDiVolo == 'hovering' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
-            if WE_ARE_FAKING_IT:
+            if self.WE_ARE_FAKING_IT:
                 self.statoDiVolo = 'sequenza simulata!'
             else:
                 self.statoDiVolo = 'sequenza!'

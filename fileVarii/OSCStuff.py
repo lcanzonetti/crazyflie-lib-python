@@ -77,6 +77,7 @@ def updateCompanion():
     global bufferone
     def daje ():
         while not finished:
+            time.sleep(COMPANION_UPDATE_RATE)
             # print(Fore.WHITE +'aggiorno companion')
             if not isSendEnabled:                       #*******************  SEND ENABLING
                 for cp in COMPANION_PAGES:
@@ -123,10 +124,7 @@ def updateCompanion():
 
                 bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                 osc_send(bandoleon, "companionClient")
-                
-
-
-            time.sleep(COMPANION_UPDATE_RATE)
+ 
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
