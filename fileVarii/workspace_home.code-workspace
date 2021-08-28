@@ -5,7 +5,12 @@
 		},
 		{
 			"path": "../../OSC_recorder"
+		},
+		{
+			"path": "../../uav_trajectories"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.pythonPath": "/usr/local/bin/python3"
+	}
 }

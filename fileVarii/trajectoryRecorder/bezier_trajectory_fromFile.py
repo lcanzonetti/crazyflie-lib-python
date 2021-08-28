@@ -32,8 +32,9 @@ See https://en.wikipedia.org/wiki/B%C3%A9zier_curve
 All coordinates are (x, y, z, yaw)
 """
 import math
-
+import os
 import numpy as np
+import csv
 
 
 class Node:
@@ -138,7 +139,6 @@ class Node:
         print('Head:')
         for c in self._control_points[0]:
             print(c)
-
 
 class Segment:
     """
@@ -255,6 +255,16 @@ class Segment:
         s += '],  # noqa'
         print(s)
 
+    def gimme_poly_python(self):
+        s = '  [' + str(self._scale) + ', '
+
+        for axis in range(4):
+            for d in range(8):
+                s += str(self._polys[axis][d]) + ', '
+
+        s += '],  # noqa'
+        return(s)
+
     def print_poly_c(self):
         s = ''
 
@@ -314,7 +324,6 @@ class Segment:
 
         return result
 
-
 class Visualizer:
     def __init__(self):
         self.canvas = scene.SceneCanvas(keys='interactive', size=(800, 600),
@@ -344,71 +353,101 @@ segment_time = 2
 z = 1
 yaw = 0
 
-segments = []
+
+DIRECTORY_NAME = 'ciessevui'
+RECORD_NAME    = 'marconio'
+
+def melo(directoryName = DIRECTORY_NAME, recordNAme=RECORD_NAME):
+    WORKING_PATH   = os.path.join ( os.getcwd() , DIRECTORY_NAME , RECORD_NAME    )
+    files           = os.listdir( os.path.join ( os.getcwd() , DIRECTORY_NAME , RECORD_NAME    ))
+    for csvFile in files:
+        segments    = []
+        nodes       = []
+        inputFile   = os.path.join(WORKING_PATH, csvFile)
+        outputFile  = os.path.join(WORKING_PATH, 'trajectory_' + csvFile[-5:-4] + '.txt')
+
+        with open(inputFile) as f:
+            reader = csv.reader(f, delimiter=',', quotechar='|')
+            for row in reader: 
+                d = 0.1
+                x = float(row[1])
+                y = float(row[2])
+                z = float(row[3])
+                # nodes.append = Node((x,y,z,0), q1=(x+0.1, y+0.1, z+0.1, 0))
+                nodes.append(Node((x,y,z,0)))
+
+        for i in range(0, len(nodes)-1):
+            if i < len(nodes):
+                # print(i)
+                segments.append(Segment(nodes[i], nodes[i+1], 0.4))
+        
+        with open(outputFile, "w") as f:
+            for s in segments:
+                f.write(s.gimme_poly_python() + '\n')
+    print('All done')
+    
+
 
 # Nodes with one control point has not velocity, this is similar to calling
 # goto in the High-level commander
 
-n0 = Node((0, 0, z, yaw))
-n1 = Node((1, 0, z, yaw))
-n2 = Node((1, 1, z, yaw))
-n3 = Node((0, 1, z, yaw))
+# n0 = Node((0, 0, z, yaw))
+# n1 = Node((1, 0, z, yaw))
+# n2 = Node((1, 1, z, yaw))
+# n3 = Node((0, 1, z, yaw))
 
-segments.append(Segment(n0, n1, segment_time))
-segments.append(Segment(n1, n2, segment_time))
-segments.append(Segment(n2, n3, segment_time))
-segments.append(Segment(n3, n0, segment_time))
+# segments.append(Segment(n0, n1, segment_time))
+# segments.append(Segment(n1, n2, segment_time))
+# segments.append(Segment(n2, n3, segment_time))
+# segments.append(Segment(n3, n0, segment_time))
 
 
 # By setting the q1 control point we get velocity through the nodes
 # Increase d to 0.7 to get some more action
-d = 0.1
+# d = 0.1
 
-n5 = Node((1, 0, z, yaw), q1=(1 + d, 0 + d, z, yaw))
-n6 = Node((1, 1, z, yaw), q1=(1 - d, 1 + d, z, yaw))
-n7 = Node((0, 1, z, yaw), q1=(0 - d, 1 - d, z, yaw))
+# n5 = Node((1, 0, z, yaw), q1=(1 + d, 0 + d, z, yaw))
+# n6 = Node((1, 1, z, yaw), q1=(1 - d, 1 + d, z, yaw))
+# n7 = Node((0, 1, z, yaw), q1=(0 - d, 1 - d, z, yaw))
 
-segments.append(Segment(n0, n5, segment_time))
-segments.append(Segment(n5, n6, segment_time))
-segments.append(Segment(n6, n7, segment_time))
-segments.append(Segment(n7, n0, segment_time))
+# segments.append(Segment(n0, n5, segment_time))
+# segments.append(Segment(n5, n6, segment_time))
+# segments.append(Segment(n6, n7, segment_time))
+# segments.append(Segment(n7, n0, segment_time))
 
 
 # When setting q2 we can also control acceleration and get more action.
 # Yaw also adds to the fun.
 
-d2 = 0.2
-dyaw = 2
-f = -0.3
+# d2 = 0.2
+# dyaw = 2
+# f = -0.3
 
-n8 = Node(
-    (1, 0, z, yaw),
-    q1=(1 + d2, 0 + d2, z, yaw),
-    q2=(1 + 2 * d2, 0 + 2 * d2 + 0*f * d2, 1, yaw))
-n9 = Node(
-    (1, 1, z, yaw + dyaw),
-    q1=(1 - d2, 1 + d2, z, yaw + dyaw),
-    q2=(1 - 2 * d2 + f * d2, 1 + 2 * d2 + f * d2, 1, yaw + dyaw))
-n10 = Node(
-    (0, 1, z, yaw - dyaw),
-    q1=(0 - d2, 1 - d2, z, yaw - dyaw),
-    q2=(0 - 2 * d2,  1 - 2 * d2,  1, yaw - dyaw))
+# n8 = Node(
+#     (1, 0, z, yaw),
+#     q1=(1 + d2, 0 + d2, z, yaw),
+#     q2=(1 + 2 * d2, 0 + 2 * d2 + 0*f * d2, 1, yaw))
+# n9 = Node(
+#     (1, 1, z, yaw + dyaw),
+#     q1=(1 - d2, 1 + d2, z, yaw + dyaw),
+#     q2=(1 - 2 * d2 + f * d2, 1 + 2 * d2 + f * d2, 1, yaw + dyaw))
+# n10 = Node(
+#     (0, 1, z, yaw - dyaw),
+#     q1=(0 - d2, 1 - d2, z, yaw - dyaw),
+#     q2=(0 - 2 * d2,  1 - 2 * d2,  1, yaw - dyaw))
 
-segments.append(Segment(n0, n8, segment_time))
-segments.append(Segment(n8, n9, segment_time))
-segments.append(Segment(n9, n10, segment_time))
-segments.append(Segment(n10, n0, segment_time))
+# segments.append(Segment(n0, n8, segment_time))
+# segments.append(Segment(n8, n9, segment_time))
+# segments.append(Segment(n9, n10, segment_time))
+# segments.append(Segment(n10, n0, segment_time))
 
 
-print('Paste this code into the autonomous_sequence_high_level.py example to '
-      'see it fly')
-for s in segments:
-    s.print_poly_python()
+
 
 
 # Enable this if you have Vispy installed and want a visualization of the
 # trajectory
-if True:
+if False:
     # Import here to avoid problems for users that do not have Vispy
     from vispy import scene
     from vispy.scene import XYZAxis, LinePlot, TurntableCamera, Markers
@@ -419,7 +458,7 @@ if True:
         # s.draw_vel(visualizer)
         # s.draw_control_points(visualizer)
 
-    for n in [n0, n1, n2, n3, n5, n6, n7, n8, n9, n10]:
+    for n in nodes:
         n.draw_unscaled_controlpoints(visualizer)
 
     visualizer.run()
