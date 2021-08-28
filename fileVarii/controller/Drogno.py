@@ -84,6 +84,7 @@ class Drogno(threading.Thread):
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
         if self.WE_ARE_FAKING_IT:
+            print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
         else:
             self.printThread   = threading.Thread(target=self.printStatus).start()
@@ -454,16 +455,8 @@ class Drogno(threading.Thread):
         # time.sleep(2)
         # commander.stop()
  
-    def startTestSequence(self,sequenceNumber=0,loop=False):
-        if self.isFlying:
-            if self.WE_ARE_FAKING_IT:
-                self.statoDiVolo = 'sequenza simulata!'
-            else:
-                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
-                print ('eseguo la sequenza %s' % sequenceNumber)
-                self.sequenzaTest(sequenceNumber)
-        else:
-            print('not ready!')
+    def startTest(self,sequenceNumber=0,loop=False):
+        print ('orcodo %d'% sequenceNumber)
         def sequenzaZero():
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
@@ -484,28 +477,38 @@ class Drogno(threading.Thread):
         def sequenzaUno():
             print('inizio prima sequenza di test')
             self.positionHLCommander.go_to(0.0, 0.0, 1)
-            self.setRingColor(255,   0,   0, 1.0, 1.0)
+            self.setRingColor(255,   0,   0)
             time.sleep(1)
 
-            self.positionHLCommander.go_to(0.0, 1+RELATIVE_SPACING, 1, 0.2)
-            self.setRingColor(255,   0,   0, 1.0, 1.0)
+            self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
+            self.setRingColor(255,   0,   0)
 
-            self.positionHLCommander.go_to(1+RELATIVE_SPACING, 1+RELATIVE_SPACING, 1, 0.2)
-            self.setRingColor(  0, 255,  0, 1.0, 1.0)
+            self.positionHLCommander.go_to(1, 1, 1, 0.2)
+            self.setRingColor(  0, 255,  0)
             
-            self.positionHLCommander.go_to(1.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1, 0.2)
-            self.setRingColor(  0,   0, 255, 1.0, 1.0)
+            self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
+            self.setRingColor(  0,   0, 255)
 
-            self.positionHLCommander.go_to(0.0+RELATIVE_SPACING, 0.0+RELATIVE_SPACING, 1, 0.2)
-            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
+            self.setRingColor(255, 255,   0)
             time.sleep(1)
 
-            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            self.setRingColor(255, 0,   0)
             time.sleep(1)
-            self.setRingColor(255, 255,   0, 1.0, 1.0)
+            self.setRingColor(0, 255,   0)
             time.sleep(1)
+            self.setRingColor(0, 0,   255)
+            time.sleep(1)
+
+            self.setRingColor(0, 255,   255)
+            time.sleep(1)
+            self.setRingColor(255, 255,   0)
+            time.sleep(1)
+            self.setRingColor(255, 0,   255)
+            time.sleep(1)
+            
             print('fine prima sequenza di test')
-            self.statoDiVolo = 'landed'
+            self.statoDiVolo = 'hovering'
         def sequenzaDue():
             pass
         def sequenzaTre():
@@ -536,15 +539,23 @@ class Drogno(threading.Thread):
             # self._cf.commander.send_stop_setpoint()
             self.statoDiVolo = 'landed'
 
-        
         sequenzeTest = [sequenzaZero, sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro]
-
-        if not self.currentSequenceThread:
-            self.currentSequenceThread = threading.Thread(target=sequenzeTest[sequenceNumber])
-            self.currentSequenceThread.start()
-            print('non ci sono sequenze in esecuzione, parto con la %s' % sequenceNumber)
+        if self.isFlying:
+            if self.WE_ARE_FAKING_IT:
+                self.statoDiVolo = 'sequenza simulata!'
+            else:
+                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
+                print ('eseguo la sequenza %s' % sequenceNumber)
+                if not self.currentSequenceThread:
+                    self.currentSequenceThread = threading.Thread(target=sequenzeTest[sequenceNumber])
+                    self.currentSequenceThread.start()
+                    print('non ci sono sequenze in esecuzione, parto con la %s' % sequenceNumber)
+                else:
+                 print('la sequenza in esecuzione non può essere fermata. \nMAI')
         else:
-           print('la sequenza in esecuzione non può essere fermata. \nMAI')
+            print('not ready!')
+
+       
   
     def upload_trajectory(self, trajectory_id, trajectory):
         trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]

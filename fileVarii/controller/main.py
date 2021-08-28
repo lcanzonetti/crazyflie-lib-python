@@ -12,7 +12,7 @@ import Drogno
 import cflib.crtp
 import sys
 
-WE_ARE_FAKING_IT      = False
+WE_ARE_FAKING_IT = False
 
 exit_event = threading.Event()
 uris = [
@@ -24,24 +24,24 @@ uris = [
         # possibili problemi hardware
         # 'radio://1/90/2M/E7E7E7E7E3',
         #  (vuoti d'aria?)
-        # 'radio://1/90/2M/E7E7E7E7E4',
+        'radio://1/90/2M/E7E7E7E7E4',
         # grande incertezza al centro - super compensazioni
         # 'radio://1/90/2M/E7E7E7E7E5',
         #  gut  
-        # 'radio://2/100/2M/E7E7E7E7E6',
+        'radio://2/100/2M/E7E7E7E7E6',
         #  gut  -il meglio
-        # 'radio://2/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E7',
         # serii problemi radio
         # 'radio://2/100/2M/E7E7E7E7E8',
         #  gut
-        'radio://3/110/2M/E7E7E7E7E9',
+        # 'radio://3/110/2M/E7E7E7E7E9',
         #  gut
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 drogni = {}
 SPACING = 0.8
-PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING), (0, SPACING)   , (SPACING, SPACING), 
-                                ( -SPACING, -0),       (0, 0)         , (SPACING, 0), 
+PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
+                                ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
                                 ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
                                   ( -SPACING*1.5, -SPACING)
                                 ]
@@ -59,7 +59,8 @@ def main():
                 print ('Found %s radios.' % len(availableRadios))
                 print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
         else:
-            WE_ARE_FAKING_IT = True
+            # WE_ARE_FAKING_IT = True
+            pass
     except IndexError:
         print(IndexError)
  
