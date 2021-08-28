@@ -3,7 +3,6 @@
 import threading
 import multiprocessing
 import time
-import repeatedTimer as rp
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 # from   osc4py3.as_comthreads import *
@@ -161,12 +160,25 @@ def takeOff(coddii, decollante):
                 drogni[decollante].land()
         else:
             print('il drogno %s non è connesso' % drogni[decollante].name)
-
-def go(unused_addr, args, isEnabled):
-        print('chief says we\'re gonna do shit at sequence %s' % args)
+def uploadSequence(coddii,quale):
+        print('chief says we\'re gonna do shit at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].go(args)
+                drogni[drogno].startTestSequence(quale, False)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+def startTest(coddii,quale):
+        print('chief says we\'re gonna do testsss at sequence %s' % quale)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].startTestSequence(quale, False)
+            else:
+                print('il drogno %s non è connesso' % drogni[drogno].name)
+def go(coddii,quale):
+        print('chief says we\'re gonna do shit at sequence %s' % quale)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].go(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def goLeft   (coddii,quanto):
@@ -236,9 +248,9 @@ def printAndSendCoordinates():
     global drogni
     global bufferone
     # print(bufferone)
-    time.sleep(1)
+    # time.sleep(1)
     while not finished:
-        time.sleep(0.18)
+        time.sleep(0.2)
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
@@ -251,6 +263,7 @@ def printAndSendCoordinates():
         # else:
         #     # print('ma i comandi di movimento disabilitati')
         #     pass
+    print ('non potrò ricevere comandi di movimento, mai più')
 
 def printHowManyMessages():
     def printa():
@@ -259,6 +272,7 @@ def printHowManyMessages():
             time.sleep(5)
             print('ho ricevuto %s messaggi al secondo.' % str(msgCount/5))
             msgCount = 0
+        print('D\'ora in poi la smetto di ricevere messaggi')
 
     threading.Thread(target=printa).start()
 
@@ -323,9 +337,9 @@ def start_server():          #### OSC init    #########    acts as main()
     
     # aggregoneThread.join()
 
-    print(Fore.GREEN + 'osc server initalized on',              RECEIVING_IP, RECEIVING_PORT)
-    print(Fore.GREEN + 'osc feedback client initalized on',      FEEDBACK_IP, FEEDBACK_PORT)
-    print(Fore.GREEN + 'osc client to companion initalized on', COMPANION_IP, COMPANION_PORT)
+    print(Fore.GREEN + 'OSC server initalized on',              RECEIVING_IP, RECEIVING_PORT)
+    print(Fore.GREEN + 'OSC feedback client initalized on',      FEEDBACK_IP, FEEDBACK_PORT)
+    print(Fore.GREEN + 'OSC client to companion initalized on', COMPANION_IP, COMPANION_PORT)
 
     ###########################  single fella
     # osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -338,7 +352,8 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/notch/drone*/col", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  whole swarm routing
     osc_method("/takeOff",          takeOff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/start",            go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/startTest",        startTest, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/go",               go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -357,6 +372,7 @@ def start_server():          #### OSC init    #########    acts as main()
         time.sleep(OSC_PROCESS_RATE)
         # pass
     # Properly close the system.
+    print('chiudo OSC')
     osc_terminate()
 
 def faiIlBufferon():
@@ -381,6 +397,7 @@ def sendPose():
                 osc_send(bandoleon, "feedbackClient")
                 # osc_process()
                 # print (droneID, roll, pitch, yaw) 
+        print(Fore.GREEN + 'closing feedback thread')
     print(Fore.GREEN + 'starting feedback thread')
     feedbackTreddo = threading.Thread(target=treddo).start()
 

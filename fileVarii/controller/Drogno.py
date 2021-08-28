@@ -15,6 +15,8 @@ from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
+from   cflib.crazyflie.mem import MemoryElement
+from   cflib.crazyflie.mem import Poly4D
 
 BOX_X                 = 1.5
 BOX_Y                 = 1.5
@@ -30,7 +32,7 @@ BLUE                  = '0x0000AA'
 
 
 class Drogno(threading.Thread):
-    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt):
+    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint):
         threading.Thread.__init__(self)
         self.link_uri    = link_uri
         self.ID          = int(ID)
@@ -59,14 +61,16 @@ class Drogno(threading.Thread):
         self.x                     = 0.0
         self.y                     = 0.0 
         self.z                     = 0.0
-        self.requested_X            = 0.0
-        self.requested_Y            = 0.0
-        self.requested_Z            = 0.0
-        self.requested_R            = 0
-        self.requested_G            = 0
-        self.requested_B            = 0
+        self.requested_X           = 0.0
+        self.requested_Y           = 0.0
+        self.requested_Z           = 0.0
+        self.requested_R           = 0
+        self.requested_G           = 0
+        self.requested_B           = 0
+        self.prefStartPoint_X      = startingPoint[0]
+        self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
-        self.batteryVoltage        = 4.2
+        self.batteryVoltage        = '4.2'
         self.ringIntensity         = 0.1
         self.goToCount             = 0.0
 
@@ -99,6 +103,7 @@ class Drogno(threading.Thread):
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
             # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
+        print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
         def volo():
@@ -134,11 +139,11 @@ class Drogno(threading.Thread):
 
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
-                    print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
                     self.recconnectionAttempts +=1
-                    self._cf.open_link( self.link_uri)
                     print('Aspetto 1 secondo prima di ritentare')
                     time.sleep(1)
+                    print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
+                    self.connect()
             else:
                 print('con il drogno %s ho perso le speranze' % self.ID)
                 self.exit()
@@ -213,6 +218,9 @@ class Drogno(threading.Thread):
         self._lg_stab.add_variable('stateEstimate.x', 'float')
         self._lg_stab.add_variable('stateEstimate.y', 'float')
         self._lg_stab.add_variable('stateEstimate.z', 'float')
+        # self._lg_stab.add_variable('kalman.varPX', 'float')
+        # self._lg_stab.add_variable('kalman.varPY', 'float')
+        # self._lg_stab.add_variable('kalman.varPZ', 'float')
         self._lg_stab.add_variable('stabilizer.yaw', 'float')
         self._lg_stab.add_variable('pm.vbat', 'FP16')
  
@@ -363,7 +371,6 @@ class Drogno(threading.Thread):
             print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
             
-
     def goRight(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) + float(quanto)
@@ -374,19 +381,26 @@ class Drogno(threading.Thread):
         if self.isFlying:
             newY = float(self.y) + float(quanto)
             print('va bene, vado a %s' % newY)
-            self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
+            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
 
     def goBack(self, quanto=0.3):
         if self.isFlying:
             newY = float(self.y) - float(quanto)
             print('va bene, vado a %s' % newY)
-            self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
+            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            # self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
 
     def goToHome(self, speed=0.5):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
             # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
+    
+    def goToStart(self, speed=0.2):
+        if self.isFlying:                
+            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+            # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
+        print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, r, g, b, speed=0.25):
         r *= self.ringIntensity
@@ -417,17 +431,39 @@ class Drogno(threading.Thread):
         print ('vado al colore %s %s %s' % (r,g, b))
 
     def go(self, sequenceNumber=0):
-        if self.statoDiVolo == 'hovering' or self.statoDiVolo == 'finito sequenza' or self.statoDiVolo == 'idle':
+        if self.isFlying:
             if self.WE_ARE_FAKING_IT:
                 self.statoDiVolo = 'sequenza simulata!'
             else:
-                self.statoDiVolo = 'sequenza!'
+                trajectory_id = sequenceNumber
+                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
+                duration = self.upload_trajectory(trajectory_id, figure8)
+
+                print ('eseguo la sequenza %s lunga %s' % (sequenceNumber, duration))
+                self.run_sequence(trajectory_id, duration)
+        else:
+            print('not ready!')
+    def run_sequence(self, trajectory_id, duration):
+        commander = self._cf.high_level_commander
+        # commander.takeoff(1.0, 2.0)
+        # time.sleep(3.0)
+        # relative = True
+        commander.start_trajectory(trajectory_id, 1.0, False)
+        time.sleep(duration)
+        commander.land(0.0, 2.0)
+        # time.sleep(2)
+        # commander.stop()
+ 
+    def startTestSequence(self,sequenceNumber=0,loop=False):
+        if self.isFlying:
+            if self.WE_ARE_FAKING_IT:
+                self.statoDiVolo = 'sequenza simulata!'
+            else:
+                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
                 print ('eseguo la sequenza %s' % sequenceNumber)
                 self.sequenzaTest(sequenceNumber)
         else:
             print('not ready!')
-
-    def sequenzaTest(self,sequenceNumber=0,loop=False):
         def sequenzaZero():
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
@@ -509,6 +545,25 @@ class Drogno(threading.Thread):
             print('non ci sono sequenze in esecuzione, parto con la %s' % sequenceNumber)
         else:
            print('la sequenza in esecuzione non può essere fermata. \nMAI')
+  
+    def upload_trajectory(self, trajectory_id, trajectory):
+        trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
+
+        total_duration = 0
+        for row in trajectory:
+            duration = row[0]
+            x = Poly4D.Poly(row[1:9])
+            y = Poly4D.Poly(row[9:17])
+            z = Poly4D.Poly(row[17:25])
+            yaw = Poly4D.Poly(row[25:33])
+            trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
+            total_duration += duration
+
+        upload_result = Uploader().upload(trajectory_mem)
+        if not upload_result:
+            print('Upload failed, aborting!')
+        self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
+        return total_duration
 
     def evaluateBattery(self):
         while not self.exitFlag:
@@ -546,3 +601,47 @@ class Drogno(threading.Thread):
 
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
+
+
+   # The trajectory to fly
+# See https://github.com/whoenig/uav_trajectories for a tool to generate
+# trajectories
+
+# Duration,x^0,x^1,x^2,x^3,x^4,x^5,x^6,x^7,y^0,y^1,y^2,y^3,y^4,y^5,y^6,y^7,z^0,z^1,z^2,z^3,z^4,z^5,z^6,z^7,yaw^0,yaw^1,yaw^2,yaw^3,yaw^4,yaw^5,yaw^6,yaw^7
+figure8 = [
+    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+]
+
+class Uploader:
+    def __init__(self):
+        self._is_done = False
+        self._sucess = True
+
+    def upload(self, trajectory_mem):
+        print('Uploading data')
+        trajectory_mem.write_data(self._upload_done,
+                                  write_failed_cb=self._upload_failed)
+
+        while not self._is_done:
+            time.sleep(0.2)
+
+        return self._sucess
+
+    def _upload_done(self, mem, addr):
+        print('Data uploaded')
+        self._is_done = True
+        self._sucess = True
+
+    def _upload_failed(self, mem, addr):
+        print('Data upload failed')
+        self._is_done = True
+        self._sucess = False

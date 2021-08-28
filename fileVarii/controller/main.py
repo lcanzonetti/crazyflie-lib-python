@@ -10,13 +10,11 @@ import OSCStuff as OSC
 import timerino as myTimer
 import Drogno
 import cflib.crtp
+import sys
 
 WE_ARE_FAKING_IT      = False
 
-
-
 exit_event = threading.Event()
-
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # gut
@@ -41,7 +39,12 @@ uris = [
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 drogni = {}
-
+SPACING = 0.8
+PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING), (0, SPACING)   , (SPACING, SPACING), 
+                                ( -SPACING, -0),       (0, 0)         , (SPACING, 0), 
+                                ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
+                                  ( -SPACING*1.5, -SPACING)
+                                ]
 
     
 def main():
@@ -63,8 +66,8 @@ def main():
     
     for uro in uris:
         iddio = int(uro[-1])
-        drogni[int(iddio)] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT)
-        drogni[int(iddio)].start()
+        drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio])
+        drogni[iddio].start()
         # drogni[int(iddio)].join()
         # print(drogni)
 
@@ -79,6 +82,7 @@ def exit_signal_handler(signum, frame):
     exit_event.set() 
     OSC.finished = True
     drogni = {}
+    sys.exit()
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.ERROR)
