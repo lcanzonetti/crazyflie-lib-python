@@ -8,7 +8,7 @@ import recorder
 
 PORTA   = 9200
 nowa    = datetime.now()
-dt_string = nowa.strftime("%d-%m-%Y_%H:%M:%S")
+dt_string = nowa.strftime("%d-%m-%Y_%H-%M-%S")
 registrazione     = 'registrazione_'+dt_string
 # registrazione     = './marconio.json'
 nomeRegistrazione = Path(registrazione).stem
