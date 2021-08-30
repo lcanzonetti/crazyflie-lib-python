@@ -354,12 +354,9 @@ z = 1
 yaw = 0
 
 
-DIRECTORY_NAME = 'ciessevui'
-RECORD_NAME    = 'marconio'
-
-def melo(directoryName = DIRECTORY_NAME, recordNAme=RECORD_NAME):
-    WORKING_PATH   = os.path.join ( os.getcwd() , DIRECTORY_NAME , RECORD_NAME    )
-    files           = os.listdir( os.path.join ( os.getcwd() , DIRECTORY_NAME , RECORD_NAME    ))
+def melo(directoryName, recordName):
+    WORKING_PATH   = os.path.join ( os.getcwd() , directoryName , recordName  )
+    files           = os.listdir( os.path.join ( os.getcwd() , directoryName , recordName    ))
     for csvFile in files:
         segments    = []
         nodes       = []
@@ -384,6 +381,10 @@ def melo(directoryName = DIRECTORY_NAME, recordNAme=RECORD_NAME):
         with open(outputFile, "w") as f:
             for s in segments:
                 f.write(s.gimme_poly_python() + '\n')
+
+        lastRecordFile = os.path.join( directoryName, "lastRecord.txt")
+        with open (lastRecordFile, "w") as log:
+            log.write(os.path.dirname(os.path.abspath(outputFile)))
     print('All done')
     
 

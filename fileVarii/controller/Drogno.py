@@ -32,8 +32,10 @@ BLUE                  = '0x0000AA'
 
 
 class Drogno(threading.Thread):
-    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint):
+    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
         threading.Thread.__init__(self)
+        self.lastRecordPath  = lastRecordPath
+        self.lastTrajectory  = ''
         self.link_uri    = link_uri
         self.ID          = int(ID)
         self.name        = 'Drogno_'+str(ID)
@@ -83,6 +85,12 @@ class Drogno(threading.Thread):
      
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
+        trajectory = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+        print ('my trajectory is: ' + trajectory)
+        with open(trajectory, 'r') as t:
+            # print(t.readlines())
+            self.lastTrajectory = t.readlines()
+
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
@@ -94,6 +102,7 @@ class Drogno(threading.Thread):
     def exit(self):
                 print('exitFlag is now set for drogno %s, bye kiddo' % self.name)       
                 self.exitFlag = 1
+                self.killed   = 1
 
     def printStatus(self):
         while not self.exitFlag:
@@ -101,9 +110,9 @@ class Drogno(threading.Thread):
             if self.is_connected:
                 print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
                 self.goToCount = 0
+                print ('experimental position get: %s' % self.positionHLCommander.get_position())
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
-            # print(f"\nYour Celsius value is {self.x:0.2f} {self.y:0.2f}\n")
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -235,9 +244,8 @@ class Drogno(threading.Thread):
             # This callback will be called on errors
             self._lg_stab.error_cb.add_callback(self._stab_log_error)
             
-            time.sleep(0.3)
+            # time.sleep(0.3)
             self.reset_estimator()
-
             self._cf.param.set_value('commander.enHighLevel', '1')
             # self.setRingColor(0,0,0, 0)
             self._cf.param.set_value('ring.effect', '14')
@@ -371,18 +379,21 @@ class Drogno(threading.Thread):
             newX = float(self.x) - float(quanto)
             print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            self.statoDiVolo = 'hovering'
             
     def goRight(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) + float(quanto)
             print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            self.statoDiVolo = 'hovering'
 
     def goForward(self, quanto=0.3):
         if self.isFlying:
             newY = float(self.y) + float(quanto)
             print('va bene, vado a %s' % newY)
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            self.statoDiVolo = 'hovering'
 
     def goBack(self, quanto=0.3):
         if self.isFlying:
@@ -390,11 +401,12 @@ class Drogno(threading.Thread):
             print('va bene, vado a %s' % newY)
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
             # self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
+            self.statoDiVolo = 'hovering'
 
-    def goToHome(self, speed=0.5):
+    def goHome(self, speed=0.5):
         if self.isFlying:                
-            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
-            # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
+            # self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+            self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
     
     def goToStart(self, speed=0.2):
@@ -438,7 +450,11 @@ class Drogno(threading.Thread):
             else:
                 trajectory_id = sequenceNumber
                 self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
-                duration = self.upload_trajectory(trajectory_id, figure8)
+                # duration = self.upload_trajectory(trajectory_id, figure8)
+                if sequenceNumber == 0:
+                    duration = self.upload_trajectory(trajectory_id, self.lastTrajectory)
+                else:
+                    duration = self.upload_trajectory(trajectory_id, figure8)
 
                 print ('eseguo la sequenza %s lunga %s' % (sequenceNumber, duration))
                 self.run_sequence(trajectory_id, duration)
@@ -451,7 +467,7 @@ class Drogno(threading.Thread):
         # relative = True
         commander.start_trajectory(trajectory_id, 1.0, False)
         time.sleep(duration)
-        commander.land(0.0, 2.0)
+        commander.land(0.0, 4.0)
         # time.sleep(2)
         # commander.stop()
  
@@ -555,8 +571,6 @@ class Drogno(threading.Thread):
         else:
             print('not ready!')
 
-       
-  
     def upload_trajectory(self, trajectory_id, trajectory):
         trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
 

@@ -1,5 +1,8 @@
 #rf 2021
 #ciao
+import os
+from pathlib import Path
+
 import threading
 import time
 import signal
@@ -12,11 +15,12 @@ import Drogno
 import cflib.crtp
 import sys
 
-WE_ARE_FAKING_IT = False
+lastRecordPath   = ''  
+WE_ARE_FAKING_IT = True
 
 exit_event = threading.Event()
 uris = [
-        # 'radio://0/80/2M/E7E7E7E7E0',
+        'radio://0/80/2M/E7E7E7E7E0',
         # gut
         # 'radio://0/80/2M/E7E7E7E7E1',
         # gut
@@ -24,13 +28,13 @@ uris = [
         # possibili problemi hardware
         # 'radio://1/90/2M/E7E7E7E7E3',
         #  (vuoti d'aria?)
-        'radio://1/90/2M/E7E7E7E7E4',
+        # 'radio://1/90/2M/E7E7E7E7E4',
         # grande incertezza al centro - super compensazioni
         # 'radio://1/90/2M/E7E7E7E7E5',
         #  gut  
-        'radio://2/100/2M/E7E7E7E7E6',
+        # 'radio://2/100/2M/E7E7E7E7E6',
         #  gut  -il meglio
-        'radio://2/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E7',
         # serii problemi radio
         # 'radio://2/100/2M/E7E7E7E7E8',
         #  gut
@@ -39,7 +43,7 @@ uris = [
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 drogni = {}
-SPACING = 0.8
+SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
                                 ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
                                 ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
@@ -67,10 +71,8 @@ def main():
     
     for uro in uris:
         iddio = int(uro[-1])
-        drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio])
+        drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start()
-        # drogni[int(iddio)].join()
-        # print(drogni)
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
@@ -87,6 +89,11 @@ def exit_signal_handler(signum, frame):
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.ERROR)
+    os.chdir('../trajectoryRecorder/registrazioniOSC/')
+    patto = Path('./lastRecord.txt')
+    with open(patto, 'r') as f:
+        lastRecordPath = f.read()
+        print ('last record path: ' + lastRecordPath)
     main()
     signal.signal(signal.SIGINT, exit_signal_handler)
 
