@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from timecode import Timecode
 from pathlib import Path
 import os
@@ -7,9 +7,12 @@ import bezier_trajectory_fromFile as traiettoria
 import recorder
 
 PORTA   = 9200
-registrazione = './marconio.json'
+nowa    = datetime.now()
+dt_string = nowa.strftime("%d-%m-%Y_%H:%M:%S")
+registrazione     = 'registrazione_'+dt_string
+# registrazione     = './marconio.json'
 nomeRegistrazione = Path(registrazione).stem
-OUTPUT_DIR        = 'ciessevui'
+OUTPUT_DIR        = 'registrazioniOSC'
 if not Path(OUTPUT_DIR).exists():
   os.mkdir(OUTPUT_DIR)
 os.chdir(OUTPUT_DIR)
@@ -34,10 +37,9 @@ def nnamo():
   print('Waypoints done.')
   traiettoria.melo(OUTPUT_DIR, nomeRegistrazione)
 
+recorder.recorda(PORTA, nomeRegistrazione, True )
 
-recorder.recorda(PORTA, )
-
-with open(registrazione) as f:
+with open(registrazione+'.json') as f:
   data = json.load(f)
   carlo = 0
   for i in data.keys():
@@ -49,7 +51,8 @@ with open(registrazione) as f:
     coordinate = data[drogno]['samples']
 
     filepath =  os.path.join( OUTPUT_DIR, "{}/timed_waypoints_drogno_{}.csv".format(nomeRegistrazione, str(drogno)[-5:-4]))
-    print (filepath)
+    print ('csv file: ' + filepath)
+    
     with open(filepath, "w") as f:
       for i in range(len(coordinate)):
         riga = str(durataFrame)+',' + str(coordinate[i][1]) + ',' + str(coordinate[i][2]) + ',' + str(coordinate[i][3]) + '\n'
@@ -63,4 +66,17 @@ with open(registrazione) as f:
 
 # capture_osc -f ./nomefile -p 9200
  
-
+# from getkey import getkey, keys
+# key = getkey()
+# if key == keys.UP:
+#   ...  # Handle the UP key
+# elif key == keys.DOWN:
+#   ...  # Handle the DOWN key
+# elif key == 'a':
+#   ...  # Handle the `a` key
+# elif key == 'Y':
+#   ...  # Handle `shift-y`
+# else:
+#   # Handle other text characters
+#   buffer += key
+#   print(buffer)

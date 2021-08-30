@@ -175,21 +175,21 @@ def startTest(coddii,quale):
                 drogni[drogno].startTest(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def go(coddii,quale):
+def go       (coddii,quale):
         print('chief says we\'re gonna do shit at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].go(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goLeft   (coddii,quanto):
+def goLeft   (coddii, quanto):
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goLeft(quanto)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def goRight  (coddii,quanto):
+def goRight  (coddii, quanto):
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
@@ -220,13 +220,13 @@ def land     (bullshit, landingCandidate):
                 print('il drogno %s non è connesso' % drogni[drogno].name)
     else:
         drogni[landingCandidate].land()
-def home     (unused_addr, args):
-        print('chief says we\'re gonna go home')
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goToHome()
+def home     (coddii, chi):
+        print('chief says drogno_%s gonna go home' % chi)
+        if drogni[chi].is_connected:
+            if drogni[chi].isFlying:
+                drogni[chi].goHome()
             else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+                print('il drogno %s non è connesso' % drogni[chi].name)
 def ringColor(*args):
     # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
     # print (bullshit)

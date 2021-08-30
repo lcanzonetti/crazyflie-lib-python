@@ -28,7 +28,8 @@ from osc_recorder import CaptureOSCServer
 
 # args = parser.parse_args()
 # assuming python3
-import msvcrt
+from getkey import getkey, keys
+
 from itertools import cycle
 
 loop = cycle(r"-\|/")
@@ -41,7 +42,7 @@ def func():
 def recorda(porta, nomeDelFile, debug=False):
     try:
         server = CaptureOSCServer(porta, debug=debug)
-        input("enter to start")
+        input("press enter to start recording and q to stop")
         server.start()
         print("Recording Server started on %d. Press q terminate and save." % (porta))
         print("Data saved to %s.json" % nomeDelFile)
@@ -54,9 +55,9 @@ def recorda(porta, nomeDelFile, debug=False):
         try:
             time.sleep(0.1)
             func()
-            if msvcrt.kbhit():
-                if msvcrt.getch().lower() == b'q':
-                    break
+            key = getkey()
+            if key == 'q':
+              break
         except KeyboardInterrupt:
             time_series_bundle = server.get_time_series()
             time_series_bundle.to_json(nomeDelFile+'.json')
