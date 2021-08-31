@@ -4,7 +4,6 @@ import time
 import random
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
-
 coloInit(convert=True)
 
 #crazyflie's
@@ -25,12 +24,6 @@ DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
-RED                   = '0x555500'
-GREEN                 = '0x00AA00'
-BLUE                  = '0x0000AA'
-
-
-
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -46,7 +39,7 @@ class Drogno(threading.Thread):
         self.durataVolo  = random.randint(1,4)
         self.exitFlag    = exitFlag
         self.WE_ARE_FAKING_IT = perhapsWeReFakingIt
-        self.killed      = False
+        self.isKilled      = False
         self.isReadyToFly          = False
         self.isFlying              = False
         self.controlThread         = False
@@ -72,10 +65,13 @@ class Drogno(threading.Thread):
         self.requested_R           = 0
         self.requested_G           = 0
         self.requested_B           = 0
+        self.kalman_X              = 0
+        self.kalman_Y              = 0
+        self.kalman_Z              = 0
         self.prefStartPoint_X      = startingPoint[0]
         self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
-        self.batteryVoltage        = '4.2'
+        self.batteryVoltage        = 'n.p.'
         self.ringIntensity         = 0.1
         self.goToCount             = 0.0
 
@@ -89,6 +85,7 @@ class Drogno(threading.Thread):
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+        self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
         
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
@@ -100,22 +97,23 @@ class Drogno(threading.Thread):
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
         else:
+            print('we are not faking it')
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
             self.connect()
      
     def exit(self):
                 print('exitFlag is now set for drogno %s, bye kiddo' % self.name)       
-                self.exitFlag = 1
-                self.killed   = 1
+                self.exitFlag.set()
+                self.isKilled   = 1
 
     def printStatus(self):
-        while not self.exitFlag:
+        while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage:0.2f} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
                 self.goToCount = 0
-                print ('experimental position get: %s' % self.positionHLCommander.get_position())
+                # print ('experimental position get: %s %s %s' % (self.positionHLCommander.get_position()))
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -128,53 +126,39 @@ class Drogno(threading.Thread):
 
     def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
         print('Waiting for estimator to find position...')
+        while not self.isPositionEstimated:
+            var_y_history = [1000] * 10
+            var_x_history = [1000] * 10
+            var_z_history = [1000] * 10
+            # threshold =5
+            threshold = 0.01
+            var_x_history.append(self.kalman_X)
+            var_x_history.pop(0)
+            var_y_history.append(self.kalman_Y)
+            var_y_history.pop(0)
+            var_z_history.append(self.kalman_Z)
+            var_z_history.pop(0)
 
-        log_config = LogConfig(name='Kalman Variance', period_in_ms=500)
-        log_config.add_variable('kalman.varPX', 'float')
-        log_config.add_variable('kalman.varPY', 'float')
-        log_config.add_variable('kalman.varPZ', 'float')
+            min_x = min(var_x_history)
+            max_x = max(var_x_history)
+            min_y = min(var_y_history)
+            max_y = max(var_y_history)
+            min_z = min(var_z_history)
+            max_z = max(var_z_history)
 
-        var_y_history = [1000] * 10
-        var_x_history = [1000] * 10
-        var_z_history = [1000] * 10
-
-        # threshold =5
-        threshold = 0.01
-
-        with SyncLogger(self._cf, log_config) as logger:
-            print('estimation logger started')
-            for log_entry in logger:
-                print(log_entry)
-                data = log_entry[1]
-
-                var_x_history.append(data['kalman.varPX'])
-                var_x_history.pop(0)
-                var_y_history.append(data['kalman.varPY'])
-                var_y_history.pop(0)
-                var_z_history.append(data['kalman.varPZ'])
-                var_z_history.pop(0)
-
-                min_x = min(var_x_history)
-                max_x = max(var_x_history)
-                min_y = min(var_y_history)
-                max_y = max(var_y_history)
-                min_z = min(var_z_history)
-                max_z = max(var_z_history)
-
-                print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
-                if (max_x - min_x) < threshold and (
-                    max_y - min_y) < threshold and (
-                    max_z - min_z) < threshold:
-                    break
-        print('positionEstimated')
-        self.isPositionEstimated = True
+            print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+            if (max_x - min_x) < threshold and (
+                max_y - min_y) < threshold and (
+                max_z - min_z) < threshold:
+                break
+            print('positionEstimated')
+            self.isPositionEstimated = True
 
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
-        # self.wait_for_position_estimator()
 #################################################################### connection
 
     def connect(self): 
@@ -187,7 +171,7 @@ class Drogno(threading.Thread):
                 print('capperi')
             except:
                 print('no radio pal')
-        if self.killed == False:
+        if self.isKilled == False:
             connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):
@@ -222,16 +206,22 @@ class Drogno(threading.Thread):
         self._lg_stab.add_variable('stateEstimate.x', 'float')
         self._lg_stab.add_variable('stateEstimate.y', 'float')
         self._lg_stab.add_variable('stateEstimate.z', 'float')
-        # self._lg_stab.add_variable('kalman.varPX', 'float')
-        # self._lg_stab.add_variable('kalman.varPY', 'float')
-        # self._lg_stab.add_variable('kalman.varPZ', 'float')
-        self._lg_stab.add_variable('stabilizer.yaw', 'float')
+
+        self._lg_stab.add_variable('kalman.varPX', 'float')
+        self._lg_stab.add_variable('kalman.varPY', 'float')
+        self._lg_stab.add_variable('kalman.varPZ', 'float')
+        # self._lg_stab.add_variable('stabilizer.yaw', 'float')
         self._lg_stab.add_variable('pm.vbat', 'FP16')
- 
+
+        # self._lg_kalm = LogConfig(name='Kalman Variance', period_in_ms=500)
+        # self._lg_kalm.add_variable('kalman.varPX', 'float')
+        # self._lg_kalm.add_variable('kalman.varPY', 'float')
+        # self._lg_kalm.add_variable('kalman.varPZ', 'float')
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
         try:
+            self._cf.log.add_config(self._lg_stab)
             self._cf.log.add_config(self._lg_stab)
             # This callback will receive the data
             self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
@@ -240,6 +230,8 @@ class Drogno(threading.Thread):
             
             # time.sleep(0.3)
             self.reset_estimator()
+            self.wait_for_position_estimator()
+
             self._cf.param.set_value('commander.enHighLevel', '1')
             # self.setRingColor(0,0,0, 0)
             self._cf.param.set_value('ring.effect', '14')
@@ -274,8 +266,11 @@ class Drogno(threading.Thread):
         self.x              = float(data['stateEstimate.x'])
         self.y              = float(data['stateEstimate.y'])
         self.z              = float(data['stateEstimate.z'])
-        self.yaw            = float(data['stabilizer.yaw'])
-        self.batteryVoltage = float(data['pm.vbat'])
+        # self.yaw            = float(data['stabilizer.yaw'])
+        self.batteryVoltage = str(round(float(data['pm.vbat']),2))
+        self.kalman_X       = float(data['kalman.varPX'])
+        self.kalman_Y       = float(data['kalman.varPY'])
+        self.kalman_Z       = float(data['kalman.varPZ'])
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -333,11 +328,6 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 3.0)
             self.isFlying     = False
             time.sleep(3)
-            # self._cf.commander.send_position_setpoint(self.starting_x, self.starting_y, 0.05, 180)
-            # time.sleep(0.1)
-
-            # self._cf.commander.send_stop_setpoint()
-
             self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
@@ -568,7 +558,7 @@ class Drogno(threading.Thread):
             self._cf.commander.send_position_setpoint(0.0, 0.0, 1, 180)
             # self._cf.commander.set_client_xmode()
             time.sleep(0.1)
-            self.positionHLCommander.land()
+            # self.positionHLCommander.land()
             # self._cf.commander.send_stop_setpoint()
             self.statoDiVolo = 'landed'
 
@@ -600,8 +590,13 @@ class Drogno(threading.Thread):
             print('start!')
 
     def evaluateBattery(self):
-        while not self.exitFlag:
-            level = self.batteryVoltage 
+        while not self.exitFlag.is_set():
+            # print (self.batteryVoltage)
+            level = 0.0
+            if self.batteryVoltage == 'n.p.':
+                level = 20.
+            else:
+                level  = float(self.batteryVoltage)
             if level<3.50:
                 print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
             if level<3.35:
@@ -618,18 +613,20 @@ class Drogno(threading.Thread):
             time.sleep(BATTERY_CHECK_RATE)
 
     def killMeSoftly(self):
-            self.killed = True
+            self.isKilled = True
             self.land()
             self.exit()
 
     def killMeHardly(self):
-            self.killed = True
-            self.setRingColor(0,0,0)
+            # self.setRingColor(0,0,0)
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
             # self._cf.loc.send_emergency_stop()
             self._cf.close_link()
+            time.sleep(0.5)
             self.exit()
+            self.isKilled = True
+
 
 
 
@@ -644,6 +641,18 @@ def clamp(num, min_value, max_value):
 
 # Duration,x^0,x^1,x^2,x^3,x^4,x^5,x^6,x^7,y^0,y^1,y^2,y^3,y^4,y^5,y^6,y^7,z^0,z^1,z^2,z^3,z^4,z^5,z^6,z^7,yaw^0,yaw^1,yaw^2,yaw^3,yaw^4,yaw^5,yaw^6,yaw^7
 figure8 = [
+    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000,  0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000],  # noqa
+]
+figure8Triple = [
     [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
@@ -654,6 +663,26 @@ figure8 = [
     [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.053185  -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+     [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.053185  -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
 ]
 
 class Uploader:

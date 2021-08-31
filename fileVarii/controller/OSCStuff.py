@@ -115,18 +115,18 @@ def updateCompanion():
                     cp = int(cp)  + 2
                     iddio -= 14
                 cp = str(cp)
-                flyingStatus = 'take off'
-                if d.isFlying: flyingStatus = 'land'
+                takeOffPossibility = 'take off'
+                if d.isFlying: takeOffPossibility = 'land'
 
                 int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii",   [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B])
-                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [10,10,10])
-
-                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    None,   [d.statoDiVolo + ' ' + str(round( float(d.batteryVoltage) , 1))]) 
+                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [100,100,100])
+                
+                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    None,   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
                 status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
                 status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
 
 
-                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [flyingStatus])
+                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeOffPossibility])
                 tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   [1, 200,  1])
                 tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
@@ -244,7 +244,7 @@ def goToStart (coddii, quanto):
         print('chief says we\'re back at the by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].goLeft(quanto)
+                drogni[drogno].goToStart(0.2)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def ringColor(*args):
@@ -254,15 +254,13 @@ def ringColor(*args):
     for drogno in drogni:
         drogni[drogno].setRingColor(args[1][0], args[1][0], args[1][2])
         # drogni[drogno].alternativeSetRingColor(args)
-def kill     (unused_addr, *args):
-        print('everybody fuck now %s' % args )
+def kill     (coddii, chi):
+    print(' %s  fuck now' % chi )
+    if chi == 'all':    
         for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].killMeHardly()
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
-                break
-        # finished = True
+            drogni[drogno].killMeHardly()
+    else:
+        drogni[chi].killMeHardly()
 
 ###########################  single fella
 def printAndSendCoordinates():
@@ -291,7 +289,8 @@ def printHowManyMessages():
         while not finished:
             global msgCount
             time.sleep(5)
-            print('ho ricevuto %s messaggi al secondo.' % str(msgCount/5))
+            if msgCount > 0.:
+                print('ho ricevuto %s messaggi OSC al secondo.' % str(msgCount/5))
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -346,32 +345,11 @@ def start_server():          #### OSC init    #########    acts as main()
         osc_broadcast_client(FEEDBACK_IP,   FEEDBACK_PORT,    "feedbackClient")
         sendPose()
 
-    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
-    # aggregoneThread.start()
-    # sharedBuffer = manager.dict()
-    # sharedBuffer = bufferone
-    # print('sharedBuffer:  ')
-    # print(sharedBuffer)
-    # aggregatore      = OSCaggregator.Aggregator()
-    # aggregoneThread  = multiprocessing.Process(target=aggregatore.main, args=(sharedBuffer,))
-    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
-    # aggregoneThread.start()
-    # print('sharedBuffer after:  ')
-    # print(sharedBuffer)
-    
-    # aggregoneThread.join()
-
     print(Fore.GREEN + 'OSC server initalized on',              RECEIVING_IP, RECEIVING_PORT)
     print(Fore.GREEN + 'OSC feedback client initalized on',      FEEDBACK_IP, FEEDBACK_PORT)
     print(Fore.GREEN + 'OSC client to companion initalized on', COMPANION_IP, COMPANION_PORT)
 
     ###########################  single fella
-    # osc_method("/notch/drone*/X",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/Y",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/Z",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/R",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/G",   setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    # osc_method("/notch/drone*/B",   setRequested,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/notch/drone*/pos", setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/notch/drone*/col", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  whole swarm routing
@@ -381,6 +359,7 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/go",               go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goToStart",        goToStart, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goLeft",           goLeft,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goRight",          goRight,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goForward",        goForward, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -457,3 +436,17 @@ if __name__ == '__main__':
 #     keyboard.send('ctrl+6')
  
 
+    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
+    # aggregoneThread.start()
+    # sharedBuffer = manager.dict()
+    # sharedBuffer = bufferone
+    # print('sharedBuffer:  ')
+    # print(sharedBuffer)
+    # aggregatore      = OSCaggregator.Aggregator()
+    # aggregoneThread  = multiprocessing.Process(target=aggregatore.main, args=(sharedBuffer,))
+    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
+    # aggregoneThread.start()
+    # print('sharedBuffer after:  ')
+    # print(sharedBuffer)
+    
+    # aggregoneThread.join()

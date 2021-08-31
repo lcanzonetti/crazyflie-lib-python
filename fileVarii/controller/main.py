@@ -16,27 +16,27 @@ import cflib.crtp
 import sys
 
 lastRecordPath   = ''  
-WE_ARE_FAKING_IT = True
-
+WE_ARE_FAKING_IT = False
+AUTO_RECONNECT   = True
 exit_event = threading.Event()
 uris = [
-        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E0',
         # gut
-        # 'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E1',
         # gut
         # 'radio://0/80/2M/E7E7E7E7E2',
         # possibili problemi hardware
-        # 'radio://1/90/2M/E7E7E7E7E3',
+        'radio://1/90/2M/E7E7E7E7E3',
         #  (vuoti d'aria?)
-        # 'radio://1/90/2M/E7E7E7E7E4',
+        'radio://1/90/2M/E7E7E7E7E4',
         # grande incertezza al centro - super compensazioni
-        # 'radio://1/90/2M/E7E7E7E7E5',
+        'radio://1/90/2M/E7E7E7E7E5',
         #  gut  
-        # 'radio://2/100/2M/E7E7E7E7E6',
+        'radio://2/100/2M/E7E7E7E7E6',
         #  gut  -il meglio
         # 'radio://2/100/2M/E7E7E7E7E7',
         # serii problemi radio
-        # 'radio://2/100/2M/E7E7E7E7E8',
+        'radio://2/100/2M/E7E7E7E7E8',
         #  gut
         # 'radio://3/110/2M/E7E7E7E7E9',
         #  gut
@@ -50,7 +50,18 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
                                   ( -SPACING*1.5, -SPACING)
                                 ]
 
-    
+
+def autoReconnect():
+    if AUTO_RECONNECT:
+        for drogno in drogni:
+            if drogni[drogno].isKilled:
+                print('il drogno %s è stato ucciso, provo a riconnettermi' % drogni[drogno.ID])
+                IDToBeRenewed = drogni[drogno].ID
+                uriToBeRenewed = drogni[drogno].link_uri
+                del drogni[drogno]
+                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
+                drogni[IDToBeRenewed].start()
+
 def main():
     global WE_ARE_FAKING_IT
     if not WE_ARE_FAKING_IT:
@@ -74,6 +85,8 @@ def main():
         drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start()
 
+    reconnectThread       = threading.Thread(target=autoReconnect).start()  
+
     OSC.drogni = drogni
     OSC.faiIlBufferon()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
@@ -89,7 +102,7 @@ def exit_signal_handler(signum, frame):
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.ERROR)
-    os.chdir('../trajectoryRecorder/registrazioniOSC/')
+    os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
     patto = Path('./lastRecord.txt')
     with open(patto, 'r') as f:
         lastRecordPath = f.read()
@@ -100,30 +113,3 @@ if __name__ == '__main__':
     while True:
         pass
 
-
-
-
-class Uploader:
-    def __init__(self):
-        self._is_done = False
-        self._sucess = True
-
-    def upload(self, trajectory_mem):
-        print('Uploading data')
-        trajectory_mem.write_data(self._upload_done,
-                                  write_failed_cb=self._upload_failed)
-
-        while not self._is_done:
-            time.sleep(0.2)
-
-        return self._sucess
-
-    def _upload_done(self, mem, addr):
-        print('Data uploaded')
-        self._is_done = True
-        self._sucess = True
-
-    def _upload_failed(self, mem, addr):
-        print('Data upload failed')
-        self._is_done = True
-        self._sucess = False
