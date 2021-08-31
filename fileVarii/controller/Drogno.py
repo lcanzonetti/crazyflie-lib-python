@@ -24,14 +24,20 @@ DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
+<<<<<<< HEAD
+=======
+RED                   = '0x555500'
+GREEN                 = '0x00AA00'
+BLUE                  = '0x0000AA'
+
+
+>>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
         threading.Thread.__init__(self)
-        self.TRAJECTORIES    = {}
         self.lastRecordPath  = lastRecordPath
         self.lastTrajectory  = ''
-        self.currentTrajectoryLenght = 0
         self.link_uri    = link_uri
         self.ID          = int(ID)
         self.name        = 'Drogno_'+str(ID)
@@ -84,6 +90,7 @@ class Drogno(threading.Thread):
      
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
+<<<<<<< HEAD
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
@@ -92,6 +99,13 @@ class Drogno(threading.Thread):
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
         #     self.lastTrajectory = t.readlines()
+=======
+        trajectory = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+        print ('my trajectory is: ' + trajectory)
+        with open(trajectory, 'r') as t:
+            # print(t.readlines())
+            self.lastTrajectory = t.readlines()
+>>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
 
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
@@ -117,7 +131,53 @@ class Drogno(threading.Thread):
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
-                            
+                    
+    def sequenzaDiVoloSimulata(self):     
+        def volo():
+            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
+            time.sleep(self.durataVolo)
+            self.statoDiVolo = 'hovering'
+
+        if not self.currentSequenceThread:
+            self.currentSequenceThread = threading.Thread(target=volo)
+            self.currentSequenceThread.start()
+            print('start!')
+
+    def connect(self): 
+        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+        def porcoMondo():
+            self.statoDiVolo = 'connecting'
+            try:
+                self._cf.open_link(self.link_uri)
+            except IndexError:
+                print('capperi')
+            except:
+                print('no radio pal')
+        if self.killed == False:
+            connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
+
+    def reconnect(self):
+        self._cf.close_link()
+        def mariconnetto():
+            if self.recconnectionAttempts == 0:
+                print(f'provo a riaprire la connessione con il drogno {self.name}')
+                self.recconnectionAttempts+=1
+                self._cf.open_link( self.link_uri)
+
+            elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
+                while self.is_connected == False and self.recconnectionAttempts < 10: 
+                    self.recconnectionAttempts +=1
+                    print('Aspetto 1 secondo prima di ritentare')
+                    time.sleep(1)
+                    print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
+                    self.connect()
+            else:
+                print('con il drogno %s ho perso le speranze' % self.ID)
+                self.exit()
+        tio = 'something'
+        tio = threading.Thread(target=mariconnetto)
+        tio.start()
+        
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
         if use_mellinger:
@@ -159,6 +219,7 @@ class Drogno(threading.Thread):
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
+<<<<<<< HEAD
 #################################################################### connection
 
     def connect(self): 
@@ -195,6 +256,10 @@ class Drogno(threading.Thread):
         tio = 'something'
         tio = threading.Thread(target=mariconnetto)
         tio.start()
+=======
+        # self.wait_for_position_estimator()
+
+>>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
     def _connected(self, link_uri):   ##########   where a lot of things happen
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
@@ -321,7 +386,6 @@ class Drogno(threading.Thread):
                 self.isFlying    = True
             else:
                 print('BUT NOT READY')
-#################################################################### movements
 
     def land(self, speed=0.15, landing_height=0.03):
         def landing_sequence():
@@ -399,7 +463,6 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
             # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
-#################################################################### colors
 
     def setRingColor(self, r, g, b, speed=0.25):
         r *= self.ringIntensity
@@ -428,48 +491,27 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.solidGreen','{}'.format(g))
         self._cf.param.set_value('ring.solidBlue', '{}'.format(b))
         print ('vado al colore %s %s %s' % (r,g, b))
-#################################################################### trajectories
-    def upload(self, trajectory_id):
-            # if self.TRAJECTORIES [trajectory_id] in self.TRAJECTORIES :
-            if True:
-                print ('sì! uppa la %s'% trajectory_id)
-
-                trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
-
-                total_duration = 0
-                for row in self.TRAJECTORIES [trajectory_id]:
-                    duration = row[0]
-                    x = Poly4D.Poly(row[1:9])
-                    y = Poly4D.Poly(row[9:17])
-                    z = Poly4D.Poly(row[17:25])
-                    yaw = Poly4D.Poly(row[25:33])
-                    trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
-                    total_duration += duration
-
-                upload_result = Uploader().upload(trajectory_mem)
-                if not upload_result:
-                    print('Upload failed, aborting!')
-                self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
-                self.currentTrajectoryLenght = total_duration
 
     def go(self, sequenceNumber=0):
-        # if self.isFlying:
+        if self.isFlying:
             if self.WE_ARE_FAKING_IT:
                 self.statoDiVolo = 'sequenza simulata!'
             else:
-                # if self.TRAJECTORIES [sequenceNumber] in self.TRAJECTORIES :
-                  trajectory_id = sequenceNumber
-                  self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
+                trajectory_id = sequenceNumber
+                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
                 # duration = self.upload_trajectory(trajectory_id, figure8)
-                  duration = self.currentTrajectoryLenght
-                  print ('eseguo la sequenza %s lunga %s' % (sequenceNumber, duration))
-                  self.run_sequence(trajectory_id, duration)
-        # else:
-        #     print('not ready!')
+                if sequenceNumber == 0:
+                    duration = self.upload_trajectory(trajectory_id, self.lastTrajectory)
+                else:
+                    duration = self.upload_trajectory(trajectory_id, figure8)
 
+                print ('eseguo la sequenza %s lunga %s' % (sequenceNumber, duration))
+                self.run_sequence(trajectory_id, duration)
+        else:
+            print('not ready!')
     def run_sequence(self, trajectory_id, duration):
         commander = self._cf.high_level_commander
-        commander.takeoff(1.0, 2.0)
+        # commander.takeoff(1.0, 2.0)
         # time.sleep(3.0)
         # relative = True
         commander.start_trajectory(trajectory_id, 1.0, False)
@@ -577,17 +619,25 @@ class Drogno(threading.Thread):
                  print('la sequenza in esecuzione non può essere fermata. \nMAI')
         else:
             print('not ready!')
-  
-    def sequenzaDiVoloSimulata(self):     
-        def volo():
-            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
-            time.sleep(self.durataVolo)
-            self.statoDiVolo = 'hovering'
 
-        if not self.currentSequenceThread:
-            self.currentSequenceThread = threading.Thread(target=volo)
-            self.currentSequenceThread.start()
-            print('start!')
+    def upload_trajectory(self, trajectory_id, trajectory):
+        trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
+
+        total_duration = 0
+        for row in trajectory:
+            duration = row[0]
+            x = Poly4D.Poly(row[1:9])
+            y = Poly4D.Poly(row[9:17])
+            z = Poly4D.Poly(row[17:25])
+            yaw = Poly4D.Poly(row[25:33])
+            trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
+            total_duration += duration
+
+        upload_result = Uploader().upload(trajectory_mem)
+        if not upload_result:
+            print('Upload failed, aborting!')
+        self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
+        return total_duration
 
     def evaluateBattery(self):
         while not self.exitFlag.is_set():
@@ -616,7 +666,6 @@ class Drogno(threading.Thread):
             self.isKilled = True
             self.land()
             self.exit()
-
     def killMeHardly(self):
             # self.setRingColor(0,0,0)
             self._cf.high_level_commander.stop()
