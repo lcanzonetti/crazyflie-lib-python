@@ -1,1 +1,1 @@
-/Users/riccardoavs/Desktop/crazyflie-lib-python/fileVarii/trajectoryRecorder/registrazioniOSC/registrazione_30-08-2021_14-45-21
+/Users/riccardoavs/Desktop/crazyflie-lib-python/fileVarii/trajectoryRecorder/registrazioniOSC/registrazione_31-08-2021_19-29-11
