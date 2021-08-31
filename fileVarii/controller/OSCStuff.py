@@ -25,7 +25,7 @@ COMPANION_IP            = "192.168.10.255"
 COMPANION_PORT          = 12321
 COMPANION_PAGES         = ['92', '93', '94']
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 1.0
+COMPANION_UPDATE_RATE   = 0.8
 
 FEEDBACK_ENABLED        = False
 FEEDBACK_RATE           = 0.8
@@ -79,29 +79,17 @@ def updateCompanion():
         while not finished:
             time.sleep(COMPANION_UPDATE_RATE)
             # print(Fore.WHITE +'aggiorno companion')
-            listaTimecode = timecode.split(':')
-            timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(29),   None,   [listaTimecode[0]])
-            timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(30),   None,   [listaTimecode[1]])
-            timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(31),   None,   [listaTimecode[2]])
-            timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(32),   None,   [listaTimecode[3]])
-            bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames]) 
-            osc_send(bandoleon, "companionClient")
-            
             if not isSendEnabled:                       #*******************  SEND ENABLING
                 for cp in COMPANION_PAGES:
-                    col              = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
-                    txt              = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
-                    col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [10, 235, 10])
-                    txt2              = oscbuildparse.OSCMessage("/style/text/90/21", None,   ["non mando"])
-                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                    col = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
+                    txt = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
+                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
                     osc_send(bandoleon, "companionClient")
             else:
                 for cp in COMPANION_PAGES:
                     col        = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
                     txt        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
-                    col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [235, 10, 10])
-                    txt2              = oscbuildparse.OSCMessage("/style/text/90/21"  , None,   ["mando"])
-                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt]) 
                     osc_send(bandoleon, "companionClient")
 
             for drogno in drogni:               #*******************  singol-drogn               
@@ -173,11 +161,11 @@ def takeOff(coddii, decollante):
                 drogni[decollante].land()
         else:
             print('il drogno %s non è connesso' % drogni[decollante].name)
-def upload(coddii,quale):
-        print('uppo la %s!' % quale)
+def uploadSequence(coddii,quale):
+        print('chief says we\'re gonna do shit at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].upload(quale)
+                drogni[drogno].startTestSequence(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def startTest(coddii,quale):
@@ -192,7 +180,7 @@ def go       (coddii,quale):
         print('chief says we\'re gonna do shit at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                drogni[drogno].go(quale)
+                drogni[drogno].go(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def goLeft   (coddii, quanto):
@@ -307,14 +295,11 @@ def setRequested(*args):
 
 def setRequestedPos(address, args):
     global msgCount
-    global timecode
-
     msgCount += 1
     iddio      = int(address[-5])
-    value1     = round(float(args[1]),3)
-    value2     = round(float(args[2]),3)
-    value3     = round(float(args[3]),3)
-    timecode   = args[0]
+    value1     = round(float(args[0]),3)
+    value2     = round(float(args[1]),3)
+    value3     = round(float(args[2]),3)
     # if isSendEnabled:
     # print('provo a variare il parametro posizione dell\'iddio %s mettendoci %s %s %s' % ( iddio, value1, value2, value3))
     bufferone[iddio].requested_X = value1
@@ -355,7 +340,6 @@ def start_server():          #### OSC init    #########    acts as main()
     ###########################  whole swarm routing
     osc_method("/takeOff",          takeOff,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/startTest",        startTest, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/upload",           upload,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/go",               go,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/home",             home,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

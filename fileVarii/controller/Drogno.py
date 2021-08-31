@@ -24,14 +24,6 @@ DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
-<<<<<<< HEAD
-=======
-RED                   = '0x555500'
-GREEN                 = '0x00AA00'
-BLUE                  = '0x0000AA'
-
-
->>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -90,7 +82,6 @@ class Drogno(threading.Thread):
      
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
-<<<<<<< HEAD
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
@@ -99,13 +90,6 @@ class Drogno(threading.Thread):
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
         #     self.lastTrajectory = t.readlines()
-=======
-        trajectory = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
-        print ('my trajectory is: ' + trajectory)
-        with open(trajectory, 'r') as t:
-            # print(t.readlines())
-            self.lastTrajectory = t.readlines()
->>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
 
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
@@ -219,7 +203,6 @@ class Drogno(threading.Thread):
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
-<<<<<<< HEAD
 #################################################################### connection
 
     def connect(self): 
@@ -256,10 +239,6 @@ class Drogno(threading.Thread):
         tio = 'something'
         tio = threading.Thread(target=mariconnetto)
         tio.start()
-=======
-        # self.wait_for_position_estimator()
-
->>>>>>> ad250d2affed5b83f0ffc1d13c958713120f1083
     def _connected(self, link_uri):   ##########   where a lot of things happen
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
