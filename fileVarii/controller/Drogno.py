@@ -113,7 +113,7 @@ class Drogno(threading.Thread):
             if self.is_connected:
                 print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
                 self.goToCount = 0
-                # print ('experimental position get: %s %s %s' % (self.positionHLCommander.get_position()))
+                print ('kalman var: %s %s %s' % (round(self.kalman_X,3), round(self.kalman_Y,3), round(self.kalman_Z,3)))
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -213,6 +213,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'connecting'
             try:
                 self._cf.open_link(self.link_uri)
+
             except IndexError:
                 print('capperi')
             except:
@@ -249,10 +250,12 @@ class Drogno(threading.Thread):
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
         self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=500)
-        self._lg_stab.add_variable('stateEstimate.x', 'float')
-        self._lg_stab.add_variable('stateEstimate.y', 'float')
-        self._lg_stab.add_variable('stateEstimate.z', 'float')
-
+        # self._lg_stab.add_variable('stateEstimate.x', 'float')
+        # self._lg_stab.add_variable('stateEstimate.y', 'float')
+        # self._lg_stab.add_variable('stateEstimate.z', 'float')
+        self._lg_stab.add_variable('kalman.stateX', 'float')
+        self._lg_stab.add_variable('kalman.stateY', 'float')
+        self._lg_stab.add_variable('kalman.stateZ', 'float')
         self._lg_stab.add_variable('kalman.varPX', 'float')
         self._lg_stab.add_variable('kalman.varPY', 'float')
         self._lg_stab.add_variable('kalman.varPZ', 'float')
@@ -309,9 +312,12 @@ class Drogno(threading.Thread):
         print('Error when logging %s: %s' % (logconf.name, msg))
 
     def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati
-        self.x              = float(data['stateEstimate.x'])
-        self.y              = float(data['stateEstimate.y'])
-        self.z              = float(data['stateEstimate.z'])
+        # self.x              = float(data['stateEstimate.x'])
+        # self.y              = float(data['stateEstimate.y'])
+        # self.z              = float(data['stateEstimate.z'])
+        self.x              = float(data['kalman.stateX'])
+        self.y              = float(data['kalman.stateY'])
+        self.z              = float(data['kalman.stateZ'])
         # self.yaw            = float(data['stabilizer.yaw'])
         self.batteryVoltage = str(round(float(data['pm.vbat']),2))
         self.kalman_X       = float(data['kalman.varPX'])
@@ -397,9 +403,9 @@ class Drogno(threading.Thread):
             clamp(x, -BOX_X, BOX_X)
             clamp(y, -BOX_Y, BOX_Y)
             clamp(z, 0.3   , BOX_Z)
-            # print('%s va a %s %s %s' % (self.name,  x,y,z))
+            print('%s va a %s %s %s' % (self.name,  x,y,z))
             self.statoDiVolo = 'moving'
-            self._cf.high_level_commander.go_to(x,y,z, yaw,1)
+            self._cf.high_level_commander.go_to(x,y,z, yaw,0.3)
             self.statoDiVolo = 'hovering'
         else:
             print('perhaps take off?')
@@ -496,6 +502,7 @@ class Drogno(threading.Thread):
         time.sleep(3.0)
         relative = True
         commander.start_trajectory(trajectory_id, 1.0, relative)
+        # commander.start_compressed
         time.sleep(self.currentTrajectoryLenght)
         commander.land(0.0, 4.0)
         time.sleep(4)
@@ -651,6 +658,8 @@ class Drogno(threading.Thread):
             # self.setRingColor(0,0,0)
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
+            self._lg_stab.stop()
+
             # self._cf.loc.send_emergency_stop()
             self._cf.close_link()
             time.sleep(0.5)
@@ -694,6 +703,10 @@ figure8Triple = [
     [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
+    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
     ]
 
 class Uploader:

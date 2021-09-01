@@ -32,9 +32,9 @@ uris = [
         # grande incertezza al centro - super compensazioni
         # 'radio://1/90/2M/E7E7E7E7E5',
         #  gut  
-        'radio://2/100/2M/E7E7E7E7E6',
+        # 'radio://2/100/2M/E7E7E7E7E6',
         #  gut  -il meglio
-        # 'radio://2/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E7',
         # serii problemi radio
         # 'radio://2/100/2M/E7E7E7E7E8',
         #  gut
@@ -66,6 +66,7 @@ def main():
     global WE_ARE_FAKING_IT
     if not WE_ARE_FAKING_IT:
         cflib.crtp.init_drivers(enable_debug_driver=False)
+        print(cflib.crtp.get_interfaces_status())
 
     try:
         availableRadios = cflib.crtp.scan_interfaces()
@@ -101,7 +102,6 @@ def exit_signal_handler(signum, frame):
     sys.exit()
 
 if __name__ == '__main__':
-    # logging.basicConfig(level=logging.ERROR)
     os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
     patto = Path('./lastRecord.txt')
     with open(patto, 'r') as f:
