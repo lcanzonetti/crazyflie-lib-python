@@ -11,8 +11,7 @@ from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 from   random                import uniform
 import logging
-
-# import OSCaggregator
+import OSCaggregator
 coloInit(convert=True)
 FEEDBACK_IP             = "192.168.10.255"
 FEEDBACK_PORT           = 9201
@@ -29,6 +28,8 @@ COMPANION_UPDATE_RATE   = 1.0
 
 FEEDBACK_ENABLED        = False
 FEEDBACK_RATE           = 0.8
+
+COMMANDS_FREQUENCY      = 0.2
 
 drogni        = {} 
 bufferone     = {}
@@ -62,7 +63,7 @@ def resetCompanion():
             status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+8),  ",iii",   [120, 120, 120])
 
             tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+16),   None,   ['take off'])
-            tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+16), ",iii",   [1,    20,   1])
+            tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+16), ",iii",   [60,  20,   1])
             tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+16), ",iii",   [60, 60, 60])
 
             kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+24),   None,   ['kill'])
@@ -89,8 +90,8 @@ def updateCompanion():
             
             if not isSendEnabled:                       #*******************  SEND ENABLING
                 for cp in COMPANION_PAGES:
-                    col              = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
-                    txt              = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
+                    col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
+                    txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
                     col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [10, 235, 10])
                     txt2              = oscbuildparse.OSCMessage("/style/text/90/21", None,   ["non mando"])
                     bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
@@ -115,8 +116,15 @@ def updateCompanion():
                     cp = int(cp)  + 2
                     iddio -= 14
                 cp = str(cp)
-                flyingStatus = 'take off'
-                if d.isFlying: flyingStatus = 'land'
+                takeoffOrLand      = 'take off'
+                if d.isReadyToFly:
+                    takeoffOrLandColor = [20,200,40]
+                else:
+                    takeoffOrLandColor = [100,90,40]
+                if d.isFlying:
+                    takeoffOrLand = 'land'
+                    takeoffOrLandColor = [200,20,40]
+
 
                 int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii",   [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B])
                 int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [10,10,10])
@@ -126,8 +134,8 @@ def updateCompanion():
                 status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
 
 
-                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [flyingStatus])
-                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   [1, 200,  1])
+                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeoffOrLand])
+                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   [takeoffOrLandColor])
                 tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
                 kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   ['kill'])
@@ -269,7 +277,7 @@ def printAndSendCoordinates():
     # print(bufferone)
     # time.sleep(1)
     while not finished:
-        time.sleep(0.3)
+        time.sleep(COMMANDS_FREQUENCY)
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID

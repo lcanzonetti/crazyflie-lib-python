@@ -24,6 +24,7 @@ DEFAULT_HEIGHT        = 0.8
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
+COMMANDS_FREQUENCY    = 0.2
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -46,8 +47,6 @@ class Drogno(threading.Thread):
         self.printThread           = False
         self.printRate             = STATUS_PRINT_RATE
         self.currentSequenceThread = False
-        self.exitingTimer          = False
-        self.idleExitTime          = 10    #seconds
         self.recconnectionAttempts = 0
         self.is_connected          = False
         self.isPositionEstimated   = False
@@ -103,7 +102,8 @@ class Drogno(threading.Thread):
             self.connect()
      
     def exit(self):
-                print('exitFlag is now set for drogno %s, bye kiddo' % self.name)       
+                print('exitFlag is now set for drogno %s, bye kiddo' % self.name)    
+                self.isReadyToFly = False
                 self.exitFlag.set()
                 self.isKilled   = 1
 
@@ -143,7 +143,7 @@ class Drogno(threading.Thread):
             connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):
-        self._cf.close_link()
+        # self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
@@ -199,13 +199,14 @@ class Drogno(threading.Thread):
                 break
             print('positionEstimated')
             self.isPositionEstimated = True
+            self.isReadyToFly = True
 
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
-#################################################################### connection
+    #################################################################### connection
 
     def connect(self): 
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
@@ -222,7 +223,7 @@ class Drogno(threading.Thread):
             connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
 
     def reconnect(self):
-        self._cf.close_link()
+        # self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
@@ -238,6 +239,7 @@ class Drogno(threading.Thread):
                     self.connect()
             else:
                 print('con il drogno %s ho perso le speranze' % self.ID)
+                self.isReadyToFly = False
                 self.exit()
         tio = 'something'
         tio = threading.Thread(target=mariconnetto)
@@ -271,7 +273,6 @@ class Drogno(threading.Thread):
         # would like to log are in the TOC.
         try:
             self._cf.log.add_config(self._lg_stab)
-            self._cf.log.add_config(self._lg_stab)
             # This callback will receive the data
             self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
             # This callback will be called on errors
@@ -282,9 +283,9 @@ class Drogno(threading.Thread):
             self.wait_for_position_estimator()
 
             self._cf.param.set_value('commander.enHighLevel', '1')
-            # self.setRingColor(0,0,0, 0)
             self._cf.param.set_value('ring.effect', '14')
-            
+            self._cf.param.set_value('lighthouse.method', '0')
+
             self.HLCommander = self._cf.high_level_commander
             self.positionHLCommander = PositionHlCommander(
                 self._cf,
@@ -294,9 +295,8 @@ class Drogno(threading.Thread):
                 controller=PositionHlCommander.CONTROLLER_PID) 
             self._lg_stab.start()
             self.batteryThread.start()
-            self._cf.param.set_value('ring.fadeTime', 0.25)
+            self._cf.param.set_value('ring.fadeTime', 1)
 
-            self.isReadyToFly = True
             self.statoDiVolo = 'landed'
             # self.setRingColor(20,1,1, 2)
 
@@ -329,6 +329,8 @@ class Drogno(threading.Thread):
         at the specified address)"""
         print('Connessione la drogno %s fallita: %s' % (self.ID, msg))
         self.is_connected = False
+        self.isReadyToFly = False
+
         self.statoDiVolo = 'sconnesso'
         # self._cf.close_link()
         # time.sleep(1)
@@ -340,6 +342,8 @@ class Drogno(threading.Thread):
         print('Me son perso %s dice: %s' % (link_uri, msg))
         self.is_connected = False
         self.statoDiVolo = 'sconnesso'
+        self.isReadyToFly = False
+
         # self._cf.close_link()
         # time.sleep(1)
         self.reconnect()
@@ -349,7 +353,9 @@ class Drogno(threading.Thread):
             """Callback when the Crazyflie is disconnected (called in all cases)"""
             print('Deh, son sconnesso da %s' % link_uri)
             self.is_connected = False
-            self.statoDiVolo = 'sconnesso'
+            self.statoDiVolo  = 'sconnesso'
+            self.isReadyToFly = False
+
             # self._cf.close_link()
             # time.sleep(1)
             self.reconnect()
@@ -396,16 +402,26 @@ class Drogno(threading.Thread):
             else:
                 print('%s can\'t land! (not flying)' % self.name)
 
-    def goTo(self,x,y,z, yaw=0, speed=0.1):  #la zeta è in alto!
+    def goTo(self,x,y,z, yaw=0, duration=COMMANDS_FREQUENCY):  #la zeta è in alto!
         self.goToCount += 1
 
         if self.isFlying:
+            if x > 0 and y > 0:
+                yaw = -45
+            elif x > 0 and y < 0:
+                yaw =  45
+            elif x < 0 and y < 0:
+                yaw =  135
+            elif x < 0 and y > 0:
+                yaw =  135
+
             clamp(x, -BOX_X, BOX_X)
             clamp(y, -BOX_Y, BOX_Y)
             clamp(z, 0.3   , BOX_Z)
-            print('%s va a %s %s %s' % (self.name,  x,y,z))
+            print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,0.3)
+            self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         else:
             print('perhaps take off?')
@@ -637,10 +653,14 @@ class Drogno(threading.Thread):
                 level  = float(self.batteryVoltage)
             if level<3.50:
                 print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
+                self.isReadyToFly = False
+
             if level<3.35:
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
-                    self.statoDiVolo == 'landed with no battery'
+                    self.statoDiVolo == 'depleted'
+                    self.isReadyToFly = False
+
                     # self._cf.high_level_commander.stop()
                     # self._cf.commander.send_stop_setpoint()
                 else:
@@ -651,11 +671,13 @@ class Drogno(threading.Thread):
             time.sleep(BATTERY_CHECK_RATE)
 
     def killMeSoftly(self):
+            self.isReadyToFly = False
             self.isKilled = True
             self.land()
             self.exit()
     def killMeHardly(self):
             # self.setRingColor(0,0,0)
+            self.isReadyToFly = False
             self._cf.high_level_commander.stop()
             self._cf.commander.send_stop_setpoint()
             self._lg_stab.stop()
@@ -663,12 +685,9 @@ class Drogno(threading.Thread):
             # self._cf.loc.send_emergency_stop()
             self._cf.close_link()
             time.sleep(0.5)
-            self.exit()
             self.isKilled = True
 
-
-
-
+            self.exit()
 
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)

@@ -7,18 +7,23 @@ import threading
 import time
 import signal
 from   collections import namedtuple
-from types import BuiltinFunctionType
 #custom modules
 import OSCStuff as OSC
-import timerino as myTimer
 import Drogno
 import cflib.crtp
 import sys
 
 lastRecordPath   = ''  
-WE_ARE_FAKING_IT = False
-AUTO_RECONNECT   = True
+WE_ARE_FAKING_IT    = True
+AUTO_RECONNECT      = True
+RECONNECT_FREQUENCY = 1
+COMMANDS_FREQUENCY  = 0.2
+Drogno.COMMANDS_FREQUENCY = COMMANDS_FREQUENCY
+OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
+
+
 exit_event = threading.Event()
+
 uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # gut
@@ -52,7 +57,8 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
 
 
 def autoReconnect():
-    if AUTO_RECONNECT:
+    while not exit_event.is_set() :
+        time.sleep(RECONNECT_FREQUENCY)
         for drogno in drogni:
             if drogni[drogno].isKilled:
                 print('il drogno %s è stato ucciso, provo a riconnettermi' % drogni[drogno.ID])
@@ -79,20 +85,18 @@ def main():
             pass
     except IndexError:
         print(IndexError)
- 
     
     for uro in uris:
         iddio = int(uro[-1])
         drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start()
 
-    reconnectThread       = threading.Thread(target=autoReconnect).start()  
-
     OSC.drogni = drogni
     OSC.faiIlBufferon()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
-
+    if AUTO_RECONNECT:
+        reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
     print('esco')
