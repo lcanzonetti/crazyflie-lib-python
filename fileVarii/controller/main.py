@@ -14,7 +14,7 @@ import cflib.crtp
 import sys
 
 lastRecordPath   = ''  
-WE_ARE_FAKING_IT    = True
+WE_ARE_FAKING_IT    = False
 AUTO_RECONNECT      = True
 RECONNECT_FREQUENCY = 1
 COMMANDS_FREQUENCY  = 0.2
@@ -24,24 +24,24 @@ OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
 
 exit_event = threading.Event()
 
-uris = [
+uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
         # gut
         # 'radio://0/80/2M/E7E7E7E7E1',
         # gut
         # 'radio://0/80/2M/E7E7E7E7E2',
         # possibili problemi hardware
-        # 'radio://1/90/2M/E7E7E7E7E3',
+        'radio://1/90/2M/E7E7E7E7E3',
         #  (vuoti d'aria?)
         # 'radio://1/90/2M/E7E7E7E7E4',
         # grande incertezza al centro - super compensazioni
-        # 'radio://1/90/2M/E7E7E7E7E5',
+        'radio://1/90/2M/E7E7E7E7E5',
         #  gut  
         # 'radio://2/100/2M/E7E7E7E7E6',
         #  gut  -il meglio
-        'radio://2/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E7',
         # serii problemi radio
-        # 'radio://2/100/2M/E7E7E7E7E8',
+        'radio://2/100/2M/E7E7E7E7E8',
         #  gut
         # 'radio://3/110/2M/E7E7E7E7E9',
         #  gut
@@ -61,7 +61,7 @@ def autoReconnect():
         time.sleep(RECONNECT_FREQUENCY)
         for drogno in drogni:
             if drogni[drogno].isKilled:
-                print('il drogno %s è stato ucciso, provo a riconnettermi' % drogni[drogno.ID])
+                print('il drogno %s è stato ucciso, provo a riconnettermi' % drogni[drogno].ID)
                 IDToBeRenewed = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
@@ -101,6 +101,7 @@ def main():
 def exit_signal_handler(signum, frame):
     print('esco')
     exit_event.set() 
+    OSC.resetCompanion()
     OSC.finished = True
     drogni = {}
     sys.exit()

@@ -382,7 +382,7 @@ class Drogno(threading.Thread):
 
     def land(self, speed=0.15, landing_height=0.03):
         def landing_sequence():
-            self._cf.high_level_commander.land(0.0, 3.0)
+            self._cf.high_level_commander.land(0.0, 2.0)
             self.isFlying     = False
             time.sleep(3)
             self.isReadyToFly = True
@@ -406,22 +406,22 @@ class Drogno(threading.Thread):
         self.goToCount += 1
 
         if self.isFlying:
-            if x > 0 and y > 0:
-                yaw = -45
-            elif x > 0 and y < 0:
-                yaw =  45
-            elif x < 0 and y < 0:
-                yaw =  135
-            elif x < 0 and y > 0:
-                yaw =  135
+            # if x > 0 and y > 0:
+            #     yaw = -45
+            # elif x > 0 and y < 0:
+            #     yaw =  45
+            # elif x < 0 and y < 0:
+            #     yaw =  135
+            # elif x < 0 and y > 0:
+            #     yaw =  135
 
             clamp(x, -BOX_X, BOX_X)
             clamp(y, -BOX_Y, BOX_Y)
             clamp(z, 0.3   , BOX_Z)
             print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
-            self._cf.high_level_commander.go_to(x,y,z, yaw,0.3)
-            self._cf.high_level_commander.go_to
+            self._cf.high_level_commander.go_to(x,y,z, yaw,1)
+            # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         else:
             print('perhaps take off?')
@@ -461,9 +461,9 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
     
-    def goToStart(self, speed=0.2):
+    def goToStart(self, speed=0.5):
         if self.isFlying:                
-            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
+            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.2, 0, 2, False)
             # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 

@@ -18,13 +18,13 @@ FEEDBACK_PORT           = 9201
 
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.01
+OSC_PROCESS_RATE        = 0.001
 
 COMPANION_IP            = "192.168.10.255"
 COMPANION_PORT          = 12321
 COMPANION_PAGES         = ['92', '93', '94']
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 1.0
+COMPANION_UPDATE_RATE   = 0.5
 
 FEEDBACK_ENABLED        = False
 FEEDBACK_RATE           = 0.8
@@ -85,8 +85,8 @@ def updateCompanion():
             timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(30),   None,   [listaTimecode[1]])
             timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(31),   None,   [listaTimecode[2]])
             timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(32),   None,   [listaTimecode[3]])
-            bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames]) 
-            osc_send(bandoleon, "companionClient")
+            ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames]) 
+            osc_send(ticcio, "companionClient")
             
             if not isSendEnabled:                       #*******************  SEND ENABLING
                 for cp in COMPANION_PAGES:
@@ -94,16 +94,16 @@ def updateCompanion():
                     txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
                     col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [10, 235, 10])
                     txt2              = oscbuildparse.OSCMessage("/style/text/90/21", None,   ["non mando"])
-                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                    osc_send(bandoleon, "companionClient")
+                    carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                    osc_send(carlo, "companionClient")
             else:
                 for cp in COMPANION_PAGES:
-                    col        = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
-                    txt        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
+                    col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
+                    txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
                     col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [235, 10, 10])
                     txt2              = oscbuildparse.OSCMessage("/style/text/90/21"  , None,   ["mando"])
-                    bandoleon = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                    osc_send(bandoleon, "companionClient")
+                    carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                    osc_send(carlo, "companionClient")
 
             for drogno in drogni:               #*******************  singol-drogn               
                 cp   = COMPANION_PAGES[0]
@@ -117,33 +117,37 @@ def updateCompanion():
                     iddio -= 14
                 cp = str(cp)
                 takeoffOrLand      = 'take off'
+                takeoffOrLandColor = [200,20,40]
                 if d.isReadyToFly:
                     takeoffOrLandColor = [20,200,40]
                 else:
                     takeoffOrLandColor = [100,90,40]
+
                 if d.isFlying:
                     takeoffOrLand = 'land'
                     takeoffOrLandColor = [200,20,40]
+                rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
+                if not any(rgb):
+                    rgb = [40,40,40]
 
+                int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
+                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
 
-                int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii",   [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B])
-                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [10,10,10])
-
-                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    None,   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
+                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
                 status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
                 status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
 
 
                 tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeoffOrLand])
-                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   [takeoffOrLandColor])
+                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeoffOrLandColor)
                 tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
                 kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   ['kill'])
                 kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [255, 10, 10])
                 kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [60, 60, 60])
 
-                bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
-                osc_send(bandoleon, "companionClient")
+                macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
+                osc_send(macron, "companionClient")
  
     nnamo = threading.Thread(target=daje).start()
 
@@ -241,15 +245,15 @@ def land     (bullshit, landingCandidate):
                 print('il drogno %s non è connesso' % drogni[drogno].name)
     else:
         drogni[landingCandidate].land()
-def home     (coddii, chi):
+def home      (coddii, chi):
         print('chief says drogno_%s gonna go home' % chi)
         if drogni[chi].is_connected:
             if drogni[chi].isFlying:
                 drogni[chi].goHome()
             else:
                 print('il drogno %s non è connesso' % drogni[chi].name)
-def goToStart (coddii, quanto):
-        print('chief says we\'re back at the by %s ' % quanto)
+def goToStart (coddii, chi):
+        print('chief says we (%s) are back at the start.' % chi)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goToStart(0.2)
@@ -332,9 +336,9 @@ def setRequestedCol(address, args):
     global msgCount
     msgCount += 1
     iddio     = int(address[-5])
-    bufferone[iddio].requested_R = int(args[0])
-    bufferone[iddio].requested_G = int(args[1])
-    bufferone[iddio].requested_B = int(args[2])
+    bufferone[iddio].requested_R = int(args[1])
+    bufferone[iddio].requested_G = int(args[2])
+    bufferone[iddio].requested_B = int(args[3])
 
 def start_server():          #### OSC init    #########    acts as main()
     global finished 
