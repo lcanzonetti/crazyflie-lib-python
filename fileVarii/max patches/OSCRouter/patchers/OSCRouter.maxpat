@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 77.0, 1412.0, 929.0 ],
+		"rect" : [ 34.0, 77.0, 1564.0, 929.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -39,6 +39,31 @@
 		"subpatcher_template" : "",
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-168",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 516.071423649787903, 724.999993085861206, 309.821426093578339, 22.0 ],
+					"presentation_linecount" : 8,
+					"text" : "/notch/drone6/pos 00:00:28:17 0.63 1.45 1.28"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-167",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 520.894441246986389, 685.15641587972641, 278.571426391601563, 22.0 ],
+					"text" : "/notch/drone3/pos 00:00:28:17 0.63 1.45 1.28"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-163",
 					"maxclass" : "number",
@@ -384,7 +409,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 185.343972891569138, 841.578900158405304, 155.464285433292389, 36.0 ],
-					"text" : "00:39:43:13"
+					"text" : "02:12:54:09"
 				}
 
 			}
@@ -397,7 +422,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 357.665399819612503, 844.257471561431885, 155.464285433292389, 36.0 ],
-					"text" : "00:00:05:02"
+					"text" : "00:00:28:19"
 				}
 
 			}
@@ -5308,7 +5333,7 @@
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
 													"patching_rect" : [ 627.0, 279.0, 50.0, 50.0 ],
-													"text" : "0.83 -0.78 0.71"
+													"text" : "-0.5 -0.74 1.13"
 												}
 
 											}
@@ -6829,7 +6854,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 134.541978836059343, 452.423828125, 349.0, 22.0 ],
-									"text" : "/notch/drone0/pos 00:00:04:02 -1.13 -1.23 1.2"
+									"text" : "/notch/drone0/pos 00:00:28:17 -1.13 -1.23 1.2"
 								}
 
 							}
@@ -7474,13 +7499,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -7528,7 +7552,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone8/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone8/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -7653,7 +7677,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone8/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone8/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -8482,13 +8506,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -8536,7 +8559,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone7/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone7/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -8661,7 +8684,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone7/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone7/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -9423,7 +9446,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 168.0, 158.0, 1571.0, 752.0 ],
+						"rect" : [ 961.0, 158.0, 841.0, 752.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -9451,7 +9474,21 @@
 						"style" : "",
 						"subpatcher_template" : "",
 						"assistshowspatchername" : 0,
+						"visible" : 1,
 						"boxes" : [ 							{
+								"box" : 								{
+									"id" : "obj-4",
+									"linecount" : 3,
+									"maxclass" : "message",
+									"numinlets" : 2,
+									"numoutlets" : 1,
+									"outlettype" : [ "" ],
+									"patching_rect" : [ 1089.0, 536.0, 50.0, 50.0 ],
+									"text" : "0.62 1.46 1.29"
+								}
+
+							}
+, 							{
 								"box" : 								{
 									"id" : "obj-55",
 									"maxclass" : "newobj",
@@ -9490,13 +9527,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 22.0 ],
+									"text" : "0.6164"
 								}
 
 							}
@@ -9544,7 +9580,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone6/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone6/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -9656,7 +9692,7 @@
 									"numinlets" : 1,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 1145.17884349822998, 428.921343372295269, 105.0, 22.0 ],
+									"patching_rect" : [ 1140.17884349822998, 479.921343372295269, 105.0, 22.0 ],
 									"text" : "pv local_trajectory"
 								}
 
@@ -9669,7 +9705,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone6/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone6/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -10342,6 +10378,15 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-36", 0 ],
+									"order" : 0,
+									"source" : [ "obj-7", 0 ]
+								}
+
+							}
+, 							{
+								"patchline" : 								{
+									"destination" : [ "obj-4", 1 ],
+									"order" : 1,
 									"source" : [ "obj-7", 0 ]
 								}
 
@@ -10498,13 +10543,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -10552,7 +10596,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone5/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone5/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -10677,7 +10721,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone5/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone5/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -11506,13 +11550,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -11560,7 +11603,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone4/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone4/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -11685,7 +11728,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone4/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone4/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -12447,7 +12490,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 168.0, 158.0, 1571.0, 752.0 ],
+						"rect" : [ 144.0, 149.0, 739.0, 752.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -12475,6 +12518,7 @@
 						"style" : "",
 						"subpatcher_template" : "",
 						"assistshowspatchername" : 0,
+						"visible" : 1,
 						"boxes" : [ 							{
 								"box" : 								{
 									"id" : "obj-55",
@@ -12514,13 +12558,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 22.0 ],
+									"text" : "0.6164"
 								}
 
 							}
@@ -12568,7 +12611,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone3/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone3/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -12693,7 +12736,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone3/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone3/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -13522,13 +13565,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -13576,7 +13618,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone2/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone2/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -13701,7 +13743,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone2/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone2/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -14530,13 +14572,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"text" : "0.6164"
 								}
 
 							}
@@ -14584,7 +14625,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"text" : "/notch/drone1/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone1/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -14709,7 +14750,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone1/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone1/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -15570,7 +15611,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 887.141517460346222, 416.510879165912684, 219.0, 22.0 ],
-									"text" : "00:00:05:02"
+									"text" : "00:00:28:19"
 								}
 
 							}
@@ -15582,7 +15623,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 895.360358777179954, 319.510879165912684, 127.0, 22.0 ],
-									"text" : "0 0 5 2"
+									"text" : "0 0 28 19"
 								}
 
 							}
@@ -15654,7 +15695,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 999.962946891784668, 237.796592838550623, 155.0, 22.0 ],
-									"text" : "/drone8/B 255."
+									"text" : "/drone8/B 0."
 								}
 
 							}
@@ -16265,13 +16306,12 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-51",
-									"linecount" : 2,
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 36.0 ],
-									"text" : "-1.111075"
+									"patching_rect" : [ 1033.088215589523315, 225.735289812088013, 50.0, 22.0 ],
+									"text" : "0.6164"
 								}
 
 							}
@@ -16319,8 +16359,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 356.176464080810547, 466.592655004104472, 322.058818340301514, 22.0 ],
-									"presentation_linecount" : 2,
-									"text" : "/notch/drone0/color 00:00:04:02 255. 0. 231.357666"
+									"text" : "/notch/drone0/color 00:00:28:17 255. 255. 0."
 								}
 
 							}
@@ -16445,7 +16484,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 36.317501068115007, 462.916184485992289, 259.558819532394409, 22.0 ],
-									"text" : "/notch/drone0/pos 00:00:04:02 -1.16 0.65 0.82"
+									"text" : "/notch/drone0/pos 00:00:28:17 0.63 1.45 1.28"
 								}
 
 							}
@@ -17259,7 +17298,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 23.147543668746948, 1018.352150693546264, 284.0, 64.0 ],
-					"text" : "00:00:05:02"
+					"text" : "00:00:28:19"
 				}
 
 			}
@@ -18233,7 +18272,6 @@
 						"style" : "",
 						"subpatcher_template" : "",
 						"assistshowspatchername" : 0,
-						"visible" : 1,
 						"boxes" : [ 							{
 								"box" : 								{
 									"id" : "obj-12",
@@ -19362,7 +19400,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 84.0, 129.0, 640.0, 480.0 ],
+						"rect" : [ 337.0, 256.0, 640.0, 673.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -22141,6 +22179,15 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-158", 1 ],
+					"order" : 1,
+					"source" : [ "obj-128", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-168", 1 ],
+					"order" : 0,
 					"source" : [ "obj-128", 0 ]
 				}
 
@@ -22544,6 +22591,15 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-154", 1 ],
+					"order" : 1,
+					"source" : [ "obj-83", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-167", 1 ],
+					"order" : 0,
 					"source" : [ "obj-83", 0 ]
 				}
 
