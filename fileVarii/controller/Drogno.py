@@ -696,7 +696,8 @@ class Drogno(threading.Thread):
         self.exit()
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
-        self._lg_stab.stop()
+        # self._lg_stab.stop()
+        # self._lg_stab.
 
         # self._cf.loc.send_emergency_stop()
         self._cf.close_link()

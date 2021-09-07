@@ -16,11 +16,11 @@ finished = False
 # bufferon = {}
 
 class feedbacco():
-    def __init__(self):
+    def __init__(self, eventoFinaleTremendo):
         self.OSC_SENDING_IP   = "192.168.1.255"
         self.SENDING_PORT     = 9203
         self.RECEIVING_PORT   = 6000
-        self.finished         = False
+        self.finished         = eventoFinaleTremendo
         self.start()
 
     def sendPose(self, robbaVaria):
@@ -47,12 +47,13 @@ class feedbacco():
         # osc_startup(logger=logger)
 
         def daje():
-            while not finished:
+            while not self.finished.is_set():
                 osc_process()
                 msg = connessione.recv()
                 self.sendPose(msg)
                 time.sleep(0.01)
             # Properly close the system.
+            print('anche il feedbacker se ne va')
             osc_terminate()
             listener.close()
         

@@ -24,7 +24,9 @@ Drogno.COMMANDS_FREQUENCY = COMMANDS_FREQUENCY
 OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
 
 
-exit_event = threading.Event()
+threads_exit_event   = threading.Event()
+processes_exit_event = multiprocessing.Event()
+OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.feedbacco, args=[processes_exit_event])
 
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
@@ -49,7 +51,7 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
 
 
 def autoReconnect():
-    while not exit_event.is_set() :
+    while not threads_exit_event.is_set() :
         time.sleep(RECONNECT_FREQUENCY)
         for drogno in drogni:
             if drogni[drogno].isKilled:
@@ -57,7 +59,7 @@ def autoReconnect():
                 IDToBeRenewed = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
-                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
+                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
                 drogni[IDToBeRenewed].start()
  
 
@@ -78,12 +80,12 @@ def main():
             pass
     except IndexError:
         print(IndexError)
-    OSCFeedbackProcess  = multiprocessing.Process(target=feedbacker.feedbacco).start()
+    OSCFeedbackProcess.start()
     
 
     for uro in uris:
         iddio = int(uro[-1])
-        drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
 
     OSC.drogni = drogni
@@ -96,11 +98,18 @@ def main():
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
+    global OSCFeedbackProcess 
+    global threads_exit_event
     print('esco')
-    exit_event.set() 
+    threads_exit_event.set() 
+    processes_exit_event.set()
+    OSCFeedbackProcess.join()
+    time.sleep(4)
+    # for drogno in drogni:
+    #     drogni[drogno].exit()
+    #     drogni[drogno].join()
     OSC.resetCompanion()
     OSC.finished = True
-    drogni = {}
     sys.exit()
 
 if __name__ == '__main__':
