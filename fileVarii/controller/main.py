@@ -26,25 +26,15 @@ exit_event = threading.Event()
 
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
-        # gut
-        'radio://0/80/2M/E7E7E7E7E1',
-        # gut
+        # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        # possibili problemi hardware
         'radio://1/90/2M/E7E7E7E7E3',
-        #  (vuoti d'aria?)
-        'radio://1/90/2M/E7E7E7E7E4',
-        # grande incertezza al centro - super compensazioni
-        'radio://1/90/2M/E7E7E7E7E5',
-        #  gut  
+        # 'radio://1/90/2M/E7E7E7E7E4',
+        # 'radio://1/90/2M/E7E7E7E7E5',
         # 'radio://2/100/2M/E7E7E7E7E6',
-        #  gut  -il meglio
         # 'radio://2/100/2M/E7E7E7E7E7',
-        # serii problemi radio
-        'radio://2/100/2M/E7E7E7E7E8',
-        #  gut
+        # 'radio://2/100/2M/E7E7E7E7E8',
         # 'radio://3/110/2M/E7E7E7E7E9',
-        #  gut
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 drogni = {}

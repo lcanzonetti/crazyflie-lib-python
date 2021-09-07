@@ -423,8 +423,8 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
             # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
-        else:
-            print('perhaps take off?')
+        # else:
+        #     print('perhaps take off?')
 
     def goLeft(self, quanto=0.3):
         if self.isFlying:
