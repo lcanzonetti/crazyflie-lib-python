@@ -1,9 +1,13 @@
 #rf 2021
 import threading
+from multiprocessing.connection import Client
+
 import time
 import random
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
+
+          
 coloInit(convert=True)
 
 #crazyflie's
@@ -25,6 +29,7 @@ RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
 COMMANDS_FREQUENCY    = 0.2
+FEEDBACK_SENDING_PORT = 6000
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -64,16 +69,16 @@ class Drogno(threading.Thread):
         self.requested_R           = 0
         self.requested_G           = 0
         self.requested_B           = 0
-        self.kalman_X              = 0
-        self.kalman_Y              = 0
-        self.kalman_Z              = 0
+        self.kalman_VarX              = 0
+        self.kalman_VarY              = 0
+        self.kalman_VarZ              = 0
         self.prefStartPoint_X      = startingPoint[0]
         self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
         self.batteryVoltage        = 'n.p.'
         self.ringIntensity         = 0.1
         self.goToCount             = 0.0
-
+        self.multiprocessConnection = None
         self._cf = Crazyflie(rw_cache='./fileVarii/cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -86,7 +91,12 @@ class Drogno(threading.Thread):
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
-        
+        address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
+        try:
+            time.sleep(0.5)
+            self.multiprocessConnection = Client(address)
+        except ConnectionRefusedError:
+            print('server di feedback non connesso!')
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
@@ -95,25 +105,24 @@ class Drogno(threading.Thread):
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
+            # print('fKING IT')
+            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
+            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
+            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
+            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
         else:
-            print('we are not faking it')
+            print('We are not faking it this time.')
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
             self.connect()
      
-    def exit(self):
-                print('exitFlag is now set for drogno %s, bye kiddo' % self.name)    
-                self.isReadyToFly = False
-                self.exitFlag.set()
-                self.isKilled   = 1
-
     def printStatus(self):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
                 print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
                 self.goToCount = 0
-                print ('kalman var: %s %s %s' % (round(self.kalman_X,3), round(self.kalman_Y,3), round(self.kalman_Z,3)))
+                print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -178,11 +187,11 @@ class Drogno(threading.Thread):
             var_z_history = [1000] * 10
             # threshold =5
             threshold = 0.01
-            var_x_history.append(self.kalman_X)
+            var_x_history.append(self.kalman_VarX)
             var_x_history.pop(0)
-            var_y_history.append(self.kalman_Y)
+            var_y_history.append(self.kalman_VarY)
             var_y_history.pop(0)
-            var_z_history.append(self.kalman_Z)
+            var_z_history.append(self.kalman_VarZ)
             var_z_history.pop(0)
 
             min_x = min(var_x_history)
@@ -197,15 +206,17 @@ class Drogno(threading.Thread):
                 max_y - min_y) < threshold and (
                 max_z - min_z) < threshold:
                 break
-            print('positionEstimated')
-            self.isPositionEstimated = True
-            self.isReadyToFly = True
+        print('positionEstimated')
+        self.isPositionEstimated = True
+        self.isReadyToFly = True
 
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
+        self.wait_for_position_estimator()
+
     #################################################################### connection
 
     def connect(self): 
@@ -220,7 +231,7 @@ class Drogno(threading.Thread):
             except:
                 print('no radio pal')
         if self.isKilled == False:
-            connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
+            connessione = threading.Thread(target=porcoMondo).start() 
 
     def reconnect(self):
         # self._cf.close_link()
@@ -280,7 +291,6 @@ class Drogno(threading.Thread):
             
             # time.sleep(0.3)
             self.reset_estimator()
-            self.wait_for_position_estimator()
 
             self._cf.param.set_value('commander.enHighLevel', '1')
             self._cf.param.set_value('ring.effect', '14')
@@ -315,14 +325,19 @@ class Drogno(threading.Thread):
         # self.x              = float(data['stateEstimate.x'])
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])
-        self.x              = float(data['kalman.stateX'])
-        self.y              = float(data['kalman.stateY'])
-        self.z              = float(data['kalman.stateZ'])
+        self.x                 = float(data['kalman.stateX'])
+        self.y                 = float(data['kalman.stateY'])
+        self.z                 = float(data['kalman.stateZ'])
         # self.yaw            = float(data['stabilizer.yaw'])
-        self.batteryVoltage = str(round(float(data['pm.vbat']),2))
-        self.kalman_X       = float(data['kalman.varPX'])
-        self.kalman_Y       = float(data['kalman.varPY'])
-        self.kalman_Z       = float(data['kalman.varPZ'])
+        self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
+        self.kalman_VarX       = float(data['kalman.varPX'])
+        self.kalman_VarY       = float(data['kalman.varPY'])
+        self.kalman_VarZ       = float(data['kalman.varPZ'])
+        try:
+            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
+            print('carlo')
+        except ConnectionRefusedError:
+            print('oooo')
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -372,7 +387,7 @@ class Drogno(threading.Thread):
                 self.reset_estimator()
                 self.starting_x  = self.x
                 self.starting_y  = self.y
-                self.statoDiVolo = 'taking off!'
+                self.statoDiVolo = 'scrambling!'
                 self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
                 # self.positionHLCommander.take_off()
                 self.statoDiVolo = 'hovering'
@@ -385,7 +400,7 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 2.0)
             self.isFlying     = False
             time.sleep(3)
-            self.isReadyToFly = True
+            self.isReadyToFly = False
             self.statoDiVolo = 'landed'
 
         if self.WE_ARE_FAKING_IT:
@@ -671,23 +686,22 @@ class Drogno(threading.Thread):
             time.sleep(BATTERY_CHECK_RATE)
 
     def killMeSoftly(self):
-            self.isReadyToFly = False
-            self.isKilled = True
-            self.land()
-            self.exit()
+        self.land()
+        self.exit()
     def killMeHardly(self):
-            # self.setRingColor(0,0,0)
-            self.isReadyToFly = False
-            self._cf.high_level_commander.stop()
-            self._cf.commander.send_stop_setpoint()
-            self._lg_stab.stop()
+        # self.setRingColor(0,0,0)
+        self._cf.high_level_commander.stop()
+        self._cf.commander.send_stop_setpoint()
+        self.exit()
+    def exit(self):
+        print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
+        self._lg_stab.stop()
 
-            # self._cf.loc.send_emergency_stop()
-            self._cf.close_link()
-            time.sleep(0.5)
-            self.isKilled = True
-
-            self.exit()
+        # self._cf.loc.send_emergency_stop()
+        self._cf.close_link()
+        self.isKilled = True
+        self.isReadyToFly = False
+        self.exitFlag.set()
 
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
