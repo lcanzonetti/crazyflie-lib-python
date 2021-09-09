@@ -17,7 +17,7 @@ finished = False
 
 class feedbacco():
     def __init__(self, eventoFinaleTremendo):
-        self.OSC_SENDING_IP   = "192.168.1.255"
+        self.OSC_SENDING_IP   = "192.168.10.255"
         self.SENDING_PORT     = 9203
         self.RECEIVING_PORT   = 6000
         self.finished         = eventoFinaleTremendo
@@ -29,7 +29,7 @@ class feedbacco():
         ipsila   = robbaVaria[2]
         zedda    = robbaVaria[3]
         batteria = float(robbaVaria[4])
-        print ('direi a tutti he il drogno %s sta a  %s  |  %s  |  %s   con batteria %s' % (iddio, ixxa, ipsila, zedda, batteria))
+        # print ('direi a tutti he il drogno %s sta a  %s  |  %s  |  %s   con batteria %s' % (iddio, ixxa, ipsila, zedda, batteria))
         coordinate  = oscbuildparse.OSCMessage("/feedback/" + iddio + "/pos", ",fff",   [ixxa,ipsila,zedda])
         robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",f",  [batteria])
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [coordinate, robba]) 

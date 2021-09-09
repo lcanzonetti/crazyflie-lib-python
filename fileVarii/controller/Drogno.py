@@ -180,35 +180,40 @@ class Drogno(threading.Thread):
         self._cf.cf.param.set_value('stabilizer.controller', controller)
 
     def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
-        print('Waiting for estimator to find position...')
-        while not self.isPositionEstimated:
-            var_y_history = [1000] * 10
-            var_x_history = [1000] * 10
-            var_z_history = [1000] * 10
-            # threshold =5
-            threshold = 0.01
-            var_x_history.append(self.kalman_VarX)
-            var_x_history.pop(0)
-            var_y_history.append(self.kalman_VarY)
-            var_y_history.pop(0)
-            var_z_history.append(self.kalman_VarZ)
-            var_z_history.pop(0)
+        def orco():
+            print('Waiting for estimator to find position...')
+            while not self.isPositionEstimated:
+                var_y_history = [1000] * 10
+                var_x_history = [1000] * 10
+                var_z_history = [1000] * 10
+                # threshold =5
+                threshold = 0.01
+                var_x_history.append(self.kalman_VarX)
+                var_x_history.pop(0)
+                var_y_history.append(self.kalman_VarY)
+                var_y_history.pop(0)
+                var_z_history.append(self.kalman_VarZ)
+                var_z_history.pop(0)
 
-            min_x = min(var_x_history)
-            max_x = max(var_x_history)
-            min_y = min(var_y_history)
-            max_y = max(var_y_history)
-            min_z = min(var_z_history)
-            max_z = max(var_z_history)
+                min_x = min(var_x_history)
+                max_x = max(var_x_history)
+                min_y = min(var_y_history)
+                max_y = max(var_y_history)
+                min_z = min(var_z_history)
+                max_z = max(var_z_history)
 
-            print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
-            if (max_x - min_x) < threshold and (
-                max_y - min_y) < threshold and (
-                max_z - min_z) < threshold:
-                break
-        print('positionEstimated')
-        self.isPositionEstimated = True
-        self.isReadyToFly = True
+                # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+                if (max_x - min_x) < threshold and (
+                    max_y - min_y) < threshold and (
+                    max_z - min_z) < threshold:
+                    self.isPositionEstimated = True
+                    break
+                if self.kalman_VarX < threshold and self.kalman_VarY < threshold and self.kalman_VarZ < threshold:
+                    self.isPositionEstimated = True
+                    break
+            print('positionEstimated')
+            self.isReadyToFly = True
+        lanciaOrco = threading.Thread(target=orco).start()
 
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
@@ -333,11 +338,12 @@ class Drogno(threading.Thread):
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
-        try:
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
-            print('carlo')
-        except ConnectionRefusedError:
-            print('oooo')
+        if not self.isKilled:
+            try:
+                self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
+                # print('carlo')
+            except ConnectionRefusedError:
+                print('oooo')
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -349,7 +355,8 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'sconnesso'
         # self._cf.close_link()
         # time.sleep(1)
-        self.reconnect()
+        # self.reconnect()
+        self.exit()
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -361,7 +368,9 @@ class Drogno(threading.Thread):
 
         # self._cf.close_link()
         # time.sleep(1)
-        self.reconnect()
+        # self.reconnect()
+        self.exit()
+
 
     def _disconnected(self, link_uri):
         if self.is_connected == True:
@@ -373,7 +382,9 @@ class Drogno(threading.Thread):
 
             # self._cf.close_link()
             # time.sleep(1)
-            self.reconnect()
+            # self.reconnect()
+            self.exit()
+ 
 
     def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
         print('like, now')
@@ -384,7 +395,7 @@ class Drogno(threading.Thread):
         else:
             print('for real')
             if self.isReadyToFly:
-                self.reset_estimator()
+                # self.reset_estimator()
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
@@ -400,7 +411,7 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 2.0)
             self.isFlying     = False
             time.sleep(3)
-            self.isReadyToFly = False
+            # self.isReadyToFly = False
             self.statoDiVolo = 'landed'
 
         if self.WE_ARE_FAKING_IT:

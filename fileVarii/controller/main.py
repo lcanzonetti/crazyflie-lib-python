@@ -16,7 +16,7 @@ import sys
 
 
 lastRecordPath   = ''  
-WE_ARE_FAKING_IT    = True
+WE_ARE_FAKING_IT    = False
 AUTO_RECONNECT      = True
 RECONNECT_FREQUENCY = 1
 COMMANDS_FREQUENCY  = 0.2
@@ -105,19 +105,19 @@ def exit_signal_handler(signum, frame):
     processes_exit_event.set()
     OSCFeedbackProcess.join()
     time.sleep(4)
-    # for drogno in drogni:
-    #     drogni[drogno].exit()
-    #     drogni[drogno].join()
+    for drogno in drogni:
+        drogni[drogno].exit()
+        # drogni[drogno].join()
     OSC.resetCompanion()
     OSC.finished = True
     sys.exit()
 
 if __name__ == '__main__':
-    os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
-    patto = Path('./lastRecord.txt')
-    with open(patto, 'r') as f:
-        lastRecordPath = f.read()
-        print ('last record path: ' + lastRecordPath)
+    # os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
+    # patto = Path('./lastRecord.txt')
+    # with open(patto, 'r') as f:
+    #     lastRecordPath = f.read()
+    #     print ('last record path: ' + lastRecordPath)
     main()
     signal.signal(signal.SIGINT, exit_signal_handler)
 
