@@ -72,6 +72,7 @@ class Drogno(threading.Thread):
         self.kalman_VarX              = 0
         self.kalman_VarY              = 0
         self.kalman_VarZ              = 0
+        self.esteemsCount           = 0
         self.prefStartPoint_X      = startingPoint[0]
         self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
@@ -120,9 +121,9 @@ class Drogno(threading.Thread):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate} kalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
                 self.goToCount = 0
-                print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
+                # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -140,6 +141,7 @@ class Drogno(threading.Thread):
 
     def connect(self): 
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+
         def porcoMondo():
             self.statoDiVolo = 'connecting'
             try:
@@ -180,37 +182,61 @@ class Drogno(threading.Thread):
         self._cf.cf.param.set_value('stabilizer.controller', controller)
 
     def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
+        self.isReadyToFly = False
+        self.isPositionEstimated = False
+        global esteemCount
         def orco():
             print('Waiting for estimator to find position...')
-            while not self.isPositionEstimated:
-                var_y_history = [1000] * 10
-                var_x_history = [1000] * 10
-                var_z_history = [1000] * 10
+            currentEsteem_x = 0
+            currentEsteem_y = 0
+            currentEsteem_z = 0
+            var_y_history = [] 
+            var_x_history = [] 
+            var_z_history = [] 
+            var_x_history.append(currentEsteem_x)
+            var_y_history.append(currentEsteem_y)
+            var_z_history.append(currentEsteem_z)
+            self.esteemsCount =  0
+            def addKalmanDatas():
+                # var_y_history = [1000] * 10
+                # var_x_history = [1000] * 10
+                # var_z_history = [1000] * 10
                 # threshold =5
                 threshold = 0.01
-                var_x_history.append(self.kalman_VarX)
-                var_x_history.pop(0)
-                var_y_history.append(self.kalman_VarY)
-                var_y_history.pop(0)
-                var_z_history.append(self.kalman_VarZ)
-                var_z_history.pop(0)
+                if self.kalman_VarX != currentEsteem_x:
+                    var_x_history.append(self.kalman_VarX)
+                    var_x_history.pop(0)
+                    self.esteemsCount += 1
+                if self.kalman_VarY != currentEsteem_x:
+                    var_y_history.append(self.kalman_VarY)
+                    var_y_history.pop(0) 
+                    self.esteemsCount += 1
 
-                min_x = min(var_x_history)
-                max_x = max(var_x_history)
-                min_y = min(var_y_history)
-                max_y = max(var_y_history)
-                min_z = min(var_z_history)
-                max_z = max(var_z_history)
+                if self.kalman_VarZ != currentEsteem_x:
+                    var_z_history.append(self.kalman_VarZ)
+                    var_z_history.pop(0) 
+                    self.esteemsCount += 1
 
-                # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
-                if (max_x - min_x) < threshold and (
-                    max_y - min_y) < threshold and (
-                    max_z - min_z) < threshold:
-                    self.isPositionEstimated = True
-                    break
-                if self.kalman_VarX < threshold and self.kalman_VarY < threshold and self.kalman_VarZ < threshold:
-                    self.isPositionEstimated = True
-                    break
+                if self.esteemsCount > 30:
+                        
+                    min_x = min(var_x_history)
+                    max_x = max(var_x_history)
+                    min_y = min(var_y_history)
+                    max_y = max(var_y_history)
+                    min_z = min(var_z_history)
+                    max_z = max(var_z_history)
+
+                    # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+                    if (max_x - min_x) < threshold and (
+                        max_y - min_y) < threshold and (
+                        max_z - min_z) < threshold:
+                        self.isPositionEstimated = True
+                    if self.kalman_VarX < threshold and self.kalman_VarY < threshold and self.kalman_VarZ < threshold:
+                        self.isPositionEstimated = True
+                # self.isPositionEstimated = False
+                print('position not yet estimated, got %s esteems' % self.esteemsCount)
+            while not self.isPositionEstimated:
+                addKalmanDatas()
             print('positionEstimated')
             self.isReadyToFly = True
         lanciaOrco = threading.Thread(target=orco).start()
@@ -220,8 +246,9 @@ class Drogno(threading.Thread):
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
-        self.wait_for_position_estimator()
-
+        # self.wait_for_position_estimator()
+        self.isReadyToFly = True
+        self.isPositionEstimated = True
     #################################################################### connection
 
     def connect(self): 
@@ -239,6 +266,7 @@ class Drogno(threading.Thread):
             connessione = threading.Thread(target=porcoMondo).start() 
 
     def reconnect(self):
+
         # self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
@@ -267,7 +295,7 @@ class Drogno(threading.Thread):
 
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=500)
+        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=400)
         # self._lg_stab.add_variable('stateEstimate.x', 'float')
         # self._lg_stab.add_variable('stateEstimate.y', 'float')
         # self._lg_stab.add_variable('stateEstimate.z', 'float')
@@ -308,6 +336,7 @@ class Drogno(threading.Thread):
                 default_velocity=0.5,
                 default_height=DEFAULT_HEIGHT,
                 controller=PositionHlCommander.CONTROLLER_PID) 
+            time.sleep(0.5)
             self._lg_stab.start()
             self.batteryThread.start()
             self._cf.param.set_value('ring.fadeTime', 1)
@@ -338,12 +367,12 @@ class Drogno(threading.Thread):
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
-        if not self.isKilled:
-            try:
-                self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
-                # print('carlo')
-            except ConnectionRefusedError:
-                print('oooo')
+        # if not self.isKilled:
+        #     try:
+        #         self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
+        #         # print('carlo')
+        #     except ConnectionRefusedError:
+        #         print('oooo')
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -371,7 +400,6 @@ class Drogno(threading.Thread):
         # self.reconnect()
         self.exit()
 
-
     def _disconnected(self, link_uri):
         if self.is_connected == True:
             """Callback when the Crazyflie is disconnected (called in all cases)"""
@@ -385,6 +413,7 @@ class Drogno(threading.Thread):
             # self.reconnect()
             self.exit()
  
+    #################################################################### movement
 
     def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
         print('like, now')
@@ -394,8 +423,9 @@ class Drogno(threading.Thread):
             self.isFlying  = True
         else:
             print('for real')
+            self.reset_estimator()
+
             if self.isReadyToFly:
-                # self.reset_estimator()
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
@@ -411,7 +441,7 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 2.0)
             self.isFlying     = False
             time.sleep(3)
-            # self.isReadyToFly = False
+            self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
         if self.WE_ARE_FAKING_IT:
@@ -441,16 +471,16 @@ class Drogno(threading.Thread):
             # elif x < 0 and y > 0:
             #     yaw =  135
 
-            clamp(x, -BOX_X, BOX_X)
-            clamp(y, -BOX_Y, BOX_Y)
-            clamp(z, 0.3   , BOX_Z)
+            # clamp(x, -BOX_X, BOX_X)
+            # clamp(y, -BOX_Y, BOX_Y)
+            # clamp(z, 0.3   , BOX_Z)
             print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
             # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         # else:
-        #     print('perhaps take off?')
+            # print('perhaps take off?')
 
     def goLeft(self, quanto=0.3):
         if self.isFlying:

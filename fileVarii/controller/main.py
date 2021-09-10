@@ -13,6 +13,7 @@ import OSC_feedabcker as feedbacker
 import Drogno
 import cflib.crtp
 import sys
+from   cflib.utils.power_switch import PowerSwitch
 
 
 lastRecordPath   = ''  
@@ -31,12 +32,12 @@ OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.feedbacco, args
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
+        'radio://0/80/2M/E7E7E7E7E2',
         'radio://1/90/2M/E7E7E7E7E3',
         # 'radio://1/90/2M/E7E7E7E7E4',
-        # 'radio://1/90/2M/E7E7E7E7E5',
+        'radio://1/90/2M/E7E7E7E7E5',
         # 'radio://2/100/2M/E7E7E7E7E6',
-        # 'radio://2/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8',
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
@@ -62,7 +63,6 @@ def autoReconnect():
                 drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
                 drogni[IDToBeRenewed].start()
  
-
 def main():
     global WE_ARE_FAKING_IT
     if not WE_ARE_FAKING_IT:
@@ -80,13 +80,29 @@ def main():
             pass
     except IndexError:
         print(IndexError)
-    OSCFeedbackProcess.start()
     
+    def restart_devices(self, uris):
+         print('Restarting devices')
+
+    for uri in uris:
+        try: PowerSwitch(uri).stm_power_down()
+        except: print('someone is not there to be shut down')
+
+    time.sleep(1)
+
+    for uri in uris:
+        try: PowerSwitch(uri).stm_power_up()
+        except: print('someone is not there to be woken up')
+
+    # Wait for devices to boot
+    time.sleep(5)
 
     for uro in uris:
         iddio = int(uro[-1])
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
+
+    OSCFeedbackProcess.start()
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()

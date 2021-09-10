@@ -146,9 +146,9 @@ def updateCompanion():
                     tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeoffOrLandColor)
                     tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
-                    kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   ['kill'])
-                    kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [255, 10, 10])
-                    kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [60, 60, 60])
+                    kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   [str(round(d.kalman_VarX,1)) + '' + str(round(d.kalman_VarY,1)) + ' ' + str(round(d.kalman_VarZ,1))])
+                    kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [55, 10, 10])
+                    kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [255, 255, 255])
 
                     macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                     osc_send(macron, "companionClient")
@@ -282,16 +282,20 @@ def kill     (coddii, chi):
 def printAndSendCoordinates():
     global drogni
     global bufferone
+    time.sleep(2)
     while not finished:
         time.sleep(COMMANDS_FREQUENCY)
+        # if isSendEnabled:
+        #     for drogno in drogni:
+        #         iddio = drogni[drogno].ID
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
-                    # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
-                        # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
+                    # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
         # else:
         #     # print('ma i comandi di movimento disabilitati')
         #     pass
@@ -395,7 +399,7 @@ def start_server():          #### OSC init    #########    acts as main()
 
 def faiIlBufferon():
     global bufferone
-    for i in range (0,20):
+    for i in range (0,12):
         bufferone[i] = bufferDrone(i)
     # print ('bufferon')  
     # print (bufferone)
