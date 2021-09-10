@@ -2,16 +2,18 @@
 #ciao
 import os
 from pathlib import Path
-
+import multiprocessing
 import threading
 import time
 import signal
 from   collections import namedtuple
 #custom modules
 import OSCStuff as OSC
+import OSC_feedabcker as feedbacker
 import Drogno
 import cflib.crtp
 import sys
+
 
 lastRecordPath   = ''  
 WE_ARE_FAKING_IT    = False
@@ -22,7 +24,9 @@ Drogno.COMMANDS_FREQUENCY = COMMANDS_FREQUENCY
 OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
 
 
-exit_event = threading.Event()
+threads_exit_event   = threading.Event()
+processes_exit_event = multiprocessing.Event()
+OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.feedbacco, args=[processes_exit_event])
 
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
@@ -47,7 +51,7 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
 
 
 def autoReconnect():
-    while not exit_event.is_set() :
+    while not threads_exit_event.is_set() :
         time.sleep(RECONNECT_FREQUENCY)
         for drogno in drogni:
             if drogni[drogno].isKilled:
@@ -55,8 +59,9 @@ def autoReconnect():
                 IDToBeRenewed = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
-                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
+                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
                 drogni[IDToBeRenewed].start()
+ 
 
 def main():
     global WE_ARE_FAKING_IT
@@ -75,33 +80,44 @@ def main():
             pass
     except IndexError:
         print(IndexError)
+    OSCFeedbackProcess.start()
     
+
     for uro in uris:
         iddio = int(uro[-1])
-        drogni[iddio] = Drogno.Drogno(iddio, uro, exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
-        drogni[iddio].start()
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        drogni[iddio].start() 
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
+
+    
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
+    global OSCFeedbackProcess 
+    global threads_exit_event
     print('esco')
-    exit_event.set() 
+    threads_exit_event.set() 
+    processes_exit_event.set()
+    OSCFeedbackProcess.join()
+    time.sleep(4)
+    for drogno in drogni:
+        drogni[drogno].exit()
+        # drogni[drogno].join()
     OSC.resetCompanion()
     OSC.finished = True
-    drogni = {}
     sys.exit()
 
 if __name__ == '__main__':
-    os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
-    patto = Path('./lastRecord.txt')
-    with open(patto, 'r') as f:
-        lastRecordPath = f.read()
-        print ('last record path: ' + lastRecordPath)
+    # os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
+    # patto = Path('./lastRecord.txt')
+    # with open(patto, 'r') as f:
+    #     lastRecordPath = f.read()
+    #     print ('last record path: ' + lastRecordPath)
     main()
     signal.signal(signal.SIGINT, exit_signal_handler)
 
