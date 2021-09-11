@@ -367,12 +367,12 @@ class Drogno(threading.Thread):
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
-        # if not self.isKilled:
-        #     try:
-        #         self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
-        #         # print('carlo')
-        #     except ConnectionRefusedError:
-        #         print('oooo')
+        if not self.isKilled:
+            try:
+                self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
+                # print('carlo')
+            except ConnectionRefusedError:
+                print('oooo')
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie

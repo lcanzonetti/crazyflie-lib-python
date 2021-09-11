@@ -50,10 +50,14 @@ class feedbacco():
             while not self.finished.is_set():
                 osc_process()
                 msg = connessione.recv()
-                self.sendPose(msg)
-                time.sleep(0.01)
+                if msg == 'fuck you':
+                    self.finished.set()
+                    break
+                else:
+                    self.sendPose(msg)
+                    time.sleep(0.01)
             # Properly close the system.
-            print('anche il feedbacker se ne va')
+            print('\nanche il feedbacker se ne va')
             osc_terminate()
             listener.close()
         
