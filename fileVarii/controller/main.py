@@ -19,7 +19,7 @@ from   multiprocessing.connection import Client
 
 lastRecordPath   = ''  
 WE_ARE_FAKING_IT    = False
-AUTO_RECONNECT      = True
+AUTO_RECONNECT      = False
 RECONNECT_FREQUENCY = 1
 COMMANDS_FREQUENCY  = 0.2
 FEEDBACK_SENDING_PORT = 6000
@@ -35,14 +35,14 @@ connectionToFeedbackProcess = None
 
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/90/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://1/90/2M/E7E7E7E7E3',
         'radio://1/90/2M/E7E7E7E7E4',
-        'radio://1/90/2M/E7E7E7E7E5',
-        'radio://2/100/2M/E7E7E7E7E6',
-        'radio://2/100/2M/E7E7E7E7E7',
-        'radio://2/100/2M/E7E7E7E7E8'
+        # 'radio://1/90/2M/E7E7E7E7E5',
+        # 'radio://2/100/2M/E7E7E7E7E6',
+        # 'radio://2/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E8'
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
@@ -82,8 +82,8 @@ def autoReconnect():
     while not threads_exit_event.is_set() :
         time.sleep(RECONNECT_FREQUENCY)
         for drogno in drogni:
-            if drogni[drogno].isKilled:
-                print('il drogno %s è stato ucciso, provo a riconnettermi' % drogni[drogno].ID)
+            if not drogni[drogno].isKilled:
+                print('il drogno %s è sparito, provo a riconnettermi' % drogni[drogno].ID)
                 IDToBeRenewed = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
@@ -149,9 +149,8 @@ def main():
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
-    # time.sleep(2)
+    time.sleep(5)
     global connectionToFeedbackProcess
-    time.sleep(3)
     try:
         connectionToFeedbackProcess = Client(address)
     except:
@@ -162,6 +161,10 @@ def exit_signal_handler(signum, frame):
     global OSCFeedbackProcess 
     global threads_exit_event
     print('esco')
+    # connectionToFeedbackProcess.send('fuck you')
+    connectionToFeedbackProcess.finished.set()
+
+    processes_exit_event.set()
     processes_exit_event.set()
     threads_exit_event.set() 
 
@@ -171,7 +174,6 @@ def exit_signal_handler(signum, frame):
     OSC.resetCompanion()
     OSC.finished = True
 
-    connectionToFeedbackProcess.send('fuck you')
     OSCFeedbackProcess.join()
     # time.sleep(2)
 

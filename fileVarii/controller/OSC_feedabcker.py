@@ -40,9 +40,7 @@ class Feedbacco():
 
         address = ('127.0.0.1', self.RECEIVING_PORT)
         listener = Listener(address)
-        print('dio bono %s' % listener)
 
-        connessione = listener.accept()
         print('feeddabcker yeah')
         # self.bufferone = robba
         # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
@@ -51,6 +49,8 @@ class Feedbacco():
         # osc_startup(logger=logger)
 
         def oscLoop():
+            connessione = listener.accept()
+
             while not self.finished.is_set():
                 osc_process()
                 msg = connessione.recv()
@@ -93,15 +93,15 @@ def fammeNesempio(carlo):
 
 ########## main
 if __name__ == '__main__':
-    print('coddo')
     processes_exit_event = multiprocessing.Event()
     address = ('127.0.0.1', 6000)
+    istanza = Feedbacco(processes_exit_event)
+    esempiatore = fammeNesempio(istanza)
 
+    time.sleep(3)
     connectionToFeedbackProcess = Client(address)
     connectionToFeedbackProcess.send('fuck your mother')
 
-    istanza = Feedbacco(processes_exit_event)
-    esempiatore = fammeNesempio(istanza)
     while not finished:
         pass
 
