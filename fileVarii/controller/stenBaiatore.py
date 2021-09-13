@@ -3,6 +3,10 @@
 import time
 #custom modules
 from   cflib.utils.power_switch import PowerSwitch
+from   colorama              import Fore, Back, Style
+from   colorama              import init as coloInit  
+coloInit(convert=True)
+
 
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',
@@ -22,9 +26,13 @@ uris = [
 def main():
     print('StandBying devices')
     for uri in uris:
-        PowerSwitch(uri).stm_power_down()
+        try:
+            PowerSwitch(uri).stm_power_down()
+            print(Fore.GREEN + '%s has been standbyied!' % uri)
+        except Exception:
+            print(Fore.RED + '%s is not there to be standByied' % uri)
     time.sleep(1)
-    print ('standBaiedss')
+    print ('Done. Ciao.')
  
 if __name__ == '__main__':
     main()
