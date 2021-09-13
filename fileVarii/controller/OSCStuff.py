@@ -25,7 +25,7 @@ COMPANION_IP            = "192.168.10.255"
 COMPANION_PORT          = 12321
 COMPANION_PAGES         = ['92', '93', '94']
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 0.5
+COMPANION_UPDATE_RATE   = 1
 COMPANION_FEEDBACK_ENABLED = True
 
 FEEDBACK_ENABLED        = False
@@ -278,6 +278,13 @@ def kill     (coddii, chi):
             drogni[drogno].killMeHardly()
     else:
         drogni[chi].killMeHardly()
+def standBy  (coddii, chi):
+    print(' %s  just go to sleep' % chi )
+    if chi == 'all':    
+        for drogno in drogni:
+            drogni[drogno].goToSleep()
+    else:
+        drogni[chi].goToSleep()
 
 ###########################  single fella
 def printAndSendCoordinates():
@@ -308,7 +315,7 @@ def printHowManyMessages():
             global msgCount
             time.sleep(5)
             if msgCount > 0.:
-                print('ho ricevuto %s messaggi OSC al secondo.' % str(msgCount/5))
+                print('\nho ricevuto %s messaggi OSC al secondo.' % str(msgCount/5))
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -387,6 +394,7 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/goForward",        goForward,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goBack",           goBack,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/standBy",          standBy,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     resetCompanion()

@@ -24,25 +24,26 @@ RECONNECT_FREQUENCY = 1
 COMMANDS_FREQUENCY  = 0.2
 FEEDBACK_SENDING_PORT = 6000
 
+
 Drogno.COMMANDS_FREQUENCY = COMMANDS_FREQUENCY
 OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
 
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
-OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.Feedbacco, args=[processes_exit_event])
+
 address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
 connectionToFeedbackProcess = None
 
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://1/90/2M/E7E7E7E7E3',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
+        'radio://1/90/2M/E7E7E7E7E3',
         'radio://1/90/2M/E7E7E7E7E4',
-        # 'radio://1/90/2M/E7E7E7E7E5',
-        # 'radio://2/100/2M/E7E7E7E7E6',
-        # 'radio://2/100/2M/E7E7E7E7E7',
-        # 'radio://2/100/2M/E7E7E7E7E8'
+        'radio://1/90/2M/E7E7E7E7E5',
+        'radio://2/100/2M/E7E7E7E7E6',
+        'radio://2/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E8'
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
@@ -130,18 +131,21 @@ def restart_devices():
             sys.exit()
     else:
         # Wait for devices to boot
-        time.sleep(4)
+        time.sleep(5)
 
 def main():
     radioStart()
     restart_devices()
-
+ 
     for uro in connectedUris:
         iddio = int(uro[-1])
-        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        # fiddo = feedbacker.Feedbacco(processes_exit_event)
+        # OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.Feedbacco.start, args=[processes_exit_event])
+        # OSCFeedbackProcess.start()
+
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
 
-    OSCFeedbackProcess.start()
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
@@ -149,34 +153,30 @@ def main():
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
-    time.sleep(5)
-    global connectionToFeedbackProcess
-    try:
-        connectionToFeedbackProcess = Client(address)
-    except:
-        print('non trovo quaa mmerda de fidbeck')
+    # time.sleep(5)
+    # global connectionToFeedbackProcess
+    # try:
+    #     connectionToFeedbackProcess = Client(address)
+    # except:
+    #     print('non trovo quaa mmerda de fidbeck')
     
 
 def exit_signal_handler(signum, frame):
     global OSCFeedbackProcess 
     global threads_exit_event
     print('esco')
-    # connectionToFeedbackProcess.send('fuck you')
-    connectionToFeedbackProcess.finished.set()
-
-    processes_exit_event.set()
-    processes_exit_event.set()
     threads_exit_event.set() 
+    # connectionToFeedbackProcess.send('fuck you')
+    # fiddo.finished.set()
+    # processes_exit_event.set()
 
     for drogno in drogni:
+        try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
+        except: print('%s is not there to be shut down' % drogni[drogno].link_uri)
         drogni[drogno].exit()
         drogni[drogno].join()
     OSC.resetCompanion()
     OSC.finished = True
-
-    OSCFeedbackProcess.join()
-    # time.sleep(2)
-
     sys.exit()
 
 if __name__ == '__main__':

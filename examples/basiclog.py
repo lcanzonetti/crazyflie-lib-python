@@ -36,8 +36,8 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from cflib.utils import uri_helper
 
-uri1 = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
-uri2 = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
+# uri1 = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+uri2 = uri_helper.uri_from_env(default='radio://1/90/2M/E7E7E7E7E3')
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -74,13 +74,13 @@ class LoggingExample:
         print('Connected to %s' % link_uri)
 
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=100)
-        self._lg_stab.add_variable('stateEstimate.x', 'float')
-        self._lg_stab.add_variable('stateEstimate.y', 'float')
-        self._lg_stab.add_variable('stateEstimate.z', 'float')
-        self._lg_stab.add_variable('stabilizer.roll', 'float')
-        self._lg_stab.add_variable('stabilizer.pitch', 'float')
-        self._lg_stab.add_variable('stabilizer.yaw', 'float')
+        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=200)
+        self._lg_stab.add_variable('stateEstimate.x', 'FP16')
+        self._lg_stab.add_variable('stateEstimate.y', 'FP16')
+        self._lg_stab.add_variable('stateEstimate.z', 'FP16')
+        self._lg_stab.add_variable('stabilizer.roll', 'FP16')
+        self._lg_stab.add_variable('stabilizer.pitch', 'FP16')
+        self._lg_stab.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_stab.add_variable('pm.vbat', 'FP16')
 
@@ -103,7 +103,7 @@ class LoggingExample:
 
         # Start a timer to disconnect in 10s
         # t = Timer(5, self._cf.close_link)
-        t.start()
+        # t.start()
 
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
@@ -137,13 +137,13 @@ if __name__ == '__main__':
     # Initialize the low-level drivers
     cflib.crtp.init_drivers()
 
-    le1 = LoggingExample(uri1)
+    # le1 = LoggingExample(uri1)
     le2 = LoggingExample(uri2)
 
     # The Crazyflie lib doesn't contain anything to keep the application alive,
     # so this is where your application should do something. In our case we
     # are just waiting until we are disconnected.
-    while le1.is_connected:
-        time.sleep(1)
+    # while le1.is_connected:
+    #     time.sleep(1)
     while le2.is_connected:
         time.sleep(1)

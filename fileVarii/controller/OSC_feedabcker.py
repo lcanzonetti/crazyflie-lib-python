@@ -17,13 +17,13 @@ finished = False
 # bufferon = {}
 
 class Feedbacco():
-    def __init__(self, eventoFinaleTremendo):
+    def __init__(self, eventoFinaleTremendo, receiving_port):
         self.OSC_SENDING_IP   = "192.168.10.255"
         self.SENDING_PORT     = 9203
-        self.RECEIVING_PORT   = 6000
+        self.port             = receiving_port
         self.finished         = eventoFinaleTremendo
-        self.start()
-
+        # self.start()
+ 
     def sendPose(self, robbaVaria):
         iddio    = str(robbaVaria[0])
         ixxa     = robbaVaria[1]
@@ -35,18 +35,12 @@ class Feedbacco():
         robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",f",  [batteria])
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [coordinate, robba]) 
         osc_send(bandoleon, "feedbackClient")
-    
+  
     def start(self):
-
-        address = ('127.0.0.1', self.RECEIVING_PORT)
+        address = ('127.0.0.1', self.port)
         listener = Listener(address)
 
-        print('feeddabcker yeah')
-        # self.bufferone = robba
-        # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
-        # logger = logging.getLogger("osc")
-        # logger.setLevel(logging.DEBUG)
-        # osc_startup(logger=logger)
+        print('feeddabcker yeah on port %s' + str(self.port))
 
         def oscLoop():
             connessione = listener.accept()
@@ -95,7 +89,7 @@ def fammeNesempio(carlo):
 if __name__ == '__main__':
     processes_exit_event = multiprocessing.Event()
     address = ('127.0.0.1', 6000)
-    istanza = Feedbacco(processes_exit_event)
+    istanza = Feedbacco(processes_exit_event, 6000)
     esempiatore = fammeNesempio(istanza)
 
     time.sleep(3)
