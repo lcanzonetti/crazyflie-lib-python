@@ -46,7 +46,8 @@ uris = [
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
-connectedUris = uris
+connectedUris = []
+
 drogni = {}
 SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
@@ -88,6 +89,8 @@ def autoReconnect():
 
 def restart_devices():
     print('Restarting devices')
+    connectedUris = uris.copy()
+
     for urlo in uris:
         try: PowerSwitch(urlo).stm_power_down()
         except: print('%s is not there to be shut down' % urlo)
@@ -97,10 +100,10 @@ def restart_devices():
     print(uris)
     urisToBeRemoved = []
     for urico in range(len(uris)):
-        print('tipo:  ')
-        print(uris[urico])
+        # print('tipo:  ')
+        # print(uris[urico])
         try:
-            print('trying to power up %s' % uris[urico]) 
+            # print('trying to power up %s' % uris[urico]) 
             PowerSwitch(uris[urico]).stm_power_up()
         except Exception: 
             # print (Exception)
@@ -116,9 +119,13 @@ def restart_devices():
     print('at the end these are drognos we have:')
     print(connectedUris)
     if len(connectedUris) == 0:
-        opinion = input('there actually no drognos, wanna fake it?')
+        opinion = input('there actually no drognos, wanna fake it?\nPress Y for yes, R to retry or any other key to exit.')
         if opinion == 'y' or opinion == 'Y':
             WE_ARE_FAKING_IT = True
+        if opinion == 'r' or opinion == 'R':
+            restart_devices()
+        else:
+            sys.exit()
     else:
         # Wait for devices to boot
         time.sleep(4)

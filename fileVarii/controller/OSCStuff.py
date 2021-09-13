@@ -84,12 +84,16 @@ def updateCompanion():
             if COMPANION_FEEDBACK_ENABLED:
                 time.sleep(COMPANION_UPDATE_RATE)
                 # print(Fore.WHITE +'aggiorno companion')
-                listaTimecode = timecode.split(':')
+                listaTimecode    = timecode.split(':')
                 timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(29),   None,   [listaTimecode[0]])
                 timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(30),   None,   [listaTimecode[1]])
                 timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(31),   None,   [listaTimecode[2]])
                 timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(32),   None,   [listaTimecode[3]])
-                ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames]) 
+
+                companionRate    = oscbuildparse.OSCMessage("/style/text/"+str(int(COMPANION_PAGES[0])-1)+"/"    + str(24),   ",s",   ["Comp. Update Rate" + COMPANION_UPDATE_RATE])
+                    
+                    
+                ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate]) 
                 osc_send(ticcio, "companionClient")
                 
                 if not isSendEnabled:                       #*******************  SEND ENABLING
@@ -346,6 +350,13 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_G = int(args[2])
     bufferone[iddio].requested_B = int(args[3])
 
+def setCompanionRate(address, args):
+    global COMPANION_UPDATE_RATE
+    if args[1] == '+':
+        COMPANION_UPDATE_RATE += 0.1
+    elif args[1] == '-':
+        COMPANION_UPDATE_RATE -= 0.1
+
 def start_server():          #### OSC init    #########    acts as main()
     global finished 
     global bufferone
@@ -384,7 +395,11 @@ def start_server():          #### OSC init    #########    acts as main()
     osc_method("/goBack",           goBack,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+    ###########################  settings
+    osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+
+
     resetCompanion()
     updateCompanion()
     printHowManyMessages()
@@ -399,7 +414,7 @@ def start_server():          #### OSC init    #########    acts as main()
 
 def faiIlBufferon():
     global bufferone
-    for i in range (0,12):
+    for i in range (0,20):
         bufferone[i] = bufferDrone(i)
     # print ('bufferon')  
     # print (bufferone)
