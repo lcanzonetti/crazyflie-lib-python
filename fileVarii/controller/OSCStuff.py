@@ -172,7 +172,7 @@ def takeOff(coddii, decollante):
                     except Exception:
                         print('already taking off %s' % Exception)
             else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+                print('can\'t scramble drogno %s, not connected' % drogni[drogno].name)
     else:
         if drogni[decollante].is_connected:
             if not drogni[decollante].isFlying:
@@ -268,7 +268,8 @@ def ringColor(*args):
     # print (bullshit)
     # print  (rgb[0])
     for drogno in drogni:
-        drogni[drogno].setRingColor(args[1][0], args[1][1], args[1][2])
+        if drogni[drogno].is_Connected:
+            drogni[drogno].setRingColor(args[1][0], args[1][1], args[1][2])
         # drogni[drogno].alternativeSetRingColor(args)
 def kill     (coddii, chi):
     print(' %s  fuck now' % chi )
@@ -293,7 +294,7 @@ def printAndSendCoordinates():
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
                     drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
-                    # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
+                    print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
         # else:

@@ -93,11 +93,7 @@ class Drogno(threading.Thread):
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
         address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
-        try:
-            time.sleep(0.5)
-            self.multiprocessConnection = Client(address)
-        except ConnectionRefusedError:
-            print('server di feedback non connesso!')
+    
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
@@ -107,12 +103,19 @@ class Drogno(threading.Thread):
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
             # print('fKING IT')
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
+            # self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
         else:
             print('We are not faking it this time.')
+            connectedToFeedback = False
+            if not self.exitFlag.is_set():
+                while not connectedToFeedback:
+                    try:
+                        time.sleep(1)
+                        self.multiprocessConnection = Client(address)
+                        connectedToFeedback = True
+                    except ConnectionRefusedError:
+                        print('server di feedback non connesso!')
+
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
             self.connect()

@@ -22,9 +22,13 @@ uris = [
 def main():
     print('StandBying devices')
     for uri in uris:
-        PowerSwitch(uri).stm_power_down()
+        try:
+            PowerSwitch(uri).stm_power_down()
+            print('%s has been standbyied!' % uri)
+        except Exception:
+            print('%s is not there to be standByied' % uri)
     time.sleep(1)
-    print ('standBaiedss')
+    print ('Done. Ciao.')
  
 if __name__ == '__main__':
     main()

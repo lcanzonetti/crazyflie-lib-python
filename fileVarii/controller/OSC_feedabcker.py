@@ -1,9 +1,10 @@
 #rf 2021
-from multiprocessing import connection
 import threading
+import multiprocessing
+
 import time
-import repeatedTimer as rp
-from multiprocessing.connection import Listener
+from   multiprocessing.connection import Listener
+from   multiprocessing.connection import Client
 
 from   colorama              import Fore, Back, Style  
 from   osc4py3.as_eventloop  import *
@@ -15,7 +16,7 @@ import logging
 finished = False
 # bufferon = {}
 
-class feedbacco():
+class Feedbacco():
     def __init__(self, eventoFinaleTremendo):
         self.OSC_SENDING_IP   = "192.168.10.255"
         self.SENDING_PORT     = 9203
@@ -36,8 +37,11 @@ class feedbacco():
         osc_send(bandoleon, "feedbackClient")
     
     def start(self):
-        address = ('localhost', self.RECEIVING_PORT)
+
+        address = ('127.0.0.1', self.RECEIVING_PORT)
         listener = Listener(address)
+        print('dio bono %s' % listener)
+
         connessione = listener.accept()
         print('feeddabcker yeah')
         # self.bufferone = robba
@@ -46,7 +50,7 @@ class feedbacco():
         # logger.setLevel(logging.DEBUG)
         # osc_startup(logger=logger)
 
-        def daje():
+        def oscLoop():
             while not self.finished.is_set():
                 osc_process()
                 msg = connessione.recv()
@@ -55,7 +59,7 @@ class feedbacco():
                     break
                 else:
                     self.sendPose(msg)
-                    time.sleep(0.01)
+                time.sleep(0.01)
             # Properly close the system.
             print('\nanche il feedbacker se ne va')
             osc_terminate()
@@ -64,7 +68,7 @@ class feedbacco():
         osc_startup()
         osc_broadcast_client(self.OSC_SENDING_IP, self.SENDING_PORT, "feedbackClient")
         print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.SENDING_PORT)
-        tridio = threading.Thread(target=daje).start()
+        tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         
 
@@ -72,38 +76,32 @@ class feedbacco():
 #cancellami:
 
 def fammeNesempio(carlo):
+    print('minchia')
     def daje():
+        print('ad esempio')
         global finished
         conto = 5
         while conto > 0:
             carlo.sendPose([int(random()*10), round(random()*10,3), round(random()*10,3), round(random()*10,3), round(random()*10,2)])
             conto -= 1
             time.sleep(1)
-        finished = True
-    # while True:
-    #     print ('tipo: ', str(bufferon[0].requested_X))
-    #     print ('tipo: ', str(bufferon[1].requested_X))
-    #     print ('tipo: ', str(bufferon[2].requested_X))
-    #     print ('tipo: ', str(bufferon[3].requested_X))
-    #     print ('tipo: ', str(bufferon[4].requested_X))
-    #     print ('tipo: ', str(bufferon[5].requested_X))
-    #     print ('tipo: ', str(bufferon[6].requested_X))
-    #     print ('tipo: ', str(bufferon[7].requested_X))
-    #     print ('tipo: ', str(bufferon[8].requested_X))
-    #     time.sleep(1)
+        processes_exit_event.set()
     OSCesempio        = threading.Thread(target=daje,daemon=True).start()
-# OSCRefreshThread  = threading.Thread(target=gino.main)
-# OSCRefreshThread.start()
-# OSCRefreshThread.join()
+
 
 
 
 ########## main
 if __name__ == '__main__':
-    # print(bufferon)
-    gino = feedbacco()
-    gino.start()
-    carlo = threading.Thread(target=fammeNesempio, args=[gino]).start()
+    print('coddo')
+    processes_exit_event = multiprocessing.Event()
+    address = ('127.0.0.1', 6000)
+
+    connectionToFeedbackProcess = Client(address)
+    connectionToFeedbackProcess.send('fuck your mother')
+
+    istanza = Feedbacco(processes_exit_event)
+    esempiatore = fammeNesempio(istanza)
     while not finished:
         pass
 

@@ -13,9 +13,9 @@ import OSC_feedabcker as feedbacker
 import Drogno
 import cflib.crtp
 import sys
-import power_switch_mod as PowerSwitch
+# import power_switch_mod as PowerSwitch
+from   cflib.utils.power_switch import PowerSwitch
 from   multiprocessing.connection import Client
-
 
 lastRecordPath   = ''  
 WE_ARE_FAKING_IT    = False
@@ -29,7 +29,7 @@ OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
 
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
-OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.feedbacco, args=[processes_exit_event])
+OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.Feedbacco, args=[processes_exit_event])
 address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
 connectionToFeedbackProcess = None
 
@@ -46,7 +46,7 @@ uris = [
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
-connectedUris = uris
+connectedUris = uris.copy()
 drogni = {}
 SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
@@ -58,17 +58,21 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
 def radioStart():
     global WE_ARE_FAKING_IT
     if not WE_ARE_FAKING_IT:
-
         try:
             cflib.crtp.init_drivers()
-            print(cflib.crtp.get_interfaces_status())        
+            print(cflib.crtp.get_interfaces_status())   
             availableRadios = cflib.crtp.scan_interfaces()
             if availableRadios:
+                print('available:')
+                print (availableRadios)     
+
                 for i in availableRadios:
                     print ('Found %s radios.' % len(availableRadios))
                     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
             else:
                 # WE_ARE_FAKING_IT = True
+                print('porcoMondo')     
+
                 pass
         except IndexError:
             print(IndexError)
@@ -87,28 +91,28 @@ def autoReconnect():
                 drogni[IDToBeRenewed].start()
 
 def restart_devices():
+    global connectedUris
     print('Restarting devices')
-    for urlo in uris:
-        try: PowerSwitch(urlo).stm_power_down()
-        except: print('%s is not there to be shut down' % urlo)
-    time.sleep(1)
+    for uri in uris:
+        # time.sleep(0.5)
+        try: PowerSwitch(uri).stm_power_down()
+        except: print('%s is not there to be shut down' % uri)
     
     print('uris meant to be switched on:')
     print(uris)
     urisToBeRemoved = []
     for urico in range(len(uris)):
-        print('tipo:  ')
-        print(uris[urico])
+        # print('tipo:  ')
+        # print(uris[urico])
         try:
             print('trying to power up %s' % uris[urico]) 
             PowerSwitch(uris[urico]).stm_power_up()
         except Exception: 
-            # print (Exception)
-            
             print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
             # connectedUris.remove(uris[urico])
             urisToBeRemoved.append(uris[urico])
             # time.sleep(0.5)
+    connectedUris = uris.copy()
     for u in urisToBeRemoved:
         connectedUris.remove(u)
     
@@ -116,9 +120,14 @@ def restart_devices():
     print('at the end these are drognos we have:')
     print(connectedUris)
     if len(connectedUris) == 0:
-        opinion = input('there actually no drognos, wanna fake it?')
-        if opinion == 'y' or opinion == 'Y':
+        opinion = input('there actually no drognos, wanna retry or fake it?\nPress R to retry,\nF to fake it,\nQ to exit,\nor any other key, to choose not to choose.')
+        if opinion == 'f' or opinion == 'F':
+            global WE_ARE_FAKING_IT
             WE_ARE_FAKING_IT = True
+        if opinion == 'r' or opinion == 'R':
+            restart_devices()
+        if opinion == 'q' or opinion == 'Q':
+            sys.exit()
     else:
         # Wait for devices to boot
         time.sleep(4)
@@ -143,7 +152,10 @@ def main():
     # time.sleep(2)
     global connectionToFeedbackProcess
     time.sleep(3)
-    connectionToFeedbackProcess = Client(address)
+    try:
+        connectionToFeedbackProcess = Client(address)
+    except:
+        print('non trovo quaa mmerda de fidbeck')
     
 
 def exit_signal_handler(signum, frame):
