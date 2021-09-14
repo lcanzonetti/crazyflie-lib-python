@@ -89,6 +89,8 @@ class Drogno(threading.Thread):
         self.ringIntensity         = 0.1
         self.goToCount             = 0.0
         self.multiprocessConnection = None
+        self.linkQuality            = 0
+
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -136,7 +138,7 @@ class Drogno(threading.Thread):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\link quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
                 self.goToCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
@@ -313,6 +315,7 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('kalman.varPX', 'FP16')
         self._lg_kalm.add_variable('kalman.varPY', 'FP16')
         self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
+        self._lg_kalm.add_variable('radio.rssi', 'UINT8')
         self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
@@ -365,7 +368,8 @@ class Drogno(threading.Thread):
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
-        # self.yaw            = float(data['stabilizer.yaw'])
+        self.yaw               = float(data['kalman.yaw'])
+        self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
@@ -395,7 +399,7 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'sconnesso'
         # self._cf.close_link()
         # time.sleep(1)
-        # self.reconnect()
+        self.reconnect()
         # self.exit()
 
     def _connection_lost(self, link_uri, msg):
@@ -408,7 +412,7 @@ class Drogno(threading.Thread):
 
         # self._cf.close_link()
         # time.sleep(1)
-        # self.reconnect()
+        self.reconnect()
         # self.exit()
 
     def _disconnected(self, link_uri):
@@ -421,7 +425,7 @@ class Drogno(threading.Thread):
 
             # self._cf.close_link()
             # time.sleep(1)
-            # self.reconnect()
+            self.reconnect()
             # self.exit()
  
     #################################################################### movement
