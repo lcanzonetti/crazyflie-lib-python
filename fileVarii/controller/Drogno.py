@@ -315,7 +315,7 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('kalman.varPX', 'FP16')
         self._lg_kalm.add_variable('kalman.varPY', 'FP16')
         self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
-        self._lg_kalm.add_variable('radio.rssi', 'UINT8')
+        # self._lg_kalm.add_variable('radio.rssi', 'UINT8')
         self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
@@ -368,8 +368,8 @@ class Drogno(threading.Thread):
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
-        self.yaw               = float(data['kalman.yaw'])
-        self.linkQuality       = data['radio.rssi']
+        self.yaw               = float(data['stabilizer.yaw'])
+        # self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])

@@ -90,11 +90,9 @@ def updateCompanion():
                 timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   [listaTimecode[1]])
                 timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(31),   None,   [listaTimecode[2]])
                 timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   [listaTimecode[3]])
-
-                companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(24),   ",s",   ["Comp. Up. Rate" + str(COMPANION_UPDATE_RATE)])
-                    
-                    
-                ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate]) 
+                companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
+                commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(COMMANDS_FREQUENCY)])
+                ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]) 
                 osc_send(ticcio, "companionClient")
                 
                 if not isSendEnabled:                       #*******************  SEND ENABLING
@@ -165,13 +163,14 @@ def updateCompanion():
 def takeOff(coddii, decollante):
     global bufferone
     def authorizedScrambleCommand():
-        bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
-        bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
-        try:
-            gino = threading.Thread(target=drogni[drogno].takeoff).start()
-            # drogni[drogno].takeoff(0.45, 2.45)
-        except Exception:
-            print('already taking off ? %s' % Exception)
+        for drogno in drogni:
+            bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
+            bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
+            try:
+                gino = threading.Thread(target=drogni[drogno].takeoff).start()
+                # drogni[drogno].takeoff(0.45, 2.45)
+            except Exception:
+                print('already taking off ? %s' % Exception)
 
     authorizedDrognos = 0
     if decollante == 'all':    # whole swarm logic
@@ -371,18 +370,26 @@ def setRequestedCol(address, args):
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE
+    # print(args)
     if args[0] == '+':
         COMPANION_UPDATE_RATE += 0.1
     elif args[0] == '-':
         if COMPANION_UPDATE_RATE > 0:
             COMPANION_UPDATE_RATE -= 0.1
+    COMPANION_UPDATE_RATE = round(COMPANION_UPDATE_RATE, 2)
+    print(COMPANION_UPDATE_RATE)
+    
 def setCommandsRate(address, args):
     global COMMANDS_FREQUENCY
+    # print(args)
     if args[0] == '+':
         COMMANDS_FREQUENCY += 0.1
     elif args[0] == '-':
         if COMMANDS_FREQUENCY > 0:
             COMMANDS_FREQUENCY -= 0.1
+    COMMANDS_FREQUENCY = round(COMMANDS_FREQUENCY, 2)
+    
+    print(COMMANDS_FREQUENCY)
 
 
 def start_server():          #### OSC init    #########    acts as main()
