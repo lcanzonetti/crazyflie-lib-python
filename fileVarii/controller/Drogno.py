@@ -266,29 +266,25 @@ class Drogno(threading.Thread):
         self.isPositionEstimated = True
     #################################################################### connection
 
-    def connect(self): 
-        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
-        def porcoMondo():
-            self.statoDiVolo = 'connecting'
-            try:
-                self._cf.open_link(self.link_uri)
-
-            except IndexError:
-                print('capperi')
-            except:
-                print('no radio pal')
+    def connect(self):
         if self.isKilled == False:
-            connessione = threading.Thread(target=porcoMondo).start() 
+            print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+            def connection():
+                self.statoDiVolo = 'connecting'
+                try:
+                    self._cf.open_link(self.link_uri)
+                except IndexError:
+                    print('capperi')
+                except:
+                    print('no radio pal')
+            connessione = threading.Thread(target=connection).start() 
 
     def reconnect(self):
-
-        # self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
-                self._cf.open_link( self.link_uri)
-
+                self.connect()
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
                     self.recconnectionAttempts +=1
@@ -317,36 +313,18 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('kalman.varPX', 'FP16')
         self._lg_kalm.add_variable('kalman.varPY', 'FP16')
         self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
-        self._lg_kalm.add_variable('stabilizer.yaw', 'float')
-        self._lg_kalm.add_variable('pm.vbat', 'FP16')
-        # self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=200)
-        # self._lg_stab.add_variable('stateEstimate.x', 'FP16')
-        # self._lg_stab.add_variable('stateEstimate.y', 'FP16')
-        # self._lg_stab.add_variable('stateEstimate.z', 'FP16')
-        # self._lg_stab.add_variable('stabilizer.roll', 'FP16')
-        # self._lg_stab.add_variable('stabilizer.pitch', 'FP16')
-        # self._lg_stab.add_variable('stabilizer.yaw', 'FP16')
+        self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
-        # self._lg_kalm = LogConfig(name='Kalman Variance', period_in_ms=500)
-        # self._lg_kalm.add_variable('kalman.varPX', 'float')
-        # self._lg_kalm.add_variable('kalman.varPY', 'float')
-        # self._lg_kalm.add_variable('kalman.varPZ', 'float')
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
         try:
-            print('porco')
-
             self._cf.log.add_config(self._lg_kalm)
-            # self._cf.log.add_config(self._lg_kalm)
             # This callback will receive the data
             self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
-            # self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
             # This callback will be called on errors
             self._lg_kalm.error_cb.add_callback(self._stab_log_error)
-            # self._lg_kalm.error_cb.add_callback(self._stab_log_error)
-           
             self._lg_kalm.start()
  
         except KeyError as e:
@@ -418,7 +396,7 @@ class Drogno(threading.Thread):
         # self._cf.close_link()
         # time.sleep(1)
         # self.reconnect()
-        self.exit()
+        # self.exit()
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -431,7 +409,7 @@ class Drogno(threading.Thread):
         # self._cf.close_link()
         # time.sleep(1)
         # self.reconnect()
-        self.exit()
+        # self.exit()
 
     def _disconnected(self, link_uri):
         if self.is_connected == True:
@@ -444,7 +422,7 @@ class Drogno(threading.Thread):
             # self._cf.close_link()
             # time.sleep(1)
             # self.reconnect()
-            self.exit()
+            # self.exit()
  
     #################################################################### movement
 
@@ -773,7 +751,11 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'stand by'
         self.standBy = True
         self.is_connected = False
-    
+    def wakeUp(self):
+        PowerSwitch(self.link_uri).stm_power_up()
+        self.connect()
+        self.statoDiVolo = 'waking up'
+
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
         self.multiprocessConnection.send('fuck you')
