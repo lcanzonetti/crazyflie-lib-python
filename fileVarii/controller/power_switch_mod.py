@@ -49,6 +49,7 @@ class PowerSwitch:
             if self.link:
                 self.link.close()
                 self.link = None
+        print('daje')
 
     def platform_power_down(self):
         """ Power down the platform, both NRF and STM MCUs.

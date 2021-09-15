@@ -1,6 +1,8 @@
 #rf 2021
 import threading
+import multiprocessing
 from multiprocessing.connection import Client
+import OSC_feedabcker as feedbacker
 
 import time
 import random
@@ -20,19 +22,25 @@ from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
+from   cflib.utils.power_switch import PowerSwitch
+logging.basicConfig(level=logging.ERROR)
 
 BOX_X                 = 1.5
 BOX_Y                 = 1.5
 BOX_Z                 = 1.9
-DEFAULT_HEIGHT        = 0.8
+DEFAULT_HEIGHT        = 0.9
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
 COMMANDS_FREQUENCY    = 0.2
+LOGGING_FREQUENCY     = 400
 FEEDBACK_SENDING_PORT = 6000
+FEEDBACK_ENABLED      = True
+RING_FADE_TIME        = 0.8
+
 
 class Drogno(threading.Thread):
-    def __init__(self, ID, link_uri, exitFlag, perhapsWeReFakingIt, startingPoint, lastRecordPath):
+    def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
         threading.Thread.__init__(self)
         self.lastRecordPath  = lastRecordPath
         self.lastTrajectory  = ''
@@ -45,7 +53,7 @@ class Drogno(threading.Thread):
         self.durataVolo  = random.randint(1,4)
         self.exitFlag    = exitFlag
         self.WE_ARE_FAKING_IT = perhapsWeReFakingIt
-        self.isKilled      = False
+        self.isKilled              = False
         self.isReadyToFly          = False
         self.isFlying              = False
         self.controlThread         = False
@@ -54,6 +62,7 @@ class Drogno(threading.Thread):
         self.currentSequenceThread = False
         self.recconnectionAttempts = 0
         self.is_connected          = False
+        self.standBy               = False
         self.isPositionEstimated   = False
         self.HLCommander           = None
         self.positionHLCommander   = None 
@@ -72,6 +81,7 @@ class Drogno(threading.Thread):
         self.kalman_VarX              = 0
         self.kalman_VarY              = 0
         self.kalman_VarZ              = 0
+        self.esteemsCount           = 0
         self.prefStartPoint_X      = startingPoint[0]
         self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
@@ -79,24 +89,25 @@ class Drogno(threading.Thread):
         self.ringIntensity         = 0.1
         self.goToCount             = 0.0
         self.multiprocessConnection = None
-        self._cf = Crazyflie(rw_cache='./fileVarii/cache')
+        self.linkQuality            = 0
+
+        self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
-     
+        self.feedbacker_port      = 9100 + self.ID
+        self.feedbacker_address   = ('127.0.0.1', self.feedbacker_port)
+        self.feedbacker           = feedbacker.Feedbacco(processes_exit_event,  self.feedbacker_port  )
+        self.OSCFeedbackProcess   = multiprocessing.Process(target=self.feedbacker.start).start()
+
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
-        address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
-        try:
-            time.sleep(0.5)
-            self.multiprocessConnection = Client(address)
-        except ConnectionRefusedError:
-            print('server di feedback non connesso!')
+    
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
@@ -106,12 +117,19 @@ class Drogno(threading.Thread):
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
             # print('fKING IT')
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
-            self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
+            # self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
         else:
             print('We are not faking it this time.')
+            connectedToFeedback = False
+            if FEEDBACK_ENABLED and  not self.exitFlag.is_set():
+                while not connectedToFeedback:
+                    try:
+                        time.sleep(1)
+                        self.multiprocessConnection = Client(self.feedbacker_address)
+                        connectedToFeedback = True
+                    except ConnectionRefusedError:
+                        print('server di feedback non connesso!')
+
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
             self.connect()
@@ -120,9 +138,9 @@ class Drogno(threading.Thread):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo} : battery {self.batteryVoltage} : pos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f} rotazione: {self.yaw:0.2f} msg/s {self.goToCount/self.printRate}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\link quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
                 self.goToCount = 0
-                print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
+                # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -140,6 +158,7 @@ class Drogno(threading.Thread):
 
     def connect(self): 
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+
         def porcoMondo():
             self.statoDiVolo = 'connecting'
             try:
@@ -180,39 +199,63 @@ class Drogno(threading.Thread):
         self._cf.cf.param.set_value('stabilizer.controller', controller)
 
     def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
+        self.isReadyToFly = False
+        self.isPositionEstimated = False
+        global esteemCount
         def orco():
             print('Waiting for estimator to find position...')
-            while not self.isPositionEstimated:
-                var_y_history = [1000] * 10
-                var_x_history = [1000] * 10
-                var_z_history = [1000] * 10
+            currentEsteem_x = 0
+            currentEsteem_y = 0
+            currentEsteem_z = 0
+            var_y_history = [] 
+            var_x_history = [] 
+            var_z_history = [] 
+            var_x_history.append(currentEsteem_x)
+            var_y_history.append(currentEsteem_y)
+            var_z_history.append(currentEsteem_z)
+            self.esteemsCount =  0
+            def addKalmanDatas():
+                # var_y_history = [1000] * 10
+                # var_x_history = [1000] * 10
+                # var_z_history = [1000] * 10
                 # threshold =5
                 threshold = 0.01
-                var_x_history.append(self.kalman_VarX)
-                var_x_history.pop(0)
-                var_y_history.append(self.kalman_VarY)
-                var_y_history.pop(0)
-                var_z_history.append(self.kalman_VarZ)
-                var_z_history.pop(0)
+                if self.kalman_VarX != currentEsteem_x:
+                    var_x_history.append(self.kalman_VarX)
+                    var_x_history.pop(0)
+                    self.esteemsCount += 1
+                if self.kalman_VarY != currentEsteem_x:
+                    var_y_history.append(self.kalman_VarY)
+                    var_y_history.pop(0) 
+                    self.esteemsCount += 1
 
-                min_x = min(var_x_history)
-                max_x = max(var_x_history)
-                min_y = min(var_y_history)
-                max_y = max(var_y_history)
-                min_z = min(var_z_history)
-                max_z = max(var_z_history)
+                if self.kalman_VarZ != currentEsteem_x:
+                    var_z_history.append(self.kalman_VarZ)
+                    var_z_history.pop(0) 
+                    self.esteemsCount += 1
 
-                # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
-                if (max_x - min_x) < threshold and (
-                    max_y - min_y) < threshold and (
-                    max_z - min_z) < threshold:
-                    self.isPositionEstimated = True
-                    break
-                if self.kalman_VarX < threshold and self.kalman_VarY < threshold and self.kalman_VarZ < threshold:
-                    self.isPositionEstimated = True
-                    break
+                if self.esteemsCount > 30:
+                        
+                    min_x = min(var_x_history)
+                    max_x = max(var_x_history)
+                    min_y = min(var_y_history)
+                    max_y = max(var_y_history)
+                    min_z = min(var_z_history)
+                    max_z = max(var_z_history)
+
+                    # print("{} {} {}".format(max_x - min_x, max_y - min_y, max_z - min_z))
+                    if (max_x - min_x) < threshold and (
+                        max_y - min_y) < threshold and (
+                        max_z - min_z) < threshold:
+                        self.isPositionEstimated = True
+                    if self.kalman_VarX < threshold and self.kalman_VarY < threshold and self.kalman_VarZ < threshold:
+                        self.isPositionEstimated = True
+                # self.isPositionEstimated = False
+                print('position not yet estimated, got %s esteems' % self.esteemsCount)
+            while not self.isPositionEstimated:
+                addKalmanDatas()
             print('positionEstimated')
-            self.isReadyToFly = True
+            self.isReadyToFly = self.evaluateFlyness()
         lanciaOrco = threading.Thread(target=orco).start()
 
     def reset_estimator(self):
@@ -220,32 +263,30 @@ class Drogno(threading.Thread):
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         time.sleep(0.2)
-        self.wait_for_position_estimator()
-
+        # self.wait_for_position_estimator()
+        self.isReadyToFly = self.evaluateFlyness()
+        self.isPositionEstimated = True
     #################################################################### connection
 
-    def connect(self): 
-        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
-        def porcoMondo():
-            self.statoDiVolo = 'connecting'
-            try:
-                self._cf.open_link(self.link_uri)
-
-            except IndexError:
-                print('capperi')
-            except:
-                print('no radio pal')
+    def connect(self):
         if self.isKilled == False:
-            connessione = threading.Thread(target=porcoMondo).start() 
+            print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+            def connection():
+                self.statoDiVolo = 'connecting'
+                try:
+                    self._cf.open_link(self.link_uri)
+                except IndexError:
+                    print('capperi')
+                except:
+                    print('no radio pal')
+            connessione = threading.Thread(target=connection).start() 
 
     def reconnect(self):
-        # self._cf.close_link()
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
-                self._cf.open_link( self.link_uri)
-
+                self.connect()
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
                     self.recconnectionAttempts +=1
@@ -267,60 +308,54 @@ class Drogno(threading.Thread):
 
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=500)
-        # self._lg_stab.add_variable('stateEstimate.x', 'float')
-        # self._lg_stab.add_variable('stateEstimate.y', 'float')
-        # self._lg_stab.add_variable('stateEstimate.z', 'float')
-        self._lg_stab.add_variable('kalman.stateX', 'float')
-        self._lg_stab.add_variable('kalman.stateY', 'float')
-        self._lg_stab.add_variable('kalman.stateZ', 'float')
-        self._lg_stab.add_variable('kalman.varPX', 'float')
-        self._lg_stab.add_variable('kalman.varPY', 'float')
-        self._lg_stab.add_variable('kalman.varPZ', 'float')
-        # self._lg_stab.add_variable('stabilizer.yaw', 'float')
-        self._lg_stab.add_variable('pm.vbat', 'FP16')
-
-        # self._lg_kalm = LogConfig(name='Kalman Variance', period_in_ms=500)
-        # self._lg_kalm.add_variable('kalman.varPX', 'float')
-        # self._lg_kalm.add_variable('kalman.varPY', 'float')
-        # self._lg_kalm.add_variable('kalman.varPZ', 'float')
+        self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=500)
+        self._lg_kalm.add_variable('kalman.stateX', 'FP16')
+        self._lg_kalm.add_variable('kalman.stateY', 'FP16')
+        self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
+        self._lg_kalm.add_variable('kalman.varPX', 'FP16')
+        self._lg_kalm.add_variable('kalman.varPY', 'FP16')
+        self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
+        # self._lg_kalm.add_variable('radio.rssi', 'UINT8')
+        self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
+        # The fetch-as argument can be set to FP16 to save space in the log packet
+        self._lg_kalm.add_variable('pm.vbat', 'FP16')
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
         try:
-            self._cf.log.add_config(self._lg_stab)
+            self._cf.log.add_config(self._lg_kalm)
             # This callback will receive the data
-            self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
+            self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
             # This callback will be called on errors
-            self._lg_stab.error_cb.add_callback(self._stab_log_error)
-            
-            # time.sleep(0.3)
-            self.reset_estimator()
-
-            self._cf.param.set_value('commander.enHighLevel', '1')
-            self._cf.param.set_value('ring.effect', '14')
-            self._cf.param.set_value('lighthouse.method', '0')
-
-            self.HLCommander = self._cf.high_level_commander
-            self.positionHLCommander = PositionHlCommander(
-                self._cf,
-                x=self.x, y=self.y, z=0.0,
-                default_velocity=0.5,
-                default_height=DEFAULT_HEIGHT,
-                controller=PositionHlCommander.CONTROLLER_PID) 
-            self._lg_stab.start()
-            self.batteryThread.start()
-            self._cf.param.set_value('ring.fadeTime', 1)
-
-            self.statoDiVolo = 'landed'
-            # self.setRingColor(20,1,1, 2)
-
-     
+            self._lg_kalm.error_cb.add_callback(self._stab_log_error)
+            self._lg_kalm.start()
+ 
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
         except AttributeError:
-            print('Could not add Stabilizer log config, bad configuration.')
+          print('Could not add log config, bad configuration.')
+        print('il clero')
+         
+        # time.sleep(0.3)
+        self.reset_estimator()
+
+        self._cf.param.set_value('commander.enHighLevel', '1')
+        self._cf.param.set_value('ring.effect', '14')
+        self._cf.param.set_value('lighthouse.method', '0')
+
+        self.HLCommander = self._cf.high_level_commander
+        self.positionHLCommander = PositionHlCommander(
+            self._cf,
+            x=self.x, y=self.y, z=0.0,
+            default_velocity=0.5,
+            default_height=DEFAULT_HEIGHT,
+            controller=PositionHlCommander.CONTROLLER_PID) 
+        time.sleep(0.3)
+        self.batteryThread.start()
+        self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
+
+        self.statoDiVolo = 'landed'
         
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
@@ -333,17 +368,26 @@ class Drogno(threading.Thread):
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
-        # self.yaw            = float(data['stabilizer.yaw'])
+        self.yaw               = float(data['stabilizer.yaw'])
+        # self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
-        if not self.isKilled:
+        self.isReadyToFly      = self.evaluateFlyness()
+        if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
             try:
                 self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
                 # print('carlo')
             except ConnectionRefusedError:
                 print('oooo')
+    def evaluateFlyness(self):
+        if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y:
+             return False
+        elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
+             return False
+        else:
+            return True
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -355,8 +399,8 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'sconnesso'
         # self._cf.close_link()
         # time.sleep(1)
-        # self.reconnect()
-        self.exit()
+        self.reconnect()
+        # self.exit()
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -368,9 +412,8 @@ class Drogno(threading.Thread):
 
         # self._cf.close_link()
         # time.sleep(1)
-        # self.reconnect()
-        self.exit()
-
+        self.reconnect()
+        # self.exit()
 
     def _disconnected(self, link_uri):
         if self.is_connected == True:
@@ -382,9 +425,10 @@ class Drogno(threading.Thread):
 
             # self._cf.close_link()
             # time.sleep(1)
-            # self.reconnect()
-            self.exit()
+            self.reconnect()
+            # self.exit()
  
+    #################################################################### movement
 
     def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
         print('like, now')
@@ -394,8 +438,9 @@ class Drogno(threading.Thread):
             self.isFlying  = True
         else:
             print('for real')
+            self.reset_estimator()
+
             if self.isReadyToFly:
-                # self.reset_estimator()
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
@@ -411,13 +456,13 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 2.0)
             self.isFlying     = False
             time.sleep(3)
-            # self.isReadyToFly = False
+            self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
         if self.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'landing'
             time.sleep(1)
-            self.isReadyToFly = True
+            self.isReadyToFly = self.evaluateFlyness()
             self.statoDiVolo = 'landed'
         else:
             if self.isFlying:
@@ -441,16 +486,16 @@ class Drogno(threading.Thread):
             # elif x < 0 and y > 0:
             #     yaw =  135
 
-            clamp(x, -BOX_X, BOX_X)
-            clamp(y, -BOX_Y, BOX_Y)
-            clamp(z, 0.3   , BOX_Z)
-            print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
+            # clamp(x, -BOX_X, BOX_X)
+            # clamp(y, -BOX_Y, BOX_Y)
+            # clamp(z, 0.3   , BOX_Z)
+            # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
             # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         # else:
-        #     print('perhaps take off?')
+            # print('perhaps take off?')
 
     def goLeft(self, quanto=0.3):
         if self.isFlying:
@@ -705,12 +750,19 @@ class Drogno(threading.Thread):
         self._cf.high_level_commander.stop()
         self._cf.commander.send_stop_setpoint()
         self.exit()
+    def goToSleep(self):
+        PowerSwitch(self.link_uri).stm_power_down()
+        self.statoDiVolo = 'stand by'
+        self.standBy = True
+        self.is_connected = False
+    def wakeUp(self):
+        PowerSwitch(self.link_uri).stm_power_up()
+        self.connect()
+        self.statoDiVolo = 'waking up'
+
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
-        # self._lg_stab.stop()
-        # self._lg_stab.
-
-        # self._cf.loc.send_emergency_stop()
+        self.multiprocessConnection.send('fuck you')
         self._cf.close_link()
         self.isKilled = True
         self.isReadyToFly = False
