@@ -61,8 +61,8 @@ class Feedbacco():
             listener.close()
         
         osc_startup()
-        osc_broadcast_client(self.OSC_SENDING_IP, self.SENDING_PORT, "feedbackClient")
-        print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.SENDING_PORT)
+        osc_broadcast_client(self.OSC_SENDING_IP, self.sendingPort, "feedbackClient")
+        print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.sendingPort)
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         

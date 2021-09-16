@@ -90,7 +90,7 @@ class Drogno(threading.Thread):
         self.goToCount             = 0.0
         self.multiprocessConnection = None
         self.linkQuality            = 0
-        self.isTumbled              = 0
+        self.isTumbled              = False
 
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
@@ -99,8 +99,8 @@ class Drogno(threading.Thread):
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
         self.feedbacker_receiving_port = 9100 + self.ID
-        self.feedbacker_address        = ('127.0.0.1', self.feedbacker_port)
-        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_PORT, self.feedbacker_port  )
+        self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
+        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.OSCFeedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
 
     def run(self):
@@ -139,7 +139,7 @@ class Drogno(threading.Thread):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\link quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
                 self.goToCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
@@ -317,8 +317,8 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('kalman.varPY', 'FP16')
         self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
         
-        self._lg_kalm.add_variable('sys.isTumbled', 'UINT8')
-        self._lg_kalm.add_variable('radio.rssi', 'UINT8')
+        self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
+        self._lg_kalm.add_variable('radio.rssi', 'uint8_t')
         self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
@@ -372,12 +372,13 @@ class Drogno(threading.Thread):
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
         self.yaw               = float(data['stabilizer.yaw'])
-        # self.linkQuality       = data['radio.rssi']
-        # self.linkQuality       = data['radio.rssi']
+        self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
+        self.isTumbled         = bool (data['sys.isTumbled'])
+        if self.isTumbled: self.killMeHardly()
         self.isReadyToFly      = self.evaluateFlyness()
         if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
             try:
@@ -386,7 +387,7 @@ class Drogno(threading.Thread):
             except ConnectionRefusedError:
                 print('oooo')
     def evaluateFlyness(self):
-        if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y:
+        if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
              return False
         elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
              return False
@@ -492,7 +493,7 @@ class Drogno(threading.Thread):
             if CLAMPING:
                 clamp(x, -BOX_X, BOX_X)
                 clamp(y, -BOX_Y, BOX_Y)
-                clamp(z, 0.3   , BOX_Z)
+                clamp(z, 0.27   , BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
@@ -753,6 +754,7 @@ class Drogno(threading.Thread):
         # self.setRingColor(0,0,0)
         self._cf.high_level_commander.stop()
         self._cf.commander.send_stop_setpoint()
+        self.goToSleep()
         self.exit()
     def goToSleep(self):
         PowerSwitch(self.link_uri).stm_power_down()

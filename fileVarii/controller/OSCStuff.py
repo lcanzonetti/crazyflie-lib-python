@@ -306,7 +306,7 @@ def kill     (coddii, chi):
         for drogno in drogni:
             drogni[drogno].killMeHardly()
     else:
-        drogni[chi].killMeSoftly()
+        drogni[chi].killMeHardly()
 def standBy  (coddii, chi):
     print(' %s  just go to sleep' % chi )
     if chi == 'all':    
