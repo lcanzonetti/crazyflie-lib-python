@@ -17,9 +17,9 @@ finished = False
 # bufferon = {}
 
 class Feedbacco():
-    def __init__(self, eventoFinaleTremendo, receiving_port):
+    def __init__(self, eventoFinaleTremendo, sendingPort,receiving_port):
         self.OSC_SENDING_IP   = "192.168.10.255"
-        self.SENDING_PORT     = 9203
+        self.sendingPort      = sendingPort
         self.port             = receiving_port
         self.finished         = eventoFinaleTremendo
         # self.start()
@@ -29,10 +29,11 @@ class Feedbacco():
         ixxa     = robbaVaria[1]
         ipsila   = robbaVaria[2]
         zedda    = robbaVaria[3]
+        yawa     = robbaVaria[4]
         batteria = float(robbaVaria[4])
         # print ('direi a tutti he il drogno %s sta a  %s  |  %s  |  %s   con batteria %s' % (iddio, ixxa, ipsila, zedda, batteria))
         coordinate  = oscbuildparse.OSCMessage("/feedback/" + iddio + "/pos", ",fff",   [ixxa,ipsila,zedda])
-        robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",f",  [batteria])
+        robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",ffs",  [batteria,yawa])
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [coordinate, robba]) 
         osc_send(bandoleon, "feedbackClient")
   
@@ -40,7 +41,7 @@ class Feedbacco():
         address = ('127.0.0.1', self.port)
         listener = Listener(address)
 
-        print('feeddabcker yeah on port %s' + str(self.port))
+        print('feeddabcker yeah on port %s' % str(self.port))
 
         def oscLoop():
             connessione = listener.accept()
@@ -66,7 +67,42 @@ class Feedbacco():
         ###########################  single fella
         
 
+class CompanionFeedbacco():
+    def __init__(self, cuia, sendingIP, sendingPort, receivingPort):
+        self.sendingIP       = sendingIP
+        self.sendingPort     = sendingPort
+        self.receivingPort   = receivingPort
+        self.cuia            = cuia
  
+    def sendCompanionFeedback(self, stuff):
+        bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, stuff) 
+        osc_send(bandoleon, "feedbackClient")
+  
+    def start(self):
+
+        print('companion feeddabcker yeah on port %s' % str(self.receivingPort))
+
+        def oscLoop():
+            while True:
+                osc_process()
+                msg = self.cuia.get()
+                if msg == 'fuck you':
+                    # self.finished.set()
+                    break
+                else:
+                    self.sendCompanionFeedback(msg)
+                time.sleep(0.01)
+            # Properly close the system.
+            print('\nanche il feedbacker se ne va')
+            osc_terminate()
+        
+        osc_startup()
+        osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
+        print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.sendingPort)
+        tridio = threading.Thread(target=oscLoop).start()
+        ###########################  single fella
+        
+
 #cancellami:
 
 def fammeNesempio(carlo):

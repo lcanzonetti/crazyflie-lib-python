@@ -1,15 +1,11 @@
 #rf 2021
 import threading
 import multiprocessing
-from multiprocessing.connection import Client
-import OSC_feedabcker as feedbacker
-
+from   multiprocessing.connection import Client
 import time
 import random
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
-
-          
 coloInit(convert=True)
 
 #crazyflie's
@@ -25,6 +21,9 @@ from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
 logging.basicConfig(level=logging.ERROR)
 
+import OSC_feedabcker as feedbacker
+
+
 BOX_X                 = 1.5
 BOX_Y                 = 1.5
 BOX_Z                 = 1.9
@@ -34,8 +33,9 @@ BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
 COMMANDS_FREQUENCY    = 0.2
 LOGGING_FREQUENCY     = 400
-FEEDBACK_SENDING_PORT = 6000
+FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
+CLAMPING              = False
 RING_FADE_TIME        = 0.8
 
 
@@ -78,10 +78,10 @@ class Drogno(threading.Thread):
         self.requested_R           = 0
         self.requested_G           = 0
         self.requested_B           = 0
-        self.kalman_VarX              = 0
-        self.kalman_VarY              = 0
-        self.kalman_VarZ              = 0
-        self.esteemsCount           = 0
+        self.kalman_VarX           = 0
+        self.kalman_VarY           = 0
+        self.kalman_VarZ           = 0
+        self.esteemsCount          = 0
         self.prefStartPoint_X      = startingPoint[0]
         self.prefStartPoint_Y      = startingPoint[1]
         self.yaw                   = 0.0
@@ -90,6 +90,7 @@ class Drogno(threading.Thread):
         self.goToCount             = 0.0
         self.multiprocessConnection = None
         self.linkQuality            = 0
+        self.isTumbled              = 0
 
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
@@ -97,10 +98,10 @@ class Drogno(threading.Thread):
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
-        self.feedbacker_port      = 9100 + self.ID
-        self.feedbacker_address   = ('127.0.0.1', self.feedbacker_port)
-        self.feedbacker           = feedbacker.Feedbacco(processes_exit_event,  self.feedbacker_port  )
-        self.OSCFeedbackProcess   = multiprocessing.Process(target=self.feedbacker.start).start()
+        self.feedbacker_receiving_port = 9100 + self.ID
+        self.feedbacker_address        = ('127.0.0.1', self.feedbacker_port)
+        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_PORT, self.feedbacker_port  )
+        self.OSCFeedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
@@ -315,7 +316,9 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('kalman.varPX', 'FP16')
         self._lg_kalm.add_variable('kalman.varPY', 'FP16')
         self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
-        # self._lg_kalm.add_variable('radio.rssi', 'UINT8')
+        
+        self._lg_kalm.add_variable('sys.isTumbled', 'UINT8')
+        self._lg_kalm.add_variable('radio.rssi', 'UINT8')
         self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
@@ -370,6 +373,7 @@ class Drogno(threading.Thread):
         self.z                 = float(data['kalman.stateZ'])
         self.yaw               = float(data['stabilizer.yaw'])
         # self.linkQuality       = data['radio.rssi']
+        # self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
@@ -377,7 +381,7 @@ class Drogno(threading.Thread):
         self.isReadyToFly      = self.evaluateFlyness()
         if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
             try:
-                self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage])
+                self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
                 # print('carlo')
             except ConnectionRefusedError:
                 print('oooo')
@@ -485,10 +489,10 @@ class Drogno(threading.Thread):
             #     yaw =  135
             # elif x < 0 and y > 0:
             #     yaw =  135
-
-            # clamp(x, -BOX_X, BOX_X)
-            # clamp(y, -BOX_Y, BOX_Y)
-            # clamp(z, 0.3   , BOX_Z)
+            if CLAMPING:
+                clamp(x, -BOX_X, BOX_X)
+                clamp(y, -BOX_Y, BOX_Y)
+                clamp(z, 0.3   , BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,1)
