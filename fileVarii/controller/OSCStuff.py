@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 #rf 2021
 import threading
-import multiprocessing
+from   multiprocessing.connection import Client
+from   multiprocessing import Process, Queue
+import OSC_feedabcker as feedbacker
+
+
 import time
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
@@ -14,8 +18,11 @@ import logging
 import OSCaggregator
 
 coloInit(convert=True)
-FEEDBACK_IP             = "192.168.1.255"
-FEEDBACK_PORT           = 9203
+FEEDBACK_IP             = "192.168.10.255"
+FEEDBACK_SENDINGPORT    = 12321
+FEEDBACK_RECEIVINGPORT  = 9100
+feedbackCue             = Queue()  
+feedbackerInstance      = feedbacker.CompanionFeedbacco( feedbackCue, FEEDBACK_IP, FEEDBACK_SENDINGPORT, FEEDBACK_RECEIVINGPORT)
 
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
@@ -29,7 +36,7 @@ COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 1
 COMPANION_FEEDBACK_ENABLED = True
 
-FEEDBACK_ENABLED        = False
+FEEDBACK_ENABLED        = True
 FEEDBACK_RATE           = 0.8
 
 COMMANDS_FREQUENCY      = 0.2
@@ -83,6 +90,7 @@ def updateCompanion():
     def daje ():
         while not finished:
             if COMPANION_FEEDBACK_ENABLED:
+                infinitaRoba = []
                 time.sleep(COMPANION_UPDATE_RATE)
                 # print(Fore.WHITE +'aggiorno companion')
                 listaTimecode    = timecode.split(':')
@@ -92,8 +100,9 @@ def updateCompanion():
                 timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   [listaTimecode[3]])
                 companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
                 commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(COMMANDS_FREQUENCY)])
-                ticcio = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]) 
-                osc_send(ticcio, "companionClient")
+                # bandolone = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]) 
+                infinitaRoba = [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]
+                # osc_send(bandolone, "companionClient")
                 
                 if not isSendEnabled:                       #*******************  SEND ENABLING
                     for cp in COMPANION_PAGES:
@@ -101,16 +110,19 @@ def updateCompanion():
                         txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
                         col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [10, 235, 10])
                         txt2              = oscbuildparse.OSCMessage("/style/text/90/21", None,   ["non mando"])
-                        carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                        osc_send(carlo, "companionClient")
+                        infinitaRoba.extend( [col, txt, col2, txt2 ]) 
+                        # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                        # osc_send(carlo, "companionClient")
                 else:
                     for cp in COMPANION_PAGES:
                         col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
                         txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
                         col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [235, 10, 10])
                         txt2              = oscbuildparse.OSCMessage("/style/text/90/21"  , None,   ["mando"])
-                        carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                        osc_send(carlo, "companionClient")
+                        infinitaRoba.extend( [col, txt, col2, txt2 ]) 
+
+                        # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
+                        # osc_send(carlo, "companionClient")
 
                 for drogno in drogni:               #*******************  singol-drogn               
                     cp   = COMPANION_PAGES[0]
@@ -154,8 +166,11 @@ def updateCompanion():
                     kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [55, 10, 10])
                     kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [255, 255, 255])
 
-                    macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
-                    osc_send(macron, "companionClient")
+                    # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
+                    infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
+                    # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
+                    # osc_send(macron, "companionClient")
+                    feedbackCue.put(infinitaRoba)
  
     nnamo = threading.Thread(target=daje).start()
 
@@ -291,7 +306,7 @@ def kill     (coddii, chi):
         for drogno in drogni:
             drogni[drogno].killMeHardly()
     else:
-        drogni[chi].killMeSoftly()
+        drogni[chi].killMeHardly()
 def standBy  (coddii, chi):
     print(' %s  just go to sleep' % chi )
     if chi == 'all':    
@@ -391,26 +406,29 @@ def setCommandsRate(address, args):
     
     print(COMMANDS_FREQUENCY)
 
-
-def start_server():          #### OSC init    #########    acts as main()
+def start_server():      ######################    #### OSC init    #########    acts as main()
     global finished 
     global bufferone
+
     # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
     # osc_startup(logger=logger)
     osc_startup( )
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
-    if COMPANION_FEEDBACK_ENABLED:
-        osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
-        print(Fore.GREEN + 'OSC client to companion initalized on', COMPANION_IP, COMPANION_PORT)
+    # if COMPANION_FEEDBACK_ENABLED:   ## direct OSC from here
+    #     osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
+    #     print(Fore.GREEN + 'OSC client to companion initalized on', COMPANION_IP, COMPANION_PORT)
 
     if FEEDBACK_ENABLED:
-        osc_broadcast_client(FEEDBACK_IP,   FEEDBACK_PORT,    "feedbackClient")
-        print(Fore.GREEN + 'OSC feedback client initalized on',      FEEDBACK_IP, FEEDBACK_PORT)
-        sendPose()
 
-    print(Fore.GREEN + 'OSC server initalized on',              RECEIVING_IP, RECEIVING_PORT)
+        companionFeedbackProcess = Process(target=feedbackerInstance.start)
+        companionFeedbackProcess.daemon = True
+        companionFeedbackProcess.start() 
+
+        print(Fore.GREEN + 'OSC feedback process initalized on', FEEDBACK_SENDINGPORT)
+
+    print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
 
     ###########################  single fella
     osc_method("/notch/drone*/pos",   setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
@@ -444,6 +462,7 @@ def start_server():          #### OSC init    #########    acts as main()
         # pass
     # Properly close the system.
     print('chiudo OSC')
+    feedbackCue.put('fuck you')
     osc_terminate()
 
 def faiIlBufferon():
@@ -455,28 +474,27 @@ def faiIlBufferon():
     # print(bufferone[0])
 
 # ################ feedbacksssssssss
-def sendPose():
-    def treddo():
-        while not finished:
-            time.sleep(FEEDBACK_RATE)
-            # for drogno in drogni:
-            #     ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
-            #     ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
-            #     zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
-            #     yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
-            ixxo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-            ypso = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-            zeto = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-            yalo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-            print("/drogni/drone"+ str(random()),None,random())
-            bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ ixxo, ypso, zeto, yalo]) 
-            osc_send(bandoleon, "companionClient")
-                # osc_process()
-                # print (droneID, roll, pitch, yaw) 
-        print(Fore.GREEN + 'closing feedback thread')
-    print(Fore.GREEN + 'starting feedback thread')
-    feedbackTreddo = threading.Thread(target=treddo).start()
-
+# def sendPose():
+#     def treddo():
+#         while not finished:
+#             time.sleep(FEEDBACK_RATE)
+#             # for drogno in drogni:
+#             #     ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
+#             #     ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
+#             #     zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
+#             #     yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
+#             ixxo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
+#             ypso = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
+#             zeto = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
+#             yalo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
+#             print("/drogni/drone"+ str(random()),None,random())
+#             bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ ixxo, ypso, zeto, yalo]) 
+#             osc_send(bandoleon, "companionClient")
+#                 # osc_process()
+#                 # print (droneID, roll, pitch, yaw) 
+#         print(Fore.GREEN + 'closing feedback thread')
+#     print(Fore.GREEN + 'starting feedback thread')
+#     feedbackTreddo = threading.Thread(target=treddo).start()
 
 ########## main
 class bufferDrone():
