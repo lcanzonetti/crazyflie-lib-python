@@ -2,6 +2,7 @@
 #rf 2021
 import threading
 from   multiprocessing.connection import Client
+from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue
 import OSC_feedabcker as feedbacker
 
@@ -23,6 +24,11 @@ FEEDBACK_SENDINGPORT    = 12321
 FEEDBACK_RECEIVINGPORT  = 9100
 feedbackCue             = Queue()  
 feedbackerInstance      = feedbacker.CompanionFeedbacco( feedbackCue, FEEDBACK_IP, FEEDBACK_SENDINGPORT, FEEDBACK_RECEIVINGPORT)
+
+AGGREGATION_ENABLED     = True
+aggregatorAddress       = ('127.0.0.1', 9099)
+aggregatore             = Listener(aggregatorAddress)
+incomingAggregation     = None
 
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
@@ -409,7 +415,7 @@ def setCommandsRate(address, args):
 def start_server():      ######################    #### OSC init    #########    acts as main()
     global finished 
     global bufferone
-
+    global timecode
     # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
@@ -427,7 +433,7 @@ def start_server():      ######################    #### OSC init    #########   
         companionFeedbackProcess.start() 
 
         print(Fore.GREEN + 'OSC feedback process initalized on', FEEDBACK_SENDINGPORT)
-
+   
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
 
     ###########################  single fella
@@ -455,10 +461,20 @@ def start_server():      ######################    #### OSC init    #########   
     resetCompanion()
     updateCompanion()
     printHowManyMessages()
+    if AGGREGATION_ENABLED:
+            incomingAggregation = aggregatore.accept()
 
     while not finished:
         osc_process()
+        if AGGREGATION_ENABLED:
+            roba = incomingAggregation.recv()
+            timecode = roba.timecode
+            setRequestedPos(roba.pos)
+            setRequestedCol(roba.col)
+
+
         time.sleep(OSC_PROCESS_RATE)
+        
         # pass
     # Properly close the system.
     print('chiudo OSC')
