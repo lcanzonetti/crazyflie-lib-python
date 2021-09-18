@@ -38,13 +38,16 @@ COMMANDS_FREQUENCY    = 0.2
 FEEDBACK_SENDING_PORT = 6000
 BROADCAST_IP          = "192.168.10.255"
 
+threads_exit_event   = threading.Event()
+processes_exit_event = multiprocessing.Event()
+
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.COMMANDS_FREQUENCY     = COMMANDS_FREQUENCY
 OSC.COMPANION_FEEDBACK_IP  = BROADCAST_IP 
+OSC.aggregatorExitEvent    = processes_exit_event 
 
-threads_exit_event   = threading.Event()
-processes_exit_event = multiprocessing.Event()
+
 connectedUris = uris.copy()
 drogni = {}
 
@@ -143,18 +146,18 @@ def main():
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
-    global OSCFeedbackProcess 
-    global threads_exit_event
     print('esco')
+    OSC.resetCompanion()
+    OSC.finished = True
     threads_exit_event.set() 
+    processes_exit_event.set()
 
     for drogno in drogni:
         try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
         except: print('%s is not there to be shut down' % drogni[drogno].link_uri)
         drogni[drogno].exit()
         drogni[drogno].join()
-    OSC.resetCompanion()
-    OSC.finished = True
+   
     sys.exit()
 
 if __name__ == '__main__':

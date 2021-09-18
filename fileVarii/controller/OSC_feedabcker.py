@@ -6,7 +6,10 @@ import time
 from   multiprocessing.connection import Listener
 from   multiprocessing.connection import Client
 
-from   colorama              import Fore, Back, Style  
+from   colorama              import Fore, Back, Style
+from   colorama              import init as coloInit  
+coloInit(convert=True)
+
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
@@ -72,7 +75,8 @@ class CompanionFeedbacco():
         self.sendingIP       = sendingIP
         self.sendingPort     = sendingPort
         self.cuia            = cuia
- 
+        print('companion OSC feedback process initalized on %s %s' %  (self.sendingIP,  self.sendingPort))
+
     def sendCompanionFeedback(self, stuff):
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, stuff) 
         osc_send(bandoleon, "feedbackClient")

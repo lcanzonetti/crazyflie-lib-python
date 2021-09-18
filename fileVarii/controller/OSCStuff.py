@@ -5,21 +5,24 @@ import threading
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
-import OSC_feedabcker as feedbacker
 
+from   random                import random, uniform
+import logging
 
 import time
-from   colorama              import Fore, Back, Style
-from   colorama              import init as coloInit  
+
 # from   osc4py3.as_comthreads import *
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
-from   random                import random, uniform
-import logging
-import OSCaggregator
 
+
+from   colorama              import Fore, Back, Style
+from   colorama              import init as coloInit  
 coloInit(convert=True)
+
+import OSCaggregator
+import OSC_feedabcker as feedbacker
 
 drogni        = {} 
 bufferone     = {}
@@ -28,17 +31,18 @@ finished      = False
 msgCount      = 0 
 timecode      = '00:00:00:00'
 
-
+################################################  this module osc receiving:
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.001
-################################################  notch osc aggregator
+################################################  notch osc aggregator:
 AGGREGATION_ENABLED     = True
+AGGREGATOR_RECEIVING_PORT = 9201
 aggregatorInstance      = None
 aggregatorProcess       = None
 aggregatorCue           = Queue()
-aggregatorExitEvent     = multiprocessing.Event()
-################################################  companion feedback via OSC
+aggregatorExitEvent     = None
+################################################  companion feedback via OSC:
 COMPANION_FEEDBACK_SENDINGPORT = 12321
 companionFeedbackCue    = Queue()  
 COMPANION_FEEDBACK_IP   = None
@@ -47,7 +51,7 @@ TC_COMPANION_PAGE       = '91'
 COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 1
 COMPANION_FEEDBACK_ENABLED = True
-##################################################
+##################################################  global rates:
 COMMANDS_FREQUENCY      = 0.2   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
 
@@ -86,8 +90,11 @@ def resetCompanion():
                 kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+24), ",iii",   [80, 10, 10])
                 kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+24), ",iii",   [60, 60, 60])
 
-                bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
-                osc_send(bandoleon, "companionClient")
+                bandoleon   = [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]
+                # bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
+                # osc_send(bandoleon, "companionClient")
+                companionFeedbackCue.put(bandoleon)
+
                 j+=1
 
 def updateCompanion():
@@ -419,19 +426,21 @@ def start_server():      ######################    #### OSC init    #########   
     osc_startup( )
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
+    # print ('ma porco il clero di ' + COMPANION_FEEDBACK_IP)
     
     if COMPANION_FEEDBACK_ENABLED:
         companionFeedbackerInstance = feedbacker.CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
         companionFeedbackProcess = Process(target=companionFeedbackerInstance.start)
         companionFeedbackProcess.daemon = True
         companionFeedbackProcess.start() 
-        print(Fore.GREEN + 'companion OSC feedback process initalized on %s %s' %  (COMPANION_FEEDBACK_IP,  COMPANION_FEEDBACK_SENDINGPORT))
    
     if AGGREGATION_ENABLED:
         global aggregatorInstance
         global aggregatorProcess
-        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue,  )
-    
+        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE )
+        aggregatorProcess  = Process(target=aggregatorInstance.start)
+        aggregatorProcess.daemon = True
+        aggregatorProcess.start() 
     
     ###########################  single fella
     osc_method("/notch/drone*/pos",   setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
@@ -455,21 +464,25 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     ############################################################
-    resetCompanion()
-    updateCompanion()
+    # resetCompanion()
+    # updateCompanion()
     printHowManyMessages()
 
     
     while not finished:
         osc_process()
         if AGGREGATION_ENABLED:
+            global timecode
             roba = aggregatorCue.get()
-            timecode  = roba.timecode
-            bufferone = roba.bufferone
+            timecode  = roba['timecode']
+            bufferone = roba['bufferone']
+            print(timecode)
         time.sleep(OSC_PROCESS_RATE)
     # Properly close the system.
     print('chiudo OSC')
     companionFeedbackCue.put('fuck you')
+    aggregatorExitEvent.set()
+    aggregatorProcess.join()
 
     osc_terminate()
 
@@ -496,6 +509,9 @@ class bufferDrone():
 
 if __name__ == '__main__':
     faiIlBufferon()
+    COMPANION_FEEDBACK_IP = "192.168.1.255"
+
+
     OSCRefreshThread      = threading.Thread(target=start_server).start()
     OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates).start()
     # sendPose()
