@@ -466,8 +466,8 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     ############################################################
-    # resetCompanion()
-    # updateCompanion()
+    resetCompanion()
+    updateCompanion()
     printHowManyMessages()
 
     
