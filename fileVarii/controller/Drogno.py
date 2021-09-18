@@ -31,8 +31,7 @@ DEFAULT_HEIGHT        = 0.9
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
-COMMANDS_FREQUENCY    = 0.2
-LOGGING_FREQUENCY     = 400
+LOGGING_FREQUENCY     = 200
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
@@ -92,6 +91,7 @@ class Drogno(threading.Thread):
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
+        self.commandsFrequency      = 0.2
 
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
@@ -310,7 +310,7 @@ class Drogno(threading.Thread):
 
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
-        self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=500)
+        self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=LOGGING_FREQUENCY)
         self._lg_kalm.add_variable('kalman.stateX', 'FP16')
         self._lg_kalm.add_variable('kalman.stateY', 'FP16')
         self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
@@ -457,9 +457,9 @@ class Drogno(threading.Thread):
             else:
                 print('BUT NOT READY')
 
-    def land(self, speed=0.15, landing_height=0.03):
+    def land(self, speed=0.15, landing_height=0.05):
         def landing_sequence():
-            self._cf.high_level_commander.land(0.0, 2.0)
+            self._cf.high_level_commander.land(0.0, 2.5)
             self.isFlying     = False
             time.sleep(3)
             self.isReadyToFly = True
@@ -479,9 +479,9 @@ class Drogno(threading.Thread):
             else:
                 print('%s can\'t land! (not flying)' % self.name)
 
-    def goTo(self,x,y,z, yaw=0, duration=COMMANDS_FREQUENCY):  #la zeta è in alto!
+    def goTo(self,x,y,z, yaw=0, duration=0.2):  #la zeta è in alto!
         self.goToCount += 1
-
+        duration = self.commandsFrequency*2
         if self.isFlying:
             # if x > 0 and y > 0:
             #     yaw = -45
@@ -497,7 +497,7 @@ class Drogno(threading.Thread):
                 clamp(z, 0.27   , BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
-            self._cf.high_level_commander.go_to(x,y,z, yaw,1)
+            self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
             # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         # else:

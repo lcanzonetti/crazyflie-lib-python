@@ -52,7 +52,7 @@ COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 1
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
-COMMANDS_FREQUENCY      = 0.2   # actual command'd rate to uavss
+commandsFrequency      = 0.2   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
 
 
@@ -111,7 +111,7 @@ def updateCompanion():
                 timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(31),   None,   [listaTimecode[2]])
                 timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   [listaTimecode[3]])
                 companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
-                commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(COMMANDS_FREQUENCY)])
+                commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(commandsFrequency)])
                 # bandolone = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]) 
                 infinitaRoba = [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]
                 # osc_send(bandolone, "companionClient")
@@ -333,7 +333,7 @@ def printAndSendCoordinates():
     global bufferone
     time.sleep(2)
     while not finished:
-        time.sleep(COMMANDS_FREQUENCY)
+        time.sleep(commandsFrequency)
         # if isSendEnabled:
         #     for drogno in drogni:
         #         iddio = drogni[drogno].ID
@@ -407,16 +407,18 @@ def setCompanionRate(address, args):
     print(COMPANION_UPDATE_RATE)
     
 def setCommandsRate(address, args):
-    global COMMANDS_FREQUENCY
+    global commandsFrequency
     # print(args)
     if args[0] == '+':
-        COMMANDS_FREQUENCY += 0.05
+        commandsFrequency += 0.05
     elif args[0] == '-':
-        if COMMANDS_FREQUENCY > 0:
-            COMMANDS_FREQUENCY -= 0.05
-    COMMANDS_FREQUENCY = round(COMMANDS_FREQUENCY, 2)
+        if commandsFrequency > 0:
+            commandsFrequency -= 0.05
+    commandsFrequency = round(commandsFrequency, 2)
+    for drogno in drogni:
+        drogni[drogno].commandsFrequency = commandsFrequency
     
-    print(COMMANDS_FREQUENCY)
+    print(Fore.RED + 'commandsFrequency has been set to ' + str(commandsFrequency))
 
 def start_server():      ######################    #### OSC init    #########    acts as main()
     global finished 
