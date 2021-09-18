@@ -17,20 +17,20 @@ finished = False
 # bufferon = {}
 
 class Feedbacco():
-    def __init__(self, eventoFinaleTremendo, sendingPort,receiving_port):
-        self.OSC_SENDING_IP   = "192.168.10.255"
+    def __init__(self, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
+        self.OSC_SENDING_IP   = sendingIP
         self.sendingPort      = sendingPort
         self.port             = receiving_port
         self.finished         = eventoFinaleTremendo
         # self.start()
  
-    def sendPose(self, robbaVaria):
-        iddio    = str(robbaVaria[0])
-        ixxa     = robbaVaria[1]
-        ipsila   = robbaVaria[2]
-        zedda    = robbaVaria[3]
-        yawa     = robbaVaria[4]
-        batteria = float(robbaVaria[4])
+    def sendPose(self, stuff):
+        iddio    = str(stuff[0])
+        ixxa     = stuff[1]
+        ipsila   = stuff[2]
+        zedda    = stuff[3]
+        yawa     = stuff[4]
+        batteria = float(stuff[4])
         # print ('direi a tutti he il drogno %s sta a  %s  |  %s  |  %s   con batteria %s' % (iddio, ixxa, ipsila, zedda, batteria))
         coordinate  = oscbuildparse.OSCMessage("/feedback/" + iddio + "/pos", ",fff",   [ixxa,ipsila,zedda])
         robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",ffs",  [batteria,yawa])
@@ -68,10 +68,9 @@ class Feedbacco():
         
 
 class CompanionFeedbacco():
-    def __init__(self, cuia, sendingIP, sendingPort, receivingPort):
+    def __init__(self, cuia, sendingIP, sendingPort):
         self.sendingIP       = sendingIP
         self.sendingPort     = sendingPort
-        self.receivingPort   = receivingPort
         self.cuia            = cuia
  
     def sendCompanionFeedback(self, stuff):
@@ -79,9 +78,6 @@ class CompanionFeedbacco():
         osc_send(bandoleon, "feedbackClient")
   
     def start(self):
-
-        print('companion feeddabcker yeah on port %s' % str(self.receivingPort))
-
         def oscLoop():
             while True:
                 osc_process()
@@ -98,7 +94,7 @@ class CompanionFeedbacco():
         
         osc_startup()
         osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.sendingPort)
+        print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         

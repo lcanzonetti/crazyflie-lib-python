@@ -1,39 +1,20 @@
 #rf 2021
-#ciao
+# native modules
 import os
-from pathlib import Path
+import sys
 import multiprocessing
 import threading
 import time
 import signal
-from   collections import namedtuple
+from   pathlib                    import Path
+#bitcraze modules
+import cflib.crtp
+from   cflib.utils.power_switch import PowerSwitch
 #custom modules
-import OSCStuff as OSC
+import OSCStuff       as OSC
 import OSC_feedabcker as feedbacker
 import Drogno
-import cflib.crtp
-import sys
-# import power_switch_mod as PowerSwitch
-from   cflib.utils.power_switch import PowerSwitch
-from   multiprocessing.connection import Client
-
-lastRecordPath   = ''  
-WE_ARE_FAKING_IT    = False
-AUTO_RECONNECT      = False
-RECONNECT_FREQUENCY = 1
-COMMANDS_FREQUENCY  = 0.2
-FEEDBACK_SENDING_PORT = 6000
-
-
-Drogno.COMMANDS_FREQUENCY = COMMANDS_FREQUENCY
-OSC.COMMANDS_FREQUENCY    = COMMANDS_FREQUENCY
-
-threads_exit_event   = threading.Event()
-processes_exit_event = multiprocessing.Event()
-
-address = ('127.0.0.1', FEEDBACK_SENDING_PORT)
-connectionToFeedbackProcess = None
-
+#########################################################################
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
@@ -47,9 +28,25 @@ uris = [
         # 'radio://3/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
+#########################################################################
+
+lastRecordPath        = ''  
+WE_ARE_FAKING_IT      = False
+AUTO_RECONNECT        = False
+RECONNECT_FREQUENCY   = 1
+COMMANDS_FREQUENCY    = 0.2
+FEEDBACK_SENDING_PORT = 6000
+BROADCAST_IP          = "192.168.10.255"
+
+Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
+Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
+OSC.COMMANDS_FREQUENCY     = COMMANDS_FREQUENCY
+OSC.COMPANION_FEEDBACK_IP  = BROADCAST_IP 
+
+threads_exit_event   = threading.Event()
+processes_exit_event = multiprocessing.Event()
 connectedUris = uris.copy()
 drogni = {}
-
 
 SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
@@ -80,7 +77,6 @@ def radioStart():
         except IndexError:
             print(IndexError)
 
-
 def autoReconnect():
     while not threads_exit_event.is_set() :
         time.sleep(RECONNECT_FREQUENCY)
@@ -105,20 +101,15 @@ def restart_devices():
     print(uris)
     urisToBeRemoved = []
     for urico in range(len(uris)):
-        # print('tipo:  ')
-        # print(uris[urico])
         try:
             # print('trying to power up %s' % uris[urico]) 
             PowerSwitch(uris[urico]).stm_power_up()
         except Exception: 
             print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
-            # connectedUris.remove(uris[urico])
             urisToBeRemoved.append(uris[urico])
-            # time.sleep(0.5)
     connectedUris = uris.copy()
     for u in urisToBeRemoved:
         connectedUris.remove(u)
-    
 
     print('at the end these are drognos we have:')
     print(connectedUris)
@@ -141,13 +132,8 @@ def main():
  
     for uro in connectedUris:
         iddio = int(uro[-1])
-        # fiddo = feedbacker.Feedbacco(processes_exit_event)
-        # OSCFeedbackProcess   = multiprocessing.Process(target=feedbacker.Feedbacco.start, args=[processes_exit_event])
-        # OSCFeedbackProcess.start()
-
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
-
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
@@ -155,22 +141,12 @@ def main():
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
-    # time.sleep(5)
-    # global connectionToFeedbackProcess
-    # try:
-    #     connectionToFeedbackProcess = Client(address)
-    # except:
-    #     print('non trovo quaa mmerda de fidbeck')
-    
 
 def exit_signal_handler(signum, frame):
     global OSCFeedbackProcess 
     global threads_exit_event
     print('esco')
     threads_exit_event.set() 
-    # connectionToFeedbackProcess.send('fuck you')
-    # fiddo.finished.set()
-    # processes_exit_event.set()
 
     for drogno in drogni:
         try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()

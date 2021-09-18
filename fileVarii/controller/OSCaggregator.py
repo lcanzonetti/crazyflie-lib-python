@@ -9,47 +9,29 @@ from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 from   random                import uniform
 
-finished = False
-bufferon = {}
-
 
 class Aggregator():
-    def __init__(self):
-        self.OSC_IP           = "127.0.0.1"
-        self.SENDING_PORT     = 9200
-        self.RECEIVING_PORT   = 9202
-        self.finished         = False
-        self.bufferone        = {}
+    def __init__(self, eventoFineDeMondo, coda, receivingPort, bufferone, oscProcessRate):
+        self.RECEIVING_PORT   = receivingPort
+        self.finished         = eventoFineDeMondo
+        self.bufferone        = bufferone
+        self.coda             = coda
+        self.oscProcessRate   = oscProcessRate
 
-    def setRequested(self, add, val):
-        # print(add, val)
-
-        iddio     = int(add[-3])
+    def setRequested(self, addr, val):
+        print(addr, val)
+        iddio     = int(addr[-3])
         value     = round(val,3)
-        parametro = 'requested_' + add[-1]
+        parametro = 'requested_' + addr[-1]
         setattr(self.bufferone[iddio], parametro, value)
-        # print ('setting: ', iddio, parametro, value)
-        # print(self.bufferone[iddio].requested_X)
+    
+    def sendCompleteFrame(self, addr, tc):
+        self.coda.put([tc, self.bufferone])
 
-
-    def main(self, robba):
-        print('robba')
-        self.bufferone = robba
-        # self.bufferone.pop(0)
-        # self.bufferone.pop(1)
-        # self.bufferone.pop(2)
-        # self.bufferone.pop(3)
-        # self.bufferone.pop(4)
-        # self.bufferone.pop(5)
-        # self.bufferone.pop(6)
-        # self.bufferone.pop(7)
-        # print(self.bufferone)
-
-        global finished 
-       
-        osc_startup(execthreadscount=20)
-        osc_udp_server("0.0.0.0", self.RECEIVING_PORT,               "aggregatingServer")
-        print(Fore.YELLOW + 'osc aggegator receiving on %s'%  self.RECEIVING_PORT)
+    def start(self):
+        osc_startup()
+        osc_udp_server("0.0.0.0", self.RECEIVING_PORT, "aggregatingServer")
+        print(Fore.YELLOW + 'osc aggregator receiving on %s'%  self.RECEIVING_PORT)
 
         ###########################  single fella
         osc_method("/notch/drone*/X",   self.setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -58,45 +40,23 @@ class Aggregator():
         osc_method("/notch/drone*/R",   self.setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
         osc_method("/notch/drone*/G",   self.setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
         osc_method("/notch/drone*/B",   self.setRequested, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-
-        while not finished:
-            osc_process()
-            time.sleep(0.1)
+        osc_method("/notch/timecode",   self.sendCompleteFrame, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        def OSCLoop():
+            while not self.finished.is_set():
+                osc_process()
+                time.sleep(oscProcessRate)
+            print('l\'aggregatore non ascolta più più')
         # Properly close the system.
+        OSCLoopThread = threading.Thread(target=OSCLoop).start()
         osc_terminate()
-
-
-def faiIlBufferon():
-    for i in range (0,20):
-        bufferon[i] = bufferDrone(i)
-
-
-
-
-
-class bufferDrone():
-    def __init__(self, ID, ):
-        self.ID          = int(ID)
-        self.name        = 'bufferDrone'+str(ID)
-        
-        self.requested_X            = 0.0
-        self.requested_Y            = 0.0
-        self.requested_Z            = 0.0
-        self.requested_R            = 0.0
-        self.requested_G            = 0.0
-        self.requested_B            = 0.0
-        self.yaw                    = 0.0
-
+ 
 ########## main
 if __name__ == '__main__':
-    faiIlBufferon()
     # print(bufferon)
     gino = Aggregator(bufferon)
     print(gino.bufferone)
     print('porco il clero')
-
-#cancellami:
-
+ 
     def fammeNesempio():
         global bufferon
         while True:

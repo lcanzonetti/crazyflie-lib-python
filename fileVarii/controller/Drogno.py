@@ -33,6 +33,7 @@ BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
 COMMANDS_FREQUENCY    = 0.2
 LOGGING_FREQUENCY     = 400
+FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
 CLAMPING              = False
@@ -100,7 +101,7 @@ class Drogno(threading.Thread):
         self._cf.connection_lost.add_callback(self._connection_lost)
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
-        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
+        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.OSCFeedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
 
     def run(self):

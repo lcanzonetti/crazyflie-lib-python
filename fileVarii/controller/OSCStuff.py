@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 #rf 2021
+import multiprocessing
 import threading
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
-from   multiprocessing import Process, Queue
+from   multiprocessing import Process, Queue, Event
 import OSC_feedabcker as feedbacker
 
 
@@ -19,33 +20,6 @@ import logging
 import OSCaggregator
 
 coloInit(convert=True)
-FEEDBACK_IP             = "192.168.10.255"
-FEEDBACK_SENDINGPORT    = 12321
-FEEDBACK_RECEIVINGPORT  = 9100
-feedbackCue             = Queue()  
-feedbackerInstance      = feedbacker.CompanionFeedbacco( feedbackCue, FEEDBACK_IP, FEEDBACK_SENDINGPORT, FEEDBACK_RECEIVINGPORT)
-
-AGGREGATION_ENABLED     = True
-aggregatorAddress       = ('127.0.0.1', 9099)
-aggregatore             = Listener(aggregatorAddress)
-incomingAggregation     = None
-
-RECEIVING_IP            = "0.0.0.0"
-RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.001
-
-COMPANION_IP            = "192.168.10.255"
-COMPANION_PORT          = 12321
-COMPANION_PAGES         = ['92', '93', '94']
-TC_COMPANION_PAGE       = '91'
-COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 1
-COMPANION_FEEDBACK_ENABLED = True
-
-FEEDBACK_ENABLED        = True
-FEEDBACK_RATE           = 0.8
-
-COMMANDS_FREQUENCY      = 0.2
 
 drogni        = {} 
 bufferone     = {}
@@ -53,6 +27,31 @@ isSendEnabled = False
 finished      = False
 msgCount      = 0 
 timecode      = '00:00:00:00'
+
+
+RECEIVING_IP            = "0.0.0.0"
+RECEIVING_PORT          = 9200
+OSC_PROCESS_RATE        = 0.001
+################################################  notch osc aggregator
+AGGREGATION_ENABLED     = True
+aggregatorInstance      = None
+aggregatorProcess       = None
+aggregatorCue           = Queue()
+aggregatorExitEvent     = multiprocessing.Event()
+################################################  companion feedback via OSC
+COMPANION_FEEDBACK_SENDINGPORT = 12321
+companionFeedbackCue    = Queue()  
+COMPANION_FEEDBACK_IP   = None
+COMPANION_PAGES         = ['92', '93', '94']
+TC_COMPANION_PAGE       = '91'
+COMPANION_ENABLE_BUTTON = '25'
+COMPANION_UPDATE_RATE   = 1
+COMPANION_FEEDBACK_ENABLED = True
+##################################################
+COMMANDS_FREQUENCY      = 0.2   # actual command'd rate to uavss
+RECEIVED_MESSAGES_AVERAGE = 10
+
+
 
 ###########################  companion
 def setSendEnabled (*args):
@@ -114,8 +113,8 @@ def updateCompanion():
                     for cp in COMPANION_PAGES:
                         col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
                         txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non mando"])
-                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [10, 235, 10])
-                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21", None,   ["non mando"])
+                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [10, 235, 10])
+                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21",    None,   ["non ricevo"])
                         infinitaRoba.extend( [col, txt, col2, txt2 ]) 
                         # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
                         # osc_send(carlo, "companionClient")
@@ -123,8 +122,8 @@ def updateCompanion():
                     for cp in COMPANION_PAGES:
                         col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
                         txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["mando"])
-                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,  [235, 10, 10])
-                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21"  , None,   ["mando"])
+                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [235, 10, 10])
+                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21"   , None,   ["ricevo"])
                         infinitaRoba.extend( [col, txt, col2, txt2 ]) 
 
                         # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
@@ -176,7 +175,7 @@ def updateCompanion():
                     infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                     # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
                     # osc_send(macron, "companionClient")
-                    feedbackCue.put(infinitaRoba)
+                    companionFeedbackCue.put(infinitaRoba)
  
     nnamo = threading.Thread(target=daje).start()
 
@@ -348,9 +347,9 @@ def printHowManyMessages():
     def printa():
         while not finished:
             global msgCount
-            time.sleep(5)
+            time.sleep(RECEIVED_MESSAGES_AVERAGE)
             if msgCount > 0.:
-                print('\nho ricevuto %s messaggi OSC al secondo.' % str(msgCount/5))
+                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % str(msgCount/RECEIVED_MESSAGES_AVERAGE))
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -404,10 +403,10 @@ def setCommandsRate(address, args):
     global COMMANDS_FREQUENCY
     # print(args)
     if args[0] == '+':
-        COMMANDS_FREQUENCY += 0.1
+        COMMANDS_FREQUENCY += 0.05
     elif args[0] == '-':
         if COMMANDS_FREQUENCY > 0:
-            COMMANDS_FREQUENCY -= 0.1
+            COMMANDS_FREQUENCY -= 0.05
     COMMANDS_FREQUENCY = round(COMMANDS_FREQUENCY, 2)
     
     print(COMMANDS_FREQUENCY)
@@ -416,26 +415,24 @@ def start_server():      ######################    #### OSC init    #########   
     global finished 
     global bufferone
     global timecode
-    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
-    # logger = logging.getLogger("osc")
-    # logger.setLevel(logging.DEBUG)
-    # osc_startup(logger=logger)
+
     osc_startup( )
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
-    # if COMPANION_FEEDBACK_ENABLED:   ## direct OSC from here
-    #     osc_broadcast_client(COMPANION_IP,    COMPANION_PORT,   "companionClient")
-    #     print(Fore.GREEN + 'OSC client to companion initalized on', COMPANION_IP, COMPANION_PORT)
-
-    if FEEDBACK_ENABLED:
-
-        companionFeedbackProcess = Process(target=feedbackerInstance.start)
+    print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
+    
+    if COMPANION_FEEDBACK_ENABLED:
+        companionFeedbackerInstance = feedbacker.CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
+        companionFeedbackProcess = Process(target=companionFeedbackerInstance.start)
         companionFeedbackProcess.daemon = True
         companionFeedbackProcess.start() 
-
-        print(Fore.GREEN + 'OSC feedback process initalized on', FEEDBACK_SENDINGPORT)
+        print(Fore.GREEN + 'companion OSC feedback process initalized on %s %s' %  (COMPANION_FEEDBACK_IP,  COMPANION_FEEDBACK_SENDINGPORT))
    
-    print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
-
+    if AGGREGATION_ENABLED:
+        global aggregatorInstance
+        global aggregatorProcess
+        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue,  )
+    
+    
     ###########################  single fella
     osc_method("/notch/drone*/pos",   setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/notch/drone*/color", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
@@ -457,62 +454,32 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-
+    ############################################################
     resetCompanion()
     updateCompanion()
     printHowManyMessages()
-    if AGGREGATION_ENABLED:
-            incomingAggregation = aggregatore.accept()
 
+    
     while not finished:
         osc_process()
         if AGGREGATION_ENABLED:
-            roba = incomingAggregation.recv()
-            timecode = roba.timecode
-            setRequestedPos(roba.pos)
-            setRequestedCol(roba.col)
-
-
+            roba = aggregatorCue.get()
+            timecode  = roba.timecode
+            bufferone = roba.bufferone
         time.sleep(OSC_PROCESS_RATE)
-        
-        # pass
     # Properly close the system.
     print('chiudo OSC')
-    feedbackCue.put('fuck you')
+    companionFeedbackCue.put('fuck you')
+
     osc_terminate()
 
 def faiIlBufferon():
     global bufferone
     for i in range (0,20):
         bufferone[i] = bufferDrone(i)
-    # print ('bufferon')  
-    # print (bufferone)
-    # print(bufferone[0])
 
-# ################ feedbacksssssssss
-# def sendPose():
-#     def treddo():
-#         while not finished:
-#             time.sleep(FEEDBACK_RATE)
-#             # for drogno in drogni:
-#             #     ixxo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_x", None,drogni[drogno].x)
-#             #     ypso = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_y", None,drogni[drogno].y)
-#             #     zeto = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_pos_z", None,drogni[drogno].z)
-#             #     yalo = oscbuildparse.OSCMessage("/drogni/drone"+str(drogni[drogno].ID)+"_rot_z", None,drogni[drogno].yaw)
-#             ixxo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-#             ypso = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-#             zeto = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-#             yalo = oscbuildparse.OSCMessage("/drogni/drone"+ str(random()),None,[random()])
-#             print("/drogni/drone"+ str(random()),None,random())
-#             bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ ixxo, ypso, zeto, yalo]) 
-#             osc_send(bandoleon, "companionClient")
-#                 # osc_process()
-#                 # print (droneID, roll, pitch, yaw) 
-#         print(Fore.GREEN + 'closing feedback thread')
-#     print(Fore.GREEN + 'starting feedback thread')
-#     feedbackTreddo = threading.Thread(target=treddo).start()
 
-########## main
+
 class bufferDrone():
     def __init__(self, ID, ):
         self.ID          = int(ID)
@@ -542,17 +509,9 @@ if __name__ == '__main__':
 #     keyboard.send('ctrl+6')
  
 
-    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
-    # aggregoneThread.start()
-    # sharedBuffer = manager.dict()
-    # sharedBuffer = bufferone
-    # print('sharedBuffer:  ')
-    # print(sharedBuffer)
-    # aggregatore      = OSCaggregator.Aggregator()
-    # aggregoneThread  = multiprocessing.Process(target=aggregatore.main, args=(sharedBuffer,))
-    # aggregoneThread  = threading.Thread(target=aggregatore.main, args=(bufferone,))
-    # aggregoneThread.start()
-    # print('sharedBuffer after:  ')
-    # print(sharedBuffer)
-    
-    # aggregoneThread.join()
+  
+
+        # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
+    # logger = logging.getLogger("osc")
+    # logger.setLevel(logging.DEBUG)
+    # osc_startup(logger=logger)
