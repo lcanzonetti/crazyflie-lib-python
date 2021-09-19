@@ -365,7 +365,7 @@ class Drogno(threading.Thread):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
 
-    def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati
+    def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati - gira il feedback indietro via osc
         # self.x              = float(data['stateEstimate.x'])
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])

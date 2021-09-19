@@ -15,6 +15,13 @@ from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 from   random                import random, uniform
 import logging
+logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '
+    '%(levelname)s - %(message)s')
+logger = logging.getLogger("osc")
+logger.setLevel(logging.DEBUG)
+
+
+
 
 finished = False
 # bufferon = {}
@@ -32,20 +39,19 @@ class Feedbacco():
         ixxa     = stuff[1]
         ipsila   = stuff[2]
         zedda    = stuff[3]
-        yawa     = stuff[4]
         batteria = float(stuff[4])
+        yawa     = stuff[5]
+
         # print ('direi a tutti he il drogno %s sta a  %s  |  %s  |  %s   con batteria %s' % (iddio, ixxa, ipsila, zedda, batteria))
         coordinate  = oscbuildparse.OSCMessage("/feedback/" + iddio + "/pos", ",fff",   [ixxa,ipsila,zedda])
-        robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",ffs",  [batteria,yawa])
+        robba       = oscbuildparse.OSCMessage("/feedback/" + iddio + "/battery", ",ff",  [batteria,yawa])
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [coordinate, robba]) 
         osc_send(bandoleon, "feedbackClient")
   
     def start(self):
         address = ('127.0.0.1', self.port)
         listener = Listener(address)
-
-        print('feeddabcker yeah on port %s' % str(self.port))
-
+        # print('feeddabcker yeah on port %s' % str(self.port))
         def oscLoop():
             connessione = listener.accept()
 
@@ -64,8 +70,10 @@ class Feedbacco():
             listener.close()
         
         osc_startup()
+        # osc_startup(logger=logger)
+
         osc_broadcast_client(self.OSC_SENDING_IP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'osc feedbacker sending on %s'%  self.sendingPort)
+        print(Fore.YELLOW + 'osc feedbacker sending on %s %s'%  (self.OSC_SENDING_IP,self.sendingPort))
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         
@@ -91,7 +99,7 @@ class CompanionFeedbacco():
                     break
                 else:
                     self.sendCompanionFeedback(msg)
-                time.sleep(0.01)
+                time.sleep(0.04)
             # Properly close the system.
             print('\nanche il feedbacker se ne va')
             osc_terminate()
