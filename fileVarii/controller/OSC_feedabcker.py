@@ -99,7 +99,7 @@ class CompanionFeedbacco():
                     break
                 else:
                     self.sendCompanionFeedback(msg)
-                time.sleep(0.01)
+                time.sleep(0.04)
             # Properly close the system.
             print('\nanche il feedbacker se ne va')
             osc_terminate()
