@@ -30,13 +30,14 @@ isSendEnabled = False
 finished      = False
 msgCount      = 0 
 timecode      = '00:00:00:00'
+framerate     = 25
 
 ################################################  this module osc receiving:
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.001
 ################################################  notch osc aggregator:
-AGGREGATION_ENABLED     = True
+AGGREGATION_ENABLED     = False
 AGGREGATOR_RECEIVING_PORT = 9201
 aggregatorInstance      = None
 aggregatorProcess       = None
@@ -356,7 +357,7 @@ def printHowManyMessages():
             global msgCount
             time.sleep(RECEIVED_MESSAGES_AVERAGE)
             if msgCount > 0.:
-                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % str(msgCount/RECEIVED_MESSAGES_AVERAGE))
+                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -439,7 +440,7 @@ def start_server():      ######################    #### OSC init    #########   
     if AGGREGATION_ENABLED:
         global aggregatorInstance
         global aggregatorProcess
-        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE )
+        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE, framerate )
         aggregatorProcess  = Process(target=aggregatorInstance.start)
         aggregatorProcess.daemon = True
         aggregatorProcess.start() 
@@ -492,7 +493,6 @@ def faiIlBufferon():
     global bufferone
     for i in range (0,20):
         bufferone[i] = bufferDrone(i)
-
 
 
 class bufferDrone():
