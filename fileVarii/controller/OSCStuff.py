@@ -94,7 +94,7 @@ def resetCompanion():
                 bandoleon   = [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]
                 # bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                 # osc_send(bandoleon, "companionClient")
-                companionFeedbackCue.put(bandoleon)
+                companionFeedbackCue.put_nowait(bandoleon)
 
                 j+=1
 
@@ -183,7 +183,7 @@ def updateCompanion():
                     infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                     # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
                     # osc_send(macron, "companionClient")
-                    companionFeedbackCue.put(infinitaRoba)
+                    companionFeedbackCue.put_nowait(infinitaRoba)
  
     nnamo = threading.Thread(target=daje).start()
 
@@ -476,16 +476,16 @@ def start_server():      ######################    #### OSC init    #########   
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode
-            roba = aggregatorCue.get()
+            roba = aggregatorCue.get_nowait()
             timecode  = roba['timecode']
             bufferone = roba['bufferone']
-            print(timecode)
+            print('ricevuto questo timecode dall\'aggregatore: %s' %timecode)
         time.sleep(OSC_PROCESS_RATE)
     # Properly close the system.
     print('chiudo OSC')
     companionFeedbackCue.put('fuck you')
     aggregatorExitEvent.set()
-    aggregatorProcess.join()
+    # aggregatorProcess.join()
 
     osc_terminate()
 

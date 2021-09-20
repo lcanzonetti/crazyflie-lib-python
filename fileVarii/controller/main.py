@@ -140,8 +140,9 @@ def main():
 
     OSC.drogni = drogni
     OSC.faiIlBufferon()
-    OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
-    OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates,daemon=True).start()
+    # OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
+    OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
+    OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates).start()
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 

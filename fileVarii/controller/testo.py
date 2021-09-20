@@ -4,10 +4,10 @@ from multiprocessing import Process, Queue
 import time
 import sys
 import pytimecode
-import finestrina
+# import finestrina
 import threading
 from threading import Thread
-
+import math
 
 def reader_proc(queue):
     ## Read from the queue; this will be spawned as a separate Process
@@ -42,5 +42,12 @@ if __name__=='__main__':
     timecode = "00:00:00:00"
     pino = pytimecode.PyTimeCode(framerate=25,frames=0, iter_return="frames")
   
-    for i in range(100):
-        print(pino.next())
+    # for i in range(100):
+    #     print(pino.next())
+    
+    a = [0, 0, 0] 
+    b = [4,4,4] 
+
+    # Calculate Euclidean distance
+    print (math.dist(a,b))
+

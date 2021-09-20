@@ -99,10 +99,11 @@ class Drogno(threading.Thread):
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
+        # Feedback instance in his own process
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
-        self.feedbacker                = feedbacker.Feedbacco(processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
-        self.OSCFeedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
+        self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
+        self.feedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
@@ -123,14 +124,15 @@ class Drogno(threading.Thread):
         else:
             print('We are not faking it this time.')
             connectedToFeedback = False
-            if FEEDBACK_ENABLED and  not self.exitFlag.is_set():
+            if FEEDBACK_ENABLED and not self.exitFlag.is_set():
+                time.sleep(0.5)
                 while not connectedToFeedback:
                     try:
-                        time.sleep(1)
+                        time.sleep(0.1)
                         self.multiprocessConnection = Client(self.feedbacker_address)
                         connectedToFeedback = True
                     except ConnectionRefusedError:
-                        print('server di feedback non connesso!')
+                        print('server del drogno %s feedback non ancora connesso!' %)
 
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
@@ -263,11 +265,11 @@ class Drogno(threading.Thread):
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
-        self._cf.param.set_value('kalman.resetEstimation', '0')
-        time.sleep(0.2)
+        # self._cf.param.set_value('kalman.resetEstimation', '0')
+        # time.sleep(0.2)
         # self.wait_for_position_estimator()
         self.isReadyToFly = self.evaluateFlyness()
-        self.isPositionEstimated = True
+        # self.isPositionEstimated = True
     #################################################################### connection
 
     def connect(self):
@@ -307,7 +309,6 @@ class Drogno(threading.Thread):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
-
         self.is_connected = True
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=LOGGING_FREQUENCY)
@@ -345,7 +346,7 @@ class Drogno(threading.Thread):
         self.reset_estimator()
 
         self._cf.param.set_value('commander.enHighLevel', '1')
-        self._cf.param.set_value('ring.effect', '14')
+        self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', '0')
 
         self.HLCommander = self._cf.high_level_commander
@@ -358,7 +359,6 @@ class Drogno(threading.Thread):
         time.sleep(0.3)
         self.batteryThread.start()
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
-
         self.statoDiVolo = 'landed'
         
     def _stab_log_error(self, logconf, msg):
@@ -389,10 +389,14 @@ class Drogno(threading.Thread):
                 print('oooo')
     def evaluateFlyness(self):
         if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
+             self._cf.param.set_value('ring.effect', '11')  #alert
              return False
         elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
+             self.reset_estimator()
+             self._cf.param.set_value('ring.effect', '11')  #alert
              return False
         else:
+            self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
             return True
 
     def _connection_failed(self, link_uri, msg):
@@ -445,12 +449,18 @@ class Drogno(threading.Thread):
         else:
             print('for real')
             self.reset_estimator()
-
             if self.isReadyToFly:
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
                 self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
+                time.sleep(2)
+                self.goTo(self.x, self.y, self.z, 180, 0.8)
+                time.sleep(0.8)
+                self._cf.param.set_value('ring.headlightEnable', '1')
+                time.sleep(1)
+                self._cf.param.set_value('ring.headlightEnable', '0')
+                
                 # self.positionHLCommander.take_off()
                 self.statoDiVolo = 'hovering'
                 self.isFlying    = True
@@ -729,10 +739,12 @@ class Drogno(threading.Thread):
             else:
                 level  = float(self.batteryVoltage)
             if level<3.50:
+                self._cf.param.set_value('ring.effect', '14')  
                 print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 self.isReadyToFly = False
 
             if level<3.35:
+                self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
                     self.statoDiVolo == 'depleted'
@@ -770,6 +782,9 @@ class Drogno(threading.Thread):
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
         self.multiprocessConnection.send('fuck you')
+        print ('waiting for drogno %s\'s feedback to close' % self.ID)
+        self.feedbackProcess.join()
+        print ('closing drogno %s\'s radio' % self.ID)
         self._cf.close_link()
         self.isKilled = True
         self.isReadyToFly = False

@@ -27,11 +27,12 @@ finished = False
 # bufferon = {}
 
 class Feedbacco():
-    def __init__(self, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
+    def __init__(self, ID, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
         self.OSC_SENDING_IP   = sendingIP
         self.sendingPort      = sendingPort
         self.port             = receiving_port
         self.finished         = eventoFinaleTremendo
+        self.ID               = ID
         # self.start()
  
     def sendPose(self, stuff):
@@ -65,7 +66,7 @@ class Feedbacco():
                     self.sendPose(msg)
                 time.sleep(0.01)
             # Properly close the system.
-            print('\nanche il feedbacker se ne va')
+            print('\nFeedbacker process for drogno %s leaving.' % self.ID)
             osc_terminate()
             listener.close()
         
@@ -73,7 +74,7 @@ class Feedbacco():
         # osc_startup(logger=logger)
 
         osc_broadcast_client(self.OSC_SENDING_IP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'osc feedbacker sending on %s %s'%  (self.OSC_SENDING_IP,self.sendingPort))
+        print(Fore.YELLOW + 'osc feedbacker for drogno %s sending on %s %s'%  (self.ID, self.OSC_SENDING_IP,self.sendingPort))
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         

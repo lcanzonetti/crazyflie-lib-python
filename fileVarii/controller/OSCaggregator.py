@@ -50,7 +50,7 @@ class Aggregator():
         secs = int(((frames%(3600*self.framerate))%(60*self.framerate))/self.framerate)
         frs =  int(((frames%(3600*self.framerate))%(60*self.framerate))%self.framerate)
         timecodeBello = str(hrs).zfill(2)+":"+str(mins).zfill(2)+":"+str(secs).zfill(2)+":"+str(frs).zfill(2)
-        self.coda.put({'timecode':timecodeBello, 'bufferone':self.bufferone})
+        self.coda.put_nowait({'timecode':timecodeBello, 'bufferone':self.bufferone})
         # print('timecodebello: %s' % timecodeBello)
 
     def start(self):
@@ -72,7 +72,7 @@ class Aggregator():
             while not self.finished.is_set():
             # while True:
                 osc_process()
-                time.sleep(0.04)
+                time.sleep(0.001)
             osc_terminate()
             print('l\'aggregatore non ascolta più più')
         # Properly close the system.
