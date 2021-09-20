@@ -72,7 +72,7 @@ class Aggregator():
             while not self.finished.is_set():
             # while True:
                 osc_process()
-                time.sleep(0.001)
+                time.sleep(0.01)
             osc_terminate()
             print('l\'aggregatore non ascolta più più')
         # Properly close the system.

@@ -132,7 +132,7 @@ class Drogno(threading.Thread):
                         self.multiprocessConnection = Client(self.feedbacker_address)
                         connectedToFeedback = True
                     except ConnectionRefusedError:
-                        print('server del drogno %s feedback non ancora connesso!' %)
+                        print('server del drogno %s feedback non ancora connesso!' % self.I)
 
             self.printThread   = threading.Thread(target=self.printStatus).start()
             self.batteryThread = threading.Thread(target=self.evaluateBattery)
@@ -268,7 +268,7 @@ class Drogno(threading.Thread):
         # self._cf.param.set_value('kalman.resetEstimation', '0')
         # time.sleep(0.2)
         # self.wait_for_position_estimator()
-        self.isReadyToFly = self.evaluateFlyness()
+        # self.isReadyToFly = self.evaluateFlyness()
         # self.isPositionEstimated = True
     #################################################################### connection
 

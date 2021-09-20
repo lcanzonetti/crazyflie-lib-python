@@ -5,7 +5,7 @@ import threading
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
-
+import queue
 from   random                import random, uniform
 import logging
 
@@ -35,7 +35,7 @@ framerate     = 25
 ################################################  this module osc receiving:
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.001
+OSC_PROCESS_RATE        = 0.01
 ################################################  notch osc aggregator:
 AGGREGATION_ENABLED     = False
 AGGREGATOR_RECEIVING_PORT = 9201
@@ -476,10 +476,15 @@ def start_server():      ######################    #### OSC init    #########   
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode
-            roba = aggregatorCue.get_nowait()
-            timecode  = roba['timecode']
-            bufferone = roba['bufferone']
-            print('ricevuto questo timecode dall\'aggregatore: %s' %timecode)
+            try:
+                roba = aggregatorCue.get(block=False)
+                # aggregatorCue.task_done()
+                timecode  = roba['timecode']
+                bufferone = roba['bufferone']
+                print('ricevuto questo timecode dall\'aggregatore: %s' %timecode)
+            except  (queue.Empty, AttributeError):
+                pass
+                # print('empty cue, aggregator sends no stuff')
         time.sleep(OSC_PROCESS_RATE)
     # Properly close the system.
     print('chiudo OSC')
