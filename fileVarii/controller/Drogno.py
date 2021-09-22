@@ -1,8 +1,9 @@
 #rf 2021
+import time
+
 import threading
 import multiprocessing
 from   multiprocessing.connection import Client
-import time
 import random
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
@@ -24,8 +25,8 @@ logging.basicConfig(level=logging.ERROR)
 import OSC_feedabcker as feedbacker
 
 
-BOX_X                 = 1.5
-BOX_Y                 = 1.5
+BOX_X                 = 2.0
+BOX_Y                 = 2.0
 BOX_Z                 = 1.9
 DEFAULT_HEIGHT        = 0.9
 RELATIVE_SPACING      = 0.4
@@ -103,7 +104,7 @@ class Drogno(threading.Thread):
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
         self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
-        self.feedbackProcess        = multiprocessing.Process(target=self.feedbacker.start).start()
+        self.feedbackProcess           = multiprocessing.Process(target=self.feedbacker.start).start()
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
@@ -381,18 +382,20 @@ class Drogno(threading.Thread):
         self.isTumbled         = bool (data['sys.isTumbled'])
         if self.isTumbled: self.killMeHardly()
         self.isReadyToFly      = self.evaluateFlyness()
+
         if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
             try:
                 self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
                 # print('carlo')
             except ConnectionRefusedError:
                 print('oooo')
+
     def evaluateFlyness(self):
         if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
              self._cf.param.set_value('ring.effect', '11')  #alert
              return False
         elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-             self.reset_estimator()
+            #  self.reset_estimator()
              self._cf.param.set_value('ring.effect', '11')  #alert
              return False
         else:
@@ -434,7 +437,6 @@ class Drogno(threading.Thread):
             self.isReadyToFly = False
 
             # self._cf.close_link()
-            # time.sleep(1)
             self.reconnect()
             # self.exit()
  
@@ -443,22 +445,24 @@ class Drogno(threading.Thread):
     def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
         print('like, now')
         if self.WE_ARE_FAKING_IT:
-            time.delay(1)
+            time.sleep(1)
+
             self.statoDiVolo = 'decollato!'
             self.isFlying  = True
         else:
             print('for real')
-            self.reset_estimator()
+            # self.reset_estimator()
             if self.isReadyToFly:
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
-                self.HLCommander.takeoff(DEFAULT_HEIGHT, 2)
-                time.sleep(2)
-                self.goTo(self.x, self.y, self.z, 180, 0.8)
-                time.sleep(0.8)
+                self.HLCommander.takeoff(1,3)
+                
+                # time.sleep(2)
+                # self.goTo(self.x, self.y, self.z, 180, 0.8)
+                # time.sleep(0.8)
                 self._cf.param.set_value('ring.headlightEnable', '1')
-                time.sleep(1)
+                # time.sleep(1)
                 self._cf.param.set_value('ring.headlightEnable', '0')
                 
                 # self.positionHLCommander.take_off()
@@ -472,7 +476,7 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.land(0.0, 2.5)
             self.isFlying     = False
             time.sleep(3)
-            self.isReadyToFly = True
+            # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
         if self.WE_ARE_FAKING_IT:
@@ -516,8 +520,8 @@ class Drogno(threading.Thread):
     def goLeft(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) - float(quanto)
-            print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            print('va bene, vado a %s' % newX)
             self.statoDiVolo = 'hovering'
             
     def goRight(self, quanto=0.3):
@@ -570,7 +574,6 @@ class Drogno(threading.Thread):
         # print ('vado al colore %s' % (color))
 
         self._cf.param.set_value('ring.fadeColor', color)
-        # time.sleep(speed)
 
     def alternativeSetRingColor(self, rgb ):
         r = int( rgb[0] / 255 * 100 )
@@ -731,7 +734,7 @@ class Drogno(threading.Thread):
         self.currentTrajectoryLenght =  total_duration
 
     def evaluateBattery(self):
-        while not self.exitFlag.is_set():
+        while not self.exitFlag.is_set() and self.is_connected:
             # print (self.batteryVoltage)
             level = 0.0
             if self.batteryVoltage == 'n.p.':
@@ -783,7 +786,7 @@ class Drogno(threading.Thread):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
         self.multiprocessConnection.send('fuck you')
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
-        self.feedbackProcess.join()
+        # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
         self._cf.close_link()
         self.isKilled = True

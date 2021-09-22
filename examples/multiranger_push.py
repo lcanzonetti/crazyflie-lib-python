@@ -52,7 +52,7 @@ from cflib.positioning.motion_commander import MotionCommander
 from cflib.utils import uri_helper
 from cflib.utils.multiranger import Multiranger
 
-URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E0')
 
 if len(sys.argv) > 1:
     URI = sys.argv[1]
@@ -62,7 +62,7 @@ logging.basicConfig(level=logging.ERROR)
 
 
 def is_close(range):
-    MIN_DISTANCE = 0.2  # m
+    MIN_DISTANCE = 0.3  # m
 
     if range is None:
         return False
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     cf = Crazyflie(rw_cache='./cache')
     with SyncCrazyflie(URI, cf=cf) as scf:
-        with MotionCommander(scf) as motion_commander:
+        with MotionCommander(scf, default_height=0.7) as motion_commander:
             with Multiranger(scf) as multiranger:
                 keep_flying = True
 
