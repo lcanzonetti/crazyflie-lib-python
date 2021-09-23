@@ -2,6 +2,9 @@
     "folders": [
         {
             "path": "controller"
+        },
+        {
+            "path": "../cflib"
         }
     ]
 }
