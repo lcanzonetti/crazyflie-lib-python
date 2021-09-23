@@ -54,41 +54,41 @@ class Drogno(threading.Thread):
         self.durataVolo  = random.randint(1,4)
         self.exitFlag    = exitFlag
         self.WE_ARE_FAKING_IT = perhapsWeReFakingIt
-        self.isKilled              = False
-        self.isReadyToFly          = False
-        self.isFlying              = False
-        self.controlThread         = False
-        self.printThread           = False
-        self.printRate             = STATUS_PRINT_RATE
-        self.currentSequenceThread = False
-        self.recconnectionAttempts = 0
-        self.is_connected          = False
-        self.standBy               = False
-        self.isPositionEstimated   = False
-        self.HLCommander           = None
-        self.positionHLCommander   = None 
-        self.starting_x            = 'np'
-        self.starting_y            = 'np'
-        self.starting_z            = 'np'
-        self.x                     = 0.0
-        self.y                     = 0.0 
-        self.z                     = 0.0
-        self.requested_X           = 0.0
-        self.requested_Y           = 0.0
-        self.requested_Z           = 0.0
-        self.requested_R           = 0
-        self.requested_G           = 0
-        self.requested_B           = 0
-        self.kalman_VarX           = 0
-        self.kalman_VarY           = 0
-        self.kalman_VarZ           = 0
-        self.esteemsCount          = 0
-        self.prefStartPoint_X      = startingPoint[0]
-        self.prefStartPoint_Y      = startingPoint[1]
-        self.yaw                   = 0.0
-        self.batteryVoltage        = 'n.p.'
-        self.ringIntensity         = 0.1
-        self.goToCount             = 0.0
+        self.isKilled               = False
+        self.isReadyToFly           = False
+        self.isFlying               = False
+        self.controlThread          = False
+        self.printThread            = False
+        self.printRate              = STATUS_PRINT_RATE
+        self.currentSequenceThread  = False
+        self.recconnectionAttempts  = 0
+        self.is_connected           = False
+        self.standBy                = False
+        self.isPositionEstimated    = False
+        self.HLCommander            = None
+        self.positionHLCommander    = None 
+        self.starting_x             = 'np'
+        self.starting_y             = 'np'
+        self.starting_z             = 'np'
+        self.x                      = 0.0
+        self.y                      = 0.0 
+        self.z                      = 0.0
+        self.requested_X            = 0.0
+        self.requested_Y            = 0.0
+        self.requested_Z            = 0.0
+        self.requested_R            = 0
+        self.requested_G            = 0
+        self.requested_B            = 0
+        self.kalman_VarX            = 0
+        self.kalman_VarY            = 0
+        self.kalman_VarZ            = 0
+        self.esteemsCount           = 0
+        self.prefStartPoint_X       = startingPoint[0]
+        self.prefStartPoint_Y       = startingPoint[1]
+        self.yaw                    = 0.0
+        self.batteryVoltage         = 'n.p.'
+        self.ringIntensity          = 0.1
+        self.commandsCount          = 0.0
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
@@ -143,11 +143,11 @@ class Drogno(threading.Thread):
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.goToCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
-                self.goToCount = 0
+                print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
+                self.commandsCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
-                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.goToCount/self.printRate}")
+                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.commandsCount/self.printRate}")
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -493,9 +493,9 @@ class Drogno(threading.Thread):
             else:
                 print('%s can\'t land! (not flying)' % self.name)
 
-    def goTo(self,x,y,z, yaw=0, duration=0.2):  #la zeta è in alto!
-        self.goToCount += 1
-        duration = self.commandsFrequency*2
+    def goTo(self,x,y,z, yaw=0, duration=0.5):  #la zeta è in alto!
+        self.commandsCount += 1
+        duration = self.commandsFrequency*3
         if self.isFlying:
             # if x > 0 and y > 0:
             #     yaw = -45
@@ -765,7 +765,7 @@ class Drogno(threading.Thread):
 
     def killMeSoftly(self):
         self.land()
-        self.exit()
+        self.goToSleep()
     def killMeHardly(self):
         # self.setRingColor(0,0,0)
         self._cf.high_level_commander.stop()
@@ -796,7 +796,15 @@ class Drogno(threading.Thread):
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
 
-
+def IDFromURI(uri) -> int:
+    # Get the address part of the uri
+    address = uri.rsplit('/', 1)[-1]
+    try:
+        return int(address, 16) - 996028180448
+    except ValueError:
+        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
+        return None
+    
    # The trajectory to fly
 # See https://github.com/whoenig/uav_trajectories for a tool to generate
 # trajectories

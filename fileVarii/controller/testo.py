@@ -1,4 +1,5 @@
 import multiprocessing
+import os
 import random
 from multiprocessing import Process, Queue
 import time
@@ -8,6 +9,21 @@ import pytimecode
 import threading
 from threading import Thread
 import math
+uris = [    
+        'radio://0/80/2M/E7E7E7E7E0',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
+        'radio://1/90/2M/E7E7E7E7E3',
+        'radio://1/90/2M/E7E7E7E7E4',
+        'radio://1/90/2M/E7E7E7E7E5',
+        'radio://2/100/2M/E7E7E7E7E6',
+        'radio://2/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E8'
+        'radio://3/110/2M/E7E7E7E7E9',
+        'radio://0/110/2M/E7E7E7E7EA',
+        'radio://0/110/2M/E7E7E7E7EB',
+        'radio://0/110/2M/E7E7E7E7EC',
+        ]
 
 import pygame
 pygame.init()
@@ -30,6 +46,15 @@ def writer(count, queue):
         queue.put(ii)             # Write 'count' numbers into the queue
     queue.put('DONE')
 
+def IDFromURI(uri) -> int:
+    # Get the address part of the uri
+    address = uri.rsplit('/', 1)[-1]
+    try:
+        return int(address, 16) - 996028180448
+    except ValueError:
+        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
+        return None
+
 if __name__=='__main__':
     
     # pino = {'carlo': [1,2,3], 'pincherlo': [4,5,6]}
@@ -48,7 +73,7 @@ if __name__=='__main__':
     #     print("Sending {0} numbers to Queue() took {1} seconds".format(count, 
     #         (time.time() - _start)))
     timecode = "00:00:00:00"
-    pino = pytimecode.PyTimeCode(framerate=25,frames=0, iter_return="frames")
+    # pino = pytimecode.PyTimeCode(framerate=25,frames=0, iter_return="frames")
   
     # for i in range(100):
     #     print(pino.next())
