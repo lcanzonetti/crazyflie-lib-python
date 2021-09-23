@@ -74,7 +74,7 @@ from PyQt5 import QtCore, QtWidgets
 
 logging.basicConfig(level=logging.INFO)
 
-URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+URI = uri_helper.uri_from_env(default='radio://0/120/2M/E7E7E7E7EA')
 
 if len(sys.argv) > 1:
     URI = sys.argv[1]
@@ -86,7 +86,7 @@ PLOT_SENSOR_DOWN = False
 # Set the sensor threshold (in mm)
 SENSOR_TH = 2000
 # Set the speed factor for moving and rotating
-SPEED_FACTOR = 0.3
+SPEED_FACTOR = 0.8
 
 
 class MainWindow(QtWidgets.QMainWindow):
