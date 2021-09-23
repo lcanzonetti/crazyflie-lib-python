@@ -134,7 +134,7 @@ def main():
     restart_devices()
  
     for uro in connectedUris:
-        iddio = int(uro[-1])
+        iddio = IDFromURI(uro)
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
 
@@ -160,6 +160,15 @@ def exit_signal_handler(signum, frame):
         drogni[drogno].join()
    
     sys.exit()
+
+def IDFromURI(uri) -> int:
+    # Get the address part of the uri
+    address = uri.rsplit('/', 1)[-1]
+    try:
+        return int(address, 16) - 996028180448
+    except ValueError:
+        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
+        return None
 
 if __name__ == '__main__':
     # os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
