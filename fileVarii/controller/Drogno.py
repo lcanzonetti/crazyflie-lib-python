@@ -28,7 +28,7 @@ import OSC_feedabcker as feedbacker
 BOX_X                 = 2.0
 BOX_Y                 = 2.0
 BOX_Z                 = 1.9
-DEFAULT_HEIGHT        = 0.9
+DEFAULT_HEIGHT        = 1.6
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
@@ -36,7 +36,7 @@ LOGGING_FREQUENCY     = 200
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
-CLAMPING              = False
+CLAMPING              = True
 RING_FADE_TIME        = 0.8
 
 
@@ -93,7 +93,8 @@ class Drogno(threading.Thread):
         self.linkQuality            = 0
         self.isTumbled              = False
         self.commandsFrequency      = 0.2
-
+        self.flyingTime             = 0
+        self.connectionThread       = None
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -123,7 +124,7 @@ class Drogno(threading.Thread):
             # print('fKING IT')
             # self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
         else:
-            print('We are not faking it this time.')
+            # print('We are not faking it this time.')
             connectedToFeedback = False
             if FEEDBACK_ENABLED and not self.exitFlag.is_set():
                 time.sleep(0.5)
@@ -136,7 +137,8 @@ class Drogno(threading.Thread):
                         print('server del drogno %s feedback non ancora connesso!' % self.I)
 
             self.printThread   = threading.Thread(target=self.printStatus).start()
-            self.batteryThread = threading.Thread(target=self.evaluateBattery)
+            self.killingPill   = threading.Event()
+            self.batteryThread = threading.Thread(target=self.evaluateBattery, args=(self.killingPill,))
             self.connect()
      
     def printStatus(self):
@@ -161,42 +163,6 @@ class Drogno(threading.Thread):
             self.currentSequenceThread.start()
             print('start!')
 
-    def connect(self): 
-        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
-
-        def porcoMondo():
-            self.statoDiVolo = 'connecting'
-            try:
-                self._cf.open_link(self.link_uri)
-            except IndexError:
-                print('capperi')
-            except:
-                print('no radio pal')
-        if self.killed == False:
-            connessione = threading.Thread(target=porcoMondo, daemon=True).start() 
-
-    def reconnect(self):
-        # self._cf.close_link()
-        def mariconnetto():
-            if self.recconnectionAttempts == 0:
-                print(f'provo a riaprire la connessione con il drogno {self.name}')
-                self.recconnectionAttempts+=1
-                self._cf.open_link( self.link_uri)
-
-            elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
-                while self.is_connected == False and self.recconnectionAttempts < 10: 
-                    self.recconnectionAttempts +=1
-                    print('Aspetto 1 secondo prima di ritentare')
-                    time.sleep(1)
-                    print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
-                    self.connect()
-            else:
-                print('con il drogno %s ho perso le speranze' % self.ID)
-                self.exit()
-        tio = 'something'
-        tio = threading.Thread(target=mariconnetto)
-        tio.start()
-        
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
         if use_mellinger:
@@ -272,26 +238,28 @@ class Drogno(threading.Thread):
         # self.isReadyToFly = self.evaluateFlyness()
         # self.isPositionEstimated = True
     #################################################################### connection
-
     def connect(self):
-        if self.isKilled == False:
-            print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
-            def connection():
-                self.statoDiVolo = 'connecting'
-                try:
-                    self._cf.open_link(self.link_uri)
-                except IndexError:
-                    print('capperi')
-                except:
-                    print('no radio pal')
-            connessione = threading.Thread(target=connection).start() 
+       if self.isKilled == False:
+        print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+        def connection():
+            self.statoDiVolo = 'connecting'
+            try:
+                self._cf.open_link(self.link_uri)
+                while not self.exitFlag or self.is_connected:
+                    print('.')
+            except IndexError:
+                print('capperi')
+            except:
+                print('no radio pal')
+        self.connectionThread = threading.Thread(target=connection).start()  
 
     def reconnect(self):
         def mariconnetto():
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
-                self.connect()
+                self._cf.open_link( self.link_uri)
+
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                 while self.is_connected == False and self.recconnectionAttempts < 10: 
                     self.recconnectionAttempts +=1
@@ -301,7 +269,6 @@ class Drogno(threading.Thread):
                     self.connect()
             else:
                 print('con il drogno %s ho perso le speranze' % self.ID)
-                self.isReadyToFly = False
                 self.exit()
         tio = 'something'
         tio = threading.Thread(target=mariconnetto)
@@ -310,7 +277,6 @@ class Drogno(threading.Thread):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
-        self.is_connected = True
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=LOGGING_FREQUENCY)
         self._lg_kalm.add_variable('kalman.stateX', 'FP16')
@@ -341,8 +307,11 @@ class Drogno(threading.Thread):
                   '{} not found in TOC'.format(str(e)))
         except AttributeError:
           print('Could not add log config, bad configuration.')
+        except RuntimeError:
+          print('Porco il padre eterno e al su madonnina')
         print('il clero')
-         
+        self.is_connected = True
+        
         # time.sleep(0.3)
         self.reset_estimator()
 
@@ -358,7 +327,10 @@ class Drogno(threading.Thread):
             default_height=DEFAULT_HEIGHT,
             controller=PositionHlCommander.CONTROLLER_PID) 
         time.sleep(0.3)
-        self.batteryThread.start()
+        # try:
+        if not self.batteryThread.is_alive():  self.batteryThread.start()
+        # except:
+        #     print('porca la zozza')
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
         self.statoDiVolo = 'landed'
         
@@ -391,16 +363,17 @@ class Drogno(threading.Thread):
                 print('oooo')
 
     def evaluateFlyness(self):
-        if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
-             self._cf.param.set_value('ring.effect', '11')  #alert
-             return False
-        elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-            #  self.reset_estimator()
-             self._cf.param.set_value('ring.effect', '11')  #alert
-             return False
-        else:
-            self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
-            return True
+        if self.is_connected and not self.standBy:
+            if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
+                self._cf.param.set_value('ring.effect', '11')  #alert
+                return False
+            elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
+                #  self.reset_estimator()
+                self._cf.param.set_value('ring.effect', '11')  #alert
+                return False
+            else:
+                self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
+                return True
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -425,11 +398,11 @@ class Drogno(threading.Thread):
 
         # self._cf.close_link()
         # time.sleep(1)
-        self.reconnect()
+        if not self.standBy:  self.reconnect()
+
         # self.exit()
 
     def _disconnected(self, link_uri):
-        if self.is_connected == True:
             """Callback when the Crazyflie is disconnected (called in all cases)"""
             print('Deh, son sconnesso da %s' % link_uri)
             self.is_connected = False
@@ -437,12 +410,12 @@ class Drogno(threading.Thread):
             self.isReadyToFly = False
 
             # self._cf.close_link()
-            self.reconnect()
+            if not self.standBy and not self.isKilled:  self.reconnect()
             # self.exit()
  
     #################################################################### movement
 
-    def takeoff(self, height=DEFAULT_HEIGHT, time=1.5):
+    def takeoff(self, height=DEFAULT_HEIGHT, scramblingTime=2):
         print('like, now')
         if self.WE_ARE_FAKING_IT:
             time.sleep(1)
@@ -456,13 +429,13 @@ class Drogno(threading.Thread):
                 self.starting_x  = self.x
                 self.starting_y  = self.y
                 self.statoDiVolo = 'scrambling!'
-                self.HLCommander.takeoff(1,3)
-                
-                # time.sleep(2)
-                # self.goTo(self.x, self.y, self.z, 180, 0.8)
-                # time.sleep(0.8)
+                self.HLCommander.takeoff(DEFAULT_HEIGHT,scramblingTime)
+                self.scramblingTime = time.time() * 1000
+                time.sleep(1)
+                self.goTo(self.x, self.y, self.z, 180, 0.8)
+                time.sleep(0.8)
                 self._cf.param.set_value('ring.headlightEnable', '1')
-                # time.sleep(1)
+                time.sleep(1)
                 self._cf.param.set_value('ring.headlightEnable', '0')
                 
                 # self.positionHLCommander.take_off()
@@ -475,7 +448,8 @@ class Drogno(threading.Thread):
         def landing_sequence():
             self._cf.high_level_commander.land(0.0, 2.5)
             self.isFlying     = False
-            time.sleep(3)
+            time.sleep(1)
+            self.flyingTime += (time.time() * 1000) - self.scramblingTime
             # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
 
@@ -733,36 +707,39 @@ class Drogno(threading.Thread):
         self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
         self.currentTrajectoryLenght =  total_duration
 
-    def evaluateBattery(self):
-        while not self.exitFlag.is_set() and self.is_connected:
-            # print (self.batteryVoltage)
-            level = 0.0
-            if self.batteryVoltage == 'n.p.':
-                level = 20.
-            else:
-                level  = float(self.batteryVoltage)
-            if level<3.50:
-                self._cf.param.set_value('ring.effect', '14')  
-                print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
-                self.isReadyToFly = False
+    def evaluateBattery(self, killingPill):
+        print (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected)
 
-            if level<3.35:
-                self._cf.param.set_value('ring.effect', '11')  #alert
-                if self.statoDiVolo == 'landed':
-                    print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
-                    self.statoDiVolo == 'depleted'
-                    self.isReadyToFly = False
+        if not self.exitFlag.is_set():
+            if self.is_connected:
+                while not killingPill.is_set():
+                    level = 0.0
+                    if self.batteryVoltage == 'n.p.':
+                        level = 20.
+                    else:
+                        level  = float(self.batteryVoltage)
+                    if level<3.50:
+                        self._cf.param.set_value('ring.effect', '14')  
+                        print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
+                        self.isReadyToFly = False
 
-                    # self._cf.high_level_commander.stop()
-                    # self._cf.commander.send_stop_setpoint()
-                else:
-                    print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    self.land()
-                    self.statoDiVolo = 'landed'
-                    self.isFlying = False
-                    self.isReadyToFly = False
-            time.sleep(BATTERY_CHECK_RATE)
+                    if level<3.35:
+                        self._cf.param.set_value('ring.effect', '11')  #alert
+                        if self.statoDiVolo == 'landed':
+                            print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
+                            self.statoDiVolo == 'depleted'
+                            self.isReadyToFly = False
 
+                            # self._cf.high_level_commander.stop()
+                            # self._cf.commander.send_stop_setpoint()
+                        else:
+                            print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
+                            self.land()
+                            self.statoDiVolo = 'landed'
+                            self.isFlying = False
+                            self.isReadyToFly = False
+                    time.sleep(BATTERY_CHECK_RATE)
+        print('battery thread for drone %s stopped'% self.ID)
     def killMeSoftly(self):
         self.land()
         self.goToSleep()
@@ -773,14 +750,18 @@ class Drogno(threading.Thread):
         self.goToSleep()
         self.exit()
     def goToSleep(self):
+        self.standBy = True
+        self.killingPill.set()
+        self._cf.close_link()
         PowerSwitch(self.link_uri).stm_power_down()
         self.statoDiVolo = 'stand by'
-        self.standBy = True
         self.is_connected = False
+
     def wakeUp(self):
-        PowerSwitch(self.link_uri).stm_power_up()
-        self.connect()
         self.statoDiVolo = 'waking up'
+        PowerSwitch(self.link_uri).stm_power_up()
+        time.sleep(.51)
+        self.connect()
 
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)
@@ -788,8 +769,8 @@ class Drogno(threading.Thread):
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
-        self._cf.close_link()
         self.isKilled = True
+        self._cf.close_link()
         self.isReadyToFly = False
         self.exitFlag.set()
 

@@ -116,8 +116,7 @@ def vector_add(v0, v1):
 def run_sequence(scf):
     cf = scf.cf
 
-    poses = vr.getDeviceToAbsoluteTrackingPose(
-        openvr.TrackingUniverseStanding, 0, openvr.k_unMaxTrackedDeviceCount)
+    poses = vr.getDeviceToAbsoluteTrackingPose( openvr.TrackingUniverseStanding, 0, openvr.k_unMaxTrackedDeviceCount)
     controller_pose = poses[controllerId]
     pose = controller_pose.mDeviceToAbsoluteTracking
     setpoint = [-1*pose[2][3], -1*pose[0][3], pose[1][3] + 0.3]

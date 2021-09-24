@@ -83,8 +83,7 @@ if __name__=='__main__':
 
     # Calculate Euclidean distance
     # print (math.dist(a,b))
-
-    
+   
 
     # for al the connected joysticks
     try:
@@ -97,10 +96,11 @@ if __name__=='__main__':
             print ("Detected joystick "),joysticks[-1].get_name(),"'"
     except:
         print('maaa, er joystick?')
+        
     while keepPlaying:
         clock.tick(60)
         for event in pygame.event.get():
             # The 0 button is the 'a' button, 1 is the 'b' button, 2 is the 'x' button, 3 is the 'y' button
-            if event.button == 0:
+            if event.joy == 0:
                 print ("A Has Been Pressed")
 
