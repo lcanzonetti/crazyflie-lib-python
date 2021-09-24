@@ -89,6 +89,7 @@ SENSOR_TH = 2000
 SPEED_FACTOR = 0.8
 
 
+
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, URI):

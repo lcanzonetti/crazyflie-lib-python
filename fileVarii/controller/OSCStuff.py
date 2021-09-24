@@ -215,7 +215,7 @@ def takeOff(coddii, decollante):
     else:                         # single drogno logic, scramble or land
         if drogni[decollante].is_connected:
             if not drogni[decollante].isFlying:   # if it is not flying
-                print('chief says %s gonna take the fuck off' %(decollante))
+                print('chief says %s gonna take the fuck off' %(drogni[decollante]))
                 if drogni[decollante].evaluateFlyness():  # and might fly
                     bufferone[drogni[decollante].ID].requested_X = drogni[decollante].x
                     bufferone[drogni[decollante].ID].requested_Y = drogni[decollante].y
@@ -327,6 +327,13 @@ def standBy  (coddii, chi):
             drogni[drogno].goToSleep()
     else:
         drogni[chi].goToSleep()
+def wakeUp  (coddii, chi):
+    print(' %s  wakeUp' % chi )
+    if chi == 'all':    
+        for drogno in drogni:
+            drogni[drogno].wakeUp()
+    else:
+        drogni[chi].wakeUp()
 
 ###########################  single fella
 def printAndSendCoordinates():
@@ -462,6 +469,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/goBack",           goBack,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/standBy",          standBy,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/wakeUp",           wakeUp,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

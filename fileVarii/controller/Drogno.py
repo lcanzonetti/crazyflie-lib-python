@@ -137,8 +137,7 @@ class Drogno(threading.Thread):
                         print('server del drogno %s feedback non ancora connesso!' % self.I)
 
             self.printThread   = threading.Thread(target=self.printStatus).start()
-            self.killingPill   = threading.Event()
-            self.batteryThread = threading.Thread(target=self.evaluateBattery, args=(self.killingPill,))
+          
             self.connect()
      
     def printStatus(self):
@@ -240,6 +239,8 @@ class Drogno(threading.Thread):
     #################################################################### connection
     def connect(self):
        if self.isKilled == False:
+        self.killingPill   = threading.Event()
+        self.batteryThread = threading.Thread(target=self.evaluateBattery, args=(self.killingPill,))
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
         def connection():
             self.statoDiVolo = 'connecting'
@@ -740,6 +741,9 @@ class Drogno(threading.Thread):
                             self.isReadyToFly = False
                     time.sleep(BATTERY_CHECK_RATE)
         print('battery thread for drone %s stopped'% self.ID)
+        self.killingPill   = None
+        self.batteryThread = None
+        
     def killMeSoftly(self):
         self.land()
         self.goToSleep()
