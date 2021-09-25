@@ -2,6 +2,7 @@
 #rf 2021
 import multiprocessing
 import threading
+from   threading import Lock
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
@@ -55,7 +56,8 @@ COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency      = 0.2   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
-
+posLock = Lock()
+colLock = Lock()
 
 
 ###########################  companion
@@ -100,12 +102,14 @@ def resetCompanion():
 
 def updateCompanion():
     global bufferone
+    companionLock = Lock()
     def daje ():
         while not finished:
             if COMPANION_FEEDBACK_ENABLED:
                 infinitaRoba = []
                 time.sleep(COMPANION_UPDATE_RATE)
                 # print(Fore.WHITE +'aggiorno companion')
+                companionLock.acquire()
                 listaTimecode    = timecode.split(':')
                 timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   [listaTimecode[0]])
                 timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   [listaTimecode[1]])
@@ -148,17 +152,17 @@ def updateCompanion():
                         cp = int(cp)  + 2
                         iddio -= 14
                     cp = str(cp)
-                    takeoffOrLand      = 'take off'
-                    takeoffOrLandColor = [200,20,40]
+                    takeOffOrLand      = 'take off'
+                    takeOffOrLandColor = [200,20,40]
                     if d.isReadyToFly:
-                        takeoffOrLandColor = [20,200,40]
+                        takeOffOrLandColor = [20,200,40]
                     else:
-                        takeoffOrLandColor = [100,90,40]
+                        takeOffOrLandColor = [100,90,40]
 
                     if d.isFlying:
-                        takeoffOrLand = 'land'
-                        if d.evaluateFlyness():  takeoffOrLandColor = [200,20,40]
-                        else: takeoffOrLandColor = [255,0,0]
+                        takeOffOrLand = 'land'
+                        if d.evaluateFlyness():  takeOffOrLandColor = [200,20,40]
+                        else: takeOffOrLandColor = [255,0,0]
 
                     rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
                     if not any(rgb): rgb = [40,40,40]
@@ -171,8 +175,8 @@ def updateCompanion():
                     status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
 
 
-                    tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeoffOrLand])
-                    tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeoffOrLandColor)
+                    tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeOffOrLand])
+                    tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeOffOrLandColor)
                     tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
                     kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None,   [str(round(d.kalman_VarX,1)) + '' + str(round(d.kalman_VarY,1)) + ' ' + str(round(d.kalman_VarZ,1))])
@@ -184,21 +188,21 @@ def updateCompanion():
                     # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
                     # osc_send(macron, "companionClient")
                     companionFeedbackCue.put_nowait(infinitaRoba)
+                    companionLock.release()
  
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
 def takeOff(coddii, decollante):
     global bufferone
+    safeLocckino = Lock()
     def authorizedScrambleCommand():
+        safeLocckino.acquire()
         for drogno in drogni:
             bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
             bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
-            try:
-                gino = threading.Thread(target=drogni[drogno].takeoff).start()
-                # drogni[drogno].takeoff(0.45, 2.45)
-            except Exception:
-                print('already taking off ? %s' % Exception)
+            drogni[drogno].takeOff()
+        safeLocckino.release()
 
     authorizedDrognos = 0
     if decollante == 'all':    # whole swarm logic
@@ -220,8 +224,8 @@ def takeOff(coddii, decollante):
                     bufferone[drogni[decollante].ID].requested_X = drogni[decollante].x
                     bufferone[drogni[decollante].ID].requested_Y = drogni[decollante].y
                     try:
-                        gino = threading.Thread(target=drogni[decollante].takeoff).start()
-                        # drogni[decollante].takeoff(0.45, 2.45)
+                        gino = threading.Thread(target=drogni[decollante].takeOff).start()
+                        # drogni[decollante].takeOff(0.45, 2.45)
                     except Exception:
                         print('already taking off %s' % Exception)
                 else: 
@@ -349,59 +353,61 @@ def printAndSendCoordinates():
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
-                    drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+                    with colLock:
+                        drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
-                    drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
+                    with posLock:
+                        drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
         # else:
         #     # print('ma i comandi di movimento disabilitati')
         #     pass
-    print ('non potrò ricevere comandi di movimento, mai più')
+    print ('Non potrò mai più inviare ai drogni comandi di movimento, mai più')
 
 def printHowManyMessages():
+    howManyMessagesLock = Lock()
     def printa():
         while not finished:
             global msgCount
             time.sleep(RECEIVED_MESSAGES_AVERAGE)
-            if msgCount > 0.:
-                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
-            msgCount = 0
+            with howManyMessagesLock:
+                if msgCount > 0.:
+                    print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
+                msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
     threading.Thread(target=printa).start()
 
-def setRequested(*args):
-    iddio     = int(args[0].split('/')[2][-1])
-    parametro = args[0][-1]
-    value     = round(args[1],3)
-    parametro = 'requested_' + parametro
-   
-    setattr(bufferone[iddio], parametro, value)
+# def setRequested(*args):
+#     iddio     = int(args[0].split('/')[2][-1])
+#     parametro = args[0][-1]
+#     value     = round(args[1],3)
+#     parametro = 'requested_' + parametro
+#     setattr(bufferone[iddio], parametro, value)
     # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
 
 def setRequestedPos(address, args):
     global msgCount
     global timecode
-    msgCount += 1
     iddio      = int(address[-5])
-    value1     = round(float(args[1]),3)
-    value2     = round(float(args[2]),3)
-    value3     = round(float(args[3]),3)
-    timecode   = args[0]
-    # print(timecode)
-    # if isSendEnabled:
-    # print('provo a variare il parametro posizione dell\'iddio %s mettendoci %s %s %s' % ( iddio, value1, value2, value3))
-    bufferone[iddio].requested_X = value1
-    bufferone[iddio].requested_Y = value2
-    bufferone[iddio].requested_Z = value3
- 
+        # print(timecode)
+        # if isSendEnabled:
+        # print('provo a variare il parametro posizione dell\'iddio %s mettendoci %s %s %s' % ( iddio, value1, value2, value3))
+    with posLock: 
+        timecode   = args[0]
+        bufferone[iddio].requested_X = round(float(args[1]),3)
+        bufferone[iddio].requested_Y = round(float(args[2]),3)
+        bufferone[iddio].requested_Z = round(float(args[3]),3)
+        msgCount += 1
+
 def setRequestedCol(address, args):
     global msgCount
-    msgCount += 1
     iddio     = int(address[-7])
-    bufferone[iddio].requested_R = int(args[1])
-    bufferone[iddio].requested_G = int(args[2])
-    bufferone[iddio].requested_B = int(args[3])
+    with colLock:
+        msgCount += 1
+        bufferone[iddio].requested_R = int(args[1])
+        bufferone[iddio].requested_G = int(args[2])
+        bufferone[iddio].requested_B = int(args[3])
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE
@@ -479,12 +485,13 @@ def start_server():      ######################    #### OSC init    #########   
     updateCompanion()
     printHowManyMessages()
 
-    
+    aggregationLock = Lock()
     while not finished:
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode
             try:
+                aggregationLock.acquire()
                 roba = aggregatorCue.get(block=False)
                 # aggregatorCue.task_done()
                 timecode  = roba['timecode']
@@ -492,6 +499,8 @@ def start_server():      ######################    #### OSC init    #########   
                 print('ricevuto questo timecode dall\'aggregatore: %s' %timecode)
             except  (queue.Empty, AttributeError):
                 pass
+            finally:
+                aggregationLock.release()
                 # print('empty cue, aggregator sends no stuff')
         time.sleep(OSC_PROCESS_RATE)
     # Properly close the system.
@@ -525,10 +534,8 @@ class bufferDrone():
 if __name__ == '__main__':
     faiIlBufferon()
     COMPANION_FEEDBACK_IP = "192.168.1.255"
-
-
     OSCRefreshThread      = threading.Thread(target=start_server).start()
-    OSCPrintAndSendThread = threading.Thread(target=printAndSendCoordinates).start()
+    OSCPrintAndSendThread = threading.Thread(name='printAndSendThread', target=printAndSendCoordinates).start()
     # sendPose()
     while not finished:
         pass
