@@ -530,7 +530,6 @@ class bufferDrone():
         self.requested_B            = 0
         self.yaw                   = 0.0
 
-
 if __name__ == '__main__':
     faiIlBufferon()
     COMPANION_FEEDBACK_IP = "192.168.1.255"
@@ -539,16 +538,7 @@ if __name__ == '__main__':
     # sendPose()
     while not finished:
         pass
-
-# import keyboard
-
-# while True:
-#     keyboard.wait('q')
-#     keyboard.send('ctrl+6')
  
-
-  
-
         # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
