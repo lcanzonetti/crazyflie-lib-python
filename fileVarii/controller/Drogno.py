@@ -466,7 +466,8 @@ class Drogno(threading.Thread):
         landLock = Lock()
         def landing_sequence():
             landLock.acquire()
-            self._cf.high_level_commander.land(0.0, 2.5)
+            # self._cf.high_level_commander.land(0.0, 2.5)
+            self._cf.high_level_commander.land()
             self.isFlying     = False
             time.sleep(1)
             self.flyingTime += (time.time() * 1000) - self.scramblingTime
