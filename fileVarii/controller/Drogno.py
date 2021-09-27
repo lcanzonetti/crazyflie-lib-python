@@ -15,7 +15,7 @@ coloInit(convert=True)
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
-from   cflib.utils                                import uri_helper
+# from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
@@ -147,11 +147,11 @@ class Drogno(threading.Thread):
             self.connect()
      
     def printStatus(self):
-        printLock = Lock()
+        # printLock = Lock()
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
             if self.is_connected:
-                with printLock:
+                # with printLock:
                     print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
                     self.commandsCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
@@ -239,8 +239,9 @@ class Drogno(threading.Thread):
     def reset_estimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
-        # self._cf.param.set_value('kalman.resetEstimation', '0')
-        # time.sleep(0.2)
+        self._cf.param.set_value('kalman.resetEstimation', '0')
+        time.sleep(0.2)
+        print(Fore.MAGENTA + 'estimator reset done')
         # self.wait_for_position_estimator()
         # self.isReadyToFly = self.evaluateFlyness()
         # self.isPositionEstimated = True
@@ -306,13 +307,13 @@ class Drogno(threading.Thread):
         try:
             self._cf.log.add_config(self._lg_kalm)
             # This callback will receive the data
-            self.logLock = Lock()
+            # self.logLock = Lock()
             self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
             # This callback will be called on errors
             self._lg_kalm.error_cb.add_callback(self._stab_log_error)
             self._lg_kalm.start()
             self.is_connected = True
-            print(Fore.LIGHTGREEN_EX + 'connesso')
+            print(Fore.LIGHTGREEN_EX + '%s connesso %s'% (self.name, self.is_connected))
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
@@ -351,7 +352,7 @@ class Drogno(threading.Thread):
         # self.x              = float(data['stateEstimate.x'])
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])
-        self.logLock.acquire()
+        # self.logLock.acquire()
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
@@ -371,23 +372,30 @@ class Drogno(threading.Thread):
             # print('carlo')
         except ConnectionRefusedError:
             print('oooo')
-        finally:
-            self.logLock.release()
-        
-
+       
     def evaluateFlyness(self):
         if self.is_connected and not self.standBy:
             if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
+                self.statoDiVolo = 'out of BOX'
+                self._cf.param.set_value('ring.effect', '11')  #alert
+                return False
+            elif self.kalman_VarX > 10.0 or self.kalman_VarZ > 10.0 or self.kalman_VarZ > 10.0:
+                print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
+                self.statoDiVolo = 'out of bounds'
+                self.reset_estimator()
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
                 #  self.reset_estimator()
-                self._cf.param.set_value('ring.effect', '11')  #alert
+                print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
+                # self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             else:
                 self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
                 return True
-
+        else:
+            # print ('nope nope nope!')
+            pass
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
         at the specified address)"""
@@ -431,11 +439,13 @@ class Drogno(threading.Thread):
     def takeOff(self, height=DEFAULT_HEIGHT, scramblingTime = DEFAULT_SCRAMBLING_TIME):
         print('like, now')
         def scramblingsequence():
-            self.scramblingLock.acquire()
+            # self.scramblingLock.acquire()
             self.starting_x  = self.x
             self.starting_y  = self.y
             self.statoDiVolo = 'scrambling!'
+            # self.motionCommander.take_off(DEFAULT_HEIGHT,0.5)
             self._cf.high_level_commander.takeoff(DEFAULT_HEIGHT,scramblingTime)
+            # self.motionCommander._is_flying = True
             self.scramblingTime = time.time() * 1000
             time.sleep(1)
             self.goTo(self.x, self.y, self.z, 180, 0.8)
@@ -446,7 +456,7 @@ class Drogno(threading.Thread):
             # self.positionHLCommander.take_off()
             self.isFlying    = True
             self.statoDiVolo = 'hovering'
-            self.scramblingLock.release()
+            # self.scramblingLock.release()
 
         if self.WE_ARE_FAKING_IT:
             time.sleep(1)
@@ -457,23 +467,23 @@ class Drogno(threading.Thread):
             print('for real')
             # self.reset_estimator()
             if self.isReadyToFly:
-                self.scramblingLock   = Lock()
+                # self.scramblingLock   = Lock()
                 scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
             else:
                 print('BUT NOT READY')
 
     def land(self, speed=0.15, landing_height=0.05):
-        landLock = Lock()
+        # landLock = Lock()
         def landing_sequence():
-            landLock.acquire()
-            # self._cf.high_level_commander.land(0.0, 2.5)
-            self._cf.high_level_commander.land()
+            # landLock.acquire()
+            self._cf.high_level_commander.land(0.0, 2.5)
+            # self._cf.high_level_commander.land()
             self.isFlying     = False
             time.sleep(1)
             self.flyingTime += (time.time() * 1000) - self.scramblingTime
             # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
-            landLock.release()
+            # landLock.release()
 
         if self.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'landing'
@@ -507,47 +517,44 @@ class Drogno(threading.Thread):
 
     def goLeft(self, quanto=0.3):
         if self.isFlying:
-            # newX = float(self.x) - float(quanto)
-            # self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-            self.motionCommander.left(quanto,DEFAULT_VELOCITY)
-            # print('va bene, vado a %s' % newX)
+            newX = float(self.x) - float(quanto)
+            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            # self.motionCommander.left(quanto,DEFAULT_VELOCITY)
+            print('va bene, vado a %s' % newX)
             self.statoDiVolo = 'hovering'
             
     def goRight(self, quanto=0.3):
         if self.isFlying:
-            # newX = float(self.x) + float(quanto)
-            # print('va bene, vado a %s' % newX)
-            # self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-            self.motionCommander.right(quanto, DEFAULT_VELOCITY)
+            newX = float(self.x) + float(quanto)
+            print('va bene, vado a %s' % newX)
+            self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
+            # self.motionCommander.right(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goForward(self, quanto=0.3):
         if self.isFlying:
-            # newY = float(self.y) + float(quanto)
-            # print('va bene, vado a %s' % newY)
-            # self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
-            self.motionCommander.forward(quanto, DEFAULT_VELOCITY)
+            newY = float(self.y) + float(quanto)
+            print('va bene, vado a %s' % newY)
+            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            # self.motionCommander.forward(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goBack(self, quanto=0.3):
         if self.isFlying:
-            # newY = float(self.y) - float(quanto)
-            # print('va bene, vado a %s' % newY)
-            # self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
-            # # self.positionHLCommander.go_to(self.x, newY, self.z, 0, 1)
-            self.motionCommander.back(quanto, DEFAULT_VELOCITY)
+            newY = float(self.y) - float(quanto)
+            print('va bene, vado a %s' % newY)
+            self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
+            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goHome(self, speed=0.5):
         if self.isFlying:                
-            # self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1, 0, 1)
             self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
     
     def goToStart(self, speed=0.5):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.2, 0, 2, False)
-            # self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, r, g, b, speed=0.25):
@@ -726,11 +733,11 @@ class Drogno(threading.Thread):
         self.currentTrajectoryLenght =  total_duration
 
     def evaluateBattery(self, killingPill):
-        print (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected)
-        batteryLock = Lock()
+        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected))
+        # batteryLock = Lock()
         while not killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
             level = 0.0
-            batteryLock.acquire()
+            # batteryLock.acquire()
             if self.batteryVoltage == 'n.p.':
                 level = 20.
             else:
@@ -754,7 +761,7 @@ class Drogno(threading.Thread):
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
                     self.isReadyToFly = False
-            batteryLock.release()
+            # batteryLock.release()
             time.sleep(BATTERY_CHECK_RATE)
         print('battery thread for drone %s stopped'% self.ID)
         del self.killingPill
@@ -780,7 +787,8 @@ class Drogno(threading.Thread):
     def wakeUp(self):
         self.statoDiVolo = 'waking up'
         PowerSwitch(self.link_uri).stm_power_up()
-        time.sleep(.51)
+        time.sleep(3)
+        self.standBy = False
         self.connect()
 
     def exit(self):

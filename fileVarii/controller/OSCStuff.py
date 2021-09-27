@@ -2,7 +2,7 @@
 #rf 2021
 import multiprocessing
 import threading
-from   threading import Lock
+# from   threading import Lock
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
@@ -16,7 +16,6 @@ import time
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
-
 
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
@@ -36,7 +35,7 @@ framerate     = 25
 ################################################  this module osc receiving:
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.01
+OSC_PROCESS_RATE        = 0.001
 ################################################  notch osc aggregator:
 AGGREGATION_ENABLED     = False
 AGGREGATOR_RECEIVING_PORT = 9201
@@ -56,8 +55,8 @@ COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency      = 0.2   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
-posLock = Lock()
-colLock = Lock()
+# posLock = Lock()
+# colLock = Lock()
 
 
 ###########################  companion
@@ -102,14 +101,14 @@ def resetCompanion():
 
 def updateCompanion():
     global bufferone
-    companionLock = Lock()
+    # companionLock = Lock()
     def daje ():
         while not finished:
             if COMPANION_FEEDBACK_ENABLED:
                 infinitaRoba = []
                 time.sleep(COMPANION_UPDATE_RATE)
                 # print(Fore.WHITE +'aggiorno companion')
-                companionLock.acquire()
+                # companionLock.acquire()
                 listaTimecode    = timecode.split(':')
                 timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   [listaTimecode[0]])
                 timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   [listaTimecode[1]])
@@ -188,21 +187,20 @@ def updateCompanion():
                     # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
                     # osc_send(macron, "companionClient")
                     companionFeedbackCue.put_nowait(infinitaRoba)
-                    companionLock.release()
- 
+                    # companionLock.release()
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
 def takeOff(coddii, decollante):
     global bufferone
-    safeLocckino = Lock()
+    # safeLocckino = Lock()
     def authorizedScrambleCommand():
-        safeLocckino.acquire()
+        # safeLocckino.acquire()
         for drogno in drogni:
             bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
             bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
             drogni[drogno].takeOff()
-        safeLocckino.release()
+        # safeLocckino.release()
 
     authorizedDrognos = 0
     if decollante == 'all':    # whole swarm logic
@@ -236,7 +234,7 @@ def takeOff(coddii, decollante):
         else:
             print('il drogno %s non è connesso' % drogni[decollante].name)
 def uploadSequence(coddii,quale):
-        print('chief says we\'re gonna do shit at sequence %s' % quale)
+        print('chief says we\'re upload shit at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].upload_trajectory(quale)
@@ -353,10 +351,10 @@ def printAndSendCoordinates():
             for drogno in drogni:
                 iddio = drogni[drogno].ID
                 if drogni[drogno].is_connected:
-                    with colLock:
+                    # with colLock:
                         drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
-                    with posLock:
+                    # with posLock:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
         # else:
@@ -365,26 +363,18 @@ def printAndSendCoordinates():
     print ('Non potrò mai più inviare ai drogni comandi di movimento, mai più')
 
 def printHowManyMessages():
-    howManyMessagesLock = Lock()
+    # howManyMessagesLock = Lock()
     def printa():
         while not finished:
             global msgCount
             time.sleep(RECEIVED_MESSAGES_AVERAGE)
-            with howManyMessagesLock:
-                if msgCount > 0.:
-                    print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
-                msgCount = 0
+            # with howManyMessagesLock:
+            if msgCount > 0.:
+                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
+            msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
     threading.Thread(target=printa).start()
-
-# def setRequested(*args):
-#     iddio     = int(args[0].split('/')[2][-1])
-#     parametro = args[0][-1]
-#     value     = round(args[1],3)
-#     parametro = 'requested_' + parametro
-#     setattr(bufferone[iddio], parametro, value)
-    # print('provo a variare il parametro %s mettendoci %s' % (parametro, value))
 
 def setRequestedPos(address, args):
     global msgCount
@@ -393,21 +383,21 @@ def setRequestedPos(address, args):
         # print(timecode)
         # if isSendEnabled:
         # print('provo a variare il parametro posizione dell\'iddio %s mettendoci %s %s %s' % ( iddio, value1, value2, value3))
-    with posLock: 
-        timecode   = args[0]
-        bufferone[iddio].requested_X = round(float(args[1]),3)
-        bufferone[iddio].requested_Y = round(float(args[2]),3)
-        bufferone[iddio].requested_Z = round(float(args[3]),3)
-        msgCount += 1
+    # with posLock: 
+    timecode   = args[0]
+    bufferone[iddio].requested_X = round(float(args[1]),3)
+    bufferone[iddio].requested_Y = round(float(args[2]),3)
+    bufferone[iddio].requested_Z = round(float(args[3]),3)
+    msgCount += 1
 
 def setRequestedCol(address, args):
     global msgCount
     iddio     = int(address[-7])
-    with colLock:
-        msgCount += 1
-        bufferone[iddio].requested_R = int(args[1])
-        bufferone[iddio].requested_G = int(args[2])
-        bufferone[iddio].requested_B = int(args[3])
+    # with colLock:
+    msgCount += 1
+    bufferone[iddio].requested_R = int(args[1])
+    bufferone[iddio].requested_G = int(args[2])
+    bufferone[iddio].requested_B = int(args[3])
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE
@@ -438,8 +428,11 @@ def start_server():      ######################    #### OSC init    #########   
     global finished 
     global bufferone
     global timecode
-
-    osc_startup( )
+    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
+    # logger = logging.getLogger("osc")
+    # logger.setLevel(logging.DEBUG)
+    # osc_startup(logger=logger)
+    osc_startup()
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
     # print ('ma porco il clero di ' + COMPANION_FEEDBACK_IP)
@@ -465,7 +458,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/takeOff",          takeOff,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/startTest",        startTest,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/upload",           uploadSequence,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/go",               go,              argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    # osc_method("/go",               go,              argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/home",             home,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goToStart",        goToStart,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -485,30 +478,26 @@ def start_server():      ######################    #### OSC init    #########   
     updateCompanion()
     printHowManyMessages()
 
-    aggregationLock = Lock()
+    # aggregationLock = Lock()
     while not finished:
+        time.sleep(OSC_PROCESS_RATE)
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode
             try:
-                aggregationLock.acquire()
                 roba = aggregatorCue.get(block=False)
                 # aggregatorCue.task_done()
+                # with aggregationLock:             
                 timecode  = roba['timecode']
                 bufferone = roba['bufferone']
                 print('ricevuto questo timecode dall\'aggregatore: %s' %timecode)
             except  (queue.Empty, AttributeError):
                 pass
-            finally:
-                aggregationLock.release()
-                # print('empty cue, aggregator sends no stuff')
-        time.sleep(OSC_PROCESS_RATE)
     # Properly close the system.
     print('chiudo OSC')
     companionFeedbackCue.put('fuck you')
     aggregatorExitEvent.set()
     # aggregatorProcess.join()
-
     osc_terminate()
 
 def faiIlBufferon():
@@ -539,7 +528,7 @@ if __name__ == '__main__':
     while not finished:
         pass
  
-        # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
+    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
     # logger = logging.getLogger("osc")
     # logger.setLevel(logging.DEBUG)
     # osc_startup(logger=logger)

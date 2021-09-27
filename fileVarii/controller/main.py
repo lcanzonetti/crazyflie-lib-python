@@ -17,7 +17,7 @@ import Drogno
 #########################################################################
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://1/90/2M/E7E7E7E7E3',
         # 'radio://1/90/2M/E7E7E7E7E4',
@@ -157,7 +157,7 @@ def exit_signal_handler(signum, frame):
         try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
         except: print('%s is not there to be shut down' % drogni[drogno].link_uri)
         drogni[drogno].exit()
-        drogni[drogno].join()
+        # drogni[drogno].join()
    
     sys.exit()
 
