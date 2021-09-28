@@ -99,8 +99,10 @@ class Drogno(threading.Thread):
         self.linkQuality            = 0
         self.isTumbled              = False
         self.commandsFrequency      = 0.2
+        self.scramblingTime         = None
         self.flyingTime             = 0
         self.connectionThread       = None
+        self.killingPill            = None
         self._cf = Crazyflie(rw_cache='./cache')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -150,9 +152,12 @@ class Drogno(threading.Thread):
         # printLock = Lock()
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
+            if not self.scramblingTime == None and self.isFlying:
+                self.flyingTime = int(time.time() - self.scramblingTime)
+
             if self.is_connected:
                 # with printLock:
-                    print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}")
+                    print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t flight time: {self.flyingTime}s ")
                     self.commandsCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
@@ -387,7 +392,7 @@ class Drogno(threading.Thread):
                 return False
             elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
                 #  self.reset_estimator()
-                print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
+                # print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
                 # self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             else:
@@ -446,7 +451,7 @@ class Drogno(threading.Thread):
             # self.motionCommander.take_off(DEFAULT_HEIGHT,0.5)
             self._cf.high_level_commander.takeoff(DEFAULT_HEIGHT,scramblingTime)
             # self.motionCommander._is_flying = True
-            self.scramblingTime = time.time() * 1000
+            self.scramblingTime = time.time()
             time.sleep(1)
             self.goTo(self.x, self.y, self.z, 180, 0.8)
             time.sleep(0.8)
@@ -480,7 +485,6 @@ class Drogno(threading.Thread):
             # self._cf.high_level_commander.land()
             self.isFlying     = False
             time.sleep(1)
-            self.flyingTime += (time.time() * 1000) - self.scramblingTime
             # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
             # landLock.release()
@@ -681,24 +685,25 @@ class Drogno(threading.Thread):
             self.positionHLCommander.land()
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'landed'
+        contatore = 0
         def sequenzaQuattro():
-            print('Drogno: %s. Inizio test a set pointsss' % self.ID)
-            self._cf.commander.send_position_setpoint(0.5, 0.5, 1, 30)
+            print('Drogno: %s. Inizio test 4' % self.ID)
+            self.setRingColor(80,   80,   80)
+
+            self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
             time.sleep(1)
-            self._cf.commander.send_position_setpoint(0.5, -0.5, 1, -30)
+            self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
             time.sleep(1)
-            self._cf.commander.send_position_setpoint(-0.5, -0.5, 1, -90)
+            self._cf.high_level_commander.go_to(-0.5, -0.5, 1, 0, 1)
             time.sleep(1)
-            self._cf.commander.send_position_setpoint(0.5, -0.5, 1, -130)
+            self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
             time.sleep(1)
-            self._cf.commander.send_position_setpoint(0.5, 0.5, 1, -270)
+            self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
             time.sleep(1)
-            self._cf.commander.send_position_setpoint(0.0, 0.0, 1, 180)
+            self._cf.high_level_commander.go_to(0.0, 0.0, 1, 0, 1)
             # self._cf.commander.set_client_xmode()
-            time.sleep(0.1)
-            # self.positionHLCommander.land()
-            # self._cf.commander.send_stop_setpoint()
-            self.statoDiVolo = 'landed'
+            time.sleep(1)
+            if contatore < 5: sequenzaQuattro()
 
         sequenzeTest = [sequenzaZero, sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro]
         if self.isFlying:
@@ -736,7 +741,7 @@ class Drogno(threading.Thread):
         self.currentTrajectoryLenght =  total_duration
 
     def evaluateBattery(self, killingPill):
-        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected))
+        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), killingPill.is_set(), self.is_connected))
         # batteryLock = Lock()
         while not killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
             level = 0.0
@@ -775,12 +780,14 @@ class Drogno(threading.Thread):
         self.goToSleep()
     def killMeHardly(self):
         # self.setRingColor(0,0,0)
+        self.isFlying = False
         self._cf.high_level_commander.stop()
         self._cf.commander.send_stop_setpoint()
         self.goToSleep()
         self.exit()
     def goToSleep(self):
         self.standBy = True
+        self.isFlying = False
         self.killingPill.set()
         self._cf.close_link()
         PowerSwitch(self.link_uri).stm_power_down()
@@ -788,11 +795,13 @@ class Drogno(threading.Thread):
         self.is_connected = False
 
     def wakeUp(self):
-        self.statoDiVolo = 'waking up'
-        PowerSwitch(self.link_uri).stm_power_up()
-        time.sleep(3)
-        self.standBy = False
-        self.connect()
+        def wakeUpProcedure():
+            self.statoDiVolo = 'waking up'
+            PowerSwitch(self.link_uri).stm_power_up()
+            time.sleep(3)
+            self.standBy = False
+            self.connect()
+        daje = threading.Thread(target=wakeUpProcedure).start()
 
     def exit(self):
         print('exitFlag is now set for drogno %s, bye kiddo' % self.name)

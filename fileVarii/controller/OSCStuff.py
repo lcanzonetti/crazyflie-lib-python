@@ -50,10 +50,10 @@ COMPANION_FEEDBACK_IP   = None
 COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 1
+COMPANION_UPDATE_RATE   = 0.6
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
-commandsFrequency      = 0.2   # actual command'd rate to uavss
+commandsFrequency      = 0.15   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
 # posLock = Lock()
 # colLock = Lock()
@@ -164,7 +164,7 @@ def updateCompanion():
                         else: takeOffOrLandColor = [255,0,0]
 
                     rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
-                    if not any(rgb): rgb = [40,40,40]
+                    if not any(rgb) or d.standBy: rgb = [40,40,40]
 
                     int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
                     int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
@@ -328,7 +328,11 @@ def standBy  (coddii, chi):
         for drogno in drogni:
             drogni[drogno].goToSleep()
     else:
-        drogni[chi].goToSleep()
+        if not drogni[int(chi)].standBy:
+            drogni[int(chi)].goToSleep()
+        else:
+            drogni[int(chi)].wakeUp()
+
 def wakeUp  (coddii, chi):
     print(' %s  wakeUp' % chi )
     if chi == 'all':    
