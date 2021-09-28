@@ -341,7 +341,7 @@ def wakeUp  (coddii, chi):
 def printAndSendCoordinates():
     global drogni
     global bufferone
-    time.sleep(2)
+    # time.sleep(2)
     while not finished:
         time.sleep(commandsFrequency)
         # if isSendEnabled:
@@ -395,9 +395,9 @@ def setRequestedCol(address, args):
     iddio     = int(address[-7])
     # with colLock:
     msgCount += 1
-    bufferone[iddio].requested_R = int(args[1])
-    bufferone[iddio].requested_G = int(args[2])
-    bufferone[iddio].requested_B = int(args[3])
+    bufferone[iddio].requested_R = args[1]
+    bufferone[iddio].requested_G = args[2]
+    bufferone[iddio].requested_B = args[3]
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE

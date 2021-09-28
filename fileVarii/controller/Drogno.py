@@ -543,6 +543,7 @@ class Drogno(threading.Thread):
         if self.isFlying:
             newY = float(self.y) - float(quanto)
             print('va bene, vado a %s' % newY)
+            self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
             # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
@@ -619,12 +620,14 @@ class Drogno(threading.Thread):
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
             # input("enter to continue")
             self.alternativeSetRingColor([255,0,0])
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 0.5, 0.2)
+            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
+            self.alternativeSetRingColor([255,0,0])
+            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
             self.alternativeSetRingColor([255,255,0])
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.0, 0.2)
+            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
             self.alternativeSetRingColor([255,255,255])
 
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 0.5, 0.2)
+            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
             
             print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
             self.statoDiVolo = 'landed'
