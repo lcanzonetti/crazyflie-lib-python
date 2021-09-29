@@ -31,7 +31,7 @@ import OSC_feedabcker as feedbacker
 
 BOX_X                 = 2.0
 BOX_Y                 = 2.0
-BOX_Z                 = 1.9
+BOX_Z                 = 2.0
 DEFAULT_HEIGHT        = 1.2
 DEFAULT_VELOCITY      = 0.6
 DEFAULT_SCRAMBLING_TIME = 2.2
