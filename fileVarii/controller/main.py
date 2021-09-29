@@ -17,15 +17,15 @@ import Drogno
 #########################################################################
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://1/90/2M/E7E7E7E7E3',
-        'radio://1/90/2M/E7E7E7E7E4',
+        # 'radio://1/90/2M/E7E7E7E7E4',
         # 'radio://1/90/2M/E7E7E7E7E5',
         # 'radio://2/100/2M/E7E7E7E7E6',
         # 'radio://2/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8'
-        # 'radio://3/110/2M/E7E7E7E7E9',
+        'radio://0/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 #########################################################################
@@ -34,7 +34,7 @@ lastRecordPath        = ''
 WE_ARE_FAKING_IT      = False
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
-COMMANDS_FREQUENCY    = 0.2
+COMMANDS_FREQUENCY    = 0.15
 FEEDBACK_SENDING_PORT = 6000
 BROADCAST_IP          = "192.168.10.255"
 
