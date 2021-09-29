@@ -116,7 +116,7 @@ class Drogno(threading.Thread):
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
 
     def run(self):
-        print (Fore.LIGHTBLUE_EX + "Starting " + self.name)
+        print (Fore.LIGHTBLUE_EX + "starting " + self.name)
         self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         self.TRAJECTORIES [7] = figure8Triple
         self.TRAJECTORIES [8] = figure8
@@ -145,7 +145,6 @@ class Drogno(threading.Thread):
                         print('server del drogno %s feedback non ancora connesso!' % self.I)
 
             self.printThread   = threading.Thread(target=self.printStatus).start()
-          
             self.connect()
      
     def printStatus(self):
@@ -161,7 +160,7 @@ class Drogno(threading.Thread):
                     self.commandsCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
-                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}  msg/s {self.commandsCount/self.printRate}")
+                print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -241,7 +240,7 @@ class Drogno(threading.Thread):
             self.isReadyToFly = self.evaluateFlyness()
         lanciaOrco = threading.Thread(target=orco).start()
 
-    def reset_estimator(self):
+    def resetEstimator(self):
         self._cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.2)
         self._cf.param.set_value('kalman.resetEstimation', '0')
@@ -273,6 +272,7 @@ class Drogno(threading.Thread):
             if self.recconnectionAttempts == 0:
                 print(f'provo a riaprire la connessione con il drogno {self.name}')
                 self.recconnectionAttempts+=1
+                self.statoDiVolo = 'connecting'
                 self._cf.open_link( self.link_uri)
 
             elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
@@ -311,10 +311,7 @@ class Drogno(threading.Thread):
         # would like to log are in the TOC.
         try:
             self._cf.log.add_config(self._lg_kalm)
-            # This callback will receive the data
-            # self.logLock = Lock()
             self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
-            # This callback will be called on errors
             self._lg_kalm.error_cb.add_callback(self._stab_log_error)
             self._lg_kalm.start()
             self.is_connected = True
@@ -326,10 +323,7 @@ class Drogno(threading.Thread):
           print('Could not add log config, bad configuration.')
         except RuntimeError:
           print('Porco il padre eterno e al su madonnina')
-        
-        # time.sleep(0.3)
-        self.reset_estimator()
-
+        self.resetEstimator()
         self._cf.param.set_value('commander.enHighLevel', '1')
         self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', '0')
@@ -342,10 +336,7 @@ class Drogno(threading.Thread):
             controller=PositionHlCommander.CONTROLLER_PID) 
         self.motionCommander = MotionCommander(self._cf, DEFAULT_HEIGHT)
         time.sleep(0.3)
-        # try:
         if not self.batteryThread.is_alive():  self.batteryThread.start()
-        # except:
-        #     print('porca la zozza')
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
         self.statoDiVolo = 'landed'
         
@@ -384,19 +375,20 @@ class Drogno(threading.Thread):
                 self.statoDiVolo = 'out of BOX'
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
-            elif self.kalman_VarX > 10.0 or self.kalman_VarZ > 10.0 or self.kalman_VarZ > 10.0:
+            elif self.kalman_VarX > 10 or self.kalman_VarZ > 10 or self.kalman_VarZ > 10:
                 print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
-                self.statoDiVolo = 'out of bounds'
-                self.reset_estimator()
+                self.statoDiVolo = 'lost'
+                self.resetEstimator()
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-                #  self.reset_estimator()
+                #  self.resetEstimator()
                 # print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
                 # self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             else:
                 self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
+                self.statoDiVolo = 'ready'
                 return True
         else:
             # print ('nope nope nope!')
@@ -407,12 +399,8 @@ class Drogno(threading.Thread):
         print('Connessione la drogno %s fallita: %s' % (self.ID, msg))
         self.is_connected = False
         self.isReadyToFly = False
-
         self.statoDiVolo = 'sconnesso'
-        # self._cf.close_link()
-        # time.sleep(1)
         self.reconnect()
-        # self.exit()
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -421,12 +409,7 @@ class Drogno(threading.Thread):
         self.is_connected = False
         self.statoDiVolo = 'sconnesso'
         self.isReadyToFly = False
-
-        # self._cf.close_link()
-        # time.sleep(1)
-        if not self.standBy:  self.reconnect()
-
-        # self.exit()
+        if not self.statoDiVolo == 'connecting':  self.reconnect()
 
     def _disconnected(self, link_uri):
             """Callback when the Crazyflie is disconnected (called in all cases)"""
@@ -434,10 +417,7 @@ class Drogno(threading.Thread):
             self.is_connected = False
             self.statoDiVolo  = 'sconnesso'
             self.isReadyToFly = False
-
-            # self._cf.close_link()
-            if not self.standBy and not self.isKilled:  self.reconnect()
-            # self.exit()
+            if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
  
     #################################################################### movement
 
@@ -470,7 +450,7 @@ class Drogno(threading.Thread):
             self.isFlying  = True
         else:
             print('for real')
-            # self.reset_estimator()
+            # self.resetEstimator()
             if self.isReadyToFly:
                 # self.scramblingLock   = Lock()
                 scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
