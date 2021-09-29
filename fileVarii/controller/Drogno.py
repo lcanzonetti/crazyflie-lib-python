@@ -251,8 +251,6 @@ class Drogno(threading.Thread):
         # time.sleep(0.2)
         print(Fore.MAGENTA + 'estimator reset done')
         # self.wait_for_position_estimator()
-        # self.isReadyToFly = self.evaluateFlyness()
-        # self.isPositionEstimated = True
     #################################################################### connection
     def connect(self):
        if self.isKilled == False:
@@ -382,16 +380,14 @@ class Drogno(threading.Thread):
                 self.statoDiVolo = 'out of BOX'
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
-            elif self.kalman_VarX > 10 or self.kalman_VarZ > 10 or self.kalman_VarZ > 10:
+            elif abs(self.x) > 10 or abs(self.y) > 10 or abs(self.x) > 5:
                 print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
-                self.statoDiVolo = 'out of bounds'
+                self.statoDiVolo = 'lost'
                 self.resetEstimator()
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-                #  self.resetEstimator()
-                # print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
-                # self._cf.param.set_value('ring.effect', '11')  #alert
+                self.statoDiVolo = 'BAD kalman'
                 return False
             else:
                 self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
