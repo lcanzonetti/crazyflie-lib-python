@@ -2,7 +2,7 @@
 #rf 2021
 import multiprocessing
 import threading
-# from   threading import Lock
+from   threading import Lock
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
@@ -55,7 +55,7 @@ COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency      = 0.15   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
-# posLock = Lock()
+posLock = Lock()
 # colLock = Lock()
 
 
@@ -164,7 +164,8 @@ def updateCompanion():
                         else: takeOffOrLandColor = [255,0,0]
 
                     rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
-                    if not any(rgb) or d.standBy: rgb = [40,40,40]
+                    if not any(rgb): rgb = [40,40,40]
+                    if d.standBy: rgb = [10,30,10]
 
                     int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
                     int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
@@ -182,12 +183,8 @@ def updateCompanion():
                     kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii",   [55, 10, 10])
                     kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii",   [255, 255, 255])
 
-                    # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
                     infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]) 
-                    # macron   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, infinitaRoba)
-                    # osc_send(macron, "companionClient")
                     companionFeedbackCue.put_nowait(infinitaRoba)
-                    # companionLock.release()
     nnamo = threading.Thread(target=daje).start()
 
 ###########################  whole swarm
@@ -332,7 +329,6 @@ def standBy  (coddii, chi):
             drogni[int(chi)].goToSleep()
         else:
             drogni[int(chi)].wakeUp()
-
 def wakeUp  (coddii, chi):
     print(' %s  wakeUp' % chi )
     if chi == 'all':    
@@ -340,7 +336,13 @@ def wakeUp  (coddii, chi):
             drogni[drogno].wakeUp()
     else:
         drogni[chi].wakeUp()
-
+def resetEstimator  (coddii, chi):
+    print(' %s  resetEstimator' % chi )
+    if chi == 'all':    
+        for drogno in drogni:
+            drogni[drogno].resetEstimator()
+    else:
+        drogni[chi].resetEstimator()
 ###########################  single fella
 def printAndSendCoordinates():
     global drogni
@@ -472,7 +474,8 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/goBack",           goBack,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/standBy",          standBy,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/wakeUp",           wakeUp,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/wakeUp",           wakeUp,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/resetEstimator",   resetEstimator,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -484,7 +487,7 @@ def start_server():      ######################    #### OSC init    #########   
 
     # aggregationLock = Lock()
     while not finished:
-        time.sleep(OSC_PROCESS_RATE)
+        # time.sleep(OSC_PROCESS_RATE)
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode

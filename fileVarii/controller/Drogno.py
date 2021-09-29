@@ -73,9 +73,9 @@ class Drogno(threading.Thread):
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
         self.motionCommander        = None 
-        self.starting_x             = 'np'
-        self.starting_y             = 'np'
-        self.starting_z             = 'np'
+        self.starting_x             = 0.0
+        self.starting_y             = 0.0
+        self.starting_z             = 0.0
         self.x                      = 0.0
         self.y                      = 0.0 
         self.z                      = 0.0
@@ -157,7 +157,7 @@ class Drogno(threading.Thread):
 
             if self.is_connected:
                 # with printLock:
-                    print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t flight time: {self.flyingTime}s ")
+                    print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                     self.commandsCount = 0
                 # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
             else:
@@ -241,11 +241,15 @@ class Drogno(threading.Thread):
             self.isReadyToFly = self.evaluateFlyness()
         lanciaOrco = threading.Thread(target=orco).start()
 
-    def reset_estimator(self):
+    def resetEstimator(self):
+        self.x = self.starting_x
+        self.y = self.starting_y
+        self.z = 0
         self._cf.param.set_value('kalman.resetEstimation', '1')
-        time.sleep(0.2)
-        self._cf.param.set_value('kalman.resetEstimation', '0')
-        time.sleep(0.2)
+        time.sleep(0.5)
+
+        # self._cf.param.set_value('kalman.resetEstimation', '0')
+        # time.sleep(0.2)
         print(Fore.MAGENTA + 'estimator reset done')
         # self.wait_for_position_estimator()
         # self.isReadyToFly = self.evaluateFlyness()
@@ -328,7 +332,7 @@ class Drogno(threading.Thread):
           print('Porco il padre eterno e al su madonnina')
         
         # time.sleep(0.3)
-        self.reset_estimator()
+        self.resetEstimator()
 
         self._cf.param.set_value('commander.enHighLevel', '1')
         self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
@@ -387,11 +391,11 @@ class Drogno(threading.Thread):
             elif self.kalman_VarX > 10.0 or self.kalman_VarZ > 10.0 or self.kalman_VarZ > 10.0:
                 print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
                 self.statoDiVolo = 'out of bounds'
-                self.reset_estimator()
+                self.resetEstimator()
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
             elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-                #  self.reset_estimator()
+                #  self.resetEstimator()
                 # print(Fore.LIGHTGREEN_EX + 'drone %s is slightly off' % self.ID)
                 # self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
@@ -470,7 +474,7 @@ class Drogno(threading.Thread):
             self.isFlying  = True
         else:
             print('for real')
-            # self.reset_estimator()
+            # self.resetEstimator()
             if self.isReadyToFly:
                 # self.scramblingLock   = Lock()
                 scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
