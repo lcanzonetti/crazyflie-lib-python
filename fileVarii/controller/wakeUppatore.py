@@ -10,7 +10,7 @@ coloInit(convert=True)
 
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://1/90/2M/E7E7E7E7E3',
         # 'radio://1/90/2M/E7E7E7E7E4',
