@@ -329,7 +329,6 @@ class Drogno(threading.Thread):
           print('Porco il padre eterno e al su madonnina')
         
         # time.sleep(0.3)
-        self.resetEstimator()
 
         self._cf.param.set_value('commander.enHighLevel', '1')
         self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
@@ -346,6 +345,9 @@ class Drogno(threading.Thread):
         if not self.batteryThread.is_alive():  self.batteryThread.start()
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
         self.statoDiVolo = 'landed'
+        time.sleep(1)
+        self.resetEstimator()
+
         
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
