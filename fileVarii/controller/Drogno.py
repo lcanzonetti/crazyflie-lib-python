@@ -31,8 +31,8 @@ import OSC_feedabcker as feedbacker
 
 BOX_X                 = 2.0
 BOX_Y                 = 2.0
-BOX_Z                 = 2.0
-DEFAULT_HEIGHT        = 1.2
+BOX_Z                 = 2.5
+DEFAULT_HEIGHT        = 0.7
 DEFAULT_VELOCITY      = 0.6
 DEFAULT_SCRAMBLING_TIME = 2.2
 RELATIVE_SPACING      = 0.4
@@ -327,7 +327,6 @@ class Drogno(threading.Thread):
           print('Porco il padre eterno e al su madonnina')
         
         # time.sleep(0.3)
-        self.resetEstimator()
 
         self._cf.param.set_value('commander.enHighLevel', '1')
         self._cf.param.set_value('ring.effect', '14')  #solid color? Missing docs?
@@ -344,6 +343,9 @@ class Drogno(threading.Thread):
         if not self.batteryThread.is_alive():  self.batteryThread.start()
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
         self.statoDiVolo = 'landed'
+        time.sleep(1)
+        self.resetEstimator()
+
         
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
@@ -403,7 +405,7 @@ class Drogno(threading.Thread):
         self.is_connected = False
         self.isReadyToFly = False
         self.statoDiVolo = 'sconnesso'
-        self.reconnect()
+        # self.reconnect()
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -412,7 +414,7 @@ class Drogno(threading.Thread):
         self.is_connected = False
         self.statoDiVolo = 'sconnesso'
         self.isReadyToFly = False
-        if not self.statoDiVolo == 'connecting':  self.reconnect()
+        # if not self.statoDiVolo == 'connecting':  self.reconnect()
 
     def _disconnected(self, link_uri):
             """Callback when the Crazyflie is disconnected (called in all cases)"""
@@ -420,7 +422,7 @@ class Drogno(threading.Thread):
             self.is_connected = False
             self.statoDiVolo  = 'sconnesso'
             self.isReadyToFly = False
-            if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
+            # if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
  
     #################################################################### movement
 
@@ -769,13 +771,13 @@ class Drogno(threading.Thread):
         self.goToSleep()
         self.exit()
     def goToSleep(self):
+        self.is_connected = False
         self.standBy = True
         self.isFlying = False
         self.killingPill.set()
         self._cf.close_link()
         PowerSwitch(self.link_uri).stm_power_down()
         self.statoDiVolo = 'stand by'
-        self.is_connected = False
 
     def wakeUp(self):
         def wakeUpProcedure():
