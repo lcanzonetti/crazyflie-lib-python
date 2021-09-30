@@ -15,7 +15,7 @@ uris = [
         # 'radio://1/90/2M/E7E7E7E7E3',
         # 'radio://1/90/2M/E7E7E7E7E4',
         # 'radio://1/90/2M/E7E7E7E7E5',
-        # 'radio://2/100/2M/E7E7E7E7E6',
+        'radio://2/100/2M/E7E7E7E7E6',
         # 'radio://2/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8',
         'radio://3/110/2M/E7E7E7E7E9',

@@ -385,12 +385,12 @@ def setRequestedPos(address, args):
         # print(timecode)
         # if isSendEnabled:
         # print('provo a variare il parametro posizione dell\'iddio %s mettendoci %s %s %s' % ( iddio, value1, value2, value3))
-    with posLock: 
-        timecode   = args[0]
-        bufferone[iddio].requested_X = round(float(args[1]),3)
-        bufferone[iddio].requested_Y = round(float(args[2]),3)
-        bufferone[iddio].requested_Z = round(float(args[3]),3)
-        msgCount += 1
+    # with posLock: 
+    timecode   = args[0]
+    bufferone[iddio].requested_X = round(float(args[1]),3)
+    bufferone[iddio].requested_Y = round(float(args[2]),3)
+    bufferone[iddio].requested_Z = round(float(args[3]),3)
+    msgCount += 1
 
 def setRequestedCol(address, args):
     global msgCount
