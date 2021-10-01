@@ -255,7 +255,7 @@ class Drogno(threading.Thread):
     def connect(self):
        if self.isKilled == False:
         self.killingPill   = threading.Event()
-        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery, args=(self.killingPill,))
+        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
         def connection():
             self.statoDiVolo = 'connecting'
@@ -366,7 +366,7 @@ class Drogno(threading.Thread):
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
         self.isTumbled         = bool (data['sys.isTumbled'])
-        if self.isTumbled: self.killMeHardly()
+        if self.isTumbled: self.goToSleep()
         self.isReadyToFly      = self.evaluateFlyness()
 
         try:
@@ -725,10 +725,10 @@ class Drogno(threading.Thread):
         self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
         self.currentTrajectoryLenght =  total_duration
 
-    def evaluateBattery(self, killingPill):
-        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), killingPill.is_set(), self.is_connected))
+    def evaluateBattery(self):
+        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected))
         # batteryLock = Lock()
-        while not killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
+        while not self.killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
             level = 0.0
             # batteryLock.acquire()
             if self.batteryVoltage == 'n.p.':
