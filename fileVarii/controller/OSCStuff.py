@@ -24,6 +24,7 @@ coloInit(convert=True)
 import OSCaggregator
 import OSC_feedabcker as feedbacker
 
+
 drogni        = {} 
 bufferone     = {}
 isSendEnabled = False
@@ -104,7 +105,6 @@ def updateCompanion():
             if COMPANION_FEEDBACK_ENABLED:
                 infinitaRoba = []
                 time.sleep(COMPANION_UPDATE_RATE)
-                # print(Fore.WHITE +'aggiorno companion')
                 # companionLock.acquire()
                 listaTimecode    = timecode.split(':')
                 timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   [listaTimecode[0]])
@@ -113,9 +113,7 @@ def updateCompanion():
                 timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   [listaTimecode[3]])
                 companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
                 commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(commandsFrequency)])
-                # bandolone = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]) 
                 infinitaRoba = [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]
-                # osc_send(bandolone, "companionClient")
                 
                 if not isSendEnabled:                       #*******************  SEND ENABLING
                     for cp in COMPANION_PAGES:
@@ -124,8 +122,6 @@ def updateCompanion():
                         col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [10, 235, 10])
                         txt2              = oscbuildparse.OSCMessage("/style/text/90/21",    None,   ["non ricevo"])
                         infinitaRoba.extend( [col, txt, col2, txt2 ]) 
-                        # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                        # osc_send(carlo, "companionClient")
                 else:
                     for cp in COMPANION_PAGES:
                         col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
@@ -133,9 +129,6 @@ def updateCompanion():
                         col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [235, 10, 10])
                         txt2              = oscbuildparse.OSCMessage("/style/text/90/21"   , None,   ["ricevo"])
                         infinitaRoba.extend( [col, txt, col2, txt2 ]) 
-
-                        # carlo = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, [col, txt, col2, txt2 ]) 
-                        # osc_send(carlo, "companionClient")
 
                 for drogno in drogni:               #*******************  singol-drogn               
                     cp   = COMPANION_PAGES[0]
@@ -346,9 +339,6 @@ def printAndSendCoordinates():
     # time.sleep(2)
     while not finished:
         time.sleep(commandsFrequency)
-        # if isSendEnabled:
-        #     for drogno in drogni:
-        #         iddio = drogni[drogno].ID
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
@@ -359,9 +349,6 @@ def printAndSendCoordinates():
                     # with posLock:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-        # else:
-        #     # print('ma i comandi di movimento disabilitati')
-        #     pass
     print ('Non potrò mai più inviare ai drogni comandi di movimento, mai più')
 
 def printHowManyMessages():
@@ -483,7 +470,7 @@ def start_server():      ######################    #### OSC init    #########   
 
     # aggregationLock = Lock()
     while not finished:
-        # time.sleep(OSC_PROCESS_RATE)
+        time.sleep(OSC_PROCESS_RATE)
         osc_process()
         if AGGREGATION_ENABLED:
             global timecode
@@ -512,7 +499,6 @@ class bufferDrone():
     def __init__(self, ID, ):
         self.ID          = int(ID)
         self.name        = 'bufferDrone'+str(ID)
-        
         self.requested_X            = 0.0
         self.requested_Y            = 0.0
         self.requested_Z            = 1.0

@@ -20,12 +20,7 @@ logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '
 logger = logging.getLogger("osc")
 logger.setLevel(logging.DEBUG)
 
-
-
-
 finished = False
-# bufferon = {}
-
 class Feedbacco():
     def __init__(self, ID, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
         self.OSC_SENDING_IP   = sendingIP
@@ -104,7 +99,6 @@ class CompanionFeedbacco():
             # Properly close the system.
             print('\nanche il feedbacker se ne va')
             osc_terminate()
-        
         osc_startup()
         osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
         print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
