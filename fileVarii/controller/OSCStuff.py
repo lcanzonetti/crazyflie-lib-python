@@ -51,7 +51,7 @@ companionFeedbackCue    = Queue()
 COMPANION_FEEDBACK_IP   = None
 COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
-SWARM_PAGE              = '96'
+SWARM_PAGE              = '90'
 COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 0.6
 COMPANION_FEEDBACK_ENABLED = True
@@ -66,7 +66,7 @@ posLock = Lock()
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
-    print(Fore.RED +  'me dici: %s' % isSendEnabled)
+    print(Fore.RED +  'Master della ricezione OSC: %s' % isSendEnabled)
     
 def getSendEnabled():
     return isSendEnabled
@@ -77,14 +77,12 @@ def comè(uno): # è booleano oppure no?
 def resetCompanion():
     if COMPANION_FEEDBACK_ENABLED:
         swarmTakeOff        = oscbuildparse.OSCMessage("/style/text/"+SWARM_PAGE+"/2",    None,   ['TAKE OFF'])
-        swarmTakeOff_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+SWARM_PAGE+"/2" , ",iii",   [60, 60, 60])
-        swarmTakeOff_col    = oscbuildparse.OSCMessage("/style/color/"+SWARM_PAGE+"/2"     ",iii",   [0, 0, 0])
+        swarmTakeOff_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+SWARM_PAGE+"/2" , ",iii",   [20, 20, 20])
+        swarmTakeOff_col    = oscbuildparse.OSCMessage("/style/color/"+SWARM_PAGE+"/2"  ,   ",iii",   [100, 100, 100])
         sbirulino   = [swarmTakeOff,swarmTakeOff_bkgcol,swarmTakeOff_col]
         companionFeedbackCue.put_nowait(sbirulino)
 
-
-
-        for i in range(2,10):
+        for i in range(2,9):
             j=0
             for cp in COMPANION_PAGES:
                 intst         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i),      None,   ['drone '+str(i-2+(j*7))])
@@ -101,7 +99,7 @@ def resetCompanion():
 
                 kill          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+24),   None,   ['engage'])
                 kill_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+24), ",iii",   [10, 80, 10])
-                kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+24), ",iii",   [60, 60, 60])
+                kill_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+24), ",iii",   [255, 255, 255])
 
                 bandoleon   = [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, kill, kill_bkg, kill_col]
                 companionFeedbackCue.put_nowait(bandoleon)
@@ -115,7 +113,8 @@ def updateCompanion():
         takeOffOrLandColor     = [200,20,40]
         engageText             = 'not engaged'
         engageColor            = [20,240,80]
-
+        swarmTakeOff_color     = [20, 20, 20]
+        
         while not finished:
             if COMPANION_FEEDBACK_ENABLED:
                 infinitaRoba = []
@@ -129,6 +128,14 @@ def updateCompanion():
                 companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
                 commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(commandsFrequency)])
                 infinitaRoba = [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]
+                
+                if isSwarmReadyToFly:
+                    swarmTakeOff_color = [20, 255, 60]
+                else:
+                    swarmTakeOff_color = [60, 60, 60]
+
+                sbc = oscbuildparse.OSCMessage("/style/bgcolor/"+SWARM_PAGE+"/2" , ",iii", swarmTakeOff_color)
+                infinitaRoba.extend([sbc])
                 
                 if not isSendEnabled:                       #*******************  SEND ENABLING
                     for cp in COMPANION_PAGES:
@@ -198,7 +205,7 @@ def updateCompanion():
                     tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
                     engage          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None, [engageText])
-                    engage_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii", [engageColor])
+                    engage_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii", engageColor)
                     engage_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii", [255, 255, 255])
 
                     infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, engage, engage_bkg, engage_col]) 
@@ -214,7 +221,7 @@ def checkSwarmFlyability():
             for drogno in drogni:
                 if drogni[drogno].isReadyToFly: swarmFlyabilityArray.append(True)
                 else: swarmFlyabilityArray.append(False)
-            if any (swarmFlyabilityArray):
+            if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True
             else:
                 isSwarmReadyToFly = False
@@ -400,9 +407,10 @@ def printAndSendCoordinates():
         if isSendEnabled:
             for drogno in drogni:
                 iddio = drogni[drogno].ID
+                drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+
                 if drogni[drogno].is_connected and drogni[drogno].isEngaged:
                     # with colLock:
-                        drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     # with posLock:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)

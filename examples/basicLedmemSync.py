@@ -32,14 +32,14 @@ Change the URI variable to your Crazyflie configuration.
 """
 import logging
 import time
-
+import random
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.mem import MemoryElement
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.utils import uri_helper
 
-URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+URI = uri_helper.uri_from_env(default='radio://0/90/2M/E7E7E7E7E4')
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -58,10 +58,18 @@ if __name__ == '__main__':
         # Get LED memory and write to it
         mem = cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
         if len(mem) > 0:
-            mem[0].leds[0].set(r=0,   g=100, b=0)
-            mem[0].leds[3].set(r=0,   g=0,   b=100)
-            mem[0].leds[6].set(r=100, g=0,   b=0)
-            mem[0].leds[9].set(r=100, g=100, b=100)
-            mem[0].write_data(None)
+            while True:
+                vr = int(random.random()*100)
+                vg = int(random.random()*100)
+                vb = int(random.random()*100)
+                # mem[0].leds[0].set(r=0,   g=100, b=0)
+                # mem[0].leds[3].set(r=0,   g=0,   b=100)
+                # mem[0].leds[6].set(r=100, g=0,   b=0)
+                mem[0].leds[9].set(r=vr, g=vg, b=vb)
+                mem[0].leds[6].set(r=vr, g=vg, b=vb)
+                mem[0].leds[3].set(r=vr, g=vg, b=vb)
+                mem[0].leds[0].set(r=vr, g=vg, b=vb)
+                mem[0].write_data(None)
+                time.sleep(0.01)
 
         time.sleep(2)
