@@ -38,12 +38,12 @@ DEFAULT_SCRAMBLING_TIME = 2.2
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
-LOGGING_FREQUENCY     = 200
+LOGGING_FREQUENCY     = 100
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
 CLAMPING              = True
-RING_FADE_TIME        = 0.8
+RING_FADE_TIME        = 0.04
 
 
 class Drogno(threading.Thread):
@@ -59,9 +59,10 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'starting'
         self.durataVolo  = random.randint(1,4)
         self.exitFlag    = exitFlag
-        self.WE_ARE_FAKING_IT = perhapsWeReFakingIt
+        self.WE_ARE_FAKING_IT       = perhapsWeReFakingIt
         self.isKilled               = False
         self.isReadyToFly           = False
+        self.isEngaged              = False
         self.isFlying               = False
         self.controlThread          = False
         self.printThread            = False
@@ -129,8 +130,6 @@ class Drogno(threading.Thread):
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
             time.sleep(1.5)
-            # print('fKING IT')
-            # self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, 4.2])
         else:
             # print('We are not faking it this time.')
             connectedToFeedback = False
@@ -155,10 +154,11 @@ class Drogno(threading.Thread):
                 self.flyingTime = int(time.time() - self.scramblingTime)
 
             if self.is_connected:
-                # with printLock:
+                if self.isEngaged:
+                   print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                else:
                     print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                    self.commandsCount = 0
-                # print ('kalman var: %s %s %s' % (round(self.kalman_VarX,3), round(self.kalman_VarY,3), round(self.kalman_VarZ,3)))
+                self.commandsCount = 0
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
         print('Sono stato %s ma ora non sono più' % self.name)
@@ -255,7 +255,7 @@ class Drogno(threading.Thread):
     def connect(self):
        if self.isKilled == False:
         self.killingPill   = threading.Event()
-        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery, args=(self.killingPill,))
+        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)
         print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
         def connection():
             self.statoDiVolo = 'connecting'
@@ -366,7 +366,7 @@ class Drogno(threading.Thread):
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
         self.isTumbled         = bool (data['sys.isTumbled'])
-        if self.isTumbled: self.killMeHardly()
+        if self.isTumbled: self.goToSleep()
         self.isReadyToFly      = self.evaluateFlyness()
 
         try:
@@ -438,7 +438,9 @@ class Drogno(threading.Thread):
             # self.motionCommander._is_flying = True
             self.scramblingTime = time.time()
             time.sleep(1)
-            self.goTo(self.x, self.y, self.z, 180, 0.8)
+            # self.goTo(self.x, self.y, self.z, 180, 0.8)
+            self._cf.high_level_commander.go_to(self.x, self.y, self.z, 180, 1.2, False)
+
             time.sleep(0.8)
             self._cf.param.set_value('ring.headlightEnable', '1')
             time.sleep(1)
@@ -725,10 +727,10 @@ class Drogno(threading.Thread):
         self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
         self.currentTrajectoryLenght =  total_duration
 
-    def evaluateBattery(self, killingPill):
-        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), killingPill.is_set(), self.is_connected))
+    def evaluateBattery(self):
+        print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected))
         # batteryLock = Lock()
-        while not killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
+        while not self.killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
             level = 0.0
             # batteryLock.acquire()
             if self.batteryVoltage == 'n.p.':

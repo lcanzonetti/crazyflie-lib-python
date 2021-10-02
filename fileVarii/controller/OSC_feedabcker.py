@@ -20,12 +20,7 @@ logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '
 logger = logging.getLogger("osc")
 logger.setLevel(logging.DEBUG)
 
-
-
-
 finished = False
-# bufferon = {}
-
 class Feedbacco():
     def __init__(self, ID, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
         self.OSC_SENDING_IP   = sendingIP
@@ -64,7 +59,7 @@ class Feedbacco():
                     break
                 else:
                     self.sendPose(msg)
-                # time.sleep(0.01)
+                time.sleep(0.001)
             # Properly close the system.
             print('\nFeedbacker process for drogno %s leaving.' % self.ID)
             osc_terminate()
@@ -100,11 +95,13 @@ class CompanionFeedbacco():
                     break
                 else:
                     self.sendCompanionFeedback(msg)
-                # time.sleep(0.04)
+                time.sleep(0.04)
             # Properly close the system.
-            print('\nanche il feedbacker se ne va')
+            self.cuia.close()
+            self.cuia.join_thread()
             osc_terminate()
-        
+            print('\nanche il companion feedbacker se ne va')
+
         osc_startup()
         osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
         print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
