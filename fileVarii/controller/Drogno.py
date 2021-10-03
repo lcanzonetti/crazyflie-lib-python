@@ -39,7 +39,8 @@ DEFAULT_SCRAMBLING_TIME = 2.0
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 0.8
 STATUS_PRINT_RATE     = 2.0
-LOGGING_FREQUENCY     = 160
+LOGGING_FREQUENCY     = 100
+COMMANDS_FREQUENCY    = 0.1
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
@@ -50,15 +51,15 @@ RING_FADE_TIME        = 0.001
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
         threading.Thread.__init__(self)
-        self.lastRecordPath  = lastRecordPath
-        self.lastTrajectory  = ''
-        self.TRAJECTORIES    = {}
-        self.currentTrajectoryLenght = 0
+        # self.lastRecordPath  = lastRecordPath
+        # self.lastTrajectory  = ''
+        # self.TRAJECTORIES    = {}
+        # self.currentTrajectoryLenght = 0
         self.link_uri    = link_uri
         self.ID          = int(ID)
         self.name        = 'Drogno_'+str(ID)
         self.statoDiVolo = 'starting'
-        self.durataVolo  = random.randint(1,4)
+        # self.durataVolo  = random.randint(1,4)
         self.exitFlag    = exitFlag
         self.WE_ARE_FAKING_IT       = perhapsWeReFakingIt
         self.isKilled               = False
@@ -68,7 +69,7 @@ class Drogno(threading.Thread):
         self.controlThread          = False
         self.printThread            = False
         self.printRate              = STATUS_PRINT_RATE
-        self.currentSequenceThread  = False
+        # self.currentSequenceThread  = False
         self.recconnectionAttempts  = 0
         self.is_connected           = False
         self.standBy                = False
@@ -81,6 +82,7 @@ class Drogno(threading.Thread):
         self.x                      = 0.0
         self.y                      = 0.0 
         self.z                      = 0.0
+        self.yaw                    = 0.0
         self.requested_X            = 0.0
         self.requested_Y            = 0.0
         self.requested_Z            = 0.0
@@ -94,14 +96,13 @@ class Drogno(threading.Thread):
         self.esteemsCount           = 0
         self.prefStartPoint_X       = startingPoint[0]
         self.prefStartPoint_Y       = startingPoint[1]
-        self.yaw                    = 0.0
         self.batteryVoltage         = 'n.p.'
         self.ringIntensity          = 0.1
         self.commandsCount          = 0.0
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
-        self.commandsFrequency      = 0.2
+        self.commandsFrequency      = COMMANDS_FREQUENCY
         self.scramblingTime         = None
         self.flyingTime             = 0
         self.connectionThread       = None

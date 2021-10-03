@@ -22,14 +22,19 @@ from cflib.utils import uri_helper
 from cflib.utils.multiranger import Multiranger
 from   cflib.utils.power_switch import PowerSwitch
 
+MIN_DISTANCE      = 0.3
+MAX_VELOCITY_XY   = 0.7
+MAX_VELOCITY_Z    = 0.3
+MAX_VELOCITY_YAW  = 30
+
+
 
 uro =('radio://0/110/2M/E7E7E7E7EA')
 
 comandi = {
-    'ics':0,
-    'ypsilon': 0,
-    'turnLeft': 0,
-    'turnRight': 0,
+    'destraSinistra':0,
+    'avantiDietro': 0,
+    'leftRight': 0,
     'changeHeight': 0
 }
 
@@ -37,42 +42,31 @@ comandi = {
 logging.basicConfig(level=logging.ERROR)
 
 def is_close(range):
-    MIN_DISTANCE = 0.40  # m
-
+    distance = MIN_DISTANCE
     if range is None:
         return False
     else:
-        return range < MIN_DISTANCE
+        return range < distance
     
 
-def gamepadCommands():
-      # Get next pygame event
+def getGamepadCommands():
     pygame.event.pump()
-
-    # sys.stdout.write('%s | Axes: ' % controller.get_name())
 
     for k in range(controller.get_numaxes()):
         if k == 0: 
             # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
-            comandi['ics'] = controller.get_axis(k)
+            comandi['destraSinistra'] = controller.get_axis(k)
         elif k == 1:
-            comandi['ypsilon'] = controller.get_axis(k)
-        elif k == 3:
+            comandi['avantiDietro'] = controller.get_axis(k)
+        elif k == 2:
             comandi['changeHeight'] = controller.get_axis(k)
-        elif k == 4:
-            comandi['turnLeft'] = controller.get_axis(k)
-        elif k == 5:
-            comandi['turnRight'] = controller.get_axis(k)
+        elif k == 3:
+            comandi['leftRight'] = controller.get_axis(k)
     print (comandi)
-    # sys.stdout.write(' | Buttons: ')
-    # for k in range(controller.get_numbuttons()):
-    #     sys.stdout.write('%d:%d ' % (k, controller.get_button(k)))
-    # sys.stdout.write('\n')
 
 
 if __name__ == '__main__':
-    joystickThread = threading.Thread(target=gamepadCommands)
-    # Initialize the low-level drivers
+    # joystickThread = threading.Thread(target=gamepadCommands)
     cflib.crtp.init_drivers()
     PowerSwitch(uro).stm_power_up()
     time.sleep(3)
@@ -84,33 +78,36 @@ if __name__ == '__main__':
                 keep_flying = True
 
                 while keep_flying:
-                    VELOCITY   = 0.7
-                    velocity_x = 0.0
-                    velocity_y = 0.0
+                    velocity_x     = 0.0
+                    velocity_y     = 0.0
+                    velocity_z     = 0.0
+                    velocity_yaw   = 0.0
+                    
+                    getGamepadCommands()
+                    
+                    if comandi['destraSinistra'] != 0:
+                        velocity_y = comandi['destraSinistra'] * MAX_VELOCITY_XY
+                    if comandi['avantiDietro'] != 0:
+                        velocity_x = comandi['avantiDietro'] * MAX_VELOCITY_XY
+                    if comandi['changeHeight'] != 0:
+                        velocity_z = comandi['changeHeight'] * MAX_VELOCITY_Z
+                    if comandi['leftRight'] != 0:
+                        velocity_yaw = comandi['leftRight'] * MAX_VELOCITY_YAW
+
 
                     if is_close(multiranger.front):
-                        velocity_x -= VELOCITY
+                        velocity_x -= MAX_VELOCITY_XY
                     if is_close(multiranger.back):
-                        velocity_x += VELOCITY
-
+                        velocity_x += MAX_VELOCITY_XY
                     if is_close(multiranger.left):
-                        velocity_y -= VELOCITY
+                        velocity_y -= MAX_VELOCITY_XY
                     if is_close(multiranger.right):
-                        velocity_y += VELOCITY
-
+                        velocity_y += MAX_VELOCITY_XY
                     if is_close(multiranger.up):
                         keep_flying = False
 
-                    motion_commander.start_linear_motion(
-                        velocity_x, velocity_y, 0)
-                    gamepadCommands()
-                    time.sleep(0.08)
-    # while True:
-    #     gamepadCommands()
-    #     time.sleep(0.08)
+                    print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:' % velocity_x, velocity_y, velocity_z, velocity_z)
+                    motion_commander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
+                    time.sleep(0.02)
     PowerSwitch(uro).stm_power_down()
-    print('Demo terminated!')
-
-
-
-
+    print('goodbye')
