@@ -22,10 +22,10 @@ from cflib.utils import uri_helper
 from cflib.utils.multiranger import Multiranger
 from   cflib.utils.power_switch import PowerSwitch
 
-MIN_DISTANCE      = 0.3
-MAX_VELOCITY_XY   = 0.7
-MAX_VELOCITY_Z    = 0.3
-MAX_VELOCITY_YAW  = 30
+MIN_DISTANCE      = 0.35
+MAX_VELOCITY_XY   = 1.0
+MAX_VELOCITY_Z    = 0.4
+MAX_VELOCITY_YAW  = 90
 
 
 
@@ -53,14 +53,14 @@ def getGamepadCommands():
     pygame.event.pump()
 
     for k in range(controller.get_numaxes()):
-        if k == 0: 
+        if k == 2: 
             # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
-            comandi['destraSinistra'] = controller.get_axis(k)
-        elif k == 1:
-            comandi['avantiDietro'] = controller.get_axis(k)
-        elif k == 2:
-            comandi['changeHeight'] = controller.get_axis(k)
+            comandi['destraSinistra'] = controller.get_axis(k) * -1.
         elif k == 3:
+            comandi['avantiDietro'] = controller.get_axis(k) * -1.
+        elif k == 1:
+            comandi['changeHeight'] = controller.get_axis(k)
+        elif k == 0:
             comandi['leftRight'] = controller.get_axis(k)
     print (comandi)
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     if is_close(multiranger.up):
                         keep_flying = False
 
-                    print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:' % velocity_x, velocity_y, velocity_z, velocity_z)
+                    print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
                     motion_commander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
                     time.sleep(0.02)
     PowerSwitch(uro).stm_power_down()

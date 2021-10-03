@@ -33,6 +33,14 @@ def main():
             print(Fore.RED + '%s is not there to be standByied' % uri)
     time.sleep(1)
     print ('Done. Ciao.')
+
+def standBySingle(uri):
+    print('StandBying device %s' % uri)
+    try:
+        PowerSwitch(uri).stm_power_down()
+        print(Fore.GREEN + '%s has been standbyied!' % uri)
+    except Exception:
+        print(Fore.RED + '%s is not there to be standByied' % uri)
  
 if __name__ == '__main__':
     main()

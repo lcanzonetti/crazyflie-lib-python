@@ -25,13 +25,16 @@
 Example of how to read the Lighthouse base station geometry and
 calibration memory from a Crazyflie
 """
-import logging
+import logging, time
 from threading import Event
 
 import cflib.crtp  # noqa
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.mem import LighthouseMemHelper
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+import stenBaiatore
+import wakeUppatore
+
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -39,24 +42,22 @@ logging.basicConfig(level=logging.ERROR)
 source_uri = 'radio://0/80/2M/E7E7E7E7E0'
 
 destination_uris = [    
-        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/90/2M/E7E7E7E7E3',
-        'radio://1/90/2M/E7E7E7E7E4',
-        'radio://1/90/2M/E7E7E7E7E5',
-        'radio://2/100/2M/E7E7E7E7E6',
-        'radio://2/100/2M/E7E7E7E7E7',
-        'radio://2/100/2M/E7E7E7E7E8'
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://1/90/2M/E7E7E7E7E3',
+        # 'radio://1/90/2M/E7E7E7E7E4',
+        # 'radio://1/90/2M/E7E7E7E7E5',
+        # 'radio://2/100/2M/E7E7E7E7E6',
+        # 'radio://2/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E8'
         # 'radio://2/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
 
 
-bs1geo   = None
-bs2geo   = None
-bs1calib = None
-bs1calib = None
+geo      = None
+calib    = None
 
 class ReadMem:
     def __init__(self, uri):
@@ -64,28 +65,22 @@ class ReadMem:
 
         with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
             helper = LighthouseMemHelper(scf.cf)
-
             helper.read_all_geos(self._geo_read_ready)
             self._event.wait()
-
             self._event.clear()
-
             helper.read_all_calibs(self._calib_read_ready)
             self._event.wait()
 
     def _geo_read_ready(self, geo_data):
-        for id, data in geo_data.items():
-            print('---- Geometry for base station', id + 1)
-            data.dump()
-            print()
-        
+        global geo
+        print('---- Retreived geometry for base stations:')
+        print (geo_data)
         self._event.set()
 
     def _calib_read_ready(self, calib_data):
-        for id, data in calib_data.items():
-            print('---- Calibration data for base station', id + 1)
-            data.dump()
-            print()
+        global calib
+        print('---- Retreived geometry for base stations:')
+        print (calib_data)
         self._event.set()
 
 class WriteMem:
@@ -93,10 +88,9 @@ class WriteMem:
         self._event = Event()
         self.uro = uro
 
-        with SyncCrazyflie(uro, cf=Crazyflie(rw_cache='./cache')) as scf:
+        with SyncCrazyflie(self.uro,  cf=Crazyflie(rw_cache='./cache')) as scf:
             helper = LighthouseMemHelper(scf.cf)
             helper.write_geos(geo_dict, self._data_written)
-
             self._event.wait()
             self._event.clear()
             
@@ -107,22 +101,25 @@ class WriteMem:
         if success:
             print('Data written on %s' % self.uro)
         else:
-            print('Write failed on %s' % uro)
+            print('Write failed on %s' % self.uro)
 
         self._event.set()
 
 
 
 if __name__ == '__main__':
-    # URI to the Crazyflie to connect to
-    
-
-    # Initialize the low-level drivers
     cflib.crtp.init_drivers()
+    wakeUppatore.wakeUpSingle(source_uri)
+    time.sleep(3)
 
     ReadMem(source_uri)
-    
-    # for uro in destination_uris:
-    #     WriteMem(destination_uris[uro], geo_dict, calib_dict)
+    stenBaiatore.standBySingle(source_uri)
+    for uro in destination_uris:
+        wakeUppatore.wakeUpSingle(uro)
+        time.sleep(3)
+        print('writing on %s'% uro)
+        WriteMem(uro, geo, calib)
+        stenBaiatore.standBySingle(uro)
+
 
 
