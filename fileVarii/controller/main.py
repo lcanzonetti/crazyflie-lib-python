@@ -63,6 +63,7 @@ def radioStart():
     if not WE_ARE_FAKING_IT:
         try:
             cflib.crtp.init_drivers()
+            print('Scanning interfaces for Crazyflies...')
             print(cflib.crtp.get_interfaces_status())   
             availableRadios = cflib.crtp.scan_interfaces()
             if availableRadios:
@@ -74,7 +75,7 @@ def radioStart():
                     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
             else:
                 # WE_ARE_FAKING_IT = True
-                print('no radios?')     
+                print('no available radios?')     
 
                 pass
         except IndexError:

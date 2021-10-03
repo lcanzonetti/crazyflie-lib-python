@@ -39,6 +39,7 @@ RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 1.0
 STATUS_PRINT_RATE     = 2.0
 LOGGING_FREQUENCY     = 100
+COMMANDS_FREQUENCY    = 0.1
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
@@ -81,7 +82,6 @@ class Drogno(threading.Thread):
         self.y                      = 0.0 
         self.z                      = 0.0
         self.yaw                    = 0.0
-
         self.requested_X            = 0.0
         self.requested_Y            = 0.0
         self.requested_Z            = 0.0
@@ -100,7 +100,7 @@ class Drogno(threading.Thread):
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
-        self.commandsFrequency      = 0.2
+        self.commandsFrequency      = COMMANDS_FREQUENCY
         self.scramblingTime         = None
         self.flyingTime             = 0
         self.connectionThread       = None
