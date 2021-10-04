@@ -22,8 +22,8 @@ from cflib.utils import uri_helper
 from cflib.utils.multiranger import Multiranger
 from   cflib.utils.power_switch import PowerSwitch
 
-MIN_DISTANCE      = 0.35
-MAX_VELOCITY_XY   = 1.0
+MIN_DISTANCE      = 0.25
+MAX_VELOCITY_XY   = 0.4
 MAX_VELOCITY_Z    = 0.4
 MAX_VELOCITY_YAW  = 90
 
@@ -62,7 +62,7 @@ def getGamepadCommands():
             comandi['changeHeight'] = controller.get_axis(k)
         elif k == 0:
             comandi['leftRight'] = controller.get_axis(k)
-    print (comandi)
+    # print (comandi)<
 
 
 if __name__ == '__main__':
@@ -106,8 +106,8 @@ if __name__ == '__main__':
                     if is_close(multiranger.up):
                         keep_flying = False
 
-                    print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
+                    # print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
                     motion_commander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
-                    time.sleep(0.02)
+                    time.sleep(0.01)
     PowerSwitch(uro).stm_power_down()
     print('goodbye')
