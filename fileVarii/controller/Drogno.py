@@ -39,8 +39,8 @@ DEFAULT_SCRAMBLING_TIME = 2.0
 RELATIVE_SPACING      = 0.4
 BATTERY_CHECK_RATE    = 0.8
 STATUS_PRINT_RATE     = 2.0
-LOGGING_FREQUENCY     = 100
-COMMANDS_FREQUENCY    = 0.1
+LOGGING_FREQUENCY     = 1000
+COMMANDS_FREQUENCY    = 0.15
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
@@ -121,9 +121,9 @@ class Drogno(threading.Thread):
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
-        self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
-        self.TRAJECTORIES [7] = figure8Triple
-        self.TRAJECTORIES [8] = figure8
+        # self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+        # self.TRAJECTORIES [7] = figure8Triple
+        # self.TRAJECTORIES [8] = figure8
     
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
         # with open(trajectory, 'r') as t:

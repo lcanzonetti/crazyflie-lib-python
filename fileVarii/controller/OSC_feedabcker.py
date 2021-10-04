@@ -59,7 +59,7 @@ class Feedbacco():
                     break
                 else:
                     self.sendPose(msg)
-                time.sleep(0.001)
+                time.sleep(0.01)
             # Properly close the system.
             print('\nFeedbacker process for drogno %s leaving.' % self.ID)
             osc_terminate()
