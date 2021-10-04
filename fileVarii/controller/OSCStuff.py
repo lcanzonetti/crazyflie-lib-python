@@ -2,7 +2,7 @@
 #rf 2021
 import multiprocessing
 import threading
-from   threading import Lock
+from   threading import Lockù
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event

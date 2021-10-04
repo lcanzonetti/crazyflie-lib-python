@@ -2,8 +2,8 @@
 	"name" : "OSCRouter_02",
 	"version" : 1,
 	"creationdate" : 3716057432,
-	"modificationdate" : 3716057468,
-	"viewrect" : [ 184.0, 115.0, 300.0, 500.0 ],
+	"modificationdate" : 3716210961,
+	"viewrect" : [ 297.0, 306.0, 300.0, 496.0 ],
 	"autoorganize" : 1,
 	"hideprojectwindow" : 0,
 	"showdependencies" : 1,
@@ -29,6 +29,10 @@
 		}
 ,
 		"externals" : 		{
+			"smpte~.mxe64" : 			{
+				"kind" : "object",
+				"local" : 1
+			}
 
 		}
 
