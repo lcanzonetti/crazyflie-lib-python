@@ -32,7 +32,7 @@ import OSC_feedabcker as feedbacker
 BOX_X                 = 1.9
 BOX_Y                 = 1.9
 BOX_Z                 = 2.5
-LIGHTHOUSE_METHOD     = '0'
+LIGHTHOUSE_METHOD     = '1'
 DEFAULT_HEIGHT        = 0.7
 DEFAULT_VELOCITY      = 0.8
 DEFAULT_SCRAMBLING_TIME = 2.0
@@ -44,7 +44,7 @@ COMMANDS_FREQUENCY    = 0.15
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
-CLAMPING              = True
+CLAMPING              = False
 RING_FADE_TIME        = 0.001
 
 
