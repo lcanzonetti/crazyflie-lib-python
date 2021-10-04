@@ -121,9 +121,9 @@ class Drogno(threading.Thread):
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
-        self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
-        self.TRAJECTORIES [7] = figure8Triple
-        self.TRAJECTORIES [8] = figure8
+        # self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+        # self.TRAJECTORIES [7] = figure8Triple
+        # self.TRAJECTORIES [8] = figure8
     
         # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
         # with open(trajectory, 'r') as t:
