@@ -37,7 +37,7 @@ framerate     = 25
 ################################################  this module osc receiving:
 RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.005
+OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
 AGGREGATION_ENABLED     = False
 AGGREGATOR_RECEIVING_PORT = 9201
