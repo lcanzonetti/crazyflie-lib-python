@@ -2,7 +2,7 @@
 #rf 2021
 import multiprocessing
 import threading
-from   threading import Lockù
+from   threading import Lock
 from   multiprocessing.connection import Client
 from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
@@ -53,7 +53,7 @@ COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
 SWARM_PAGE              = '90'
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 0.6
+COMPANION_UPDATE_RATE   = 0.8
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency      = 0.15   # actual command'd rate to uavss
