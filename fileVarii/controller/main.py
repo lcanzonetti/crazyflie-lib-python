@@ -33,7 +33,7 @@ lastRecordPath        = ''
 WE_ARE_FAKING_IT      = False
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
-COMMANDS_FREQUENCY    = 0.15
+COMMANDS_FREQUENCY    = 0.04
 FEEDBACK_SENDING_PORT = 6000
 BROADCAST_IP          = "192.168.10.255"
 
@@ -157,7 +157,7 @@ def exit_signal_handler(signum, frame):
         try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
         except: print('%s is not there to be shut down' % drogni[drogno].link_uri)
         drogni[drogno].exit()
-        # drogni[drogno].join()
+        drogni[drogno].join()
    
     sys.exit()
 

@@ -53,7 +53,7 @@ COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
 SWARM_PAGE              = '90'
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 0.8
+COMPANION_UPDATE_RATE   = 1.0
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency      = 0.15   # actual command'd rate to uavss
@@ -119,7 +119,6 @@ def updateCompanion():
             if COMPANION_FEEDBACK_ENABLED:
                 infinitaRoba = []
                 time.sleep(COMPANION_UPDATE_RATE)
-                # companionLock.acquire()
                 listaTimecode    = timecode.split(':')
                 timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   [listaTimecode[0]])
                 timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   [listaTimecode[1]])
@@ -175,10 +174,6 @@ def updateCompanion():
                     else:
                         takeOffOrLandText = 'take off'
 
-                    # if d.evaluateFlyness():  takeOffOrLandColor = [200,20,40]
-                    # else: takeOffOrLandColor = [255,0,0]
-
-
                     if d.isEngaged:
                         engageText         = 'engaged'
                         engageColor        = [240,20,80]
@@ -186,23 +181,20 @@ def updateCompanion():
                         engageText         = 'not engaged'
                         engageColor        = [20,240,80]
 
-
-
-
                     rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
                     if not any(rgb): rgb = [40,40,40]
                     if d.standBy: rgb = [10,30,10]
 
-                    int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
-                    int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
+                    int_bkgcol      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
+                    int_col         = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
 
-                    status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
-                    status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
-                    status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
+                    status          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
+                    status_bkgcol   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
+                    status_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
 
-                    tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeOffOrLandText])
-                    tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeOffOrLandColor)
-                    tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
+                    tkfland         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeOffOrLandText])
+                    tkfland_bkg     = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeOffOrLandColor)
+                    tkfland_col     = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
 
                     engage          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None, [engageText])
                     engage_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii", engageColor)
@@ -469,6 +461,8 @@ def setCommandsRate(address, args):
     if args[0] == '+':
         commandsFrequency += 0.05
     elif args[0] == '-':
+        if commandsFrequency > 0 and commandsFrequency <= 0.05:
+            commandsFrequency -= 0.01
         if commandsFrequency > 0:
             commandsFrequency -= 0.05
     commandsFrequency = round(commandsFrequency, 2)
@@ -481,14 +475,9 @@ def start_server():      ######################    #### OSC init    #########   
     global finished 
     global bufferone
     global timecode
-    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
-    # logger = logging.getLogger("osc")
-    # logger.setLevel(logging.DEBUG)
-    # osc_startup(logger=logger)
     osc_startup()
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
-    # print ('ma porco il clero di ' + COMPANION_FEEDBACK_IP)
     
     if COMPANION_FEEDBACK_ENABLED:
         companionFeedbackerInstance = feedbacker.CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
