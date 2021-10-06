@@ -22,10 +22,10 @@ from cflib.utils import uri_helper
 from cflib.utils.multiranger import Multiranger
 from   cflib.utils.power_switch import PowerSwitch
 
-MIN_DISTANCE      = 0.25
-MAX_VELOCITY_XY   = 0.4
-MAX_VELOCITY_Z    = 0.4
-MAX_VELOCITY_YAW  = 90
+MIN_DISTANCE      = 0.40
+MAX_VELOCITY_XY   = 0.60
+MAX_VELOCITY_Z    = 0.95
+MAX_VELOCITY_YAW  = 120
 
 
 
@@ -108,6 +108,6 @@ if __name__ == '__main__':
 
                     # print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
                     motion_commander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
-                    time.sleep(0.01)
+                    time.sleep(0.006)
     PowerSwitch(uro).stm_power_down()
     print('goodbye')
