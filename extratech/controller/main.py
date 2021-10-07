@@ -14,11 +14,11 @@ import OSCStuff       as OSC
 import Drogno
 #########################################################################
 uris = [    
-        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://1/90/2M/E7E7E7E7E3',
-        # 'radio://1/90/2M/E7E7E7E7E4',
+        'radio://0/90/2M/E7E7E7E7E4',
         # 'radio://1/90/2M/E7E7E7E7E5',
         # 'radio://2/100/2M/E7E7E7E7E6',
         # 'radio://2/100/2M/E7E7E7E7E7',
