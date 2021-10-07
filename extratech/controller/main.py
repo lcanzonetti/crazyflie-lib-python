@@ -15,14 +15,14 @@ import Drogno
 #########################################################################
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/90/2M/E7E7E7E7E3',
-        'radio://1/90/2M/E7E7E7E7E4',
-        'radio://1/90/2M/E7E7E7E7E5',
-        'radio://2/100/2M/E7E7E7E7E6',
-        'radio://2/100/2M/E7E7E7E7E7',
-        'radio://2/100/2M/E7E7E7E7E8'
+        # 'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://1/90/2M/E7E7E7E7E3',
+        # 'radio://1/90/2M/E7E7E7E7E4',
+        # 'radio://1/90/2M/E7E7E7E7E5',
+        # 'radio://2/100/2M/E7E7E7E7E6',
+        # 'radio://2/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E8'
         # 'radio://2/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
@@ -43,7 +43,7 @@ processes_exit_event = multiprocessing.Event()
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.COMMANDS_FREQUENCY     = COMMANDS_FREQUENCY
-OSC.COMPANION_FEEDBACK_IP  = "192.168.10.160" 
+OSC.COMPANION_FEEDBACK_IP  = "192.168.10.255" 
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 
