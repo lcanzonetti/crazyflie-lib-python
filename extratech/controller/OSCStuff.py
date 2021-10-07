@@ -39,7 +39,7 @@ RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
-AGGREGATION_ENABLED     = False
+AGGREGATION_ENABLED       = False
 AGGREGATOR_RECEIVING_PORT = 9201
 aggregatorInstance      = None
 aggregatorProcess       = None
@@ -56,10 +56,12 @@ COMPANION_ENABLE_BUTTON = '25'
 COMPANION_UPDATE_RATE   = 1.0
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
-commandsFrequency      = 0.15   # actual command'd rate to uavss
+commandsFrequency         = 0.10   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
 posLock = Lock()
 # colLock = Lock()
+
+
 
 
 ###########################  companion
@@ -427,7 +429,7 @@ def setRequestedPos(address, args):
     global msgCount
     global timecode
     iddio      = int(address[-5])
-        # print(timecode)
+    print(timecode)
     # with posLock: 
     timecode   = args[0]
     bufferone[iddio].requested_X = round(float(args[1]),3)
@@ -475,7 +477,12 @@ def start_server():      ######################    #### OSC init    #########   
     global finished 
     global bufferone
     global timecode
-    osc_startup()
+    # osc_startup()
+    logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '  '%(levelname)s - %(message)s')
+    logger = logging.getLogger("osc")
+    logger.setLevel(logging.DEBUG)
+    osc_startup(logger=logger)
+
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
     
