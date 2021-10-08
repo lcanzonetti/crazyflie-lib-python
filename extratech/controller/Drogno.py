@@ -46,6 +46,7 @@ FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
 CLAMPING              = False
 RING_FADE_TIME        = 0.001
+BATTERY_TEST          = True
 
 
 class Drogno(threading.Thread):
@@ -65,6 +66,7 @@ class Drogno(threading.Thread):
         self.isKilled               = False
         self.isReadyToFly           = False
         self.isEngaged              = True
+        self.isBatterytestPassed    = False
         self.isFlying               = False
         self.controlThread          = False
         self.printThread            = False
@@ -97,6 +99,7 @@ class Drogno(threading.Thread):
         self.prefStartPoint_X       = startingPoint[0]
         self.prefStartPoint_Y       = startingPoint[1]
         self.batteryVoltage         = 'n.p.'
+        self.batterySag             = 0
         self.ringIntensity          = 0.1
         self.commandsCount          = 0.0
         self.multiprocessConnection = None
@@ -158,7 +161,8 @@ class Drogno(threading.Thread):
 
             if self.is_connected:
                 if self.isEngaged:
-                   print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                    if BATTERY_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
+                    print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                 else:
                     print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                 self.commandsCount = 0
@@ -312,6 +316,7 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
         # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
+        if BATTERY_TEST: self._lg_kalm.add_variable('health.batterySag', 'FP16')
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
@@ -333,6 +338,7 @@ class Drogno(threading.Thread):
         # time.sleep(0.3)
 
         self._cf.param.set_value('commander.enHighLevel', '1')
+        if BATTERY_TEST: self._cf.param.set_value('health.startBatTest', '1')
         self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', LIGHTHOUSE_METHOD)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
@@ -350,7 +356,6 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'landed'
         time.sleep(1.5)
         self.resetEstimator()
-
         
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
@@ -367,6 +372,7 @@ class Drogno(threading.Thread):
         self.yaw               = float(data['stabilizer.yaw'])
         self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
+        self.batterySag        = float(data['health.batterySag'])
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
@@ -579,9 +585,6 @@ class Drogno(threading.Thread):
             self.ledMem[0].write_data(None)
 
         # print ('vado al colore %s' % (vr, vg, vb))
-        
-            
-
 
     def alternativeSetRingColor(self, rgb ):
         r = int( rgb[0] / 255 * 100 )
