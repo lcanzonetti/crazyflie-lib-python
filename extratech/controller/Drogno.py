@@ -29,8 +29,8 @@ logging.basicConfig(level=logging.ERROR)
 import OSC_feedabcker as feedbacker
 
 
-BOX_X                 = 1.9
-BOX_Y                 = 1.9
+BOX_X                 = 2.2
+BOX_Y                 = 2.2
 BOX_Z                 = 2.5
 LIGHTHOUSE_METHOD     = '0'
 DEFAULT_HEIGHT        = 0.8
