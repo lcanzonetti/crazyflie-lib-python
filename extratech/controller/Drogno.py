@@ -492,16 +492,17 @@ class Drogno(threading.Thread):
             else:
                 print('BUT NOT READY')
 
-    def land(self, speed=0.15, landing_height=0.05):
+    def land(self, speed=0.15, landing_height=0.05,thenGoToSleep=False):
         # landLock = Lock()
         def landing_sequence():
             # landLock.acquire()
             self._cf.high_level_commander.land(0.0, 2.5)
             # self._cf.high_level_commander.land()
             self.isFlying     = False
-            time.sleep(1)
+            time.sleep(3)
             # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
+            if (thenGoToSleep): self.goToSleep()
             # landLock.release()
 
         if self.WE_ARE_FAKING_IT:
@@ -612,9 +613,13 @@ class Drogno(threading.Thread):
         vb = int(vb * self.ringIntensity)
 
         if len(self.ledMem) > 0:
+            self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
             self.ledMem[0].write_data(None)
 
@@ -803,11 +808,10 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    self.land()
+                    self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
                     self.isReadyToFly = False
-                    self.standBy()
             # batteryLock.release()
             time.sleep(BATTERY_CHECK_RATE)
         print('battery thread for drone %s stopped'% self.ID)
@@ -815,8 +819,7 @@ class Drogno(threading.Thread):
         del self.batteryThread
         
     def killMeSoftly(self):
-        self.land()
-        self.goToSleep()
+        self.land(thenGoToSleep=True)
     def killMeHardly(self):
         # self.setRingColor(0,0,0)
         self.isFlying = False

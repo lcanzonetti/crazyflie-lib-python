@@ -462,7 +462,6 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_R = args[1]
     bufferone[iddio].requested_G = args[2]
     bufferone[iddio].requested_B = args[3]
-    print ('gli arghi dei colori sono: %s %s %s' % (args[1], args[2], args[3]))
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE
