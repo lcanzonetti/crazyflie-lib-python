@@ -1,9 +1,8 @@
 #rf 2021
-import time, sys
-
+import time, sys, os
 import threading
 from   threading import Lock
-
+from datetime import datetime
 import multiprocessing
 from   multiprocessing.connection import Client
 import random
@@ -117,12 +116,24 @@ class Drogno(threading.Thread):
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
         self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
-        logName = "./logs/" + self.name + "_" + time.strftime('%x_%X') + ".log"
-        logging.basicConfig(filename=logName, format='%(asctime)s %(process)d %(levelname)s %(message)s', filemode='w') # here we set the file format to write mode
-        # Creating a logger object in the log file
-        self.LoggerObject = logging.getLogger()
-        # We are setting the threshold of logger to the DEBUG value
+        
+        
+        
+        now = datetime.now() # current date and time
+        date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
+        logName = "./extratech/controller/drognoLogs/" + self.name + "_" +date_time + ".log"
+        os.makedirs(os.path.dirname(logName), exist_ok=True)
+
+
+        self.LoggerObject = logging.getLogger(self.name)
         self.LoggerObject.setLevel(logging.DEBUG)
+        self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
+        self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%Y-%m-%d %H:%M:%S')
+        self.file_handler.setFormatter(self.formatter)
+        self.LoggerObject.addHandler(self.file_handler)
+        self.LoggerObject.info('This is dronelog running on %s' % self.name)
+
+
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
@@ -158,8 +169,11 @@ class Drogno(threading.Thread):
      
     def printStatus(self):
         # printLock = Lock()
+        self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
+            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
+
             if not self.scramblingTime == None and self.isFlying:
                 self.flyingTime = int(time.time() - self.scramblingTime)
 
@@ -172,7 +186,6 @@ class Drogno(threading.Thread):
                 self.commandsCount = 0
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
-            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -479,16 +492,17 @@ class Drogno(threading.Thread):
             else:
                 print('BUT NOT READY')
 
-    def land(self, speed=0.15, landing_height=0.05):
+    def land(self, speed=0.15, landing_height=0.05,thenGoToSleep=False):
         # landLock = Lock()
         def landing_sequence():
             # landLock.acquire()
             self._cf.high_level_commander.land(0.0, 2.5)
             # self._cf.high_level_commander.land()
             self.isFlying     = False
-            time.sleep(1)
+            time.sleep(3)
             # self.isReadyToFly = True
             self.statoDiVolo = 'landed'
+            if (thenGoToSleep): self.goToSleep()
             # landLock.release()
 
         if self.WE_ARE_FAKING_IT:
@@ -599,9 +613,13 @@ class Drogno(threading.Thread):
         vb = int(vb * self.ringIntensity)
 
         if len(self.ledMem) > 0:
+            self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
             self.ledMem[0].write_data(None)
 
@@ -788,12 +806,9 @@ class Drogno(threading.Thread):
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
                     self.statoDiVolo == 'depleted'
                     self.isReadyToFly = False
-
-                    # self._cf.high_level_commander.stop()
-                    # self._cf.commander.send_stop_setpoint()
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    self.land()
+                    self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
                     self.isReadyToFly = False
@@ -804,8 +819,7 @@ class Drogno(threading.Thread):
         del self.batteryThread
         
     def killMeSoftly(self):
-        self.land()
-        self.goToSleep()
+        self.land(thenGoToSleep=True)
     def killMeHardly(self):
         # self.setRingColor(0,0,0)
         self.isFlying = False
