@@ -492,6 +492,7 @@ def setCommandsRate(address, args):
     print(Fore.RED + 'commandsFrequency has been set to ' + str(commandsFrequency))
 
 def start_server():      ######################    #### OSC init    #########    acts as main()
+    """ one day we'd call this function main, that day hasn't come yet"""
     global finished 
     global bufferone
     global timecode
