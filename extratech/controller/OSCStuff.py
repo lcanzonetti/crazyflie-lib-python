@@ -288,36 +288,51 @@ def go        (coddii,quale):
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].go(quale)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goLeft    (coddii, quanto):
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goLeft(quanto)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goRight   (coddii, quanto):
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goRight(quanto)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goForward (coddii, quanto):
         print('chief says we\'re gonna go forward by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goForward(quanto)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goBack    (coddii, quanto):
         print('chief says we\'re gonna go back by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goBack(quanto)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
+def goUp    (coddii, quanto):
+        print('chief says we\'re gonna go up by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goUp(quanto)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
+def goDown    (coddii, quanto):
+        print('chief says we\'re gonna go down by %s ' % quanto)
+        for drogno in drogni:
+            if drogni[drogno].is_connected:
+                drogni[drogno].goDown(quanto)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
+    
 def land      (bullshit, landingCandidate):
     print('chief says %s gotta be grounded' % (landingCandidate))
     if landingCandidate == 'all':    
@@ -340,8 +355,8 @@ def goToStart (coddii, chi):
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goToStart(0.2)
-            else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+            # else:
+            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def ringColor (*args):
     # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
     # print (bullshit)
@@ -399,7 +414,6 @@ def engage  (coddii, chi):
 def printAndSendCoordinates():
     global drogni
     global bufferone
-    # time.sleep(2)
     while not finished:
         time.sleep(commandsFrequency)
         if isSendEnabled:
@@ -408,7 +422,6 @@ def printAndSendCoordinates():
                 drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
 
                 if drogni[drogno].is_connected and drogni[drogno].isEngaged:
-                    # with colLock:
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     # with posLock:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
@@ -449,6 +462,7 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_R = args[1]
     bufferone[iddio].requested_G = args[2]
     bufferone[iddio].requested_B = args[3]
+    print ('gli arghi dei colori sono: %s %s %s' % (args[1], args[2], args[3]))
 
 def setCompanionRate(address, args):
     global COMPANION_UPDATE_RATE
@@ -519,6 +533,8 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/goRight",          goRight,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goForward",        goForward,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/goBack",           goBack,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goUp",             goUp,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/goDown",           goDown,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/kill",             kill,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/standBy",          standBy,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/wakeUp",           wakeUp,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

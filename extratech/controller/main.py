@@ -12,6 +12,7 @@ from   cflib.utils.power_switch import PowerSwitch
 #custom modules
 import OSCStuff       as OSC
 import Drogno
+ 
 #########################################################################
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
@@ -42,7 +43,7 @@ processes_exit_event = multiprocessing.Event()
 
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
-OSC.COMMANDS_FREQUENCY     = COMMANDS_FREQUENCY
+OSC.commandsFrequency      = COMMANDS_FREQUENCY
 OSC.COMPANION_FEEDBACK_IP  = "192.168.10.210" 
 OSC.aggregatorExitEvent    = processes_exit_event 
 

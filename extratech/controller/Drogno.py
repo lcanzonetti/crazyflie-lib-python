@@ -24,10 +24,7 @@ from   cflib.positioning.motion_commander import MotionCommander
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
-logging.basicConfig(level=logging.ERROR)
-
 import OSC_feedabcker as feedbacker
-
 
 BOX_X                 = 2.2
 BOX_Y                 = 2.2
@@ -47,7 +44,6 @@ FEEDBACK_ENABLED      = True
 CLAMPING              = False
 RING_FADE_TIME        = 0.001
 BATTERY_TEST          = True
-
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -121,6 +117,12 @@ class Drogno(threading.Thread):
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
         self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
+        logName = "./logs/" + self.name + "_" + time.strftime('%x_%X') + ".log"
+        logging.basicConfig(filename=logName, format='%(asctime)s %(process)d %(levelname)s %(message)s', filemode='w') # here we set the file format to write mode
+        # Creating a logger object in the log file
+        self.LoggerObject = logging.getLogger()
+        # We are setting the threshold of logger to the DEBUG value
+        self.LoggerObject.setLevel(logging.DEBUG)
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
@@ -132,6 +134,8 @@ class Drogno(threading.Thread):
         # with open(trajectory, 'r') as t:
         #     # print(t.readlines())
         #     self.lastTrajectory = t.readlines()
+         # Modifying the log file we are using
+       
 
         if self.WE_ARE_FAKING_IT:
             print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
@@ -168,6 +172,7 @@ class Drogno(threading.Thread):
                 self.commandsCount = 0
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
+            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -548,6 +553,22 @@ class Drogno(threading.Thread):
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
             # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
+    def goUp(self, quanto=0.3):
+        if self.isFlying:
+            newZ = float(self.z) + float(quanto)
+            print('va bene, salgo a %s' % newZ)
+            self.statoDiVolo = 'moving'
+            self._cf.high_level_commander.go_to(self.x, self.y, newZ, 0, 1)
+            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
+            self.statoDiVolo = 'hovering'
+    def goDown(self, quanto=0.3):
+        if self.isFlying:
+            newZ = float(self.z) - float(quanto)
+            print('va bene, scendo a %s' % newZ)
+            self.statoDiVolo = 'moving'
+            self._cf.high_level_commander.go_to(self.x, self.y, newZ, 0, 1)
+            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
+            self.statoDiVolo = 'hovering'
 
     def goHome(self, speed=0.5):
         if self.isFlying:                
@@ -556,7 +577,7 @@ class Drogno(threading.Thread):
     
     def goToStart(self, speed=0.5):
         if self.isFlying:                
-            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.2, 0, 2, False)
+            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.4, 0, 2, False)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, vr, vg, vb, speed=0.25):
