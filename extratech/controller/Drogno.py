@@ -33,14 +33,14 @@ DEFAULT_HEIGHT        = 0.8
 DEFAULT_VELOCITY      = 0.85
 DEFAULT_SCRAMBLING_TIME = 2.2
 RELATIVE_SPACING      = 0.4
-BATTERY_CHECK_RATE    = 0.7
-STATUS_PRINT_RATE     = 1.5
+BATTERY_CHECK_RATE    = 0.5
+STATUS_PRINT_RATE     = 1.1
 LOGGING_FREQUENCY     = 1000
-COMMANDS_FREQUENCY    = 0.10
+COMMANDS_FREQUENCY    = 0.1
 FEEDBACK_SENDING_IP   = None
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
-CLAMPING              = False
+CLAMPING              = True
 RING_FADE_TIME        = 0.001
 BATTERY_TEST          = True
 
@@ -166,7 +166,7 @@ class Drogno(threading.Thread):
         self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
-            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
+            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {self.batterySag}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}")
 
             if not self.scramblingTime == None and self.isFlying:
                 self.flyingTime = int(time.time() - self.scramblingTime)
@@ -390,7 +390,14 @@ class Drogno(threading.Thread):
         self.kalman_VarZ       = float(data['kalman.varPZ'])
         self.isTumbled         = bool (data['sys.isTumbled'])
         if self.isTumbled: self.goToSleep()
+        if self.isFlying:
+            if abs(self.x) > (BOX_X + 1.0) or abs(self.y) > (BOX_Y+1.0) or self.z > (BOX_Y + 0.5):
+                print(Fore.RED + 'Landing due trespassing!')
+                self.LoggerObject.info("Landing due trespassing!")
+                self.land(thenGoToSleep=True)
         self.isReadyToFly      = self.evaluateFlyness()
+
+
 
         try:
             if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
@@ -520,7 +527,7 @@ class Drogno(threading.Thread):
             if CLAMPING:
                 clamp(x, -BOX_X, BOX_X)
                 clamp(y, -BOX_Y, BOX_Y)
-                clamp(z, 0.27   , BOX_Z)
+                clamp(z, 0.20   , BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
@@ -793,6 +800,8 @@ class Drogno(threading.Thread):
             if level<3.50:
                 self._cf.param.set_value('ring.effect', '13')  
                 print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
+                self.LoggerObject.warning("battery under 3.50v")
+
                 # self.isReadyToFly = False
             if level<3.35:
                 self._cf.param.set_value('ring.effect', '11')  #alert
@@ -802,6 +811,7 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
+                    self.LoggerObject.warning("battery under 3.35v")
                     self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
@@ -845,6 +855,8 @@ class Drogno(threading.Thread):
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
+        self.LoggerObject.warning("closing %s"% self.name)
+
         self.isKilled = True
         self._cf.close_link()
         self.isReadyToFly = False
