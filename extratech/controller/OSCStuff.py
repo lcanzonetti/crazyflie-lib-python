@@ -9,10 +9,7 @@ from   multiprocessing import Process, Queue, Event
 import queue
 from   random                import random, uniform
 import logging
-
 import time
-
-# from   osc4py3.as_comthreads import *
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
@@ -23,7 +20,6 @@ coloInit(convert=True)
 
 import OSCaggregator
 import OSC_feedabcker as feedbacker
-
 
 drogni        = {} 
 bufferone     = {}
@@ -45,6 +41,7 @@ aggregatorInstance      = None
 aggregatorProcess       = None
 aggregatorCue           = Queue()
 aggregatorExitEvent     = None
+posLock = Lock()
 ################################################  companion feedback via OSC:
 COMPANION_FEEDBACK_SENDINGPORT = 12321
 companionFeedbackCue    = Queue()  
@@ -58,12 +55,6 @@ COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency         = 0.10   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
-posLock = Lock()
-# colLock = Lock()
-
-
-
-
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
@@ -214,10 +205,10 @@ def checkSwarmFlyability():
     def loppo():
         global isSwarmReadyToFly
         while not finished:
-            time.sleep(0.2)
+            time.sleep(0.1)
             swarmFlyabilityArray = []
             for drogno in drogni:
-                if drogni[drogno].isReadyToFly: swarmFlyabilityArray.append(True)
+                if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged : swarmFlyabilityArray.append(True)
                 else: swarmFlyabilityArray.append(False)
             if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True
@@ -226,7 +217,7 @@ def checkSwarmFlyability():
     swarmFlyabilityLoop = threading.Thread(name='flyabilityLoop', target=loppo).start()
 
 ###########################  whole swarm
-def takeOff(coddii, decollante):
+def takeOff   (coddii, decollante):
     global bufferone
     # safeLocckino = Lock()
     def authorizedScrambleCommand():
@@ -318,7 +309,7 @@ def goBack    (coddii, quanto):
                 drogni[drogno].goBack(quanto)
             # else:
             #     print('il drogno %s non è connesso' % drogni[drogno].name)
-def goUp    (coddii, quanto):
+def goUp      (coddii, quanto):
         print('chief says we\'re gonna go up by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
@@ -331,8 +322,7 @@ def goDown    (coddii, quanto):
             if drogni[drogno].is_connected:
                 drogni[drogno].goDown(quanto)
             # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
-    
+            #     print('il drogno %s non è connesso' % drogni[drogno].name) 
 def land      (bullshit, landingCandidate):
     print('chief says %s gotta be grounded' % (landingCandidate))
     if landingCandidate == 'all':    
@@ -382,7 +372,7 @@ def standBy   (coddii, chi):
             drogni[int(chi)].goToSleep()
         else:
             drogni[int(chi)].wakeUp()
-def wakeUp  (coddii, chi):
+def wakeUp    (coddii, chi):
     print(' %s  wakeUp' % chi )
     if chi == 'all':    
         for drogno in drogni:
@@ -396,7 +386,7 @@ def resetEstimator  (coddii, chi):
             drogni[drogno].resetEstimator()
     else:
         drogni[chi].resetEstimator()
-def engage  (coddii, chi):
+def engage    (coddii, chi):
     if chi == 'all':    
         for drogno in drogni:
             if not drogni[drogno].isEngaged:
@@ -408,7 +398,6 @@ def engage  (coddii, chi):
     else:
         if not drogni[chi].isEngaged: drogni[chi].isEngaged = True
         else: drogni[chi].isEngaged = False
-
 
 ###########################  single fella
 def printAndSendCoordinates():
@@ -599,8 +588,3 @@ if __name__ == '__main__':
     # sendPose()
     while not finished:
         pass
- 
-    # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - ' '%(levelname)s - %(message)s')
-    # logger = logging.getLogger("osc")
-    # logger.setLevel(logging.DEBUG)
-    # osc_startup(logger=logger)

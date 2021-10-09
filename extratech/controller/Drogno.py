@@ -116,24 +116,18 @@ class Drogno(threading.Thread):
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
         self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
-        
-        
-        
+        ################################################## logging
         now = datetime.now() # current date and time
         date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
         logName = "./extratech/controller/drognoLogs/" + self.name + "_" +date_time + ".log"
         os.makedirs(os.path.dirname(logName), exist_ok=True)
-
-
         self.LoggerObject = logging.getLogger(self.name)
         self.LoggerObject.setLevel(logging.DEBUG)
         self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
-        self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%Y-%m-%d %H:%M:%S')
+        self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%d-%m-%Y %H:%M:%S')
         self.file_handler.setFormatter(self.formatter)
         self.LoggerObject.addHandler(self.file_handler)
         self.LoggerObject.info('This is dronelog running on %s' % self.name)
-
-
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
