@@ -1,31 +1,41 @@
-import time
+# Simple pygame program
 
-uris = [    
-        'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/90/2M/E7E7E7E7E3',
-        'radio://1/90/2M/E7E7E7E7E4',
-        'radio://1/90/2M/E7E7E7E7E5',
-        'radio://2/100/2M/E7E7E7E7E6',
-        'radio://2/100/2M/E7E7E7E7E7',
-        'radio://2/100/2M/E7E7E7E7E8'
-]
+# Import and initialize the pygame library
+import pygame
+pygame.init()
 
+size = [500, 200]
+screen = pygame.display.set_mode(size)
 
-def ohMy():
-    print('uris meant to be touched on:')
-    print(uris)
-    for uri in uris:
-        print('tipo:  ')
-        print(uri)
-        try:
-            print('trying to power up %s' % uri) 
-            # PowerSwitch(uri).stm_power_up()
-        except Exception: 
-            # print (Exception)
-            print('%s is not there to be woken up, gonna pop it out from my list' % uri)
-            connectedUris.remove(uri)
-            time.sleep(1)
+clock = pygame.time.Clock()
+font  = pygame.font.Font(None, 25)
+# Define some colors
+BLACK         = (0, 0, 0)
+WHITE         = (255, 255, 255)
+timecode      = '00:00:00:00'
 
-ohMy()
+done = False
+frame_count = 0
+frame_rate = 25
+start_time = 90
+
+# Run until the user asks to quit
+running = True
+while running:
+
+    # Did the user click the window close button?
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Fill the background with white
+    screen.fill((255, 255, 255))
+
+    # Draw a solid blue circle in the center
+    pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
+
+    # Flip the display
+    pygame.display.flip()
+
+# Done! Time to quit.
+pygame.quit()
