@@ -208,7 +208,8 @@ def checkSwarmFlyability():
             time.sleep(0.1)
             swarmFlyabilityArray = []
             for drogno in drogni:
-                if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged and drogni[drogno].batterySag < 0.85: swarmFlyabilityArray.append(True)
+                if drogni[drogno].isReadyToFly : swarmFlyabilityArray.append(True)
+                # if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged and drogni[drogno].batterySag < 0.85: swarmFlyabilityArray.append(True)
                 else: swarmFlyabilityArray.append(False)
             if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True
