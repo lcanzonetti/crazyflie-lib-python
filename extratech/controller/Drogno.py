@@ -166,7 +166,7 @@ class Drogno(threading.Thread):
         self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
-            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {self.batterySag}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}")
+            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
 
             if not self.scramblingTime == None and self.isFlying:
                 self.flyingTime = int(time.time() - self.scramblingTime)
@@ -804,7 +804,7 @@ class Drogno(threading.Thread):
                 self.LoggerObject.warning("battery under 3.50v")
 
                 # self.isReadyToFly = False
-            if level<3.35:
+            if level<3.33:
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
@@ -812,7 +812,7 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    self.LoggerObject.warning("battery under 3.35v")
+                    self.LoggerObject.error("battery under 3.33v ! GOING DOWN")
                     self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
