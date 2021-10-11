@@ -98,7 +98,7 @@ class CompanionFeedbacco():
                 time.sleep(0.01)
             # Properly close the system.
             self.cuia.close()
-            self.cuia.join_thread()
+            # self.cuia.join_thread()
             osc_terminate()
             print('\nanche il companion feedbacker se ne va')
 
