@@ -50,10 +50,10 @@ COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
 SWARM_PAGE              = '90'
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 1.0
+COMPANION_UPDATE_RATE   = 0.9
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
-commandsFrequency         = 0.10   # actual command'd rate to uavss
+commandsFrequency         = 0.04   # actual command'd rate to uavss
 RECEIVED_MESSAGES_AVERAGE = 10
 ###########################  companion
 def setSendEnabled (*args):
@@ -209,7 +209,9 @@ def checkSwarmFlyability():
             swarmFlyabilityArray = []
             for drogno in drogni:
                 if drogni[drogno].isReadyToFly : swarmFlyabilityArray.append(True)
+                elif not drogni[drogno].isReadyToFly and not drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
                 # if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged and drogni[drogno].batterySag < 0.85: swarmFlyabilityArray.append(True)
+                # if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
                 else: swarmFlyabilityArray.append(False)
             if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True

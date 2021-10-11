@@ -27,7 +27,7 @@ import OSC_feedabcker as feedbacker
 
 BOX_X                 = 2.2
 BOX_Y                 = 2.2
-BOX_Z                 = 2.5
+BOX_Z                 = 2.2
 LIGHTHOUSE_METHOD     = '0'
 DEFAULT_HEIGHT        = 0.8
 DEFAULT_VELOCITY      = 0.85
@@ -177,9 +177,10 @@ class Drogno(threading.Thread):
                     print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                 else:
                     print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                self.commandsCount = 0
             else:
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
+            self.commandsCount = 0
+
         print('Sono stato %s ma ora non sono più' % self.name)
                     
     def sequenzaDiVoloSimulata(self):     
@@ -827,8 +828,8 @@ class Drogno(threading.Thread):
     def killMeHardly(self):
         # self.setRingColor(0,0,0)
         self.isFlying = False
-        self._cf.high_level_commander.stop()
-        self._cf.commander.send_stop_setpoint()
+        # self._cf.high_level_commander.stop()
+        # self._cf.commander.send_stop_setpoint()
         self.goToSleep()
         self.exit()
     def goToSleep(self):
