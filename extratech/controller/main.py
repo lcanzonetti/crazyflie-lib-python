@@ -18,9 +18,9 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
         'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/90/2M/E7E7E7E7E3',
-        'radio://1/90/2M/E7E7E7E7E4', 
-        'radio://1/90/2M/E7E7E7E7E5',
+        'radio://4/90/2M/E7E7E7E7E3',
+        'radio://4/90/2M/E7E7E7E7E4', 
+        'radio://4/90/2M/E7E7E7E7E5',
         'radio://2/100/2M/E7E7E7E7E6',
         'radio://2/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8', 
@@ -64,8 +64,10 @@ def radioStart():
         try:
             cflib.crtp.init_drivers()
             print('Scanning interfaces for Crazyflies...')
+            # print(cflib.crtp.get_interfaces_status()
             print(cflib.crtp.get_interfaces_status())   
             availableRadios = cflib.crtp.scan_interfaces()
+            # availableRadios = cflib.crtp.scan_interfaces()
             if availableRadios:
                 print('available:')
                 print (availableRadios)     
