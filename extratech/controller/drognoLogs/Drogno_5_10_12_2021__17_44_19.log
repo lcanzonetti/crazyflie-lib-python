@@ -1,0 +1,13 @@
+INFO: 12-10-2021 17:44:19 __init__(130) -- This is dronelog running on Drogno_5
+INFO: 12-10-2021 17:44:19 printStatus(166) -- Started
+INFO: 12-10-2021 17:44:20 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:21 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:23 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:24 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:25 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:26 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:44:27 printStatus(169) -- Drogno_5: ready	battery: 4.14	kalman var: 0.001 0.001 0.0	 batterySag: 0.628	link quality: 63	flight time: 0s	pos 0.00 -0.00 -0.00	yaw: 0.01	msg/s 0.0
+INFO: 12-10-2021 17:44:28 printStatus(169) -- Drogno_5: BAD kalman	battery: 4.14	kalman var: 0.051 0.051 0.002	 batterySag: 0.628	link quality: 63	flight time: 0s	pos 0.16 -0.26 -0.00	yaw: 0.05	msg/s 0.0
+INFO: 12-10-2021 17:44:30 printStatus(169) -- Drogno_5: BAD kalman	battery: 4.14	kalman var: 0.111 0.111 0.003	 batterySag: 0.628	link quality: 60	flight time: 0s	pos 0.35 -0.54 -0.01	yaw: 0.05	msg/s 0.0
+WARNING: 12-10-2021 17:44:30 exit(859) -- closing Drogno_5
+INFO: 12-10-2021 17:44:31 printStatus(169) -- Drogno_5: sconnesso	battery: 4.14	kalman var: 0.111 0.111 0.003	 batterySag: 0.628	link quality: 60	flight time: 0s	pos 0.35 -0.54 -0.01	yaw: 0.05	msg/s 0.0

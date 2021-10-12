@@ -1,0 +1,16 @@
+INFO: 12-10-2021 17:32:54 __init__(130) -- This is dronelog running on Drogno_5
+INFO: 12-10-2021 17:32:55 printStatus(166) -- Started
+INFO: 12-10-2021 17:32:56 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:32:57 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:32:58 printStatus(169) -- Drogno_5: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:32:59 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:33:00 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:33:02 printStatus(169) -- Drogno_5: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 12-10-2021 17:33:03 printStatus(169) -- Drogno_5: BAD kalman	battery: 4.15	kalman var: 0.017 0.017 0.001	 batterySag: 0.734	link quality: 51	flight time: 0s	pos 0.21 0.09 -0.01	yaw: 0.03	msg/s 0.0
+INFO: 12-10-2021 17:33:04 printStatus(169) -- Drogno_5: BAD kalman	battery: 4.15	kalman var: 0.054 0.054 0.002	 batterySag: 0.734	link quality: 53	flight time: 0s	pos 0.68 0.30 -0.02	yaw: 0.03	msg/s 0.0
+INFO: 12-10-2021 17:33:05 printStatus(169) -- Drogno_5: BAD kalman	battery: 4.15	kalman var: 0.116 0.116 0.004	 batterySag: 0.734	link quality: 51	flight time: 0s	pos 1.42 0.63 -0.04	yaw: 0.03	msg/s 0.0
+INFO: 12-10-2021 17:33:06 printStatus(169) -- Drogno_5: out of BOX	battery: 4.15	kalman var: 0.203 0.203 0.005	 batterySag: 0.734	link quality: 51	flight time: 0s	pos 2.42 1.07 -0.06	yaw: 0.03	msg/s 0.0
+INFO: 12-10-2021 17:33:07 printStatus(169) -- Drogno_5: out of BOX	battery: 4.15	kalman var: 0.318 0.318 0.006	 batterySag: 0.734	link quality: 51	flight time: 0s	pos 3.69 1.65 -0.10	yaw: 0.03	msg/s 0.0
+INFO: 12-10-2021 17:33:09 printStatus(169) -- Drogno_5: out of BOX	battery: 4.15	kalman var: 0.463 0.463 0.007	 batterySag: 0.734	link quality: 51	flight time: 0s	pos 5.22 2.34 -0.14	yaw: 0.04	msg/s 0.0
+WARNING: 12-10-2021 17:33:10 exit(859) -- closing Drogno_5
+INFO: 12-10-2021 17:33:10 printStatus(169) -- Drogno_5: sconnesso	battery: 4.15	kalman var: 0.64 0.64 0.008	 batterySag: 0.734	link quality: 52	flight time: 0s	pos 7.02 3.16 -0.19	yaw: 0.04	msg/s 0.0
