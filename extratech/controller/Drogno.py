@@ -317,28 +317,31 @@ class Drogno(threading.Thread):
         print('Connected to %s' % link_uri)
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=LOGGING_FREQUENCY)
+        # The fetch-as argument can be set to FP16 to save space in the log packet
         self._lg_kalm.add_variable('kalman.stateX', 'FP16')
         self._lg_kalm.add_variable('kalman.stateY', 'FP16')
         self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
-        self._lg_kalm.add_variable('kalman.varPX', 'FP16')
-        self._lg_kalm.add_variable('kalman.varPY', 'FP16')
-        self._lg_kalm.add_variable('kalman.varPZ', 'FP16')
-        
+        self._lg_kalm.add_variable('kalman.varPX',  'FP16')
+        self._lg_kalm.add_variable('kalman.varPY',  'FP16')
+        self._lg_kalm.add_variable('kalman.varPZ',  'FP16')
         self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
-        self._lg_kalm.add_variable('radio.rssi', 'uint8_t')
-        self._lg_kalm.add_variable('stabilizer.yaw', 'FP16')
-        # The fetch-as argument can be set to FP16 to save space in the log packet
+        self._lg_kalm.add_variable('radio.rssi',    'uint8_t')
+        self._lg_kalm.add_variable('stabilizer.yaw','FP16')
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
         if BATTERY_TEST: self._lg_kalm.add_variable('health.batterySag', 'FP16')
-        # Adding the configuration cannot be done until a Crazyflie is
-        # connected, since we need to check that the variables we
-        # would like to log are in the TOC.
+ 
         try:
             self._cf.log.add_config(self._lg_kalm)
             self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
             self._lg_kalm.error_cb.add_callback(self._stab_log_error)
             self._lg_kalm.start()
             self.is_connected = True
+            # Adding the configuration cannot be done until a Crazyflie is
+            # connected, since we need to check that the variables we
+            # would like to log are in the TOC.
+            while not self.scf.cf.param.is_updated:
+                    time.sleep (0.1)
+                    print("downloading parameters for " +  self.name)
             print(Fore.LIGHTGREEN_EX + '%s connesso %s'% (self.name, self.is_connected))
         except KeyError as e:
             print('Could not start log configuration,'
