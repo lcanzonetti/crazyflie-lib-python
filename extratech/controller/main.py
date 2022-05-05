@@ -63,15 +63,20 @@ def radioStart():
         try:
             cflib.crtp.init_drivers()
             print('Scanning interfaces for Crazyflies...')
-            print(cflib.crtp.get_interfaces_status())   
-            availableRadios = cflib.crtp.scan_interfaces()
+            print(cflib.crtp.get_interfaces_status())
+            availableRadios = []
+            for iuro in uris:
+                availableRadio  = cflib.crtp.scan_interfaces(iuro)
+                if availableRadio:
+                    availableRadios.append(availableRadio)
+
             if availableRadios:
-                print('available:')
+                print(f'gente in giro:')
                 print (availableRadios)     
 
-                for i in availableRadios:
-                    print ('Found %s radios.' % len(availableRadios))
-                    print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
+                # for i in availableRadios:
+                #     print ('Found %s radios.' % len(availableRadios))
+                #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
             else:
                 print('no available radios?')     
         except IndexError:
