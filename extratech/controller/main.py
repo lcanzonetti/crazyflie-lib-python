@@ -59,15 +59,12 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
                                 ]
 
 def radioStart():
-    global WE_ARE_FAKING_IT
     if not WE_ARE_FAKING_IT:
         try:
             cflib.crtp.init_drivers()
             print('Scanning interfaces for Crazyflies...')
-            # print(cflib.crtp.get_interfaces_status()
             print(cflib.crtp.get_interfaces_status())   
             availableRadios = cflib.crtp.scan_interfaces()
-            # availableRadios = cflib.crtp.scan_interfaces()
             if availableRadios:
                 print('available:')
                 print (availableRadios)     
@@ -76,10 +73,7 @@ def radioStart():
                     print ('Found %s radios.' % len(availableRadios))
                     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
             else:
-                # WE_ARE_FAKING_IT = True
                 print('no available radios?')     
-
-                pass
         except IndexError:
             print(IndexError)
 
@@ -89,7 +83,7 @@ def autoReconnect():
         for drogno in drogni:
             if not drogni[drogno].isKilled:
                 print('il drogno %s è sparito, provo a riconnettermi' % drogni[drogno].ID)
-                IDToBeRenewed = drogni[drogno].ID
+                IDToBeRenewed  = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
                 drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
@@ -101,8 +95,9 @@ def restart_devices():
     for uri in uris:
         # time.sleep(0.5)
         try: PowerSwitch(uri).stm_power_down()
-        except: print('%s is not there to be shut down' % uri)
-    
+        except Exception:
+            print('%s is not there to be shut down' % uri)
+            raise Exception
     print('uris meant to be switched on:')
     print(uris)
     urisToBeRemoved = []
@@ -158,7 +153,7 @@ def exit_signal_handler(signum, frame):
 
     for drogno in drogni:
         try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
-        except: print('%s is not there to be shut down' % drogni[drogno].link_uri)
+        except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % drogni[drogno].link_uri)
         drogni[drogno].exit()
         drogni[drogno].join()
    
