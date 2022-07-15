@@ -12,12 +12,10 @@ coloInit(convert=True)
 #crazyflie's
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
-from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 # from   cflib.utils                                import uri_helper
-from   cflib.crazyflie.syncLogger                 import SyncLogger
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
-from   cflib.positioning.motion_commander import MotionCommander
+from   cflib.positioning.motion_commander         import MotionCommander
 
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
@@ -315,18 +313,25 @@ class Drogno(threading.Thread):
     def _connected(self, link_uri):   ##########   where a lot of things happen
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
-        print('Connected to %s' % link_uri)
+        print('Connected to %s waiting fo parameters download.' % link_uri)
+        
+        
+        # time.sleep(0.3)
+
+    
+    def _fully_connected(self, link_uri):
+        print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
         # The fetch-as argument can be set to FP16 to save space in the log packet
-        # self._lg_kalm.add_variable('kalman.stateX', 'FP16')
-        # self._lg_kalm.add_variable('kalman.stateY', 'FP16')
-        # self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
-        # self._lg_kalm.add_variable('kalman.varPX',  'FP16')
-        # self._lg_kalm.add_variable('kalman.varPY',  'FP16')
-        # self._lg_kalm.add_variable('kalman.varPZ',  'FP16')
-        # self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
-        # self._lg_kalm.add_variable('radio.rssi',    'uint8_t')
+        self._lg_kalm.add_variable('kalman.stateX', 'FP16')
+        self._lg_kalm.add_variable('kalman.stateY', 'FP16')
+        self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
+        self._lg_kalm.add_variable('kalman.varPX',  'FP16')
+        self._lg_kalm.add_variable('kalman.varPY',  'FP16')
+        self._lg_kalm.add_variable('kalman.varPZ',  'FP16')
+        self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
+        self._lg_kalm.add_variable('radio.rssi',    'uint8_t')
         self._lg_kalm.add_variable('stabilizer.yaw','FP16')
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
         if BATTERY_TEST: self._lg_kalm.add_variable('health.batterySag', 'FP16')
@@ -348,17 +353,15 @@ class Drogno(threading.Thread):
           print('Could not add log config, bad configuration.')
         except RuntimeError:
           print('Porco il padre eterno e al su madonnina')
-        
-        # time.sleep(0.3)
-
         self._cf.param.set_value('commander.enHighLevel', '1')
+        # while not self._cf.param.is_updated:
+        #     time.sleep (0.1)
+        #     print("downloading parameters for " +  self.name)
         if BATTERY_TEST: self._cf.param.set_value('health.startBatTest', '1')
         self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', LIGHTHOUSE_METHOD)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
-        while not self._cf.param.is_updated:
-            time.sleep (0.1)
-            print("downloading parameters for " +  self.name)
+      
         self.positionHLCommander = PositionHlCommander(
             self._cf,
             x=self.x, y=self.y, z=0.0,
@@ -372,9 +375,6 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'landed'
         time.sleep(1.5)
         self.resetEstimator()
-    
-    def _fully_connected(self, link_uri):
-        print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
@@ -384,7 +384,7 @@ class Drogno(threading.Thread):
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])
         # self.logLock.acquire()
-        print('ciao vengo chiamata')
+        # print('ciao vengo chiamata')
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])

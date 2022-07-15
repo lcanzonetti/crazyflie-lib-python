@@ -1,5 +1,6 @@
 #rf 2022
 # native modules
+import logging
 import sys
 import multiprocessing
 import threading
@@ -13,7 +14,8 @@ from   cflib.utils import uri_helper
 #custom modules
 import OSCStuff       as OSC
 import Drogno
- 
+import logging
+logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
         'radio://0/80/2M/E7E7E7E7E0',

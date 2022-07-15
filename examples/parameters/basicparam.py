@@ -34,7 +34,7 @@ import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.utils import uri_helper
 
-address = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+address = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E0')
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
