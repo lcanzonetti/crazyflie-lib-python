@@ -9,8 +9,13 @@ coloInit(convert=True)
 
 
 uris = [    
+<<<<<<< HEAD
+        # 'radio://0/80/2M/E7E7E7E7E0',
+          'radio://0/80/2M/E7E7E7E7E1',
+=======
         'radio://0/80/2M/E7E7E7E7E0',
         'radio://0/80/2M/E7E7E7E7E1',
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
         'radio://0/80/2M/E7E7E7E7E2',
         'radio://1/120/2M/E7E7E7E7E3',
         'radio://1/120/2M/E7E7E7E7E4', 
