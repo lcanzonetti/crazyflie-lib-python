@@ -17,10 +17,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Simple example of a swarm using the High level commander.
 
@@ -35,9 +33,9 @@ the Swarm class.
 import time
 
 import cflib.crtp
-from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.swarm import CachedCfFactory
 from cflib.crazyflie.swarm import Swarm
+<<<<<<< HEAD
 from cflib.crazyflie.syncLogger import SyncLogger
 
 
@@ -88,6 +86,8 @@ def reset_estimator(scf):
     time.sleep(0.1)
     cf.param.set_value('kalman.resetEstimation', '0')
     wait_for_position_estimator(scf)
+=======
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 
 
 def activate_high_level_commander(scf):
@@ -139,6 +139,7 @@ uris = {
 if __name__ == '__main__':
     cflib.crtp.init_drivers()
     factory = CachedCfFactory(rw_cache='./cache')
+<<<<<<< HEAD
     try:
         with Swarm(uris, factory=factory) as swarm:
             swarm.parallel_safe(activate_high_level_commander)
@@ -146,3 +147,9 @@ if __name__ == '__main__':
             swarm.parallel_safe(run_shared_sequence)
     except:
         print('è successa una roba')
+=======
+    with Swarm(uris, factory=factory) as swarm:
+        swarm.parallel_safe(activate_high_level_commander)
+        swarm.reset_estimators()
+        swarm.parallel_safe(run_shared_sequence)
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f

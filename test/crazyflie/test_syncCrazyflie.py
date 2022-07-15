@@ -19,10 +19,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import unittest
 from test.support.asyncCallbackCaller import AsyncCallbackCaller
 from unittest.mock import MagicMock
@@ -42,6 +40,7 @@ class SyncCrazyflieTest(unittest.TestCase):
         self.cf_mock.connected = Caller()
         self.cf_mock.connection_failed = Caller()
         self.cf_mock.disconnected = Caller()
+        self.cf_mock.fully_connected = Caller()
 
         self.cf_mock.open_link = AsyncCallbackCaller(
             cb=self.cf_mock.connected,
@@ -56,7 +55,11 @@ class SyncCrazyflieTest(unittest.TestCase):
         )
         self.cf_mock.close_link = self.close_link_mock.trigger
 
-        self.sut = SyncCrazyflie(self.uri, self.cf_mock)
+        # Register a callback to be called when connected. Use it to trigger a callback
+        # to trigger the call to the param.all_updated() callback
+        self.cf_mock.connected.add_callback(self._connected_callback)
+
+        self.sut = SyncCrazyflie(self.uri, cf=self.cf_mock)
 
     def test_different_underlying_cf_instances(self):
         # Fixture
@@ -107,6 +110,26 @@ class SyncCrazyflieTest(unittest.TestCase):
         with self.assertRaises(Exception):
             self.sut.open_link()
 
+    def test_wait_for_params(self):
+        # Fixture
+
+        self.sut.open_link()
+
+        # Test
+        self.sut.wait_for_params()
+
+        # Assert
+        self.assertTrue(self.sut.is_params_updated())
+
+    def test_do_not_wait_for_params(self):
+        # Fixture
+
+        # Test
+        self.sut.open_link()
+
+        # Assert
+        self.assertFalse(self.sut.is_params_updated())
+
     def test_close_link(self):
         # Fixture
         self.sut.open_link()
@@ -152,6 +175,17 @@ class SyncCrazyflieTest(unittest.TestCase):
         self.assertEqual(1, self.close_link_mock.call_count)
         self._assertAllCallbacksAreRemoved()
 
+    def test_wait_for_params_with_context_management(self):
+        # Fixture
+
+        # Test
+        with SyncCrazyflie(self.uri, cf=self.cf_mock) as sut:
+            sut.wait_for_params()
+            self.assertTrue(sut.is_params_updated())
+
+        # Assert
+        self._assertAllCallbacksAreRemoved()
+
     def test_multiple_open_close_of_link(self):
         # Fixture
 
@@ -166,7 +200,39 @@ class SyncCrazyflieTest(unittest.TestCase):
         self.assertFalse(self.sut.is_link_open())
         self._assertAllCallbacksAreRemoved()
 
+    def test_wait_for_params_with_multiple_open_close_of_link(self):
+        # Fixture
+
+        # Test
+        self.sut.open_link()
+        self.assertFalse(self.sut.is_params_updated())
+        self.sut.wait_for_params()
+        self.assertTrue(self.sut.is_params_updated())
+        self.sut.close_link()
+        self.assertFalse(self.sut.is_params_updated())
+
+        self.sut.open_link()
+        self.assertFalse(self.sut.is_params_updated())
+        self.sut.wait_for_params()
+        self.assertTrue(self.sut.is_params_updated())
+        self.sut.close_link()
+
+        # Assert
+        self.assertFalse(self.sut.is_params_updated())
+        self._assertAllCallbacksAreRemoved()
+
     def _assertAllCallbacksAreRemoved(self):
+        # Remove our probe callback
+        self.cf_mock.connected.remove_callback(self._connected_callback)
+
         self.assertEqual(0, len(self.cf_mock.connected.callbacks))
         self.assertEqual(0, len(self.cf_mock.connection_failed.callbacks))
         self.assertEqual(0, len(self.cf_mock.disconnected.callbacks))
+        self.assertEqual(0, len(self.cf_mock.fully_connected.callbacks))
+
+    def _connected_callback(self, uri):
+        AsyncCallbackCaller(
+            cb=self.cf_mock.fully_connected,
+            args=[self.uri],
+            delay=0.2
+        ).trigger()

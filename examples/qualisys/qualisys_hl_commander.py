@@ -105,8 +105,7 @@ class QtmWrapper(Thread):
 
         params = await self.connection.get_parameters(parameters=['6d'])
         xml = ET.fromstring(params)
-        self.qtm_6DoF_labels = [label.text for label in xml.iter('Name')]
-        print(self.qtm_6DoF_labels)
+        self.qtm_6DoF_labels = [label.text.strip() for index, label in enumerate(xml.findall('*/Body/Name'))]
 
         await self.connection.stream_frames(
             components=['6D'],
@@ -153,17 +152,26 @@ class QtmWrapper(Thread):
 class Uploader:
     def __init__(self):
         self._is_done = False
+        self._success = True
 
     def upload(self, trajectory_mem):
         print('Uploading data')
-        trajectory_mem.write_data(self._upload_done)
+        trajectory_mem.write_data(self._upload_done, write_failed_cb=self._upload_failed)
 
         while not self._is_done:
             time.sleep(0.2)
 
+        return self._success
+
     def _upload_done(self, mem, addr):
         print('Data uploaded')
         self._is_done = True
+        self._success = True
+
+    def _upload_failed(self, mem, addr):
+        print('Data upload failed')
+        self._is_done = True
+        self._success = False
 
 
 def wait_for_position_estimator(scf):
@@ -264,6 +272,7 @@ def activate_mellinger_controller(cf):
 
 def upload_trajectory(cf, trajectory_id, trajectory):
     trajectory_mem = cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
+    trajectory_mem.trajectory = []
 
     total_duration = 0
     for row in trajectory:
@@ -272,12 +281,11 @@ def upload_trajectory(cf, trajectory_id, trajectory):
         y = Poly4D.Poly(row[9:17])
         z = Poly4D.Poly(row[17:25])
         yaw = Poly4D.Poly(row[25:33])
-        trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
+        trajectory_mem.trajectory.append(Poly4D(duration, x, y, z, yaw))
         total_duration += duration
 
     Uploader().upload(trajectory_mem)
-    cf.high_level_commander.define_trajectory(trajectory_id, 0,
-                                              len(trajectory_mem.poly4Ds))
+    cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.trajectory))
     return total_duration
 
 

@@ -17,10 +17,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Example of how to write to the Lighthouse base station geometry
 and calibration memory in a Crazyflie
@@ -34,6 +32,7 @@ from cflib.crazyflie.mem import LighthouseBsCalibration
 from cflib.crazyflie.mem import LighthouseBsGeometry
 from cflib.crazyflie.mem import LighthouseMemHelper
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+from cflib.utils import uri_helper
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -65,7 +64,7 @@ class WriteMem:
 
 if __name__ == '__main__':
     # URI to the Crazyflie to connect to
-    uri = 'radio://0/80'
+    uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
     # Initialize the low-level drivers
     cflib.crtp.init_drivers()

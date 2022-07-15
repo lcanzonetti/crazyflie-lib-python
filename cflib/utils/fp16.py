@@ -20,10 +20,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import struct
 
 
@@ -38,7 +36,7 @@ def fp16_to_float(float16):
             return int(s << 31)
         else:
             while not (f & 0x00000400):
-                f = f << 1
+                f <<= 1
                 e -= 1
             e += 1
             f &= ~0x00000400
@@ -49,7 +47,7 @@ def fp16_to_float(float16):
         else:
             return int((s << 31) | 0x7f800000 | (f << 13))
 
-    e = e + (127 - 15)
-    f = f << 13
+    e += 127 - 15
+    f <<= 13
     result = int((s << 31) | (e << 23) | f)
     return struct.unpack('f', struct.pack('I', result))[0]

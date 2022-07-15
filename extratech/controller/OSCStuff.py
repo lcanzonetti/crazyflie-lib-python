@@ -54,7 +54,11 @@ COMPANION_UPDATE_RATE   = 0.9
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency         = 0.04   # actual command'd rate to uavss
+<<<<<<< HEAD
 RECEIVED_MESSAGES_AVERAGE = 10
+=======
+RECEIVED_MESSAGES_SAMPLING_RATE = 10 # secondi ogni quanto calcolare la media dei messaggi ricevuti
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
@@ -414,10 +418,17 @@ def printAndSendCoordinates():
                 drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
 
                 if drogni[drogno].is_connected and drogni[drogno].isEngaged:
+<<<<<<< HEAD
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     # with posLock:
                         drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
+=======
+                    print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
+                    with posLock:
+                        drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
+                    print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
     print ('Non potrò mai più inviare ai drogni comandi di movimento, mai più')
 
 def printHowManyMessages():
@@ -425,10 +436,17 @@ def printHowManyMessages():
     def printa():
         while not finished:
             global msgCount
+<<<<<<< HEAD
             time.sleep(RECEIVED_MESSAGES_AVERAGE)
             # with howManyMessagesLock:
             if msgCount > 0.:
                 print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_AVERAGE ,str(msgCount/RECEIVED_MESSAGES_AVERAGE)))
+=======
+            time.sleep(RECEIVED_MESSAGES_SAMPLING_RATE)
+            # with howManyMessagesLock:
+            if msgCount > 0.:
+                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_SAMPLING_RATE ,str(msgCount/RECEIVED_MESSAGES_SAMPLING_RATE)))
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -585,7 +603,11 @@ class bufferDrone():
 
 if __name__ == '__main__':
     faiIlBufferon()
+<<<<<<< HEAD
     COMPANION_FEEDBACK_IP = "192.168.1.255"
+=======
+    COMPANION_FEEDBACK_IP = "127.0.0.1"
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
     OSCRefreshThread      = threading.Thread(target=start_server).start()
     OSCPrintAndSendThread = threading.Thread(name='printAndSendThread', target=printAndSendCoordinates).start()
     # sendPose()

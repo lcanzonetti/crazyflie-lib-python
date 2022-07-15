@@ -19,10 +19,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Simple example that connects to the crazyflie at `URI` and writes to
 the LED memory so that individual leds in the LED-ring can be set,
@@ -58,6 +56,7 @@ if __name__ == '__main__':
         # Get LED memory and write to it
         mem = cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
         if len(mem) > 0:
+<<<<<<< HEAD
             while True:
                 vr = int(random.random()*100)
                 vg = int(random.random()*100)
@@ -71,5 +70,12 @@ if __name__ == '__main__':
                 mem[0].leds[0].set(r=vr, g=vg, b=vb)
                 mem[0].write_data(None)
                 time.sleep(0.01)
+=======
+            mem[0].leds[0].set(r=0, g=100, b=0)
+            mem[0].leds[3].set(r=0, g=0, b=100)
+            mem[0].leds[6].set(r=100, g=0, b=0)
+            mem[0].leds[9].set(r=100, g=100, b=100)
+            mem[0].write_data(None)
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 
         time.sleep(2)

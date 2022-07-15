@@ -15,4 +15,17 @@ venv*
 
 #jekyll generated pages
 docs/.jekyll-metadata
+<<<<<<< HEAD
 *.DS_Store
+=======
+docs/api/cflib/*
+
+# Generated documentation
+tools/build-docs/.local
+tools/build-docs/.cache
+docs/api/cflib
+!docs/api/cflib/index.md
+
+#vscode config folder
+.vscode/
+>>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f

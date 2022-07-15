@@ -20,10 +20,8 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Gui une the PID controller of the crazyflie
 
@@ -63,7 +61,7 @@ class TunerGUI:
         self.master = master
         self.master.title('PID tuner Crazyflie')
 
-        self.figplot = plt.Figure(figsize=(5, 4), dpi=100)
+        self.figplot = plt.Figure(figsize=(2, 1), dpi=100)
         self.ax2 = self.figplot.add_subplot(111)
         self.line2 = FigureCanvasTkAgg(self.figplot, self.master)
         self.line2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
@@ -154,7 +152,10 @@ class TunerControlCF:
         self.cf.param.add_update_callback(
             group='posCtlPid', name='zKd', cb=self.param_updated_callback_Kd)
         self.cf.param.add_update_callback(
-            group='posCtlPid', name='xyVelMax',
+            group='posCtlPid', name='xVelMax',
+            cb=self.param_updated_callback_vMax)
+        self.cf.param.add_update_callback(
+            group='posCtlPid', name='yVelMax',
             cb=self.param_updated_callback_vMax)
 
         self.current_value_kp = 0
@@ -165,7 +166,8 @@ class TunerControlCF:
         self.cf.param.request_param_update('posCtlPid.zKp')
         self.cf.param.request_param_update('posCtlPid.zKi')
         self.cf.param.request_param_update('posCtlPid.zKd')
-        self.cf.param.request_param_update('posCtlPid.xyVelMax')
+        self.cf.param.request_param_update('posCtlPid.xVelMax')
+        self.cf.param.request_param_update('posCtlPid.yVelMax')
 
         time.sleep(0.1)
 
@@ -189,14 +191,15 @@ class TunerControlCF:
               'position PID controller: Kp: ' +
               str(self.pid_gui.scale_Kp.get()) +
               ', Ki: ' + str(self.pid_gui.scale_Ki.get()) +
-              ', Kd: '+str(self.pid_gui.scale_Ki.get()))
-        cf.param.set_value(self.unit_choice+'CtlPid.'+self.axis_choice +
+              ', Kd: ' + str(self.pid_gui.scale_Kd.get()))
+        cf.param.set_value(self.unit_choice + 'CtlPid.' + self.axis_choice +
                            'Kp', self.pid_gui.scale_Kp.get())
-        cf.param.set_value(self.unit_choice+'CtlPid.'+self.axis_choice +
+        cf.param.set_value(self.unit_choice + 'CtlPid.' + self.axis_choice +
                            'Ki', self.pid_gui.scale_Ki.get())
-        cf.param.set_value(self.unit_choice+'CtlPid.'+self.axis_choice +
+        cf.param.set_value(self.unit_choice + 'CtlPid.' + self.axis_choice +
                            'Kd', self.pid_gui.scale_Kd.get())
-        cf.param.set_value('posCtlPid.xyVelMax', self.pid_gui.scale_vMax.get())
+        cf.param.set_value('posCtlPid.xVelMax', self.pid_gui.scale_vMax.get())
+        cf.param.set_value('posCtlPid.yVelMax', self.pid_gui.scale_vMax.get())
 
         time.sleep(0.1)
 
@@ -237,11 +240,11 @@ class TunerControlCF:
         # print(sp_history)
         self.pid_gui.draw_plot(time_history, pos_history, sp_history)
         if self.axis_choice == 'z':
-            self.commander.go_to(0, 0, -1*STEP_SIZE, 0, 1.0, relative=True)
+            self.commander.go_to(0, 0, -1 * STEP_SIZE, 0, 1.0, relative=True)
         elif self.axis_choice == 'x':
-            self.commander.go_to(-1*STEP_SIZE, 0, 0, 0, 1.0, relative=True)
+            self.commander.go_to(-1 * STEP_SIZE, 0, 0, 0, 1.0, relative=True)
         elif self.axis_choice == 'y':
-            self.commander.go_to(0, -1*STEP_SIZE, 0, 0, 1.0, relative=True)
+            self.commander.go_to(0, -1 * STEP_SIZE, 0, 0, 1.0, relative=True)
         else:
             print('WRONG CHOICE?!?!')
             self.stop_gui()
@@ -253,7 +256,7 @@ class TunerControlCF:
     # parameter update
     def change_param_axis_callback(self, value_axis):
         #
-        print(self.unit_choice + 'CtlPid.'+value_axis)
+        print(self.unit_choice + 'CtlPid.' + value_axis)
 
         groupname = self.unit_choice + 'CtlPid'
         self.cf.param.remove_update_callback(
@@ -274,9 +277,9 @@ class TunerControlCF:
             group=groupname, name=value_axis +
             'Kd', cb=self.param_updated_callback_Kd)
 
-        self.cf.param.request_param_update(groupname+'.'+value_axis+'Kp')
-        self.cf.param.request_param_update(groupname+'.'+value_axis+'Ki')
-        self.cf.param.request_param_update(groupname+'.'+value_axis+'Kd')
+        self.cf.param.request_param_update(groupname + '.' + value_axis + 'Kp')
+        self.cf.param.request_param_update(groupname + '.' + value_axis + 'Ki')
+        self.cf.param.request_param_update(groupname + '.' + value_axis + 'Kd')
         time.sleep(0.1)
 
         self.update_scale_info()
@@ -308,13 +311,13 @@ class TunerControlCF:
             group=groupname_new, name=self.axis_choice +
             'Kd', cb=self.param_updated_callback_Kd)
 
-        print(groupname_new+'.'+self.axis_choice+'Kp')
+        print(groupname_new + '.' + self.axis_choice + 'Kp')
         self.cf.param.request_param_update(
-            groupname_new+'.'+self.axis_choice+'Kp')
+            groupname_new + '.' + self.axis_choice + 'Kp')
         self.cf.param.request_param_update(
-            groupname_new+'.'+self.axis_choice+'Ki')
+            groupname_new + '.' + self.axis_choice + 'Ki')
         self.cf.param.request_param_update(
-            groupname_new+'.'+self.axis_choice+'Kd')
+            groupname_new + '.' + self.axis_choice + 'Kd')
         time.sleep(0.1)
 
         self.update_scale_info()
