@@ -104,7 +104,7 @@ class Drogno(threading.Thread):
         self.flyingTime             = 0
         self.connectionThread       = None
         self.killingPill            = None
-        self._cf = Crazyflie(rw_cache='./cache')
+        self._cf = Crazyflie(rw_cache='./cache_test')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
@@ -315,16 +315,16 @@ class Drogno(threading.Thread):
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
         # The definition of the logconfig can be made before connecting
-        self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=LOGGING_FREQUENCY)
+        self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
         # The fetch-as argument can be set to FP16 to save space in the log packet
-        self._lg_kalm.add_variable('kalman.stateX', 'FP16')
-        self._lg_kalm.add_variable('kalman.stateY', 'FP16')
-        self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
-        self._lg_kalm.add_variable('kalman.varPX',  'FP16')
-        self._lg_kalm.add_variable('kalman.varPY',  'FP16')
-        self._lg_kalm.add_variable('kalman.varPZ',  'FP16')
-        self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
-        self._lg_kalm.add_variable('radio.rssi',    'uint8_t')
+        # self._lg_kalm.add_variable('kalman.stateX', 'FP16')
+        # self._lg_kalm.add_variable('kalman.stateY', 'FP16')
+        # self._lg_kalm.add_variable('kalman.stateZ', 'FP16')
+        # self._lg_kalm.add_variable('kalman.varPX',  'FP16')
+        # self._lg_kalm.add_variable('kalman.varPY',  'FP16')
+        # self._lg_kalm.add_variable('kalman.varPZ',  'FP16')
+        # self._lg_kalm.add_variable('sys.isTumbled', 'uint8_t')
+        # self._lg_kalm.add_variable('radio.rssi',    'uint8_t')
         self._lg_kalm.add_variable('stabilizer.yaw','FP16')
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
         if BATTERY_TEST: self._lg_kalm.add_variable('health.batterySag', 'FP16')
@@ -338,7 +338,7 @@ class Drogno(threading.Thread):
             # Adding the configuration cannot be done until a Crazyflie is
             # connected, since we need to check that the variables we
             # would like to log are in the TOC.
-            while not self.scf.cf.param.is_updated:
+            while not self._cf.param.is_updated:
                     time.sleep (0.1)
                     print("downloading parameters for " +  self.name)
             print(Fore.LIGHTGREEN_EX + '%s connesso %s'% (self.name, self.is_connected))
@@ -381,7 +381,7 @@ class Drogno(threading.Thread):
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])
         # self.logLock.acquire()
-        print('ciao vengo chiamata')
+        print('ciao vengo chiamato alle ')
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
