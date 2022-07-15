@@ -5,10 +5,6 @@ from   threading import Lock
 from datetime import datetime
 import multiprocessing
 from   multiprocessing.connection import Client
-<<<<<<< HEAD
-import random
-=======
->>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
 coloInit(convert=True)
@@ -40,20 +36,12 @@ BATTERY_CHECK_RATE    = 0.5
 STATUS_PRINT_RATE     = 1.1
 LOGGING_FREQUENCY     = 1000
 COMMANDS_FREQUENCY    = 0.1
-<<<<<<< HEAD
-FEEDBACK_SENDING_IP   = None
-=======
 FEEDBACK_SENDING_IP   = '127.0.0.1'
->>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 FEEDBACK_SENDING_PORT = 9203
 FEEDBACK_ENABLED      = True
 CLAMPING              = True
 RING_FADE_TIME        = 0.001
-<<<<<<< HEAD
 BATTERY_TEST          = True
-=======
-BATTERY_TEST          = False
->>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -119,6 +107,7 @@ class Drogno(threading.Thread):
         self._cf = Crazyflie(rw_cache='./cache_test')
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
+        self._cf.fully_connected.add_callback(self._fully_connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
@@ -177,7 +166,8 @@ class Drogno(threading.Thread):
         self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
-            self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
+            if self.is_connected:
+                self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
 
             if not self.scramblingTime == None and self.isFlying:
                 self.flyingTime = int(time.time() - self.scramblingTime)
@@ -350,9 +340,6 @@ class Drogno(threading.Thread):
             # Adding the configuration cannot be done until a Crazyflie is
             # connected, since we need to check that the variables we
             # would like to log are in the TOC.
-            while not self._cf.param.is_updated:
-                    time.sleep (0.1)
-                    print("downloading parameters for " +  self.name)
             print(Fore.LIGHTGREEN_EX + '%s connesso %s'% (self.name, self.is_connected))
         except KeyError as e:
             print('Could not start log configuration,'
@@ -369,7 +356,9 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', LIGHTHOUSE_METHOD)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
-
+        while not self._cf.param.is_updated:
+            time.sleep (0.1)
+            print("downloading parameters for " +  self.name)
         self.positionHLCommander = PositionHlCommander(
             self._cf,
             x=self.x, y=self.y, z=0.0,
@@ -383,7 +372,9 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'landed'
         time.sleep(1.5)
         self.resetEstimator()
-        
+    
+    def _fully_connected(self, link_uri):
+        print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
@@ -393,14 +384,7 @@ class Drogno(threading.Thread):
         # self.y              = float(data['stateEstimate.y'])
         # self.z              = float(data['stateEstimate.z'])
         # self.logLock.acquire()
-<<<<<<< HEAD
-        print('ciao vengo chiamato alle ')
-=======
-<<<<<<< HEAD
-=======
         print('ciao vengo chiamata')
->>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
->>>>>>> 67f9c07b1919723790d54f8258b92d9ea9a4e0bd
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
@@ -420,11 +404,6 @@ class Drogno(threading.Thread):
                 self.land(thenGoToSleep=True)
         self.isReadyToFly      = self.evaluateFlyness()
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 14a8116362f28a9a8a00c04721140b4bd8b0a65f
         try:
             if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
                 self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
