@@ -1,9 +1,0 @@
-INFO: 12-07-2022 17:50:01 __init__(130) -- This is dronelog running on Drogno_0
-INFO: 12-07-2022 17:50:02 printStatus(166) -- Started
-INFO: 12-07-2022 17:50:03 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-INFO: 12-07-2022 17:50:04 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-INFO: 12-07-2022 17:50:06 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-INFO: 12-07-2022 17:50:07 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-INFO: 12-07-2022 17:50:08 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-INFO: 12-07-2022 17:50:09 printStatus(169) -- Drogno_0: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
-WARNING: 12-07-2022 17:50:09 exit(862) -- closing Drogno_0

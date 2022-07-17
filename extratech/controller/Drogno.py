@@ -98,6 +98,7 @@ class Drogno(threading.Thread):
         self.linkQuality            = 0
         self.isTumbled              = False
         self.commandsFrequency      = COMMANDS_FREQUENCY
+        self.connection_time        = None
         self.scramblingTime         = None
         self.flyingTime             = 0
         self.connectionThread       = None
@@ -164,13 +165,9 @@ class Drogno(threading.Thread):
         self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
+
             if self.is_connected:
                 self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
-
-            if not self.scramblingTime == None and self.isFlying:
-                self.flyingTime = int(time.time() - self.scramblingTime)
-
-            if self.is_connected:
                 if self.isEngaged:
                     if BATTERY_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}")
                     print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
@@ -180,19 +177,11 @@ class Drogno(threading.Thread):
                 print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
             self.commandsCount = 0
 
-        print('Sono stato %s ma ora non sono più' % self.name)
+            if not self.scramblingTime == None and self.isFlying:
+                self.flyingTime = int(time.time() - self.scramblingTime)
+
+        print('Log chiuso per %s ' % self.name)
                     
-    def sequenzaDiVoloSimulata(self):     
-        def volo():
-            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
-            time.sleep(self.durataVolo)
-            self.statoDiVolo = 'hovering'
-
-        if not self.currentSequenceThread:
-            self.currentSequenceThread = threading.Thread(target=volo)
-            self.currentSequenceThread.start()
-            print('start!')
-
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
         if use_mellinger:
@@ -280,6 +269,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'connecting'
             try:
                 self._cf.open_link(self.link_uri)
+                self.connection_time = time.time()
                 while not self.exitFlag or self.is_connected:
                     print('.')
             except IndexError:
@@ -313,12 +303,8 @@ class Drogno(threading.Thread):
     def _connected(self, link_uri):   ##########   where a lot of things happen
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
-        print('Connected to %s waiting fo parameters download.' % link_uri)
+        print('TOC downloaded for %s, it took %s seconds, waiting for parameters.' % (link_uri, (time.time()-self.connection_time)))
         
-        
-        # time.sleep(0.3)
-
-    
     def _fully_connected(self, link_uri):
         print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
         # The definition of the logconfig can be made before connecting
@@ -345,7 +331,7 @@ class Drogno(threading.Thread):
             # Adding the configuration cannot be done until a Crazyflie is
             # connected, since we need to check that the variables we
             # would like to log are in the TOC.
-            print(Fore.LIGHTGREEN_EX + '%s connesso %s'% (self.name, self.is_connected))
+            print(Fore.LIGHTGREEN_EX + '%s connesso'% (self.name))
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
@@ -354,9 +340,7 @@ class Drogno(threading.Thread):
         except RuntimeError:
           print('Porco il padre eterno e al su madonnina')
         self._cf.param.set_value('commander.enHighLevel', '1')
-        # while not self._cf.param.is_updated:
-        #     time.sleep (0.1)
-        #     print("downloading parameters for " +  self.name)
+      
         if BATTERY_TEST: self._cf.param.set_value('health.startBatTest', '1')
         self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
         self._cf.param.set_value('lighthouse.method', LIGHTHOUSE_METHOD)
@@ -373,18 +357,13 @@ class Drogno(threading.Thread):
         if not self.batteryThread.is_alive():  self.batteryThread.start()
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
         self.statoDiVolo = 'landed'
-        time.sleep(1.5)
+        time.sleep(1.0)
         self.resetEstimator()
     def _stab_log_error(self, logconf, msg):
         """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
 
     def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati - gira il feedback indietro via osc
-        # self.x              = float(data['stateEstimate.x'])
-        # self.y              = float(data['stateEstimate.y'])
-        # self.z              = float(data['stateEstimate.z'])
-        # self.logLock.acquire()
-        # print('ciao vengo chiamata')
         self.x                 = float(data['kalman.stateX'])
         self.y                 = float(data['kalman.stateY'])
         self.z                 = float(data['kalman.stateZ'])
@@ -536,7 +515,6 @@ class Drogno(threading.Thread):
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
-            # self._cf.high_level_commander.go_to
             self.statoDiVolo = 'hovering'
         # else:
             # print('perhaps take off?')
@@ -799,12 +777,12 @@ class Drogno(threading.Thread):
             level = 0.0
             # batteryLock.acquire()
             if self.batteryVoltage == 'n.p.':
-                level = 20.
+                level = 99.
             else:
                 level  = float(self.batteryVoltage)
             if level<3.50:
-                self._cf.param.set_value('ring.effect', '13')  
-                print (Fore.YELLOW + 'ciao, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
+                self._cf.param.set_value('ring.effect', '13')
+                print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 self.LoggerObject.warning("battery under 3.50v")
 
                 # self.isReadyToFly = False
@@ -841,6 +819,7 @@ class Drogno(threading.Thread):
         self.standBy = True
         self.isFlying = False
         self.killingPill.set()
+        time.sleep(0.2)
         self._cf.close_link()
         PowerSwitch(self.link_uri).stm_power_down()
         self.statoDiVolo = 'stand by'
@@ -866,6 +845,16 @@ class Drogno(threading.Thread):
         self._cf.close_link()
         self.isReadyToFly = False
         self.exitFlag.set()
+    def sequenzaDiVoloSimulata(self):     
+        def volo():
+            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
+            time.sleep(self.durataVolo)
+            self.statoDiVolo = 'hovering'
+
+        if not self.currentSequenceThread:
+            self.currentSequenceThread = threading.Thread(target=volo)
+            self.currentSequenceThread.start()
+            print('start!')
 
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
