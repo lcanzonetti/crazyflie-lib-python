@@ -18,12 +18,12 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
-        'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
         # 'radio://1/120/2M/E7E7E7E7E3',
         # 'radio://1/120/2M/E7E7E7E7E4', 
-        # 'radio://4/90/2M/E7E7E7E7E5',
+        'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://3/100/2M/E7E7E7E7E6',
         # f'radio://3/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8', 
@@ -39,7 +39,7 @@ AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
 FEEDBACK_SENDING_PORT = 6000
-BROADCAST_IP          = "192.168.1.255"
+BROADCAST_IP          = "192.168.10.255"
 
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
@@ -186,5 +186,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, exit_signal_handler)
 
     while True:
+        time.sleep(0.1)
         pass
         
