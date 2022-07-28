@@ -15,7 +15,6 @@ from   cflib.crazyflie                            import Crazyflie, commander
 # from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
-from   cflib.positioning.motion_commander         import MotionCommander
 
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
@@ -69,7 +68,6 @@ class Drogno(threading.Thread):
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
-        self.motionCommander        = None 
         self.starting_x             = 0.0
         self.starting_y             = 0.0
         self.starting_z             = 0.0
@@ -352,7 +350,6 @@ class Drogno(threading.Thread):
             default_velocity=DEFAULT_VELOCITY,
             default_height=DEFAULT_HEIGHT,
             controller=PositionHlCommander.CONTROLLER_PID) 
-        self.motionCommander = MotionCommander(self._cf, DEFAULT_HEIGHT)
         time.sleep(0.3)
         if not self.batteryThread.is_alive():  self.batteryThread.start()
         self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
@@ -442,60 +439,36 @@ class Drogno(threading.Thread):
 
     def takeOff(self, height=DEFAULT_HEIGHT, scramblingTime = DEFAULT_SCRAMBLING_TIME):
         def scramblingsequence():
-            # self.scramblingLock.acquire()
             self.starting_x  = self.x
             self.starting_y  = self.y
             self.statoDiVolo = 'scrambling!'
-            # self.motionCommander.take_off(DEFAULT_HEIGHT,0.5)
             self._cf.high_level_commander.takeoff(DEFAULT_HEIGHT,scramblingTime)
-            # self.motionCommander._is_flying = True
             self.scramblingTime = time.time()
-            # time.sleep(1)
-            # # self.goTo(self.x, self.y, self.z, 180, 0.8)
-            # self._cf.high_level_commander.go_to(self.x, self.y, self.z, 180, 1.2, False)
-
-            # time.sleep(0.8)
-            # self._cf.param.set_value('ring.headlightEnable', '1')
-            # time.sleep(1)
-            # self._cf.param.set_value('ring.headlightEnable', '0')
-            # self.positionHLCommander.take_off()
             self.isFlying    = True
             self.statoDiVolo = 'hovering'
-            # self.scramblingLock.release()
 
-        if self.WE_ARE_FAKING_IT:
-            time.sleep(1)
-
-            self.statoDiVolo = 'decollato!'
-            self.isFlying  = True
-        else:
+        if not self.WE_ARE_FAKING_IT:
             print('for real')
             # self.resetEstimator()
             if self.isReadyToFly:
-                # self.scramblingLock   = Lock()
                 scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
             else:
-                print('BUT NOT READY')
+                print('NOT READY TO SCRAMBLE!')
+        else:
+            time.sleep(1)
+            self.statoDiVolo = 'decollato!'
+            self.isFlying  = True
 
     def land(self, speed=0.15, landing_height=0.05,thenGoToSleep=False):
-        # landLock = Lock()
         def landing_sequence():
-            # landLock.acquire()
-            self._cf.high_level_commander.land(0.0, 2.5)
-            # self._cf.high_level_commander.land()
-            self.isFlying     = False
+            self._cf.high_level_commander.land(landing_height, speed)
             time.sleep(3)
-            # self.isReadyToFly = True
+            self.isFlying     = False
             self.statoDiVolo = 'landed'
             if (thenGoToSleep): self.goToSleep()
-            # landLock.release()
-
-        if self.WE_ARE_FAKING_IT:
-            self.statoDiVolo = 'landing'
-            time.sleep(1)
             self.isReadyToFly = self.evaluateFlyness()
-            self.statoDiVolo = 'landed'
-        else:
+
+        if not self.WE_ARE_FAKING_IT:
             if self.isFlying:
                 print('%s atterra! ' % self.name)
                 self.statoDiVolo = 'landing'
@@ -503,6 +476,10 @@ class Drogno(threading.Thread):
                 # ld.join()
             else:
                 print('%s can\'t land! (not flying)' % self.name)
+        else:
+            self.statoDiVolo = 'landing'
+            time.sleep(1)
+            self.statoDiVolo = 'landed'
 
     def goTo(self,x,y,z, yaw=0, duration=0.5):  #la zeta è in alto!
         self.commandsCount += 1
@@ -523,7 +500,6 @@ class Drogno(threading.Thread):
         if self.isFlying:
             newX = float(self.x) - float(quanto)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-            # self.motionCommander.left(quanto,DEFAULT_VELOCITY)
             print('va bene, vado a %s' % newX)
             self.statoDiVolo = 'hovering'
             
@@ -532,7 +508,6 @@ class Drogno(threading.Thread):
             newX = float(self.x) + float(quanto)
             print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
-            # self.motionCommander.right(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goForward(self, quanto=0.3):
@@ -540,7 +515,6 @@ class Drogno(threading.Thread):
             newY = float(self.y) + float(quanto)
             print('va bene, vado a %s' % newY)
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
-            # self.motionCommander.forward(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goBack(self, quanto=0.3):
@@ -549,7 +523,6 @@ class Drogno(threading.Thread):
             print('va bene, vado a %s' % newY)
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
-            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
     def goUp(self, quanto=0.3):
         if self.isFlying:
@@ -557,7 +530,6 @@ class Drogno(threading.Thread):
             print('va bene, salgo a %s' % newZ)
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, self.y, newZ, 0, 1)
-            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
     def goDown(self, quanto=0.3):
         if self.isFlying:
@@ -565,7 +537,6 @@ class Drogno(threading.Thread):
             print('va bene, scendo a %s' % newZ)
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, self.y, newZ, 0, 1)
-            # self.motionCommander.back(quanto, DEFAULT_VELOCITY)
             self.statoDiVolo = 'hovering'
 
     def goHome(self, speed=0.5):
