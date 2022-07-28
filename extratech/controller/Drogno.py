@@ -15,7 +15,6 @@ from   cflib.crazyflie                            import Crazyflie, commander
 # from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
-
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
@@ -319,17 +318,13 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('stabilizer.yaw','FP16')
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
         if BATTERY_TEST: self._lg_kalm.add_variable('health.batterySag', 'FP16')
- 
         try:
             self._cf.log.add_config(self._lg_kalm)
             self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
             self._lg_kalm.error_cb.add_callback(self._stab_log_error)
             self._lg_kalm.start()
             self.is_connected = True
-            # Adding the configuration cannot be done until a Crazyflie is
-            # connected, since we need to check that the variables we
-            # would like to log are in the TOC.
-            print(Fore.LIGHTGREEN_EX + '%s connesso'% (self.name))
+            print(Fore.LIGHTGREEN_EX + '%s fully connesso'% (self.name))
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
@@ -779,10 +774,7 @@ class Drogno(threading.Thread):
     def killMeSoftly(self):
         self.land(thenGoToSleep=True)
     def killMeHardly(self):
-        # self.setRingColor(0,0,0)
         self.isFlying = False
-        # self._cf.high_level_commander.stop()
-        # self._cf.commander.send_stop_setpoint()
         self.goToSleep()
         self.exit()
     def goToSleep(self):
