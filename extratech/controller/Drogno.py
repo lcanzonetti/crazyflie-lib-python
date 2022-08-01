@@ -454,7 +454,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'decollato!'
             self.isFlying  = True
 
-    def land(self, speed=0.15, landing_height=0.05,thenGoToSleep=False):
+    def land(self, speed=2.5, landing_height=0.05,thenGoToSleep=False):
         def landing_sequence():
             self._cf.high_level_commander.land(landing_height, speed)
             time.sleep(3)

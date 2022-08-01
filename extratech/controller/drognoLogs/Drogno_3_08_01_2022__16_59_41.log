@@ -1,0 +1,46 @@
+INFO: 01-08-2022 16:59:41 __init__(126) -- This is dronelog running on Drogno_3
+INFO: 01-08-2022 16:59:41 printStatus(162) -- Started
+INFO: 01-08-2022 16:59:43 printStatus(167) -- Drogno_3: connecting	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 01-08-2022 16:59:45 printStatus(167) -- Drogno_3: landed	battery: n.p.	kalman var: 0 0 0	 batterySag: 0	link quality: 0	flight time: 0s	pos 0.00 0.00 0.00	yaw: 0.00	msg/s 0.0
+INFO: 01-08-2022 16:59:46 printStatus(167) -- Drogno_3: ready	battery: 3.83	kalman var: 0.004 0.004 0.003	 batterySag: 0.681	link quality: 53	flight time: 0s	pos 0.01 0.00 0.00	yaw: 0.08	msg/s 0.0
+INFO: 01-08-2022 16:59:47 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.033 0.033 0.005	 batterySag: 0.681	link quality: 51	flight time: 0s	pos 0.12 0.01 -0.00	yaw: 0.07	msg/s 0.0
+INFO: 01-08-2022 16:59:48 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.096 0.096 0.006	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 0.34 -0.02 -0.00	yaw: 0.05	msg/s 0.0
+INFO: 01-08-2022 16:59:49 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.196 0.196 0.007	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 0.65 -0.07 -0.01	yaw: 0.03	msg/s 0.0
+INFO: 01-08-2022 16:59:50 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.333 0.333 0.008	 batterySag: 0.681	link quality: 51	flight time: 0s	pos 1.04 -0.15 -0.01	yaw: 0.02	msg/s 0.0
+INFO: 01-08-2022 16:59:51 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.514 0.514 0.009	 batterySag: 0.681	link quality: 51	flight time: 0s	pos 1.52 -0.25 -0.02	yaw: 0.02	msg/s 0.0
+INFO: 01-08-2022 16:59:52 printStatus(167) -- Drogno_3: BAD kalman	battery: 3.84	kalman var: 0.738 0.738 0.01	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 2.10 -0.38 -0.03	yaw: 0.02	msg/s 0.0
+INFO: 01-08-2022 16:59:53 printStatus(167) -- Drogno_3: out of BOX	battery: 3.84	kalman var: 1.01 1.01 0.012	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 2.78 -0.54 -0.04	yaw: 0.00	msg/s 0.0
+INFO: 01-08-2022 16:59:54 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 1.363 1.363 0.013	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 3.61 -0.73 -0.07	yaw: -0.00	msg/s 0.0
+INFO: 01-08-2022 16:59:56 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 1.743 1.743 0.014	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 4.47 -0.94 -0.09	yaw: -0.01	msg/s 0.0
+INFO: 01-08-2022 16:59:57 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 2.178 2.178 0.015	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 5.41 -1.18 -0.12	yaw: -0.02	msg/s 0.0
+INFO: 01-08-2022 16:59:58 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 2.672 2.672 0.016	 batterySag: 0.681	link quality: 50	flight time: 0s	pos 6.45 -1.43 -0.15	yaw: -0.04	msg/s 0.0
+INFO: 01-08-2022 16:59:59 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 3.227 3.227 0.017	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 7.57 -1.71 -0.18	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:00 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 3.838 3.838 0.019	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 8.76 -2.01 -0.22	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:01 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 4.523 4.523 0.02	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 10.04 -2.33 -0.27	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:02 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 5.277 5.277 0.021	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 11.41 -2.66 -0.32	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:03 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 6.102 6.102 0.022	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 12.86 -3.02 -0.38	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:04 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 7.004 7.004 0.023	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 14.39 -3.39 -0.45	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:06 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 7.98 7.98 0.025	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 16.00 -3.79 -0.52	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:07 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 9.039 9.039 0.026	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 17.69 -4.20 -0.60	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:08 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 10.172 10.172 0.027	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 19.45 -4.64 -0.68	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:09 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 11.391 11.391 0.028	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 21.30 -5.10 -0.76	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:10 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 12.828 12.828 0.029	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 23.42 -5.62 -0.87	yaw: -0.09	msg/s 0.0
+INFO: 01-08-2022 17:00:11 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 14.242 14.242 0.031	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 25.44 -6.12 -0.97	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:12 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 15.742 15.742 0.032	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 27.53 -6.64 -1.07	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:13 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 17.344 17.344 0.033	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 29.72 -7.16 -1.18	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:14 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 19.047 19.047 0.034	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 31.98 -7.71 -1.29	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:16 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 20.844 20.844 0.036	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 34.34 -8.27 -1.40	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:17 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 22.75 22.766 0.037	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 36.75 -8.86 -1.51	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:18 printStatus(167) -- Drogno_3: out of BOX	battery: 3.81	kalman var: 24.766 24.766 0.038	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 39.25 -9.46 -1.63	yaw: -0.06	msg/s 0.0
+INFO: 01-08-2022 17:00:19 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 26.875 26.875 0.04	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 41.81 -10.09 -1.75	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:20 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 29.109 29.109 0.041	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 44.47 -10.73 -1.88	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:21 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 31.469 31.469 0.043	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 47.19 -11.38 -2.01	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:22 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 33.938 33.938 0.044	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 49.97 -12.06 -2.15	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:23 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 36.781 36.781 0.045	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 53.12 -12.83 -2.31	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:24 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 39.5 39.5 0.047	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 56.06 -13.54 -2.45	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:25 printStatus(167) -- Drogno_3: out of BOX	battery: 3.81	kalman var: 42.344 42.344 0.048	 batterySag: 0.681	link quality: 49	flight time: 0s	pos 59.09 -14.28 -2.60	yaw: -0.07	msg/s 0.0
+INFO: 01-08-2022 17:00:27 printStatus(167) -- Drogno_3: out of BOX	battery: 3.81	kalman var: 45.344 45.344 0.05	 batterySag: 0.681	link quality: 53	flight time: 0s	pos 62.19 -15.04 -2.75	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:28 printStatus(167) -- Drogno_3: out of BOX	battery: 3.82	kalman var: 48.469 48.469 0.051	 batterySag: 0.681	link quality: 52	flight time: 0s	pos 65.38 -15.81 -2.91	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:29 printStatus(167) -- Drogno_3: out of BOX	battery: 3.81	kalman var: 51.719 51.719 0.052	 batterySag: 0.681	link quality: 53	flight time: 0s	pos 68.62 -16.62 -3.07	yaw: -0.08	msg/s 0.0
+INFO: 01-08-2022 17:00:30 printStatus(167) -- Drogno_3: out of BOX	battery: 3.81	kalman var: 55.094 55.094 0.054	 batterySag: 0.681	link quality: 53	flight time: 0s	pos 71.94 -17.44 -3.23	yaw: -0.09	msg/s 0.0
+INFO: 01-08-2022 17:00:31 printStatus(167) -- Drogno_3: out of BOX	battery: 3.83	kalman var: 58.594 58.594 0.056	 batterySag: 0.681	link quality: 53	flight time: 0s	pos 75.31 -18.27 -3.40	yaw: -0.09	msg/s 0.0
