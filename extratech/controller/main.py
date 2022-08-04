@@ -47,7 +47,7 @@ processes_exit_event = multiprocessing.Event()
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.commandsFrequency      = COMMANDS_FREQUENCY
-OSC.COMPANION_FEEDBACK_IP  = "127.0.0.1" 
+OSC.COMPANION_FEEDBACK_IP  = "192.168.1.255" 
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 

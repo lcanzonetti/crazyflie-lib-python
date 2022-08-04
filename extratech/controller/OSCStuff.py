@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #rf 2021
+from OSC_feedabcker import CompanionFeedbacco
 import multiprocessing
 import threading
 from   threading import Lock
@@ -21,7 +22,6 @@ from   colorama              import init as coloInit
 coloInit(convert=True)
 
 import OSCaggregator
-import OSC_feedabcker as feedbacker
 
 drogni        = {} 
 bufferone     = {}
@@ -52,7 +52,7 @@ COMPANION_PAGES         = ['92', '93', '94']
 TC_COMPANION_PAGE       = '91'
 SWARM_PAGE              = '90'
 COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 0.9
+COMPANION_UPDATE_RATE   = 2
 COMPANION_FEEDBACK_ENABLED = True
 ##################################################  global rates:
 commandsFrequency               = 0.04   # actual command'd rate to uavss
@@ -102,6 +102,7 @@ def resetCompanion():
 
 def updateCompanion():
     global bufferone
+    print("\n\n\n partito!")
     # companionLock = Lock()
     def daje ():
         takeOffOrLandText      = 'take off'
@@ -510,7 +511,7 @@ def start_server():      ######################    #### OSC init    #########   
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
     
     if COMPANION_FEEDBACK_ENABLED:
-        companionFeedbackerInstance = feedbacker.CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
+        companionFeedbackerInstance = CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
         companionFeedbackProcess = Process(target=companionFeedbackerInstance.start)
         companionFeedbackProcess.daemon = True
         companionFeedbackProcess.start() 
