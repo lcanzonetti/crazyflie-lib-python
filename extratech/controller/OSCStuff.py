@@ -14,6 +14,8 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 
+# from   main                  import WE_ARE_FAKING_IT
+
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
@@ -200,6 +202,15 @@ def updateCompanion():
                     infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, engage, engage_bkg, engage_col]) 
                     companionFeedbackCue.put_nowait(infinitaRoba)
     nnamo = threading.Thread(target=daje).start()
+
+# def MaxFeedback():
+
+#     for drogno in drogni:
+        
+#         iddio = drogni[drogno].ID
+#         d = drogni[drogno]
+
+
     
 def checkSwarmFlyability():
     def loppo():
@@ -326,6 +337,7 @@ def goDown    (coddii, quanto):
                 drogni[drogno].goDown(quanto)
             # else:
             #     print('il drogno %s non è connesso' % drogni[drogno].name) 
+
 def land      (bullshit, landingCandidate):
     print('chief says %s gotta be grounded' % (landingCandidate))
     if landingCandidate == 'all':    
@@ -336,6 +348,7 @@ def land      (bullshit, landingCandidate):
                 print('il drogno %s non è connesso' % drogni[drogno].name)
     else:
         drogni[landingCandidate].land()
+
 def home      (coddii, chi):
         print('chief says drogno_%s gonna go home' % chi)
         if drogni[chi].is_connected:
