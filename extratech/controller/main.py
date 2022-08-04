@@ -18,15 +18,15 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
-        # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
+        'radio://0/80/2M/E7E7E7E7E0',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
         'radio://0/90/2M/E7E7E7E7E3',
-        # 'radio://1/120/2M/E7E7E7E7E4', 
-        # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://3/100/2M/E7E7E7E7E6',
-        # f'radio://3/100/2M/E7E7E7E7E7',
-        # 'radio://2/100/2M/E7E7E7E7E8', 
+        'radio://1/120/2M/E7E7E7E7E4', 
+        'radio://0/80/2M/E7E7E7E7E5',
+        'radio://3/100/2M/E7E7E7E7E6',
+        'radio://3/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E8', 
         # 'radio://2/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',
         ]
@@ -34,7 +34,7 @@ uris = [
 #########################################################################
 
 lastRecordPath        = ''  
-WE_ARE_FAKING_IT      = False
+WE_ARE_FAKING_IT      = True
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
@@ -100,33 +100,34 @@ def autoReconnect():
 def restart_devices():
     global connectedUris
     print('Restarting devices')
-    for uri in uris:
-        # time.sleep(0.5)
-        try: PowerSwitch(uri).stm_power_down()
-        except Exception:
-            print('%s is not there to be shut down' % uri)
-            raise Exception
-    print('uris meant to be switched on:')
-    print(uris)
-    urisToBeRemoved = []
-    for urico in range(len(uris)):
-        try:
-            # print('trying to power up %s' % uris[urico]) 
-            PowerSwitch(uris[urico]).stm_power_up()
-        except Exception: 
-            print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
-            urisToBeRemoved.append(uris[urico])
-    connectedUris = uris.copy()
-    for u in urisToBeRemoved:
-        connectedUris.remove(u)
+
+    if not WE_ARE_FAKING_IT:
+        for uri in uris:
+            # time.sleep(0.5)
+            try: PowerSwitch(uri).stm_power_down()
+            except Exception:
+                print('%s is not there to be shut down' % uri)
+                raise Exception
+        print('uris meant to be switched on:')
+        print(uris)
+        urisToBeRemoved = []
+        for urico in range(len(uris)):
+            try:
+                # print('trying to power up %s' % uris[urico]) 
+                PowerSwitch(uris[urico]).stm_power_up()
+            except Exception: 
+                print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
+                urisToBeRemoved.append(uris[urico])
+        connectedUris = uris.copy()
+        for u in urisToBeRemoved:
+            connectedUris.remove(u)
+    else:
+        connectedUris = uris.copy()
 
     print('at the end these are drognos we have:')
     print(connectedUris)
     if len(connectedUris) == 0:
-        opinion = input('there actually no drognos, wanna retry or fake it?\nPress R to retry,\nF to fake it,\nQ to exit,\nor any other key, to choose not to choose.')
-        if opinion == 'f' or opinion == 'F':
-            global WE_ARE_FAKING_IT
-            WE_ARE_FAKING_IT = True
+        opinion = input('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit.')
         if opinion == 'r' or opinion == 'R':
             restart_devices()
         if opinion == 'q' or opinion == 'Q':
@@ -136,6 +137,9 @@ def restart_devices():
         time.sleep(5)
 
 def main():
+    if WE_ARE_FAKING_IT:
+        print('ATTENZIONE! STIAMO FACENDO FINTA!')
+        time.sleep(2)
     radioStart()
     restart_devices()
  
