@@ -1,4 +1,4 @@
-#rf 2021
+#rf 2022
 import time, sys, os
 import threading
 from   threading import Lock
@@ -11,7 +11,7 @@ from   colorama             import init as coloInit
 from main import WE_ARE_FAKING_IT
 coloInit(convert=True)
 
-#crazyflie's
+#crazyflie'sm
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
 # from   cflib.utils                                import uri_helper
