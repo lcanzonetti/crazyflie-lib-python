@@ -34,7 +34,7 @@ uris = [
 #########################################################################
 
 lastRecordPath        = ''  
-WE_ARE_FAKING_IT      = False
+WE_ARE_FAKING_IT      = True
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
