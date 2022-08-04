@@ -139,26 +139,19 @@ class Drogno(threading.Thread):
         #     self.lastTrajectory = t.readlines()
          # Modifying the log file we are using
 
+        connectedToFeedback = False
+        if FEEDBACK_ENABLED and not self.exitFlag.is_set():
+            time.sleep(0.5)
+            while not connectedToFeedback:
+                try:
+                    time.sleep(0.1)
+                    self.multiprocessConnection = Client(self.feedbacker_address)
+                    connectedToFeedback = True
+                except ConnectionRefusedError:
+                    print('server del drogno %s feedback non ancora connesso!' % self.ID)
 
-        if self.WE_ARE_FAKING_IT:
-            # print (Fore.LIGHTBLUE_EX + "Faking it = " + str(self.WE_ARE_FAKING_IT ))
-            self.connect()
-            time.sleep(1.5)
-        else:
-            # print('We are not faking it this time.')
-            connectedToFeedback = False
-            if FEEDBACK_ENABLED and not self.exitFlag.is_set():
-                time.sleep(0.5)
-                while not connectedToFeedback:
-                    try:
-                        time.sleep(0.1)
-                        self.multiprocessConnection = Client(self.feedbacker_address)
-                        connectedToFeedback = True
-                    except ConnectionRefusedError:
-                        print('server del drogno %s feedback non ancora connesso!' % self.I)
-
-            self.printThread   = threading.Thread(target=self.printStatus).start()
-            self.connect()
+        self.printThread   = threading.Thread(target=self.printStatus).start()
+        self.connect()
      
     def printStatus(self):
         # printLock = Lock()
@@ -262,9 +255,10 @@ class Drogno(threading.Thread):
     #################################################################### connection
     def connect(self):
         print(self.link_uri)
-        if not WE_ARE_FAKING_IT:
+        self.killingPill   = threading.Event()
+        
+        if not WE_ARE_FAKING_IT:   ## true life
             if self.isKilled == False:
-                self.killingPill   = threading.Event()
                 self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)
                 print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
                 def connection():
@@ -279,8 +273,8 @@ class Drogno(threading.Thread):
                     except:
                         print('no radio pal')
                 self.connectionThread = threading.Thread(target=connection).start()
-        else:
-            self.killingPill   = threading.Event()
+        else:  ## fake world
+            time.sleep(1)
             self._connected(self.link_uri)
             time.sleep(2)
             self._fully_connected(self.link_uri)           
