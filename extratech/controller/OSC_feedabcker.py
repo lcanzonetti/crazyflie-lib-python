@@ -112,46 +112,7 @@ class CompanionFeedbacco():
         print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
-
-class CompanionFeedbacco_UDP():
-    def __init__(self, sendingIP, sendingPort):
-        self.sendingIP       = sendingIP
-        self.sendingPort     = sendingPort
-        
-        print('companion UDP feedback process initalized on %s %s' %  (self.sendingIP,  self.sendingPort))
-
-    def sendCompanionFeedback(self, stuff):
-        bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, stuff) 
-        osc_send(bandoleon, "feedbackClient")
-  
-    def start(self):
-        def udpLoop():
-            sock_s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-            while True:
-                msg = self.cuia.get()
-                if msg == 'fuck you':
-                    # self.finished.set()
-                    break
-                else:
-                    self.sendCompanionFeedback(msg)
-                time.sleep(0.01)
-            # Properly close the system.
-            self.cuia.close()
-            # self.cuia.join_thread()
-            osc_terminate()
-            print('\nanche il companion feedbacker se ne va')
-
-        osc_startup()
-        # osc_startup(logger=logger)
-
-        
-        osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
-        tridio = threading.Thread(target=oscLoop).start()
-        ###########################  single fella
-        
-
+    
 #cancellami:
 
 def fammeNesempio(carlo):
