@@ -599,20 +599,14 @@ class Drogno(threading.Thread):
     def setRingColor(self, vr, vg, vb, speed=0.25):
         self.commandsCount += 1
 
-        # vr *= self.ringIntensity
-        # vg *= self.ringIntensity
-        # vb *= self.ringIntensity
+        self.requested_R    = vr
+        self.requested_G    = vg
+        self.requested_B    = vb
 
-        # color = '0x'
-        # color += str ( hex ( int(r) ) ) [2:].zfill(2)
-        # color += str ( hex ( int(g) ) ) [2:].zfill(2)
-        # color = str ( hex ( int(b) ) ) [2:].zfill(2)
-        # self._cf.param.set_value('ring.fadeColor', color)
-        # print ('vado al colore %s' % (color))
-        
         vr = int(vr * self.ringIntensity)
         vg = int(vg * self.ringIntensity)
         vb = int(vb * self.ringIntensity)
+
 
         if len(self.ledMem) > 0:
             self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
