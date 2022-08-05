@@ -40,7 +40,7 @@ AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
 FEEDBACK_SENDING_PORT = 6000
-BROADCAST_IP          = "192.168.10.255"
+BROADCAST_IP          = "192.168.1.21"
 
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
