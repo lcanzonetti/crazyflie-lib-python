@@ -13,6 +13,7 @@ from   cflib.utils.power_switch import PowerSwitch
 from   cflib.utils import uri_helper
 #custom modules
 import OSCStuff       as OSC
+import GUI as GUI
 import Drogno
 import logging
 logging.basicConfig(level=logging.ERROR)
@@ -47,7 +48,7 @@ processes_exit_event = multiprocessing.Event()
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.commandsFrequency      = COMMANDS_FREQUENCY
-OSC.COMPANION_FEEDBACK_IP  = "192.168.1.255" 
+GUI.COMPANION_FEEDBACK_IP  = "192.168.1.255" 
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 
@@ -148,18 +149,28 @@ def main():
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
         drogni[iddio].start() 
 
+    #send drogni's array to submodules
     OSC.drogni = drogni
     OSC.faiIlBufferon()
+    GUI.drogni = drogni
     # OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates).start()
+
+
+    GUI.startCompanionFeedback()
+    time.sleep(1)
+    GUI.resetCompanion()
+    GUI.updateCompanion()
+
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
     print('esco')
-    OSC.resetCompanion()
+    GUI.resetCompanion()
     OSC.finished = True
+    GUI.ends_it_when_it_needs_to_end()
     threads_exit_event.set() 
     processes_exit_event.set()
 

@@ -22,6 +22,8 @@ from   colorama              import init as coloInit
 coloInit(convert=True)
 
 import OSCaggregator
+from GUI import setCompanionRate, setFlyability, set_command_frequency,weMaySend
+
 
 drogni        = {} 
 bufferone     = {}
@@ -44,16 +46,7 @@ aggregatorProcess       = None
 aggregatorCue           = Queue()
 aggregatorExitEvent     = None
 posLock = Lock()
-################################################  companion feedback via OSC:
-COMPANION_FEEDBACK_SENDINGPORT = 12321
-companionFeedbackCue    = Queue()  
-COMPANION_FEEDBACK_IP   = None
-COMPANION_PAGES         = ['92', '93', '94']
-TC_COMPANION_PAGE       = '91'
-SWARM_PAGE              = '90'
-COMPANION_ENABLE_BUTTON = '25'
-COMPANION_UPDATE_RATE   = 2
-COMPANION_FEEDBACK_ENABLED = True
+
 ##################################################  global rates:
 commandsFrequency               = 0.04   # actual command'd rate to uavss
 RECEIVED_MESSAGES_SAMPLING_RATE = 10
@@ -61,6 +54,7 @@ RECEIVED_MESSAGES_SAMPLING_RATE = 10
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
+    weMaySend(isSendEnabled)
     print(Fore.RED +  'Master della ricezione OSC: %s' % isSendEnabled)
     
 def getSendEnabled():
@@ -69,150 +63,7 @@ def comè(uno): # è booleano oppure no?
     uno = uno *1
     return uno
 
-def resetCompanion():
-    if COMPANION_FEEDBACK_ENABLED:
-        swarmTakeOff        = oscbuildparse.OSCMessage("/style/text/"+SWARM_PAGE+"/2",    None,   ['TAKE OFF'])
-        swarmTakeOff_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+SWARM_PAGE+"/2" , ",iii",   [20, 20, 20])
-        swarmTakeOff_col    = oscbuildparse.OSCMessage("/style/color/"+SWARM_PAGE+"/2"  ,   ",iii",   [100, 100, 100])
-        sbirulino   = [swarmTakeOff,swarmTakeOff_bkgcol,swarmTakeOff_col]
-        companionFeedbackCue.put_nowait(sbirulino)
-
-        for i in range(2,9):
-            j=0
-            for cp in COMPANION_PAGES:
-                intst         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i),      None,   ['drone '+str(i-2+(j*7))])
-                int_bkgcol    = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i),    ",iii",   [1, 1, 1])
-                int_col       = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i),    ",iii",   [60, 60, 60])
-
-                status        = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+8),    None,   ['sconnesso'])
-                status_bkgcol = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+8),  ",iii",   [1, 1, 1])
-                status_col    = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+8),  ",iii",   [120, 120, 120])
-
-                tkfland       = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+16),   None,   ['take off'])
-                tkfland_bkg   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+16), ",iii",   [60,  20,   1])
-                tkfland_col   = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+16), ",iii",   [60, 60, 60])
-
-                engage         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(i+24),   None,   ['engage'])
-                engage_bkg     = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(i+24), ",iii",   [10, 80, 10])
-                engage_col     = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(i+24), ",iii",   [255, 255, 255])
-
-                bandoleon   = [intst, int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, engage, engage_bkg, engage_col]
-                companionFeedbackCue.put_nowait(bandoleon)
-                j+=1
-
-def updateCompanion():
-    global bufferone
-    print("\n\n\n partito!")
-    # companionLock = Lock()
-    def daje ():
-        takeOffOrLandText      = 'take off'
-        takeOffOrLandColor     = [200,20,40]
-        engageText             = 'not engaged'
-        engageColor            = [20,240,80]
-        swarmTakeOff_color     = [20, 20, 20]
-        
-        while not finished:
-            if COMPANION_FEEDBACK_ENABLED:
-                infinitaRoba = []
-                time.sleep(COMPANION_UPDATE_RATE)
-                # listaTimecode    = timecode.split(':')
-                # timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   [listaTimecode[0]])
-                # timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   [listaTimecode[1]])
-                # timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(31),   None,   [listaTimecode[2]])
-                # timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   [listaTimecode[3]])
-                timecode_hours   = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(29),   None,   ['00:'])
-                timecode_minutes = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(30),   None,   ['00:'])
-                timecode_seconds = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(31),   None,   ['00:'])
-                timecode_frames  = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(32),   None,   ['00'])
-                companionRate    = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(11),   None,   [str(COMPANION_UPDATE_RATE)])
-                commandsRate     = oscbuildparse.OSCMessage("/style/text/"+TC_COMPANION_PAGE+"/"    + str(13),   None,   [str(commandsFrequency)])
-                infinitaRoba = [  timecode_hours, timecode_minutes, timecode_seconds, timecode_frames, companionRate, commandsRate]
-                
-                if isSwarmReadyToFly:
-                    swarmTakeOff_color = [20, 255, 60]
-                else:
-                    swarmTakeOff_color = [60, 60, 60]
-
-                sbc = oscbuildparse.OSCMessage("/style/bgcolor/"+SWARM_PAGE+"/2" , ",iii", swarmTakeOff_color)
-                infinitaRoba.extend([sbc])
-                
-                if not isSendEnabled:                       #*******************  SEND ENABLING
-                    for cp in COMPANION_PAGES:
-                        col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [10, 235, 10])
-                        txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["non ricevo"])
-                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [10, 235, 10])
-                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21",    None,   ["non ricevo"])
-                        infinitaRoba.extend( [col, txt, col2, txt2 ]) 
-                else:
-                    for cp in COMPANION_PAGES:
-                        col               = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + COMPANION_ENABLE_BUTTON, None,  [235, 10, 10])
-                        txt               = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + COMPANION_ENABLE_BUTTON, None,   ["ricevo"])
-                        col2              = oscbuildparse.OSCMessage("/style/bgcolor/90/21", None,   [235, 10, 10])
-                        txt2              = oscbuildparse.OSCMessage("/style/text/90/21"   , None,   ["ricevo"])
-                        infinitaRoba.extend( [col, txt, col2, txt2 ]) 
-
-                for drogno in drogni:               #*******************  singol-drogn               
-                    cp   = COMPANION_PAGES[0]
-                    iddio= drogni[drogno].ID
-                    d    = drogni[drogno]   
-                    if iddio>= 7 and iddio <14:
-                        cp = int(cp)  + 1
-                        iddio -= 7
-                    if iddio >= 14:    
-                        cp = int(cp)  + 2
-                        iddio -= 14
-                    cp = str(cp)
-                    
-
-                    if d.isReadyToFly:
-                        takeOffOrLandColor = [20,200,40]
-                    else:
-                        takeOffOrLandColor = [100,90,40]
-                
-                    if d.isFlying:
-                        takeOffOrLandText = 'land'
-                    else:
-                        takeOffOrLandText = 'take off'
-
-                    if d.isEngaged:
-                        engageText         = 'engaged'
-                        engageColor        = [240,20,80]
-                    else:
-                        engageText         = 'not engaged'
-                        engageColor        = [20,240,80]
-
-                    rgb = [bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B]
-                    if not any(rgb): rgb = [40,40,40]
-                    if d.standBy: rgb = [10,30,10]
-
-                    int_bkgcol      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2),    ",iii", rgb )
-                    int_col         = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2),    ",iii",   [255,255,255])
-
-                    status          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+8),    ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage]) 
-                    status_bkgcol   = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
-                    status_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+8),  ",iii",   [255, 255, 255])
-
-                    tkfland         = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+16),   None,   [takeOffOrLandText])
-                    tkfland_bkg     = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+16), ",iii",   takeOffOrLandColor)
-                    tkfland_col     = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+16), ",iii",   [40, 40, 40])
-
-                    engage          = oscbuildparse.OSCMessage("/style/text/"+cp+"/"    + str(iddio+2+24),   None, [engageText])
-                    engage_bkg      = oscbuildparse.OSCMessage("/style/bgcolor/"+cp+"/" + str(iddio+2+24), ",iii", engageColor)
-                    engage_col      = oscbuildparse.OSCMessage("/style/color/"+cp+"/"   + str(iddio+2+24), ",iii", [255, 255, 255])
-
-                    infinitaRoba.extend([ int_bkgcol, int_col, status, status_bkgcol, status_col, tkfland, tkfland_bkg, tkfland_col, engage, engage_bkg, engage_col]) 
-                    companionFeedbackCue.put_nowait(infinitaRoba)
-    nnamo = threading.Thread(target=daje).start()
-
-# def MaxFeedback():
-
-#     for drogno in drogni:
-        
-#         iddio = drogni[drogno].ID
-#         d = drogni[drogno]
-
-
-    
+   
 def checkSwarmFlyability():
     def loppo():
         global isSwarmReadyToFly
@@ -227,8 +78,11 @@ def checkSwarmFlyability():
                 else: swarmFlyabilityArray.append(False)
             if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True
+                setFlyability(True)
+                
             else:
                 isSwarmReadyToFly = False
+                setFlyability(False)
     swarmFlyabilityLoop = threading.Thread(name='flyabilityLoop', target=loppo).start()
 
 ###########################  whole swarm
@@ -294,51 +148,36 @@ def go        (coddii,quale):
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].go(quale)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goLeft    (coddii, quanto):
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goLeft(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goRight   (coddii, quanto):
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goRight(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goForward (coddii, quanto):
         print('chief says we\'re gonna go forward by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goForward(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goBack    (coddii, quanto):
         print('chief says we\'re gonna go back by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goBack(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goUp      (coddii, quanto):
         print('chief says we\'re gonna go up by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goUp(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def goDown    (coddii, quanto):
         print('chief says we\'re gonna go down by %s ' % quanto)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goDown(quanto)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name) 
-
 def land      (bullshit, landingCandidate):
     print('chief says %s gotta be grounded' % (landingCandidate))
     if landingCandidate == 'all':    
@@ -349,7 +188,6 @@ def land      (bullshit, landingCandidate):
                 print('il drogno %s non è connesso' % drogni[drogno].name)
     else:
         drogni[landingCandidate].land()
-
 def home      (coddii, chi):
         print('chief says drogno_%s gonna go home' % chi)
         if drogni[chi].is_connected:
@@ -362,8 +200,6 @@ def goToStart (coddii, chi):
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 drogni[drogno].goToStart(0.2)
-            # else:
-            #     print('il drogno %s non è connesso' % drogni[drogno].name)
 def ringColor (*args):
     # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
     # print (bullshit)
@@ -469,17 +305,6 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_G = args[2]
     bufferone[iddio].requested_B = args[3]
 
-def setCompanionRate(address, args):
-    global COMPANION_UPDATE_RATE
-    # print(args)
-    if args[0] == '+':
-        COMPANION_UPDATE_RATE += 0.1
-    elif args[0] == '-':
-        if COMPANION_UPDATE_RATE > 0:
-            COMPANION_UPDATE_RATE -= 0.1
-    COMPANION_UPDATE_RATE = round(COMPANION_UPDATE_RATE, 2)
-    print(COMPANION_UPDATE_RATE)
-    
 def setCommandsRate(address, args):
     global commandsFrequency
     # print(args)
@@ -493,6 +318,8 @@ def setCommandsRate(address, args):
     commandsFrequency = round(commandsFrequency, 2)
     for drogno in drogni:
         drogni[drogno].commandsFrequency = commandsFrequency
+    set_command_frequency(commandsFrequency)
+    
     
     print(Fore.RED + 'commandsFrequency has been set to ' + str(commandsFrequency))
 
@@ -510,11 +337,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
     
-    if COMPANION_FEEDBACK_ENABLED:
-        companionFeedbackerInstance = CompanionFeedbacco( companionFeedbackCue, COMPANION_FEEDBACK_IP, COMPANION_FEEDBACK_SENDINGPORT)
-        companionFeedbackProcess = Process(target=companionFeedbackerInstance.start)
-        companionFeedbackProcess.daemon = True
-        companionFeedbackProcess.start() 
+ 
    
     if AGGREGATION_ENABLED:
         global aggregatorInstance
@@ -551,9 +374,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     
-    resetCompanion()
     ############################################################ loops on their own threads:
-    updateCompanion()
     printHowManyMessages()
     checkSwarmFlyability()
     ############################################################
@@ -575,7 +396,6 @@ def start_server():      ######################    #### OSC init    #########   
                 pass
     # Properly close the system.
     print('chiudo OSC')
-    companionFeedbackCue.put('fuck you')
     aggregatorExitEvent.set()
     # aggregatorProcess.join()
     osc_terminate()
