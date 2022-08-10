@@ -837,7 +837,8 @@ class Drogno(threading.Thread):
     def wakeUp(self):
         def wakeUpProcedure():
             self.statoDiVolo = 'waking up'
-            PowerSwitch(self.link_uri).stm_power_up()
+            if not WE_ARE_FAKING_IT:
+                PowerSwitch(self.link_uri).stm_power_up()
             time.sleep(3)
             self.standBy = False
             self.connect()
