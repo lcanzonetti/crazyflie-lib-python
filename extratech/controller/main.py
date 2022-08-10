@@ -28,8 +28,13 @@ uris = [
         'radio://3/100/2M/E7E7E7E7E6',
         'radio://3/100/2M/E7E7E7E7E7',
         'radio://2/100/2M/E7E7E7E7E8', 
-        # 'radio://2/110/2M/E7E7E7E7E9',
-        # 'radio://0/110/2M/E7E7E7E7EA',
+        'radio://2/110/2M/E7E7E7E7E9',
+        'radio://0/110/2M/E7E7E7E7EA',
+        'radio://0/120/2M/E7E7E7E7EB',
+        'radio://0/120/2M/E7E7E7E7EC',
+        'radio://0/120/2M/E7E7E7E7ED',
+        'radio://0/120/2M/E7E7E7E7EE',
+        'radio://0/120/2M/E7E7E7E7EF',
         ]
         
 #########################################################################
@@ -59,7 +64,7 @@ SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
                                 ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
                                 ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
-                                  ( -SPACING*1.5, -SPACING)
+                                ( -SPACING*1.5, -SPACING), (0, 0), (0,0) , (0,0), (0,0), (0,0), (0,0)
                                 ]
 
 def radioStart():
@@ -143,11 +148,12 @@ def main():
         time.sleep(2)
     radioStart()
     restart_devices()
- 
+
     for uro in connectedUris:
         iddio = IDFromURI(uro)
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
-        drogni[iddio].start() 
+        drogni[iddio].start()
+        print(drogni)
 
     #send drogni's array to submodules
     OSC.drogni = drogni
@@ -186,6 +192,7 @@ def IDFromURI(uri) -> int:
     # Get the address part of the uri
     address = uri.rsplit('/', 1)[-1]
     try:
+        # print(int(address, 16) - 996028180448)
         return int(address, 16) - 996028180448
     except ValueError:
         print('address is not hexadecimal! (%s)' % address, file=sys.stderr)

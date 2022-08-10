@@ -150,7 +150,7 @@ class Drogno(threading.Thread):
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
 
-        self.printThread   = threading.Thread(target=self.printStatus).start()
+        # self.printThread   = threading.Thread(target=self.printStatus).start()
         if WE_ARE_FAKING_IT: self.printRate = 10
         self.connect()
      
@@ -608,16 +608,16 @@ class Drogno(threading.Thread):
         vb = int(vb * self.ringIntensity)
 
 
-        if len(self.ledMem) > 0:
-            self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
-            self.ledMem[0].write_data(None)
+        # if len(self.ledMem) > 0:
+        #     self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
+        #     self.ledMem[0].write_data(None)
 
         # print ('vado al colore %s' % (vr, vg, vb))
 

@@ -39,7 +39,7 @@ RECEIVING_IP            = "0.0.0.0"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
-AGGREGATION_ENABLED       = False
+AGGREGATION_ENABLED       = True
 AGGREGATOR_RECEIVING_PORT = 9201
 aggregatorInstance      = None
 aggregatorProcess       = None
@@ -294,6 +294,7 @@ def setRequestedPos(address, args):
     bufferone[iddio].requested_X = round(float(args[1]),3)
     bufferone[iddio].requested_Y = round(float(args[2]),3)
     bufferone[iddio].requested_Z = round(float(args[3]),3)
+    # print('Ciao sono il drone %s e ho ricevuto un comando di posizione!' %(iddio))
     msgCount += 1
 
 def setRequestedCol(address, args):
