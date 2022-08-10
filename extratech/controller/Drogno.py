@@ -829,8 +829,9 @@ class Drogno(threading.Thread):
         self.isFlying = False
         self.killingPill.set()
         time.sleep(0.2)
-        self._cf.close_link()
-        PowerSwitch(self.link_uri).stm_power_down()
+        if not WE_ARE_FAKING_IT:
+            self._cf.close_link()
+            PowerSwitch(self.link_uri).stm_power_down()
         self.statoDiVolo = 'stand by'
 
     def wakeUp(self):
