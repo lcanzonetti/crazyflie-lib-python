@@ -108,6 +108,7 @@ class CompanionFeedbacco():
         # osc_startup(logger=logger)
 
         
+        # osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
         osc_udp_client(self.sendingIP, self.sendingPort, "feedbackClient")
         print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
         tridio = threading.Thread(target=oscLoop).start()
