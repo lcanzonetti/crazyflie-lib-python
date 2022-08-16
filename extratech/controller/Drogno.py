@@ -619,8 +619,6 @@ class Drogno(threading.Thread):
         vr = int(vr * self.ringIntensity)
         vg = int(vg * self.ringIntensity)
         vb = int(vb * self.ringIntensity)
-
-
         # if len(self.ledMem) > 0:
         #     self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
         #     self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
@@ -673,7 +671,7 @@ class Drogno(threading.Thread):
         time.sleep(4)
         # commander.stop()
  
-    def startTest(self,sequenceNumber=0,loop=False):
+    def startTestSequence(self,sequenceNumber=0,loop=False):
         print ('orcodo %d'% sequenceNumber)
         def sequenzaZero():
             print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)

@@ -136,12 +136,12 @@ def uploadSequence(coddii,quale):
                 drogni[drogno].upload_trajectory(quale)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def startTest (coddii,quale):
+def startTestSequence (coddii,quale):
         print('chief says we\'re gonna do testsss at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 print('cazzodio')
-                drogni[drogno].startTest(quale, False)
+                drogni[drogno].startTestSequence(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def go        (coddii,quale):
@@ -360,7 +360,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/notch/drone*/color", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  swarm or single commnands
     osc_method("/takeOff",          takeOff,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/startTest",        startTest,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/startTest",        startTestSequence, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/upload",           uploadSequence,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     # osc_method("/go",               go,              argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
