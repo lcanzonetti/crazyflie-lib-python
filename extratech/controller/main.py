@@ -13,33 +13,39 @@ from   cflib.utils.power_switch import PowerSwitch
 from   cflib.utils import uri_helper
 #custom modules
 import OSCStuff       as OSC
+import GUI as GUI
 import Drogno
 import logging
 logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
-        # 'radio://0/80/2M/E7E7E7E7E0',
-        # 'radio://0/80/2M/E7E7E7E7E1',
-        # 'radio://0/80/2M/E7E7E7E7E2',
+        'radio://0/80/2M/E7E7E7E7E0',
+        'radio://0/80/2M/E7E7E7E7E1',
+        'radio://0/80/2M/E7E7E7E7E2',
         'radio://0/90/2M/E7E7E7E7E3',
-        # 'radio://1/120/2M/E7E7E7E7E4', 
-        # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://3/100/2M/E7E7E7E7E6',
-        # f'radio://3/100/2M/E7E7E7E7E7',
-        # 'radio://2/100/2M/E7E7E7E7E8', 
-        # 'radio://2/110/2M/E7E7E7E7E9',
-        # 'radio://0/110/2M/E7E7E7E7EA',
+        'radio://1/120/2M/E7E7E7E7E4', 
+        'radio://0/80/2M/E7E7E7E7E5',
+        'radio://3/100/2M/E7E7E7E7E6',
+        'radio://3/100/2M/E7E7E7E7E7',
+        'radio://2/100/2M/E7E7E7E7E8', 
+        'radio://2/110/2M/E7E7E7E7E9',
+        'radio://0/110/2M/E7E7E7E7EA',
+        'radio://0/120/2M/E7E7E7E7EB',
+        'radio://0/120/2M/E7E7E7E7EC',
+        'radio://0/120/2M/E7E7E7E7ED',
+        'radio://0/120/2M/E7E7E7E7EE',
+        'radio://0/120/2M/E7E7E7E7EF',
         ]
         
 #########################################################################
 
 lastRecordPath        = ''  
-WE_ARE_FAKING_IT      = False
+WE_ARE_FAKING_IT      = True
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
 FEEDBACK_SENDING_PORT = 6000
-BROADCAST_IP          = "192.168.10.255"
+BROADCAST_IP          = "192.168.1.21"
 
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
@@ -47,7 +53,7 @@ processes_exit_event = multiprocessing.Event()
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.commandsFrequency      = COMMANDS_FREQUENCY
-OSC.COMPANION_FEEDBACK_IP  = "127.0.0.1" 
+GUI.COMPANION_FEEDBACK_IP  = "192.168.10.101" 
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 
@@ -58,7 +64,7 @@ SPACING = 0.5
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
                                 ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
                                 ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
-                                  ( -SPACING*1.5, -SPACING)
+                                ( -SPACING*1.5, -SPACING), (0, 0), (0,0) , (0,0), (0,0), (0,0), (0,0)
                                 ]
 
 def radioStart():
@@ -100,33 +106,34 @@ def autoReconnect():
 def restart_devices():
     global connectedUris
     print('Restarting devices')
-    for uri in uris:
-        # time.sleep(0.5)
-        try: PowerSwitch(uri).stm_power_down()
-        except Exception:
-            print('%s is not there to be shut down' % uri)
-            raise Exception
-    print('uris meant to be switched on:')
-    print(uris)
-    urisToBeRemoved = []
-    for urico in range(len(uris)):
-        try:
-            # print('trying to power up %s' % uris[urico]) 
-            PowerSwitch(uris[urico]).stm_power_up()
-        except Exception: 
-            print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
-            urisToBeRemoved.append(uris[urico])
-    connectedUris = uris.copy()
-    for u in urisToBeRemoved:
-        connectedUris.remove(u)
+
+    if not WE_ARE_FAKING_IT:
+        for uri in uris:
+            # time.sleep(0.5)
+            try: PowerSwitch(uri).stm_power_down()
+            except Exception:
+                print('%s is not there to be shut down' % uri)
+                raise Exception
+        print('uris meant to be switched on:')
+        print(uris)
+        urisToBeRemoved = []
+        for urico in range(len(uris)):
+            try:
+                # print('trying to power up %s' % uris[urico]) 
+                PowerSwitch(uris[urico]).stm_power_up()
+            except Exception: 
+                print('%s is not there to be woken up, gonna pop it out from my list' % uris[urico])
+                urisToBeRemoved.append(uris[urico])
+        connectedUris = uris.copy()
+        for u in urisToBeRemoved:
+            connectedUris.remove(u)
+    else:
+        connectedUris = uris.copy()
 
     print('at the end these are drognos we have:')
     print(connectedUris)
     if len(connectedUris) == 0:
-        opinion = input('there actually no drognos, wanna retry or fake it?\nPress R to retry,\nF to fake it,\nQ to exit,\nor any other key, to choose not to choose.')
-        if opinion == 'f' or opinion == 'F':
-            global WE_ARE_FAKING_IT
-            WE_ARE_FAKING_IT = True
+        opinion = input('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit.')
         if opinion == 'r' or opinion == 'R':
             restart_devices()
         if opinion == 'q' or opinion == 'Q':
@@ -136,26 +143,40 @@ def restart_devices():
         time.sleep(5)
 
 def main():
+    if WE_ARE_FAKING_IT:
+        print('ATTENZIONE! STIAMO FACENDO FINTA!')
+        time.sleep(2)
     radioStart()
     restart_devices()
- 
+
     for uro in connectedUris:
         iddio = IDFromURI(uro)
         drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
-        drogni[iddio].start() 
+        drogni[iddio].start()
+        print(drogni)
 
+    #send drogni's array to submodules
     OSC.drogni = drogni
     OSC.faiIlBufferon()
+    GUI.drogni = drogni
     # OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates).start()
+
+
+    GUI.startCompanionFeedback()
+    time.sleep(1)
+    GUI.resetCompanion()
+    GUI.updateCompanion()
+
     if AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
     print('esco')
-    OSC.resetCompanion()
+    GUI.resetCompanion()
     OSC.finished = True
+    GUI.ends_it_when_it_needs_to_end()
     threads_exit_event.set() 
     processes_exit_event.set()
 
@@ -171,6 +192,7 @@ def IDFromURI(uri) -> int:
     # Get the address part of the uri
     address = uri.rsplit('/', 1)[-1]
     try:
+        # print(int(address, 16) - 996028180448)
         return int(address, 16) - 996028180448
     except ValueError:
         print('address is not hexadecimal! (%s)' % address, file=sys.stderr)

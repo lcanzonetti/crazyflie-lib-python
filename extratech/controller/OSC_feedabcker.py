@@ -10,6 +10,8 @@ from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
 
+import socket
+
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
@@ -106,12 +108,12 @@ class CompanionFeedbacco():
         # osc_startup(logger=logger)
 
         
-        osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
+        # osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
+        osc_udp_client(self.sendingIP, self.sendingPort, "feedbackClient")
         print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
-        
-
+    
 #cancellami:
 
 def fammeNesempio(carlo):
