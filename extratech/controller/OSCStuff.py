@@ -11,6 +11,7 @@ import queue
 from   random                import random, uniform
 import logging
 import time
+import numpy as np
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
@@ -35,7 +36,7 @@ timecode      = '00:00:00:00'
 framerate     = 25
 
 ################################################  this module osc receiving:
-RECEIVING_IP            = "0.0.0.0"
+RECEIVING_IP            = "192.168.10.161"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
@@ -287,14 +288,20 @@ def printHowManyMessages():
 def setRequestedPos(address, args):
     global msgCount
     global timecode
-    iddio      = int(address[-5])
+
+    x = address.split('/')
+    y = x[2].split('_')
+
+    iddio = int(y[1])
+    
+    
     # print(timecode)
     # with posLock: 
     timecode   = args[0]
     bufferone[iddio].requested_X = round(float(args[1]),3)
     bufferone[iddio].requested_Y = round(float(args[2]),3)
     bufferone[iddio].requested_Z = round(float(args[3]),3)
-    # print('Ciao sono il drone %s e ho ricevuto un comando di posizione!' %(iddio))
+    print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s!!' %(iddio,round(float(args[1]),3), round(float(args[2]),3), round(float(args[3]),3)))
     msgCount += 1
 
 def setRequestedCol(address, args):
