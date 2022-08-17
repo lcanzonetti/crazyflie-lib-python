@@ -259,12 +259,10 @@ class Drogno(threading.Thread):
         self.y = self.starting_y
         self.z = 0
         self._cf.param.set_value('kalman.resetEstimation', '1')
-        time.sleep(0.5)
-
-        # self._cf.param.set_value('kalman.resetEstimation', '0')
-        # time.sleep(0.2)
+        time.sleep(0.1)
+        self._cf.param.set_value('kalman.resetEstimation', '0')
         print(Fore.MAGENTA + 'estimator reset done on ' + self.name)
-        # self.wait_for_position_estimator()
+
     #################################################################### connection
     def connect(self):
         print(self.link_uri)
@@ -272,8 +270,9 @@ class Drogno(threading.Thread):
         
         if not WE_ARE_FAKING_IT:   ## true life
             if self.isKilled == False:
-                self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)
+                self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
                 print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
+
                 def connection():
                     self.statoDiVolo = 'connecting'
                     try:
@@ -289,7 +288,7 @@ class Drogno(threading.Thread):
         else:  ## fake world
             time.sleep(1)
             self._connected(self.link_uri)
-            time.sleep(2)
+            time.sleep(1)
             self._fully_connected(self.link_uri)           
 
 
@@ -315,15 +314,15 @@ class Drogno(threading.Thread):
         tio = threading.Thread(name=self.name+'_reconnectThread',target=mariconnetto)
         tio.start()
 
-    def _connected(self, link_uri):   ##########   where a lot of things happen
+    def _connected(self, link_uri):   
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         # print('TOC downloaded for %s, it took %s seconds, waiting for parameters.' % (link_uri, (time.time()-self.connection_time)))
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
         
-    def _fully_connected(self, link_uri):
+    def _fully_connected(self, link_uri):  ##########   where a lot of things happen
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
-        print('Il drone ha scaricato tutto.')
+        print('Il drone %s ha scaricato i parametri.' % link_uri)
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
         # The fetch-as argument can be set to FP16 to save space in the log packet
@@ -376,7 +375,7 @@ class Drogno(threading.Thread):
             time.sleep(0.3)
             if not self.batteryThread.is_alive():  self.batteryThread.start()
             self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
-            time.sleep(1.0)
+            # time.sleep(1.0)
             self.resetEstimator()
 
         self.statoDiVolo = 'landed'
@@ -890,7 +889,14 @@ def IDFromURI(uri) -> int:
     except ValueError:
         print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
         return None
-    
+
+def convert_motor_pass(datoIntero):
+    pass
+
+
+
+
+
    # The trajectory to fly
 # See https://github.com/whoenig/uav_trajectories for a tool to generate
 # trajectories
