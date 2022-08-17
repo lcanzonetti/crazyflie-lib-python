@@ -892,10 +892,10 @@ def IDFromURI(uri) -> int:
 
 def convert_motor_pass(numeroBinario):
     motori = [1,1,1,1]
-    motori[0] = (numero >> 3) & 1
-    motori[1] = (numero >> 2) & 1
-    motori[2] = (numero >> 1) & 1
-    motori[3] = (numero >> 0) & 1
+    motori[0] = (numeroBinario >> 3) & 1
+    motori[1] = (numeroBinario >> 2) & 1
+    motori[2] = (numeroBinario >> 1) & 1
+    motori[3] = (numeroBinario >> 0) & 1
     return motori
 
 
