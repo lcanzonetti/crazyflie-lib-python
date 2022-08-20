@@ -1,8 +1,8 @@
 #rf 2022
+
 import time, sys, os
 import threading
-from   threading import Lock
-from datetime import datetime
+from   datetime import datetime
 import multiprocessing
 from   multiprocessing.connection import Client
 from   colorama             import Fore, Back, Style
@@ -142,7 +142,7 @@ class Drogno(threading.Thread):
 
         connectedToFeedback = False
         if FEEDBACK_ENABLED and not self.exitFlag.is_set():
-            time.sleep(0.5)
+            time.sleep(0.4)
             while not connectedToFeedback:
                 try:
                     time.sleep(0.1)
@@ -157,6 +157,9 @@ class Drogno(threading.Thread):
      
     def printStatus(self):
         # printLock = Lock()
+        # A good rule of thumb is that one radio can handle at least 500 packets per seconds 
+        # in each direction and each log block uses one packet per log.
+        # So it should be possible to log at 100Hz a couple of log blocks. 
         self.LoggerObject.info('Started')
         while not self.exitFlag.is_set():
             time.sleep(self.printRate)
