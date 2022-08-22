@@ -3,12 +3,7 @@
 
 
 import time
-import sys, os
-from dotenv import load_dotenv
-load_dotenv()
-
-CONTROLLER_PATH =  os.environ.get("CONTROLLER_PATH")
-print (CONTROLLER_PATH)
+import sys
 
 import logging
 from   pprint import pprint
@@ -18,10 +13,7 @@ from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 
-# adding Folder_2/subfolder to the system path
-sys.path.append(CONTROLLER_PATH)
-pprint(sys.path)
-import Drogno
+# import simpleDrogno
 
 available = []
 
@@ -75,13 +67,16 @@ def connectToEverything():
     global available
     
     for uro in available:
-        ID = IDFromURI(uro)
-        drogni[ID] = Crazyflie(rw_cache="./extratech/utilities/cache_drogno_%s" %(ID))
-        drogni[ID].open_link(uro)
-        drogni[ID]._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
-        drogni[ID]._lg_kalm.add_variable('health.motorPass', 'uint8_t')
-        print("Mi sono connesso al drone %s all'indirizzo %s" %(ID, uro))
+        iddio = IDFromURI(uro)
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        drogni[iddio].open_link(uro)
+        drogni[iddio]._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
+        drogni[iddio]._lg_kalm.add_variable('health.motorPass', 'uint8_t')
+        print("Mi sono connesso al drone %s all'indirizzo %s" %(iddio, uro))
         # print("Questi sono tutti i droni che abbiamo %s" %(drogni))
+
+#def printStatus():
+
 
 def propellerTest():
     print("Inizio Propeller Test... ")
