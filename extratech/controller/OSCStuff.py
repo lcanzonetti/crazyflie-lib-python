@@ -136,12 +136,12 @@ def uploadSequence(coddii,quale):
                 drogni[drogno].upload_trajectory(quale)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
-def startTest (coddii,quale):
+def startTestSequence (coddii,quale):
         print('chief says we\'re gonna do testsss at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
                 print('cazzodio')
-                drogni[drogno].startTest(quale, False)
+                drogni[drogno].startTestSequence(quale, False)
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def go        (coddii,quale):
@@ -252,7 +252,19 @@ def engage    (coddii, chi):
     else:
         if not drogni[chi].isEngaged: drogni[chi].isEngaged = True
         else: drogni[chi].isEngaged = False
+def enable_log(coddii, chi):
+    if chi == 'all':    
+        for drogno in drogni:
+            if not drogni[drogno].isLogEnabled:
+                drogni[drogno].isLogEnabled = True
+                print(' enabling Logging for %s' % chi )
+            else:
+                drogni[drogno].isLogEnabled = False
+                print(' disabling Logging for %s' % chi )
 
+    else:
+        if not drogni[chi].isLogEnabled: drogni[chi].isLogEnabled = True
+        else: drogni[chi].isLogEnabled = False
 ###########################  single fella
 def printAndSendCoordinates():
     global drogni
@@ -344,8 +356,6 @@ def start_server():      ######################    #### OSC init    #########   
 
     osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
-    
- 
    
     if AGGREGATION_ENABLED:
         global aggregatorInstance
@@ -360,7 +370,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/notch/drone*/color", setRequestedCol, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
     ###########################  swarm or single commnands
     osc_method("/takeOff",          takeOff,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/startTest",        startTest,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/startTest",        startTestSequence, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/upload",           uploadSequence,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     # osc_method("/go",               go,              argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/land",             land,            argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
@@ -377,6 +387,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/wakeUp",           wakeUp,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/resetEstimator",   resetEstimator,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+    osc_method("/enable_log",       enable_log,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/engage",           engage,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

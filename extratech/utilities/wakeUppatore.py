@@ -7,25 +7,12 @@ from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
 
+droni = 20
+radio = 2
 
-uris = [    
-        # 'radio://0/80/2M/E7E7E7E7E0',
-          'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://1/120/2M/E7E7E7E7E3',
-        'radio://1/120/2M/E7E7E7E7E4', 
-        'radio://4/90/2M/E7E7E7E7E5',
-        'radio://3/100/2M/E7E7E7E7E6',
-        'radio://3/100/2M/E7E7E7E7E7',
-        # 'radio://2/100/2M/E7E7E7E7E8',
-        # 'radio://3/110/2M/E7E7E7E7E9',
-        # 'radio://0/110/2M/E7E7E7E7EA',
-        ]
- 
- 
 def main():
     print('Waking up devices')
-    for uri in uris:
+    for uri in create_CF_list(droni, radio):
         try:
             PowerSwitch(uri).stm_power_up()
             print(Fore.GREEN + '%s has been woke upped!' % uri)
@@ -45,3 +32,14 @@ def wakeUpSingle(uri):
 if __name__ == '__main__':
     main()
 
+
+def create_CF_list(numero_massimo_droni = 20, radio_installate = 2):
+    canali_radio = [80, 100, 110, 120]
+    list = []
+    numero = 996028180448   ## E7E7E7E7E0
+    for drone_potenziale in range (numero, numero + numero_massimo_droni):
+        for canale in canali_radio:
+            for radio in range(radio_installate):
+                esadecimalato = hex(drone_potenziale)
+                list.append(f'radio://{radio}//{canale}//{esadecimalato}')
+    return list
