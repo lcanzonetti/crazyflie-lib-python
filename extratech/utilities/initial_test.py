@@ -117,8 +117,8 @@ closeAllLinks()
 
 class dataDrone():
     def __init__(self, ID, ):
-        self.ID          = int(ID)
-        self.name        = 'dataDrone'+str(ID)
+        self.ID                     = int(ID)
+        self.name                   = 'dataDrone'+str(ID)
         self.propeller_test_result  = [0,0,0,0]
         self.propeller_test_passed    = False
         self.battery_test_passed    = False
