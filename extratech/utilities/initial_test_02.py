@@ -21,8 +21,8 @@ from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 
-import Drogno
-from   main                                       import threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS, lastRecordPath
+# import Drogno
+# from   main                                       import threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS, lastRecordPath
 
 available = []
 
@@ -88,9 +88,9 @@ def connectToEverything():
         except KeyError as e:
             print('Could not start log configuration,' '{} not found in TOC'.format(str(e)))
         except AttributeError:
-          print('Could not add log config, bad configuration.')
+            print('Could not add log config, bad configuration.')
         except RuntimeError:
-          print('Porco il padre eterno e al su madonnina')
+            print('Porco il padre eterno e al su madonnina')
 
         print("Mi sono connesso al drone %s all'indirizzo %s" %(iddio, uro))
         # print("Questi sono tutti i droni che abbiamo %s" %(drogni))
