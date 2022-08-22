@@ -9,6 +9,19 @@ def assegna_BIT_a_lista(numero):
     motori[3] = (numero >> 0) & 1
     return motori
 
-print(assegna_BIT_a_lista(1))
-print(assegna_BIT_a_lista(4))
-print(assegna_BIT_a_lista(17))
+GINO  = True
+CARLO = True
+
+def ginnico(chiVoglioAssertare):
+    assert(chiVoglioAssertare)
+    print("%s è ginnico" % chiVoglioAssertare)
+
+
+def sonoGinnici():
+    try:
+        ginnico(GINO)
+        ginnico(CARLO)
+    except AssertionError:
+        print('non sono tutti ginnici')
+    print('sono tutti ginnici')
+sonoGinnici()ca
