@@ -3,16 +3,25 @@
 
 
 import time
-import sys
+import sys, os
+from dotenv import load_dotenv
+load_dotenv()
+
+CONTROLLER_PATH =  os.environ.get("CONTROLLER_PATH")
+print (CONTROLLER_PATH)
 
 import logging
+from   pprint import pprint
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 
-# import simpleDrogno
+# adding Folder_2/subfolder to the system path
+sys.path.append(CONTROLLER_PATH)
+pprint(sys.path)
+import Drogno
 
 available = []
 
@@ -109,3 +118,16 @@ closeAllLinks()
 
 ## _funzione stampa             prendono istanza da lista droni presenti - stampa i risultati (e dato riassuntivo)
 
+
+
+class dataDrone():
+    def __init__(self, ID, ):
+        self.ID          = int(ID)
+        self.name        = 'bufferDrone'+str(ID)
+        self.requested_X            = 0.0
+        self.requested_Y            = 0.0
+        self.requested_Z            = 1.0
+        self.requested_R            = 0
+        self.requested_G            = 0
+        self.requested_B            = 0
+        self.yaw                   = 0.0
