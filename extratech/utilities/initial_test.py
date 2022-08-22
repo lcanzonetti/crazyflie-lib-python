@@ -5,7 +5,7 @@
 import time
 import os
 
-from dotenv import load_dotenv
+from   dotenv                                     import load_dotenv
 
 load_dotenv()
 
@@ -78,10 +78,21 @@ def connectToEverything():
     
     for uro in available:
         iddio = IDFromURI(uro)
-        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        drogni[iddio] = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(iddio))
         drogni[iddio].open_link(uro)
         drogni[iddio]._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
         drogni[iddio]._lg_kalm.add_variable('health.motorPass', 'uint8_t')
+
+        try:
+            drogni[iddio].log.add_config(drogni[iddio._lg_kalm])
+        
+        except KeyError as e:
+            print('Could not start log configuration,' '{} not found in TOC'.format(str(e)))
+        except AttributeError:
+          print('Could not add log config, bad configuration.')
+        except RuntimeError:
+          print('Porco il padre eterno e al su madonnina')
+
         print("Mi sono connesso al drone %s all'indirizzo %s" %(iddio, uro))
         # print("Questi sono tutti i droni che abbiamo %s" %(drogni))
 
