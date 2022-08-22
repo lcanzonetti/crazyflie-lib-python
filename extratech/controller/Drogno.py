@@ -22,24 +22,24 @@ from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
 import OSC_feedabcker as feedbacker
 
-BOX_X                 = 2.2
-BOX_Y                 = 2.2
-BOX_Z                 = 2.2
-LIGHTHOUSE_METHOD     = '0'
-DEFAULT_HEIGHT        = 0.8
-DEFAULT_VELOCITY      = 0.85
+BOX_X                   = 2.2
+BOX_Y                   = 2.2
+BOX_Z                   = 2.2
+LIGHTHOUSE_METHOD       = '0'
+DEFAULT_HEIGHT          = 0.8
+DEFAULT_VELOCITY        = 0.85
 DEFAULT_SCRAMBLING_TIME = 2.2
-RELATIVE_SPACING      = 0.4
-BATTERY_CHECK_RATE    = 0.5
-STATUS_PRINT_RATE     = 1.1
-LOGGING_FREQUENCY     = 1000
-COMMANDS_FREQUENCY    = 0.1
-FEEDBACK_SENDING_IP   = '127.0.0.1'
-FEEDBACK_SENDING_PORT = 9203
-FEEDBACK_ENABLED      = True
-CLAMPING              = True
-RING_FADE_TIME        = 0.001
-INITIAL_TEST          = True
+RELATIVE_SPACING        = 0.4
+BATTERY_CHECK_RATE      = 0.5
+STATUS_PRINT_RATE       = 1.1
+LOGGING_FREQUENCY       = 1000
+COMMANDS_FREQUENCY      = 0.1
+FEEDBACK_SENDING_IP     = '127.0.0.1'
+FEEDBACK_SENDING_PORT   = 9203
+FEEDBACK_ENABLED        = True
+CLAMPING                = True
+RING_FADE_TIME          = 0.001
+INITIAL_TEST            = True
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
