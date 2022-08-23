@@ -56,7 +56,6 @@ def istanziaClassi():
         iddio = IDFromURI(uro)
         print(uro)
         datadrogni[iddio] = DataDrogno.dataDrone(iddio, uro)
-        DataDrogno.dataDrone()
         datadrogni[iddio].connectToEverything()
 
 def IDFromURI(uri) -> int:
