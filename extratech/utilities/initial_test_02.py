@@ -1,5 +1,9 @@
 ###
 ### test iniziale:
+
+import pandas as pd
+from IPython.display import display
+
 import threading
 import time, os, sys, logging 
 from   pprint import pprint
@@ -14,20 +18,23 @@ from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 import   DataDrogno  
+
+
 available  = []
 datadrogni = {}
+# tabellona  = pd.DataFrame(columns=['Drone', 'Motor Pass', 'Battery Sag', 'Battery Test Passed', 'Radio RSSI'])
 iddio      = 0
 PRINTRATE  = 1
 paginegialle = [
     # 'E7E7E7E7E0',
     # 'E7E7E7E7E1',
     # 'E7E7E7E7E2',
-    'E7E7E7E7E3',
+    # 'E7E7E7E7E3',
     # 'E7E7E7E7E4',
-    # 'E7E7E7E7E5',
+    'E7E7E7E7E5',
     # 'E7E7E7E7E6',
     # 'E7E7E7E7E7',
-    # 'E7E7E7E7E8',
+    'E7E7E7E7E8',
     # 'E7E7E7E7E9'
 ]
 
@@ -64,10 +71,30 @@ def IDFromURI(uri) -> int:
             return None
 
 def check_if_test_is_completed():
- 
+    
+    dataframes = []
+
     while not (all (datadrogni[datadrogno].is_testing_over != False for datadrogno in datadrogni)):
         time.sleep(1)
+        
     test_completed = True
+
+    for drogno in datadrogni:
+        # print(datadrogni[drogno].battery_sag)
+        # print(datadrogni[drogno].battery_voltage)
+        # print(datadrogni[drogno].RSSI)
+        i = 0
+        dataframe = pd.DataFrame({'Battery Sag'     : [datadrogni[drogno].battery_sag],
+                                  'Battery Voltage' : [datadrogni[drogno].battery_voltage],
+                                  'RSSI'            : [datadrogni[drogno].RSSI]},
+                                  index             = ['Drone ' + str(drogno)])
+        dataframes.append(dataframe)
+        i += 1
+    
+    df = pd.concat([drogno for drogno in dataframes])
+        
+    display(df)
+    print()
     print('tutti i test sono stati completati')
 
 def main():
@@ -78,6 +105,7 @@ def main():
     except Exception as e:
         print(".")
     istanziaClassi()
+    # display(tabellona)
     check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
 
 if __name__ == '__main__':
