@@ -14,6 +14,8 @@ class dataDrone(threading.Thread):
         self.ID                     = int(ID)
         self.link_uri               = link_uri
         self.name                   = 'dataDrone '+str(ID)
+        self.test_tracker           = [0, 0]
+        self.is_testing_over        = False
         self.propeller_test_result  = [0,0,0,0]
         self.propeller_test_passed  = False
         self.battery_test_passed    = False
@@ -24,7 +26,20 @@ class dataDrone(threading.Thread):
         self._cf.connected.add_callback(self._connected)
         # self._cf.param.all_updated.add_callback(self._all_params_there)
         self._cf.fully_connected.add_callback(self._fully_connected)
-
+        self.test_checker()
+    
+    def test_checker(self):
+        while not self.is_testing_over:
+            for test in self.test_tracker():
+                if test == 0:
+                    pass
+                else:
+                    self.is_testing_over = True
+                    print ("test finiti per CF %S " % self.name)
+                    self.close_link()
+        
+        
+ 
     def IDFromURI(self, uri) -> int:
     # Get the address part of the uri
         address = uri.rsplit('/', 1)[-1]
@@ -36,6 +51,10 @@ class dataDrone(threading.Thread):
             return None
     
     ### _test propellers           prendono istanza da lista drone, fa il check, scrive il risultato 
+
+    def battery_test(self):
+        self.battery_test_passed = True
+        self.test_tracker[1]     = 1
 
     def propellerTest(self):
         print("Inizio Propeller Test... ")
@@ -68,7 +87,7 @@ class dataDrone(threading.Thread):
     def _fully_connected(self, link_uri):
         # self.connectToEverything()
         self.propellerTest()
-        self.close_link()
+        self.battery_test()
         
     ### _routine connetti droni  array con canali --> connessione  --> istanzia classe drogno presente e lista droni presenti
 
@@ -88,3 +107,4 @@ class dataDrone(threading.Thread):
     def propeller_callback(self, timestamp, data, logconf):
         motor_pass = data['health.motorPass']
         print('Motor Pass: {}'.format(motor_pass))
+        self.test_tracker[0] = 1

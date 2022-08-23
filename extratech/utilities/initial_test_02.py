@@ -56,6 +56,7 @@ def istanziaClassi():
         iddio = IDFromURI(uro)
         print(uro)
         datadrogni[iddio] = DataDrogno.dataDrone(iddio, uro)
+        DataDrogno.dataDrone()
         datadrogni[iddio].connectToEverything()
 
 def IDFromURI(uri) -> int:
@@ -76,6 +77,7 @@ def closeAllLinks():
 
 def main():
     cflib.crtp.init_drivers()
+    time.sleep(2)
     try:
         scan_for_crazyflies()
     except Exception as e:
