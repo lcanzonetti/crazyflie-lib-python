@@ -1,5 +1,6 @@
 ###
 ### test iniziale:
+import threading
 import time, os, sys, logging 
 from   pprint import pprint
 from   dotenv import load_dotenv
@@ -14,7 +15,6 @@ import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 import   DataDrogno  
 available  = []
-drogni     = {}
 datadrogni = {}
 iddio      = 0
 PRINTRATE  = 1
@@ -30,6 +30,9 @@ paginegialle = [
     # 'E7E7E7E7E8',
     # 'E7E7E7E7E9'
 ]
+
+test_completed = False
+
 
 def scan_for_crazyflies():
     global available
@@ -60,11 +63,12 @@ def IDFromURI(uri) -> int:
             print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
             return None
 
-def closeAllLinks():
-    for i in drogni:
-        drogni[i].close_link()
-        print("Ora chiudo con %s" %(i))
-
+def check_if_test_is_completed():
+ 
+    while not (all (datadrogni[datadrogno].is_testing_over != False for datadrogno in datadrogni)):
+        time.sleep(1)
+    test_completed = True
+    print('tutti i test sono stati completati')
 
 def main():
     cflib.crtp.init_drivers()
@@ -74,10 +78,13 @@ def main():
     except Exception as e:
         print(".")
     istanziaClassi()
-    closeAllLinks()
+    check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
 
 if __name__ == '__main__':
     main()
+    while not test_completed:
+        time.sleep(1)
+        pass
 
 
 
