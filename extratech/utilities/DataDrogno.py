@@ -22,6 +22,7 @@ class dataDrone(threading.Thread):
         self.RSSI                   = 0
         self.channel                = None
         self.connection_time        = None
+        self.motorTestCount         = None
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self._cf.connected.add_callback(self._connected)
         # self._cf.param.all_updated.add_callback(self._all_params_there)
@@ -57,6 +58,7 @@ class dataDrone(threading.Thread):
         log_conf = LogConfig(name='MotorPass', period_in_ms = 200)
         log_conf.data_received_cb.add_callback(self._crazyflie_logData_receiver)
         log_conf.add_variable('health.motorPass', 'uint8_t')
+        log_conf.add_variable('health.motorTestCount', 'uint16_t')
         time.sleep(2)
         self._cf.log.add_config(log_conf)
         log_conf.start()
@@ -107,10 +109,14 @@ class dataDrone(threading.Thread):
     
     def _crazyflie_logData_receiver(self, timestamp, data, logconf):
         print('alle %s il crazyflie %s mi loggherebbe:' % (timestamp, self.name))
-
-        if data['health.motorpass'] != 0:
-            print(convert_motor_pass(data['health.motorpass']))
+        # print(data)
+        # {'health.motorPass': 15, 'health.motorTestCount': 5}
+        if self.motorTestCount != None and self.motorTestCount != data['health.motorTestCount']:
+            print(convert_motor_pass(data['health.motorPass']))
             self.test_tracker[0] = 1
+        else:
+            self.motorTestCount = data['health.motorTestCount']
+
 
 def convert_motor_pass(numeroBinario):
     motori = [1,1,1,1]
