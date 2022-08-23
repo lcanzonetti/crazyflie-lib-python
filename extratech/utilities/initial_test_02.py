@@ -12,51 +12,43 @@ from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
-
-
 import   DataDrogno  
-
 available  = []
 drogni     = {}
 datadrogni = {}
 iddio      = 0
 PRINTRATE  = 1
 paginegialle = [
-    'E7E7E7E7E0',
-    'E7E7E7E7E1',
-    'E7E7E7E7E2',
+    # 'E7E7E7E7E0',
+    # 'E7E7E7E7E1',
+    # 'E7E7E7E7E2',
     'E7E7E7E7E3',
-    'E7E7E7E7E4',
-    'E7E7E7E7E5',
-    'E7E7E7E7E6',
-    'E7E7E7E7E7',
-    'E7E7E7E7E8',
-    'E7E7E7E7E9'
+    # 'E7E7E7E7E4',
+    # 'E7E7E7E7E5',
+    # 'E7E7E7E7E6',
+    # 'E7E7E7E7E7',
+    # 'E7E7E7E7E8',
+    # 'E7E7E7E7E9'
 ]
-
 
 def scan_for_crazyflies():
     global available
     print("Scanning for available radios...")
     for i in paginegialle:
         available.extend(cflib.crtp.scan_interfaces(address=int(i, 16)))
-    
     available = list(filter(None, available))
     available = [x[0] for x in available]
-
     print("\nTrovate %s radio!" %(len(available)))
     for i in available:
         print(i)
     print("\n")
-
     return available
 
 def istanziaClassi():
     for uro in available:
         iddio = IDFromURI(uro)
-        print(uro)
         datadrogni[iddio] = DataDrogno.dataDrone(iddio, uro)
-        datadrogni[iddio].connectToEverything()
+        datadrogni[iddio].connect()
 
 def IDFromURI(uri) -> int:
     # Get the address part of the uri

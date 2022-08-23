@@ -300,7 +300,6 @@ class Drogno(threading.Thread):
             time.sleep(1)
             self._fully_connected(self.link_uri)           
 
-
     def reconnect(self):
         def mariconnetto():
             if self.recconnectionAttempts == 0:
@@ -331,7 +330,6 @@ class Drogno(threading.Thread):
         
     def _all_params_there(self, link_uri):
         print('Parametri scricati per' % self.name)
-
 
     def _fully_connected(self, link_uri):  ##########   where a lot of things happen
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)

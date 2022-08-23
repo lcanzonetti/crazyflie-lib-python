@@ -71,8 +71,8 @@ class dataDrone(threading.Thread):
         # print("Il test ha dato risultato: %s" % (self._cf.param.get_value('health.startPropTest', timeout=60)))
 
     def _connected(self, link_uri):   
-        """ This callback is called form the Crazyflie API when a Crazyflie
-        has been connected and the TOCs have been downloaded."""
+        self._cf.is_connected = True
+        print("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
     
     # def _all_params_there(self, link_uri):
@@ -86,11 +86,11 @@ class dataDrone(threading.Thread):
         
     ### _routine connetti droni  array con canali --> connessione  --> istanzia classe drogno presente e lista droni presenti
 
-    def connectToEverything(self):
+    def connect(self):
+        print("provo a connettermi al drone %s " % self.name)
         self._cf.open_link(self.link_uri)
         self.connection_time = time.time()
-        self._cf.is_connected = True
-        print("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
+
     
     def close_link(self):
         self._cf.close_link()
@@ -107,8 +107,15 @@ class dataDrone(threading.Thread):
     
     def _crazyflie_logData_receiver(self, timestamp, data, logconf):
         print('alle %s il crazyflie %s mi loggherebbe:' % (timestamp, self.name))
-        print(data)
 
+        if data['health.motorpass'] != 0:
+            print(convert_motor_pass(data['health.motorpass']))
+            self.test_tracker[0] = 1
 
-        if (all ((data.motorPass == 0):
-        #     self.test_tracker[0] = 1
+def convert_motor_pass(numeroBinario):
+    motori = [1,1,1,1]
+    motori[0] = (numeroBinario >> 3) & 1
+    motori[1] = (numeroBinario >> 2) & 1
+    motori[2] = (numeroBinario >> 1) & 1
+    motori[3] = (numeroBinario >> 0) & 1
+    return motori
