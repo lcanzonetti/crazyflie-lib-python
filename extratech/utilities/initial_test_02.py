@@ -2,6 +2,7 @@
 ### test iniziale:
 
 
+from sqlite3 import connect
 import time
 import os
 
@@ -17,6 +18,8 @@ import logging
 from   pprint import pprint
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
+from   cflib.crazyflie.mem                        import MemoryElement
+from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
@@ -24,9 +27,96 @@ from   cflib.crazyflie.log                        import LogConfig
 # import Drogno
 # from   main                                       import threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS, lastRecordPath
 
+class dataDrone():
+    def __init__(self, ID, link_uri):
+        self.ID                     = int(ID)
+        self.link_uri               = link_uri
+        self.name                   = 'dataDrone '+str(ID)
+        self.propeller_test_result  = [0,0,0,0]
+        self.propeller_test_passed  = False
+        self.battery_test_passed    = False
+        self.RSSI                   = 0
+        self.channel                = None
+        self.connection_time        = None
+        self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
+        self._cf.connected.add_callback(self._connected)
+        # self._cf.param.all_updated.add_callback(self._all_params_there)
+        self._cf.fully_connected.add_callback(self._fully_connected)
+
+    def IDFromURI(self, uri) -> int:
+    # Get the address part of the uri
+        address = uri.rsplit('/', 1)[-1]
+        try:
+            # print(int(address, 16) - 996028180448)
+            return int(address, 16) - 996028180448
+        except ValueError:
+            print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
+            return None
+    
+    ### _test propellers           prendono istanza da lista drone, fa il check, scrive il risultato 
+
+    def propellerTest(self):
+        print("Inizio Propeller Test... ")
+              
+        log_conf = LogConfig(name='MotorPass', period_in_ms = 200)
+        print("LogConfig OK")
+        log_conf.add_variable('health.motorPass', 'uint8_t')
+        print("Aggiunta variabile")
+        time.sleep(2)
+        self._cf.log.add_config(log_conf)
+        print("Come cazzo funziona sto coso")
+        # log_conf.data_received_cb.add_callback(self.propeller_callback())
+        # log_conf.start()
+
+        print("Propeller Test per il Drone %s" %(self.ID))
+        self._cf.param.request_update_of_all_params()
+        time.sleep(2)
+        self._cf.param.set_value('health.startPropTest', '1')
+        time.sleep(5)
+        print("Il test ha dato risultato: %s" % (self._cf.param.get_value('health.startPropTest', timeout=60)))
+
+    def _connected(self, link_uri):   
+        """ This callback is called form the Crazyflie API when a Crazyflie
+        has been connected and the TOCs have been downloaded."""
+        print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
+    
+    # def _all_params_there(self, link_uri):
+    #     print('Parametri scricati per' % self.name)
+
+    def _fully_connected(self, link_uri):
+        # self.connectToEverything()
+        self.propellerTest()
+        self.closeAllLinks()
+        
+    ### _routine connetti droni  array con canali --> connessione  --> istanzia classe drogno presente e lista droni presenti
+
+    def connectToEverything(self):
+        global available
+
+        self._cf.open_link(self.link_uri)
+        self.connection_time = time.time()
+        self._cf.is_connected = True
+
+        print("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
+    
+    def closeAllLinks(self):
+
+        self._cf.close_link()
+        print("Ora chiudo con %s" %(self.ID))
+
+    def propeller_callback(self, timestamp, data, logconf):
+        motor_pass = data['health.motorPass']
+        print('Motor Pass: {}'.format(motor_pass))
+
 available = []
 
 drogni = {}
+
+datadrogni = {}
+
+iddio = 0
+
+PRINTRATE = 1
 
 paginegialle = [
     'E7E7E7E7E0',
@@ -41,17 +131,17 @@ paginegialle = [
     'E7E7E7E7E9'
 ]
 
+### _routine componi indirizzi --> array indirizzi
+
 def IDFromURI(uri) -> int:
     # Get the address part of the uri
-    address = uri.rsplit('/', 1)[-1]
-    try:
-        # print(int(address, 16) - 996028180448)
-        return int(address, 16) - 996028180448
-    except ValueError:
-        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
-        return None
-
-### _routine componi indirizzi --> array indirizzi
+        address = uri.rsplit('/', 1)[-1]
+        try:
+            # print(int(address, 16) - 996028180448)
+            return int(address, 16) - 996028180448
+        except ValueError:
+            print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
+            return None
 
 def scanEverything():
     global available
@@ -70,42 +160,12 @@ def scanEverything():
 
     return available
 
-### _routine connetti droni  array con canali --> connessione  --> istanzia classe drogno presente e lista droni presenti
-
-def connectToEverything():
-    global available
-    
+def istanziaClassi():
     for uro in available:
         iddio = IDFromURI(uro)
-        drogni[iddio] = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(iddio))
-        drogni[iddio].open_link(uro)
-        drogni[iddio]._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=100)
-        drogni[iddio]._lg_kalm.add_variable('health.motorPass', 'uint8_t')
-
-        try:
-            drogni[iddio].log.add_config(drogni[iddio._lg_kalm])
-        
-        except KeyError as e:
-            print('Could not start log configuration,' '{} not found in TOC'.format(str(e)))
-        except AttributeError:
-            print('Could not add log config, bad configuration.')
-        except RuntimeError:
-            print('Porco il padre eterno e al su madonnina')
-
-        print("Mi sono connesso al drone %s all'indirizzo %s" %(iddio, uro))
-        # print("Questi sono tutti i droni che abbiamo %s" %(drogni))
-
-#def printStatus():
-
-
-def propellerTest():
-    print("Inizio Propeller Test... ")
-    for drogno in drogni:
-        print("Propeller Test per il Drone %s" %(drogno))
-        drogni[drogno].param.request_update_of_all_params()
-        time.sleep(2)
-        drogni[drogno].param.set_value('health.startPropTest', '1')
-        time.sleep(3)
+        print(uro)
+        datadrogni[iddio] = dataDrone(iddio, uro)
+        datadrogni[iddio].connectToEverything()
 
 def closeAllLinks():
 
@@ -116,31 +176,24 @@ def closeAllLinks():
 # Initiate the low level drivers
 cflib.crtp.init_drivers()
 
-
-scanEverything()
-connectToEverything()
-propellerTest()
-closeAllLinks()
-
 ### _routine componi indirizzi completi:   array indirizzi --> array con canali
 
 ### _routine connessione  prendi da un pool di thread e provi. 
 
 ###  routine esegui test:      prendono istanza da lista drone, fa partire i test e controlla che siano finiti, infine fa partire la stampa
 ### _test batteria             prendono istanza da lista drone, fa il check, scrive il risultato 
-### _test propellers           prendono istanza da lista drone, fa il check, scrive il risultato 
+
 ### _test radio (verificare un buon valore)  prendono istanza da lista drone, fa il check, scrive il risultato 
 
 ## _funzione stampa             prendono istanza da lista droni presenti - stampa i risultati (e dato riassuntivo)
 
+def main():
+    scanEverything()
+    istanziaClassi()
+    # connectToEverything()     viene chiamato dalla callback _fully_connected
+    # propellerTest()           """"
+    closeAllLinks()
 
+if __name__ == '__main__':
+    main()
 
-class dataDrone():
-    def __init__(self, ID, ):
-        self.ID                     = int(ID)
-        self.name                   = 'dataDrone'+str(ID)
-        self.propeller_test_result  = [0,0,0,0]
-        self.propeller_test_passed    = False
-        self.battery_test_passed    = False
-        self.RSSI                   = 0
-        self.channel                = None
