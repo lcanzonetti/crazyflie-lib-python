@@ -9,6 +9,7 @@ from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
 
 from main import WE_ARE_FAKING_IT
+from main import LOGGING_ENABLED
 coloInit(convert=True)
 
 #crazyflie'sm
@@ -61,7 +62,7 @@ class Drogno(threading.Thread):
         self.isBatterytestPassed    = False
         self.isFlying               = False
         self.controlThread          = False
-        self.isLogEnabled           = True
+        self.isLogEnabled           = LOGGING_ENABLED
         self.printThread            = False
         self.printRate              = STATUS_PRINT_RATE
         # self.currentSequenceThread  = False
@@ -118,17 +119,18 @@ class Drogno(threading.Thread):
         self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
         ################################################## logging
-        now = datetime.now() # current date and time
-        date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
-        logName = "./extratech/controller/drognoLogs/" + self.name + "_" +date_time + ".log"
-        os.makedirs(os.path.dirname(logName), exist_ok=True)
-        self.LoggerObject = logging.getLogger(self.name)
-        self.LoggerObject.setLevel(logging.DEBUG)
-        self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
-        self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%d-%m-%Y %H:%M:%S')
-        self.file_handler.setFormatter(self.formatter)
-        self.LoggerObject.addHandler(self.file_handler)
-        self.LoggerObject.info('This is dronelog running on %s' % self.name)
+        if (LOGGING_ENABLED):
+            now = datetime.now() # current date and time
+            date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
+            logName = "./extratech/controller/drognoLogs/" + self.name + "_" +date_time + ".log"
+            os.makedirs(os.path.dirname(logName), exist_ok=True)
+            self.LoggerObject = logging.getLogger(self.name)
+            self.LoggerObject.setLevel(logging.DEBUG)
+            self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
+            self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%d-%m-%Y %H:%M:%S')
+            self.file_handler.setFormatter(self.formatter)
+            self.LoggerObject.addHandler(self.file_handler)
+            self.LoggerObject.info('This is dronelog running on %s' % self.name)
 
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name)
@@ -163,8 +165,8 @@ class Drogno(threading.Thread):
         # in each direction and each log block uses one packet per log.
         # So it should be possible to log at 100Hz a couple of log blocks. 
 
-        self.LoggerObject.info('Logger started')
         if self.isLogEnabled:
+            self.LoggerObject.info('Logger started')
             while not self.exitFlag.is_set():
                 time.sleep(self.printRate)
                 if not WE_ARE_FAKING_IT:    
@@ -817,7 +819,7 @@ class Drogno(threading.Thread):
             if level<3.50:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
-                self.LoggerObject.warning("battery under 3.50v")
+                if (self.isLogEnabled):  self.LoggerObject.warning("battery under 3.50v")
 
                 # self.isReadyToFly = False
             if level<3.33:
@@ -828,7 +830,7 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    self.LoggerObject.error("battery under 3.33v ! GOING DOWN")
+                    if (self.isLogEnabled): self.LoggerObject.error("battery under 3.33v ! GOING DOWN")
                     self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
@@ -872,7 +874,7 @@ class Drogno(threading.Thread):
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
-        self.LoggerObject.warning("closing %s"% self.name)
+        if (self.isLogEnabled): self.LoggerObject.warning("closing %s"% self.name)
 
         self.isKilled = True
         self._cf.close_link()

@@ -41,6 +41,7 @@ uris = [
 
 lastRecordPath        = ''  
 WE_ARE_FAKING_IT      = True
+LOGGING_ENABLED       = False
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.04
