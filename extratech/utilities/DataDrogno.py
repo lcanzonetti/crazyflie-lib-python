@@ -1,4 +1,7 @@
 import threading, time, sys
+
+import numpy as np
+
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
@@ -23,6 +26,8 @@ class dataDrone(threading.Thread):
         self.battery_sag            = 0.0
         self.battery_voltage        = 0.0
         self.RSSI                   = 0
+        self.firmware_revision0     = 0
+        self.firmware_revision1     = 0
         self.channel                = None
         self.connection_time        = None
         self.motorTestCount         = None
@@ -77,7 +82,10 @@ class dataDrone(threading.Thread):
         print("il drone %s inizia il Propeller Test... " % self.name)
         self._cf.param.set_value('health.startPropTest', '1')
         
-        self._cf.param.set_value('ring.effect', '13')
+        self._cf.param.set_value('ring.effect', '7')
+        self._cf.param.set_value('ring.solidBlue', '255')
+        self._cf.param.set_value('ring.solidGreen', '0')
+        self._cf.param.set_value('ring.solidRed', '0')
 
     def _connected(self, link_uri):   
         self._cf.is_connected = True
@@ -107,10 +115,16 @@ class dataDrone(threading.Thread):
         # print(data)
         # {'health.motorPass': 15, 'health.motorTestCount': 5}
         if self.motorTestCount != None and \
-           self.motorTestCount != data['health.motorTestCount'] and \
-           self.test_tracker[0] == 0 :
+            self.motorTestCount != data['health.motorTestCount'] and \
+            self.test_tracker[0] == 0 :
             print(convert_motor_pass(data['health.motorPass']))
             self.propeller_test_result = convert_motor_pass(data['health.motorPass'])
+
+            if all(self.propeller_test_result):
+                self.propeller_test_passed = True
+            else:
+                pass
+
             self.test_tracker[0] = 1   ##propeller test completato
             self.battery_test()
             self.battery_test_started = True
@@ -120,21 +134,34 @@ class dataDrone(threading.Thread):
 
         self.battery_sag        = float(data['health.batterySag'])
         self.battery_voltage    = float(data['pm.vbat'])
+        self.RSSI               = float(data['radio.rssi'])
+        self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
+        self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
 
         if self.battery_test_started and self.battery_sag > 0.0:
-            print("battery test per CF %s eseguito" % self.name)
+            # print("battery test per CF %s eseguito" % self.name)
             if self.battery_sag < 0.9:
                 self.battery_test_passed = True
-                print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
+                
+                # print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
             else:
-                print("battery test per CF %s NON passato. il valore è %s" %  (self.name, self.battery_sag))
+                # print("battery test per CF %s NON passato. il valore è %s" %  (self.name, self.battery_sag))
+                pass
             self.test_tracker[1] = 1   # propeller test completato
-
+            if self.battery_test_passed and self.propeller_test_passed:
+                self._cf.param.set_value('ring.solidBlue', '0')
+                self._cf.param.set_value('ring.solidGreen', '255')
+                self._cf.param.set_value('ring.solidRed', '0')
+            else:
+                self._cf.param.set_value('ring.effect', '6')
+                self._cf.param.set_value('ring.solidBlue', '0')
+                self._cf.param.set_value('ring.solidGreen', '0')
+                self._cf.param.set_value('ring.solidRed', '255')
         
 
 
 def convert_motor_pass(numeroBinario):
-    motori = [1,1,1,1]
+    motori    = [1,1,1,1]
     motori[0] = (numeroBinario >> 3) & 1
     motori[1] = (numeroBinario >> 2) & 1
     motori[2] = (numeroBinario >> 1) & 1
