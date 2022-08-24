@@ -26,6 +26,9 @@ class dataDrone(threading.Thread):
         self.channel                = None
         self.connection_time        = None
         self.motorTestCount         = None
+        self.firmware0              = None
+        self.firmware1              = None
+        self.firmware_modified      = None
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self._cf.connected.add_callback(self._connected)
         self._cf.fully_connected.add_callback(self._fully_connected)
@@ -39,6 +42,7 @@ class dataDrone(threading.Thread):
             else:
                 self.is_testing_over = True
                 print ("test finiti per CF %s " % self.name)
+                print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.firmware0, self.firmware1, self.firmware_modified))
                 self.close_link()
                 
         
@@ -65,6 +69,10 @@ class dataDrone(threading.Thread):
         log_conf.add_variable('pm.vbat', 'FP16')
         log_conf.add_variable('radio.rssi',    'uint8_t')
         log_conf.add_variable('health.batterySag', 'FP16')
+        log_conf.add_variable('firmware.revision0', 'uint32_t')
+        log_conf.add_variable('firmware.revision1', 'uint16_t')
+        log_conf.add_variable('firmware.modified', 'uint8_t')
+        
 
         time.sleep(2)
         self._cf.log.add_config(log_conf)
@@ -97,8 +105,15 @@ class dataDrone(threading.Thread):
     
     def _crazyflie_logData_receiver(self, timestamp, data, logconf):
         # print('alle %s il crazyflie %s mi loggherebbe:' % (timestamp, self.name))
-        # print(data)
-        # {'health.motorPass': 15, 'health.motorTestCount': 5}
+        # qualche assegnazione di variabile:
+
+        self.battery_sag        = float(data['health.batterySag'])
+        self.battery_voltage    = float(data['pm.vbat'])
+        self.firmware0          = data['firmware.revision0']
+        self.firmware1          = data['firmware.revision1']
+        self.firmware_modified  = data['firmware.modified']
+
+
         if self.motorTestCount != None and \
            self.motorTestCount != data['health.motorTestCount'] and \
            self.test_tracker[0] == 0 :
@@ -107,12 +122,8 @@ class dataDrone(threading.Thread):
             self.test_tracker[0] = 1   ##propeller test completato
             self.battery_test()
             self.battery_test_started = True
-
         else:
             self.motorTestCount = data['health.motorTestCount']
-
-        self.battery_sag        = float(data['health.batterySag'])
-        self.battery_voltage    = float(data['pm.vbat'])
 
         if self.battery_test_started and self.battery_sag > 0.0:
             print("battery test per CF %s eseguito" % self.name)
