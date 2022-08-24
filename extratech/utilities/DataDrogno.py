@@ -1,7 +1,6 @@
+# -*- coding: utf-8 -*-
+
 import threading, time, sys
-
-import numpy as np
-
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
@@ -52,38 +51,44 @@ class dataDrone(threading.Thread):
                 self.close_link()
  
     def led_test(self):
-        # Set solid color effect
-        self._cf.param.set_value('ring.effect', '7')
-        # Set the RGB values
-        self._cf.param.set_value('ring.solidRed', '100')
-        self._cf.param.set_value('ring.solidGreen', '0')
-        self._cf.param.set_value('ring.solidBlue', '0')
-        time.sleep(2)
+        def led_test_sequence():
+            # Set solid color effect
+            self._cf.param.set_value('ring.effect', '7')
+            # Set the RGB values
+            self._cf.param.set_value('ring.solidRed', '100')
+            self._cf.param.set_value('ring.solidGreen', '0')
+            self._cf.param.set_value('ring.solidBlue', '0')
+            time.sleep(2)
+            self._cf.param.set_value('ring.solidRed', '0')
+            self._cf.param.set_value('ring.solidGreen', '100')
+            self._cf.param.set_value('ring.solidBlue', '0')
+            time.sleep(2)
+            self._cf.param.set_value('ring.solidRed', '0')
+            self._cf.param.set_value('ring.solidGreen', '0')
+            self._cf.param.set_value('ring.solidBlue', '100')
+            # # Set black color effect
+            # self._cf.param.set_value('ring.effect', '0')
+            # time.sleep(1)
 
-        # Set black color effect
-        self._cf.param.set_value('ring.effect', '0')
-        time.sleep(1)
-
-        # Set fade to color effect
-        self._cf.param.set_value('ring.effect', '14')
-        # Set fade time i seconds
-        self._cf.param.set_value('ring.fadeTime', '1.0')
-        # Set the RGB values in one uint32 0xRRGGBB
-        self._cf.param.set_value('ring.fadeColor', int('0000A0', 16))
-        time.sleep(1)
-        self._cf.param.set_value('ring.fadeColor', int('00A000', 16))
-        time.sleep(1)
-        self._cf.param.set_value('ring.fadeColor', int('A00000', 16))
-        time.sleep(1)
-
-        self.test_tracker[2] = 1   # led test completato
-
+            # # Set fade to color effect
+            # self._cf.param.set_value('ring.effect', '14')
+            # # Set fade time i seconds
+            # self._cf.param.set_value('ring.fadeTime', '1.0')
+            # # Set the RGB values in one uint32 0xRRGGBB
+            # self._cf.param.set_value('ring.fadeColor', int('0000A0', 16))
+            # time.sleep(1)
+            # self._cf.param.set_value('ring.fadeColor', int('00A000', 16))
+            # time.sleep(1)
+            # self._cf.param.set_value('ring.fadeColor', int('A00000', 16))
+            # time.sleep(1)
+            print('led test finito')
+            self.test_tracker[2] = 1   # led test completato
+        threading.Thread(target=led_test_sequence).start()
     def battery_test(self):
         self._cf.param.set_value('health.startBatTest', '1')
         def batt_control_loop():
             while self.battery_sag == 0.0:
                 time.sleep(0.3)
-
             print("il drone %s ha finito il Battery Test. " % self.name)
             if self.battery_sag < 0.81:
                 self.battery_test_passed = True
@@ -96,16 +101,24 @@ class dataDrone(threading.Thread):
     def propeller_test(self):
         self._cf.param.set_value('health.startPropTest', '1')
         def prop_control_loop():
-            while   self.new_motorTestCount == None                         and  \
-                    selfcurrent_motorTestCount == None                         and  \
-                    (self.new_motorTestCount - self.current_motorTestCount) != 1:
+            while   self.new_motorTestCount     == None                         or  \
+                    self.current_motorTestCount == None:                       
                 time.sleep(0.3)
+            while (self.new_motorTestCount - self.current_motorTestCount) != 1:
+                time.sleep(0.3)
+                print(str(self.new_motorTestCount) + ' ' + str(self.current_motorTestCount))
             print("il drone %s ha finito il Propeller Test. " % self.name)
+
+            time.sleep(1)
+            if not (all ( x != 0 for x in self.propeller_test_result)):
+                self.propeller_test_passed = True
+                
+
             self.test_tracker[0] = 1   ##propeller test completato
         threading.Thread(target=prop_control_loop).start()
      
     def configura_log(self):
-        log_conf = LogConfig(name='MotorPass', period_in_ms = 200)
+        log_conf = LogConfig(name='MotorPass', period_in_ms = 500)
         log_conf.data_received_cb.add_callback(self._crazyflie_logData_receiver)
         log_conf.add_variable('health.motorPass', 'uint8_t')
         log_conf.add_variable('health.motorTestCount', 'uint16_t')
@@ -123,9 +136,9 @@ class dataDrone(threading.Thread):
         print("il drone %s inizia il Propeller Test... " % self.name)
         self.propeller_test()
 
-        time.sleep(1.5)
+        time.sleep(7)
 
-        print("il drone %s inizia il battery test... " % self.name)
+        # print("il drone %s inizia il battery test... " % self.name)
         self.battery_test()
 
         time.sleep(1.5)

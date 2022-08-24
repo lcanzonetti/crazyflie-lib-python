@@ -10,8 +10,8 @@ from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
 
-droni = 20
-radio = 2
+droni = 8
+radio = 1
 
 def wekappa():
     print('Waking up devices')

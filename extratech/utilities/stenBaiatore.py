@@ -44,8 +44,6 @@ def standBySingle(uri):
     except Exception:
         print(Fore.RED + '%s is not there to be standByied' % uri)
  
-
-
 def create_CF_list(numero_massimo_droni = 10, radio_installate = 1):
     canali_radio = [80, 90, 100]
     list = []

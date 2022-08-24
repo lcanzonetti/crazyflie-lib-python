@@ -1,16 +1,12 @@
 ###
 ### test iniziale:
 
-from tkinter import W
 import   pandas                                     as     pd
 
 import   threading
-import   pandas
-import   time, os, sys, logging
+import   time, os, sys, signal
 import   wakeUppatore, stenBaiatore
-from     pprint                                     import pprint
 from     dotenv                                     import load_dotenv
-
 load_dotenv()
 CONTROLLER_PATH = os.environ.get('CONTROLLER_PATH')
 
@@ -21,12 +17,13 @@ from     cflib.crazyflie.mem                        import Poly4D
 from     cflib.utils                                import uri_helper
 import   cflib.crtp
 from     cflib.crazyflie.log                        import LogConfig
+from     cflib.utils.power_switch import PowerSwitch
+
 import   DataDrogno  
 
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
-
 
 available  = []
 data_d = {}
@@ -34,15 +31,15 @@ data_d = {}
 iddio      = 0
 PRINTRATE  = 1
 paginegialle = [
-    # 'E7E7E7E7E0',
-    'E7E7E7E7E1',
+    'E7E7E7E7E0',
+    # 'E7E7E7E7E1',
     # 'E7E7E7E7E2',
     # 'E7E7E7E7E3',
     # 'E7E7E7E7E4',
-    'E7E7E7E7E5',
-    'E7E7E7E7E6',
+    # 'E7E7E7E7E5',
+    # 'E7E7E7E7E6',
     # 'E7E7E7E7E7',
-    'E7E7E7E7E8',
+    # 'E7E7E7E7E8',
     # 'E7E7E7E7E9'
 ]
 
@@ -79,14 +76,10 @@ def IDFromURI(uri) -> int:
             return None
 
 def check_if_test_is_completed():
-    
     dataframes = []
-
     while not (all (data_d[datadrogno].is_testing_over != False for datadrogno in data_d)):
         time.sleep(1)
-        
     test_completed = True
-
     for drogno in data_d:
         # print(data_d[drogno].battery_sag)
         # print(data_d[drogno].battery_voltage)
@@ -110,37 +103,53 @@ def check_if_test_is_completed():
     
     print()
     print('tutti i test sono stati completati')
-    time.sleep(3)
-    print('metto a ninna tutti... ')
     time.sleep(2)
+    print('metto a ninna tutti... ')
+    # time.sleep(2)
     for drogno in data_d:
         stenBaiatore.standBySingle(data_d[drogno].link_uri)
 
+def exit_signal_handler(signum, frame):
+    print('esco')
+    # threads_exit_event.set() 
+
+    for drogno in data_d:
+        try: PowerSwitch(data_d[drogno].link_uri).stm_power_down()
+        except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % data_d[drogno].link_uri)
+   
+    sys.exit(0)
+    os._exit(0)
 
 def main():
-    
     cflib.crtp.init_drivers()
 
-    # wakeUppatore.wekappa()
-
+    wakeUppatore.wekappa()
     try:
         scan_for_crazyflies()
     except Exception as e:
         print(".")
+    signal.signal(signal.SIGINT, exit_signal_handler)
     
-    
-
     istanziaClassi()
-    # display(tabellona)
+    display(tabellona)
     check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
 
     
 
 if __name__ == '__main__':
-    main()
-    while not test_completed:
-        time.sleep(1)
-        pass
+    try:
+        main()
+        while not test_completed:
+            time.sleep(1)
+            pass
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
+    
+  
 
 
 

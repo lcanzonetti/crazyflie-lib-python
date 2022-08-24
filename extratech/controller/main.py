@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #rf 2022
 # native modules
 import logging
