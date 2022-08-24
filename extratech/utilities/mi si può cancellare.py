@@ -24,4 +24,4 @@ def sonoGinnici():
     except AssertionError:
         print('non sono tutti ginnici')
     print('sono tutti ginnici')
-sonoGinnici()ca
+sonoGinnici()
