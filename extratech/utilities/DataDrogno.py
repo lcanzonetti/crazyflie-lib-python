@@ -14,7 +14,7 @@ class dataDrone(threading.Thread):
         self.ID                     = int(ID)
         self.link_uri               = link_uri
         self.name                   = 'dataDrone '+str(ID)
-        self.test_tracker           = [0, 0] # val 0 = props; val 1 = battery
+        self.test_tracker           = [0, 0, 0] # val 0 = props; val 1 = battery; val 2 = leds
         self.is_testing_over        = False
         self.propeller_test_result  = [0,0,0,0]
         self.battery_test_started   = False
@@ -28,8 +28,8 @@ class dataDrone(threading.Thread):
         self.motorTestCount         = None
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self._cf.connected.add_callback(self._connected)
-        # self._cf.param.all_updated.add_callback(self._all_params_there)
         self._cf.fully_connected.add_callback(self._fully_connected)
+        self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
 
     def test_checker(self):
         while not self.is_testing_over:
@@ -52,14 +52,10 @@ class dataDrone(threading.Thread):
             print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
             return None
     
-    ### _test propellers           prendono istanza da lista drone, fa il check, scrive il risultato 
-
     def battery_test(self):
         time.sleep(1.5)
         print('comincio il battery test per %s ' % self.name)
         self._cf.param.set_value('health.startBatTest', '1')
-
-       
 
     def start_test(self):
         log_conf = LogConfig(name='MotorPass', period_in_ms = 200)
@@ -76,7 +72,6 @@ class dataDrone(threading.Thread):
         
         print("il drone %s inizia il Propeller Test... " % self.name)
         self._cf.param.set_value('health.startPropTest', '1')
-        
         self._cf.param.set_value('ring.effect', '13')
 
     def _connected(self, link_uri):   
@@ -89,8 +84,6 @@ class dataDrone(threading.Thread):
         checker           = threading.Thread(target=self.test_checker).start()
         start_test_thread = threading.Thread(target=self.start_test).start()
         
-    ### _routine connetti droni  array con canali --> connessione  --> istanzia classe drogno presente e lista droni presenti
-
     def connect(self):
         print("provo a connettermi al drone %s " % self.name)
         self._cf.open_link(self.link_uri)
@@ -123,7 +116,7 @@ class dataDrone(threading.Thread):
 
         if self.battery_test_started and self.battery_sag > 0.0:
             print("battery test per CF %s eseguito" % self.name)
-            if self.battery_sag < 0.9:
+            if self.battery_sag < 0.81:
                 self.battery_test_passed = True
                 print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
             else:

@@ -194,8 +194,7 @@ class Drogno(threading.Thread):
 
                 if not self.scramblingTime == None and self.isFlying:
                     self.flyingTime = int(time.time() - self.scramblingTime)
-
-        print('Log chiuso per %s ' % self.name)
+            print('Log chiuso per %s ' % self.name)
                     
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
@@ -368,7 +367,7 @@ class Drogno(threading.Thread):
         except RuntimeError:
           print('Porco il padre eterno e al su madonnina')
 
-        if not WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esite!
+        if not WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
             self._cf.param.set_value('commander.enHighLevel', '1')
             if INITIAL_TEST: 
                 self._cf.param.set_value('health.startBatTest', '1')
@@ -429,7 +428,7 @@ class Drogno(threading.Thread):
                 self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
             # print('carlo')
         except ConnectionRefusedError:
-            print('oooo')
+            print('Noooo! Non le riesco a dire a nessuno le cose di ' + self.name)
        
     def evaluateFlyness(self):
         if not WE_ARE_FAKING_IT:
@@ -463,7 +462,6 @@ class Drogno(threading.Thread):
         else:
             self.statoDiVolo = 'ready'
             return True
-
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -550,8 +548,7 @@ class Drogno(threading.Thread):
                 print('%s atterra! ' % self.name)
                 self.statoDiVolo = 'landing'
                 ld = threading.Thread(name=self.name+'_landingThread',target=fake_landing_sequence).start()
-                # ld.join()
-            
+               
     def goTo(self,x,y,z, yaw=0, duration=0.5):  #la zeta è in alto!
         self.commandsCount += 1
         duration = self.commandsFrequency*3
@@ -564,9 +561,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
             self.statoDiVolo = 'hovering'
-        # else:
-            # print('perhaps take off?')
-
+   
     def goLeft(self, quanto=0.3):
         if self.isFlying:
             newX = float(self.x) - float(quanto)
@@ -630,16 +625,16 @@ class Drogno(threading.Thread):
         vr = int(vr * self.ringIntensity)
         vg = int(vg * self.ringIntensity)
         vb = int(vb * self.ringIntensity)
-        # if len(self.ledMem) > 0:
-        #     self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
-        #     self.ledMem[0].write_data(None)
+        if len(self.ledMem) > 0:
+            self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[7].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[6].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[4].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[3].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[1].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].leds[0].set(r=vr, g=vg, b=vb)
+            self.ledMem[0].write_data(None)
 
         # print ('vado al colore %s' % (vr, vg, vb))
 
