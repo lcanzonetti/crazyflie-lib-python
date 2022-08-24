@@ -2,6 +2,7 @@
 ### test iniziale:
 
 import   pandas                                     as     pd
+from     IPython.display                            import display
 
 import   threading
 import   time, os, sys, signal
@@ -99,6 +100,7 @@ def check_if_test_is_completed():
         i += 1
     
     df = pd.concat([drogno for drogno in dataframes])
+    display(df)
     # df = df.align()
     
     print()
@@ -131,7 +133,7 @@ def main():
     signal.signal(signal.SIGINT, exit_signal_handler)
     
     istanziaClassi()
-    display(tabellona)
+    # display(tabellona)
     check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
 
     
