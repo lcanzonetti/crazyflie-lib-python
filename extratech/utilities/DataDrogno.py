@@ -95,7 +95,6 @@ class dataDrone(threading.Thread):
         print("provo a connettermi al drone %s " % self.name)
         self._cf.open_link(self.link_uri)
         self.connection_time = time.time()
-        print('ciao')
 
     def close_link(self):
         self._cf.close_link()

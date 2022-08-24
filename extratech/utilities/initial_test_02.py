@@ -5,7 +5,9 @@ import pandas as pd
 from IPython.display import display
 
 import threading
-import time, os, sys, logging 
+import pandas
+import time, os, sys, logging
+import wakeUppatore, stenBaiatore
 from   pprint import pprint
 from   dotenv import load_dotenv
 load_dotenv()
@@ -98,8 +100,8 @@ def check_if_test_is_completed():
     print('tutti i test sono stati completati')
 
 def main():
+    wakeUppatore.main()
     cflib.crtp.init_drivers()
-    time.sleep(2)
     try:
         scan_for_crazyflies()
     except Exception as e:

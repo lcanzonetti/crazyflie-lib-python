@@ -30,7 +30,7 @@ import cflib.crtp
 cflib.crtp.init_drivers()
 
 print('Scanning interfaces for Crazyflies...')
-available = cflib.crtp.scan_interfaces(address=int('E7E7E7E7E7', 16)
+available = cflib.crtp.scan_interfaces(address=int('E7E7E7E7E3', 16)
                                        )
 print('Crazyflies found:')
 for i in available:
