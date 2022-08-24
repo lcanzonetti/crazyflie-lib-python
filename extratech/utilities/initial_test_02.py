@@ -3,7 +3,6 @@
 
 from tkinter import W
 import   pandas                                     as     pd
-from     IPython.display                            import display
 
 import   threading
 import   pandas
@@ -109,7 +108,6 @@ def check_if_test_is_completed():
     df = pd.concat([drogno for drogno in dataframes])
     # df = df.align()
     
-    display(df)
     print()
     print('tutti i test sono stati completati')
     time.sleep(3)
@@ -123,7 +121,7 @@ def main():
     
     cflib.crtp.init_drivers()
 
-    wakeUppatore.wekappa()
+    # wakeUppatore.wekappa()
 
     try:
         scan_for_crazyflies()

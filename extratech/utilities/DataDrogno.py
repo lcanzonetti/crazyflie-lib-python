@@ -96,7 +96,9 @@ class dataDrone(threading.Thread):
     def propeller_test(self):
         self._cf.param.set_value('health.startPropTest', '1')
         def prop_control_loop():
-            while(self.new_motorTestCount - self.current_motorTestCount) != 1:
+            while   self.new_motorTestCount == None                         and  \
+                    selfcurrent_motorTestCount == None                         and  \
+                    (self.new_motorTestCount - self.current_motorTestCount) != 1:
                 time.sleep(0.3)
             print("il drone %s ha finito il Propeller Test. " % self.name)
             self.test_tracker[0] = 1   ##propeller test completato
@@ -110,9 +112,6 @@ class dataDrone(threading.Thread):
         log_conf.add_variable('pm.vbat', 'FP16')
         log_conf.add_variable('radio.rssi',    'uint8_t')
         log_conf.add_variable('health.batterySag', 'FP16')
-        log_conf.add_variable('firmware.revision0', 'uint32_t')
-        log_conf.add_variable('firmware.revision1', 'uint16_t')
-        log_conf.add_variable('firmware.modified', 'uint8_t')
         self._cf.log.add_config(log_conf)
         # time.sleep(0.5)
         log_conf.start()
