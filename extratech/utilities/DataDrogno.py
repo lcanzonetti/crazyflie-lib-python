@@ -78,7 +78,6 @@ class dataDrone(threading.Thread):
 
         self.test_tracker[2] = 1   # led test completato
 
-
     def battery_test(self):
         self._cf.param.set_value('health.startBatTest', '1')
         def batt_control_loop():
@@ -94,7 +93,6 @@ class dataDrone(threading.Thread):
             self.test_tracker[1] = 1   # battery test completato
         threading.Thread(target=batt_control_loop).start()
 
-      
     def propeller_test(self):
         self._cf.param.set_value('health.startPropTest', '1')
         def prop_control_loop():
@@ -103,8 +101,7 @@ class dataDrone(threading.Thread):
             print("il drone %s ha finito il Propeller Test. " % self.name)
             self.test_tracker[0] = 1   ##propeller test completato
         threading.Thread(target=prop_control_loop).start()
-   
-        
+     
     def configura_log(self):
         log_conf = LogConfig(name='MotorPass', period_in_ms = 200)
         log_conf.data_received_cb.add_callback(self._crazyflie_logData_receiver)
@@ -146,6 +143,9 @@ class dataDrone(threading.Thread):
         # self.connectToEverything()
         checker           = threading.Thread(target=self.test_over_checker).start()
         start_test_thread = threading.Thread(target=self.start_sequenza_test).start()
+        self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
+        self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
+        self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
         
     def connect(self):
         print("provo a connettermi al drone %s " % self.name)
@@ -162,45 +162,15 @@ class dataDrone(threading.Thread):
         # qualche assegnazione di variabile:
         self.battery_sag           = float(data['health.batterySag'])
         self.battery_voltage       = float(data['pm.vbat'])
-        self.firmware0             = data['firmware.revision0']
-        self.firmware1             = data['firmware.revision1']
-        self.firmware_modified     = data['firmware.modified']
         self.propeller_test_result = convert_motor_pass(data['health.motorPass'])
 
-        if self.motorTestCount     == None: self.current_motorTestCount = data['health.motorTestCount']
-        else:                               self.new_motorTestCount     = data['health.motorTestCount']
-
-
-        
+        if self.current_motorTestCount   == None: self.current_motorTestCount = data['health.motorTestCount']
+        else:                                     self.new_motorTestCount     = data['health.motorTestCount']
 
         self.battery_sag        = float(data['health.batterySag'])
         self.battery_voltage    = float(data['pm.vbat'])
         self.RSSI               = float(data['radio.rssi'])
-        self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
-        self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
-
-        if self.battery_test_started and self.battery_sag > 0.0:
-            # print("battery test per CF %s eseguito" % self.name)
-            if self.battery_sag < 0.9:
-                self.battery_test_passed = True
-                
-                # print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
-            else:
-                # print("battery test per CF %s NON passato. il valore è %s" %  (self.name, self.battery_sag))
-                pass
-            self.test_tracker[1] = 1   # propeller test completato
-            if self.battery_test_passed and self.propeller_test_passed:
-                self._cf.param.set_value('ring.solidBlue', '0')
-                self._cf.param.set_value('ring.solidGreen', '255')
-                self._cf.param.set_value('ring.solidRed', '0')
-            else:
-                self._cf.param.set_value('ring.effect', '6')
-                self._cf.param.set_value('ring.solidBlue', '0')
-                self._cf.param.set_value('ring.solidGreen', '0')
-                self._cf.param.set_value('ring.solidRed', '255')
-        
-
-
+ 
 def convert_motor_pass(numeroBinario):
     motori    = [1,1,1,1]
     motori[0] = (numeroBinario >> 3) & 1
