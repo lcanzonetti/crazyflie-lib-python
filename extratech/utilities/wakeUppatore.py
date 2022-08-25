@@ -10,7 +10,7 @@ from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
 
-droni = 8
+droni = 9
 radio = 1
 
 def wekappa():
