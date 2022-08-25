@@ -2,7 +2,7 @@
 ### test iniziale:
 
 import   pandas                                     as     pd
-from     IPython.display                            import display
+from     IPython.display                            import display          ### Serve per "stampare" il DataFrame contenente i risultati
 
 import   threading
 import   time, os, sys, signal
@@ -10,6 +10,11 @@ import   wakeUppatore, stenBaiatore
 from     dotenv                                     import load_dotenv
 load_dotenv()
 CONTROLLER_PATH = os.environ.get('CONTROLLER_PATH')
+
+isExist = os.path.exists(sys.path[0] + '/Test_Resultsss')                   ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+if not isExist: os.makedirs(sys.path[0] + '/Test_Resultsss')
+
+
 
 from     cflib.crazyflie                            import Crazyflie
 from     cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -28,19 +33,18 @@ coloInit(convert=True)
 
 available  = []
 data_d = {}
-# tabellona  = pd.DataFrame(columns=['Drone', 'Motor Pass', 'Battery Sag', 'Battery Test Passed', 'Radio RSSI'])
 iddio      = 0
 PRINTRATE  = 1
 paginegialle = [
-    'E7E7E7E7E0',
-    # 'E7E7E7E7E1',
+    # 'E7E7E7E7E0',
+    'E7E7E7E7E1',
     # 'E7E7E7E7E2',
-    # 'E7E7E7E7E3',
+    'E7E7E7E7E3',
     # 'E7E7E7E7E4',
     # 'E7E7E7E7E5',
-    # 'E7E7E7E7E6',
+    'E7E7E7E7E6',
     # 'E7E7E7E7E7',
-    # 'E7E7E7E7E8',
+    'E7E7E7E7E8',
     # 'E7E7E7E7E9'
 ]
 
@@ -77,7 +81,8 @@ def IDFromURI(uri) -> int:
             return None
 
 def check_if_test_is_completed():
-    dataframes = []
+    dati_mech = []                              ### Dati "elettromeccanici" dei droni
+    dati_rev  = []                              ### Dati sulla "revisione del firmware"
     while not (all (data_d[datadrogno].is_testing_over != False for datadrogno in data_d)):
         time.sleep(1)
     test_completed = True
@@ -86,28 +91,41 @@ def check_if_test_is_completed():
         # print(data_d[drogno].battery_voltage)
         # print(data_d[drogno].RSSI)
         i = 0
-        dataframe = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
+        data_mech = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
                                   'Battery Sag'            : [data_d[drogno].battery_sag],
                                   'Battery Voltage'        : [data_d[drogno].battery_voltage],
                                   'Battery Test Pass'      : [data_d[drogno].battery_test_passed],
                                   'Propeller Test'         : [data_d[drogno].propeller_test_result],
                                   'Propeller Test Pass'    : [data_d[drogno].propeller_test_passed],
-                                  'RSSI'                   : [data_d[drogno].RSSI],
-                                  'Revisione Firmware (1)' : [data_d[drogno].firmware_revision0],
-                                  'Revisione Firmware (2)' : [data_d[drogno].firmware_revision1]},
-                                  index             = ['Drone ' + str(drogno)])
-        dataframes.append(dataframe)
+                                  'RSSI'                   : [data_d[drogno].RSSI],},
+                                  index                    = ['Drone ' + str(drogno)])
+        dati_mech.append(data_mech)
+        data_rev = pd.DataFrame({'Revisione Firmware (1)' : [data_d[drogno].firmware_revision0],
+                                 'Revisione Firmware (2)' : [data_d[drogno].firmware_revision1]},
+                                  index                   = ['Drone ' + str(drogno)])
+        dati_rev.append(data_rev)
         i += 1
     
-    df = pd.concat([drogno for drogno in dataframes])
-    display(df)
+    df1 = pd.concat([drogno for drogno in dati_mech])
+    df2 = pd.concat([drogno for drogno in dati_rev])
+    display(df1)
+    print()
+    display(df2)
+    df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati1.json', orient='index', indent=4)
+    df2.to_json(sys.path[0] + '/Test_resultsss/Risultati2.json', orient='index', indent=4)
     # df = df.align()
     
     print()
     print('tutti i test sono stati completati')
     time.sleep(2)
+    print('sto per mettere a ninna tutti...')
+
+    ### Aspetta finché il LED di ogni drone non ha finito di "lampeggiare"
+    while not (all(data_d[drogno].lampeggio_finito for drogno in data_d)):
+        time.sleep(0.5)
+    
+
     print('metto a ninna tutti... ')
-    # time.sleep(2)
     for drogno in data_d:
         stenBaiatore.standBySingle(data_d[drogno].link_uri)
 
@@ -133,7 +151,6 @@ def main():
     signal.signal(signal.SIGINT, exit_signal_handler)
     
     istanziaClassi()
-    # display(tabellona)
     check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
 
     

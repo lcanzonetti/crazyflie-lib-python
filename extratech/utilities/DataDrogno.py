@@ -22,6 +22,7 @@ class dataDrone(threading.Thread):
         self.battery_test_started   = False
         self.propeller_test_passed  = False
         self.battery_test_passed    = False
+        self.lampeggio_finito       = False     ### True se il led di notifica risultati ha finito di lampeggiare
         self.battery_sag            = 0.0
         self.battery_voltage        = 0.0
         self.RSSI                   = 0
@@ -39,6 +40,32 @@ class dataDrone(threading.Thread):
         self._cf.fully_connected.add_callback(self._fully_connected)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
 
+    ### Incapsulato cambi colore in funzioni 
+
+    def fai_rosso(self):
+        self._cf.param.set_value('ring.effect', '7')
+        self._cf.param.set_value('ring.solidRed', '255')
+        self._cf.param.set_value('ring.solidGreen', '0')
+        self._cf.param.set_value('ring.solidBlue', '0')
+    
+    def fai_verde(self):
+        self._cf.param.set_value('ring.effect', '7')
+        self._cf.param.set_value('ring.solidRed', '0')
+        self._cf.param.set_value('ring.solidGreen', '255')
+        self._cf.param.set_value('ring.solidBlue', '0')
+    
+    def fai_blu(self):
+        self._cf.param.set_value('ring.effect', '7')
+        self._cf.param.set_value('ring.solidRed', '0')
+        self._cf.param.set_value('ring.solidGreen', '0')
+        self._cf.param.set_value('ring.solidBlue', '255')
+    
+    def spegni_led(self):
+        self._cf.param.set_value('ring.effect', '7')
+        self._cf.param.set_value('ring.solidRed', '0')
+        self._cf.param.set_value('ring.solidGreen', '0')
+        self._cf.param.set_value('ring.solidBlue', '0')
+
     def test_over_checker(self):
         while not self.is_testing_over:
             if not (all ( x != 0 for x in self.test_tracker)):
@@ -46,30 +73,36 @@ class dataDrone(threading.Thread):
                 pass
             else:
                 self.is_testing_over = True
+                if self.battery_test_passed and self.propeller_test_passed:
+                    self.fai_verde()
+                    time.sleep(10)
+                    self.lampeggio_finito = True
+                else:
+                    for i in range(20):
+                        if i % 2 == 0:
+                            self.fai_rosso()
+                            time.sleep(0.5)
+                        else:
+                            self.spegni_led()
+                            time.sleep(0.5)
+                    self.lampeggio_finito = True
                 print ("test finiti per CF %s " % self.name)
-                print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.firmware0, self.firmware1, self.firmware_modified))
+                print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.firmware_revision0, self.firmware_revision1, self.firmware_modified))
                 self.close_link()
  
     def led_test(self):
         def led_test_sequence():
+            self.spegni_led()
+            time.sleep(1)
             # Set solid color effect
-            self._cf.param.set_value('ring.effect', '7')
-            # Set the RGB values
-            self._cf.param.set_value('ring.solidRed', '100')
-            self._cf.param.set_value('ring.solidGreen', '0')
-            self._cf.param.set_value('ring.solidBlue', '0')
+            self.fai_rosso()
             time.sleep(2)
-            self._cf.param.set_value('ring.solidRed', '0')
-            self._cf.param.set_value('ring.solidGreen', '100')
-            self._cf.param.set_value('ring.solidBlue', '0')
+            self.fai_verde()
             time.sleep(2)
-            self._cf.param.set_value('ring.solidRed', '0')
-            self._cf.param.set_value('ring.solidGreen', '0')
-            self._cf.param.set_value('ring.solidBlue', '100')
-            # # Set black color effect
-            # self._cf.param.set_value('ring.effect', '0')
-            # time.sleep(1)
-
+            self.fai_blu()
+            time.sleep(2)
+            self.spegni_led()
+            time.sleep(2)
             # # Set fade to color effect
             # self._cf.param.set_value('ring.effect', '14')
             # # Set fade time i seconds
@@ -84,13 +117,14 @@ class dataDrone(threading.Thread):
             print('led test finito')
             self.test_tracker[2] = 1   # led test completato
         threading.Thread(target=led_test_sequence).start()
+
     def battery_test(self):
         self._cf.param.set_value('health.startBatTest', '1')
         def batt_control_loop():
             while self.battery_sag == 0.0:
                 time.sleep(0.3)
             print("il drone %s ha finito il Battery Test. " % self.name)
-            if self.battery_sag < 0.81:
+            if self.battery_sag < 0.9:
                 self.battery_test_passed = True
                 print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
             else:
@@ -106,11 +140,11 @@ class dataDrone(threading.Thread):
                 time.sleep(0.3)
             while (self.new_motorTestCount - self.current_motorTestCount) != 1:
                 time.sleep(0.3)
-                print(str(self.new_motorTestCount) + ' ' + str(self.current_motorTestCount))
+                # print(str(self.new_motorTestCount) + ' ' + str(self.current_motorTestCount))
             print("il drone %s ha finito il Propeller Test. " % self.name)
 
             time.sleep(1)
-            if not (all ( x != 0 for x in self.propeller_test_result)):
+            if all (self.propeller_test_result):                ### Resituisce True solo se tutti i risultati motori stanno a '1'
                 self.propeller_test_passed = True
                 
 
@@ -130,6 +164,9 @@ class dataDrone(threading.Thread):
         log_conf.start()
 
     def start_sequenza_test(self):
+
+        self.fai_blu()                  ### Blue is for testing
+
         print("il drone %s configura il log... " % self.name)
         self.configura_log()
 
@@ -138,13 +175,15 @@ class dataDrone(threading.Thread):
 
         time.sleep(7)
 
-        # print("il drone %s inizia il battery test... " % self.name)
+        print("il drone %s inizia il battery test... " % self.name)
         self.battery_test()
 
         time.sleep(1.5)
 
         print("il drone %s inizia il led test... " % self.name)
         self.led_test()
+
+        time.sleep(1.5)
 
     def _connected(self, link_uri):   ## callback allo scaricamento del TOC
         self._cf.is_connected = True
