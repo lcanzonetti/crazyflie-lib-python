@@ -20,10 +20,7 @@ oggieora = oggieora.replace('-', '')
 oggieora = oggieora.replace(' ', '')
 oggieora = oggieora.replace(':', '')
 oggieora = oggieora[:-7]
-print(oggieora)
-
-
-
+# print(oggieora)
 
 from     cflib.crazyflie                            import Crazyflie
 from     cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -83,7 +80,6 @@ def IDFromURI(uri) -> int:
     # Get the address part of the uri
         address = uri.rsplit('/', 1)[-1]
         try:
-            # print(int(address, 16) - 996028180448)
             return int(address, 16) - 996028180448
         except ValueError:
             print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
@@ -96,9 +92,6 @@ def check_if_test_is_completed():
         time.sleep(1)
     test_completed = True
     for drogno in data_d:
-        # print(data_d[drogno].battery_sag)
-        # print(data_d[drogno].battery_voltage)
-        # print(data_d[drogno].RSSI)
         i = 0
         data_mech = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
                                   'Battery Sag'            : [data_d[drogno].battery_sag],
@@ -114,45 +107,46 @@ def check_if_test_is_completed():
                                   index                   = ['Drone ' + str(drogno)])
         dati_rev.append(data_rev)
         i += 1
-    
-    df1 = pd.concat([drogno for drogno in dati_mech])
-    df2 = pd.concat([drogno for drogno in dati_rev])
-    display(df1)
-    print()
-    display(df2)
-    df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
-    df2.to_json(sys.path[0] + '/Test_resultsss/Risultati_rev_' + oggieora + '.json', orient='index', indent=4)
-    # df = df.align()
-    
-    print()
-    print('tutti i test sono stati completati')
-    time.sleep(2)
-    print('sto per mettere a ninna tutti...')
+    try:
+        df1 = pd.concat([drogno for drogno in dati_mech])
+        df2 = pd.concat([drogno for drogno in dati_rev])
+        display(df1)
+        print()
+        display(df2)
+        df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
+        df2.to_json(sys.path[0] + '/Test_resultsss/Risultati_rev_' + oggieora + '.json', orient='index', indent=4)
+        # df = df.align()
+        print()
+        print('tutti i test sono stati completati')
+        time.sleep(2)
+        print('sto per mettere a ninna tutti...')
 
-    ### Aspetta finché il LED di ogni drone non ha finito di "lampeggiare"
-    while not (all(data_d[drogno].lampeggio_finito for drogno in data_d)):
-        time.sleep(0.5)
-    
-
-    print('metto a ninna tutti... ')
-    for drogno in data_d:
-        stenBaiatore.standBySingle(data_d[drogno].link_uri)
+        ### Aspetta finché il LED di ogni drone non ha finito di "lampeggiare"
+        while not (all(data_d[drogno].lampeggio_finito for drogno in data_d)):
+            time.sleep(0.5)
+        print('addormento tutti... ')
+        for drogno in data_d:
+            stenBaiatore.standBySingle(data_d[drogno].link_uri)
+    except ValueError:
+        print('mi sa che \'sto test è ito buco')
+        # sys.exit(0)
+        os._exit(0)
+        return
 
 def exit_signal_handler(signum, frame):
-    print('esco')
+    print('\nEsco.')
     # threads_exit_event.set() 
 
     for drogno in data_d:
         try: PowerSwitch(data_d[drogno].link_uri).stm_power_down()
         except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % data_d[drogno].link_uri)
-   
-    sys.exit(0)
     os._exit(0)
+    sys.exit(0)
 
 def main():
     cflib.crtp.init_drivers()
-
     wakeUppatore.wekappa()
+    
     try:
         scan_for_crazyflies()
     except Exception as e:
@@ -161,8 +155,6 @@ def main():
     
     istanziaClassi()
     check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
-
-    
 
 if __name__ == '__main__':
     try:
