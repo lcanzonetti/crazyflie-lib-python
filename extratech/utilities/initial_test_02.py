@@ -3,6 +3,7 @@
 
 import   pandas                                     as     pd
 from     IPython.display                            import display          ### Serve per "stampare" il DataFrame contenente i risultati
+from     datetime                                   import datetime
 
 import   threading
 import   time, os, sys, signal
@@ -13,6 +14,14 @@ CONTROLLER_PATH = os.environ.get('CONTROLLER_PATH')
 
 isExist = os.path.exists(sys.path[0] + '/Test_Resultsss')                   ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
 if not isExist: os.makedirs(sys.path[0] + '/Test_Resultsss')
+
+oggieora = str(datetime.now())                                              ### Crea stringa in formato yyyymmddhhmmss per creazione nome json
+oggieora = oggieora.replace('-', '')
+oggieora = oggieora.replace(' ', '')
+oggieora = oggieora.replace(':', '')
+oggieora = oggieora[:-7]
+print(oggieora)
+
 
 
 
@@ -111,8 +120,8 @@ def check_if_test_is_completed():
     display(df1)
     print()
     display(df2)
-    df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati1.json', orient='index', indent=4)
-    df2.to_json(sys.path[0] + '/Test_resultsss/Risultati2.json', orient='index', indent=4)
+    df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
+    df2.to_json(sys.path[0] + '/Test_resultsss/Risultati_rev_' + oggieora + '.json', orient='index', indent=4)
     # df = df.align()
     
     print()
