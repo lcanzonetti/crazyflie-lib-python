@@ -1,44 +1,49 @@
-###
+# -*- coding: utf-8 -*-
+### extratech 2022
 ### test iniziale:
+############   standard libraries 
+import   time, os, sys, signal, threading
 
+############   dependencies
 import   pandas                                     as     pd
 from     IPython.display                            import display          ### Serve per "stampare" il DataFrame contenente i risultati
 from     datetime                                   import datetime
-
-import   threading
-import   time, os, sys, signal
-import   wakeUppatore, stenBaiatore
+from     colorama              import Fore, Back, Style
+from     colorama              import init as coloInit  
+coloInit(convert=True)
 from     dotenv                                     import load_dotenv
 load_dotenv()
-CONTROLLER_PATH = os.environ.get('CONTROLLER_PATH')
 
-isExist = os.path.exists(sys.path[0] + '/Test_Resultsss')                   ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
-if not isExist: os.makedirs(sys.path[0] + '/Test_Resultsss')
-
-oggieora = str(datetime.now())                                              ### Crea stringa in formato yyyymmddhhmmss per creazione nome json
-oggieora = oggieora.replace('-', '')
-oggieora = oggieora.replace(' ', '')
-oggieora = oggieora.replace(':', '')
-oggieora = oggieora[:-7]
-# print(oggieora)
-
+############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
+CFLIB_PATH      = os.environ.get('CFLIB_PATH')
+sys.path.append(CFLIB_PATH)
+import   cflib.crtp
 from     cflib.crazyflie                            import Crazyflie
 from     cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from     cflib.crazyflie.mem                        import MemoryElement
 from     cflib.crazyflie.mem                        import Poly4D
 from     cflib.utils                                import uri_helper
-import   cflib.crtp
 from     cflib.crazyflie.log                        import LogConfig
-from     cflib.utils.power_switch import PowerSwitch
+from     cflib.utils.power_switch                   import PowerSwitch
+############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
+SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')
+sys.path.append(SYS_TEST_PATH)
 
-import   DataDrogno  
 
-from   colorama              import Fore, Back, Style
-from   colorama              import init as coloInit  
-coloInit(convert=True)
+############   local scripts
+import   wakeUppatore, stenBaiatore, DataDrogno  
+
+isExist    = os.path.exists(sys.path[0] + '/Test_Resultsss')                   ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+if not isExist: os.makedirs(sys.path[0] + '/Test_Resultsss')
+
+oggieora   = str(datetime.now())                                              ### Crea stringa in formato yyyymmddhhmmss per creazione nome json
+oggieora   = oggieora.replace('-', '')
+oggieora   = oggieora.replace(' ', '')
+oggieora   = oggieora.replace(':', '')
+oggieora   = oggieora[:-7]
 
 available  = []
-data_d = {}
+data_d     = {}
 iddio      = 0
 PRINTRATE  = 1
 paginegialle = [
@@ -54,7 +59,7 @@ paginegialle = [
     # 'E7E7E7E7E9'
 ]
 
-test_completed = False
+is_test_completed = False
 
 
 def scan_for_crazyflies():
@@ -90,7 +95,7 @@ def check_if_test_is_completed():
     dati_rev  = []                              ### Dati sulla "revisione del firmware"
     while not (all (data_d[datadrogno].is_testing_over != False for datadrogno in data_d)):
         time.sleep(1)
-    test_completed = True
+    is_test_completed = True
     for drogno in data_d:
         i = 0
         data_mech = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
@@ -159,7 +164,7 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-        while not test_completed:
+        while not is_test_completed:
             time.sleep(1)
             pass
     except KeyboardInterrupt:
