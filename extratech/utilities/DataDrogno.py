@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import threading, time, sys, os
-from     dotenv                                     import load_dotenv
-load_dotenv()
-
+import threading, time, sys, importlib
+test_single_cf_grounded = importlib.import_module('test_single_cf_grounded')
+cflib                   = importlib.import_module('cflib')
 
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -12,11 +11,10 @@ from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
+from   test_single_cf_grounded import test_link
 
-print(sys.path)
-import     sys_test.single_cf_grounded                
-# gino = single_cf_grounded.test_link.TestLink()
 
+ 
 class dataDrone(threading.Thread):
     def __init__(self, ID, link_uri):
         threading.Thread.__init__(self)
@@ -42,11 +40,11 @@ class dataDrone(threading.Thread):
         self.firmware0              = None
         self.firmware1              = None
         self.firmware_modified      = None
+        self.test_link              = test_link.TestLink()
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self._cf.connected.add_callback(self._connected)
         self._cf.fully_connected.add_callback(self._fully_connected)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
-        self.test_link              = test_link.TestLink()
 
     ### Incapsulato cambi colore in funzioni 
     def fai_rosso(self):

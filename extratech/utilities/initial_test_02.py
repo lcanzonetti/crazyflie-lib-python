@@ -2,7 +2,7 @@
 ### extratech 2022
 ### test iniziale:
 ############   standard libraries 
-import   time, os, sys, signal, threading
+import   time, os, sys, signal, threading,importlib
 
 ############   dependencies
 import   pandas                                     as     pd
@@ -17,7 +17,10 @@ load_dotenv()
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH      = os.environ.get('CFLIB_PATH')
 sys.path.append(CFLIB_PATH)
-import   cflib.crtp
+print(*sys.path, sep='\n')
+# cflib                   = importlib.import_module('.cflib')
+
+
 from     cflib.crazyflie                            import Crazyflie
 from     cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from     cflib.crazyflie.mem                        import MemoryElement
@@ -25,10 +28,11 @@ from     cflib.crazyflie.mem                        import Poly4D
 from     cflib.utils                                import uri_helper
 from     cflib.crazyflie.log                        import LogConfig
 from     cflib.utils.power_switch                   import PowerSwitch
+import cflib.crtp
 ############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
 SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')
+SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
 sys.path.append(SYS_TEST_PATH)
-
 
 ############   local scripts
 import   wakeUppatore, stenBaiatore, DataDrogno  
@@ -76,6 +80,8 @@ def scan_for_crazyflies():
     return available
 
 def istanziaClassi():
+    cancellami = DataDrogno.dataDrone(IDFromURI('E7E7E7E7E1'),'E7E7E7E7E1')
+
     for uro in available:
         iddio = IDFromURI(uro)
         data_d[iddio] = DataDrogno.dataDrone(iddio, uro)
@@ -151,7 +157,6 @@ def exit_signal_handler(signum, frame):
 def main():
     cflib.crtp.init_drivers()
     wakeUppatore.wekappa()
-    
     try:
         scan_for_crazyflies()
     except Exception as e:

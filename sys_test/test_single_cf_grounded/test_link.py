@@ -24,7 +24,7 @@ import time
 import unittest
 
 import numpy as np
-from single_cf_grounded import TestSingleCfGrounded
+from .single_cf_grounded import TestSingleCfGrounded
 
 import cflib.crtp
 from cflib.crtp.crtpstack import CRTPPacket
