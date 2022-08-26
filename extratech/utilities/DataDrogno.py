@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import threading, time, sys
+import threading, time, sys, os
+from     dotenv                                     import load_dotenv
+load_dotenv()
+
+
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
@@ -9,6 +13,9 @@ from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 
+print(sys.path)
+import     sys_test.single_cf_grounded                
+# gino = single_cf_grounded.test_link.TestLink()
 
 class dataDrone(threading.Thread):
     def __init__(self, ID, link_uri):
@@ -16,7 +23,7 @@ class dataDrone(threading.Thread):
         self.ID                     = int(ID)
         self.link_uri               = link_uri
         self.name                   = 'dataDrone '+str(ID)
-        self.test_tracker           = [0, 0, 0] # val 0 = props; val 1 = battery; val 2 = leds
+        self.test_tracker           = [0, 0, 0, 0] # val 0 = props; val 1 = battery; val 2 = leds; val 3 = radio
         self.is_testing_over        = False
         self.propeller_test_result  = [0,0,0,0]
         self.battery_test_started   = False
@@ -39,9 +46,9 @@ class dataDrone(threading.Thread):
         self._cf.connected.add_callback(self._connected)
         self._cf.fully_connected.add_callback(self._fully_connected)
         self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
+        self.test_link              = test_link.TestLink()
 
     ### Incapsulato cambi colore in funzioni 
-
     def fai_rosso(self):
         self._cf.param.set_value('ring.effect', '7')
         self._cf.param.set_value('ring.solidRed', '255')
@@ -89,7 +96,11 @@ class dataDrone(threading.Thread):
                 print ("test finiti per CF %s " % self.name)
                 print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.firmware_revision0, self.firmware_revision1, self.firmware_modified))
                 self.close_link()
- 
+    
+    def radio_test(self):
+        self.test_link.bandwidth(self.link_uri)
+        self.test_link.latency(self.link_uri)
+
     def led_test(self):
         def led_test_sequence():
             self.spegni_led()
@@ -163,7 +174,7 @@ class dataDrone(threading.Thread):
         # time.sleep(0.5)
         log_conf.start()
 
-    def start_sequenza_test(self):
+    def start_sequenza_test(self):       ### sequenza principale con tempi
 
         self.fai_blu()                  ### Blue is for testing
 
@@ -184,6 +195,9 @@ class dataDrone(threading.Thread):
         self.led_test()
 
         time.sleep(1.5)
+
+        print("il drone %s inizia i test radio... " % self.name)
+        self.radio_test()       
 
     def _connected(self, link_uri):   ## callback allo scaricamento del TOC
         self._cf.is_connected = True

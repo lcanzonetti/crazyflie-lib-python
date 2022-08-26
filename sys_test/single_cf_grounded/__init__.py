@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #     ||          ____  _ __
@@ -7,9 +6,7 @@
 #  +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
 #   ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
 #
-#  Copyright (C) 2020 Bitcraze AB
-#
-#  Crazyflie Nano Quadcopter Client
+#  Copyright (C) 2019 Bitcraze AB
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -22,32 +19,3 @@
 #  GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import struct
-
-
-# Code from davidejones at https://gamedev.stackexchange.com/a/28756
-def fp16_to_float(float16):
-    s = int((float16 >> 15) & 0x00000001)    # sign
-    e = int((float16 >> 10) & 0x0000001f)    # exponent
-    f = int(float16 & 0x000003ff)            # fraction
-
-    if e == 0:
-        if f == 0:
-            return int(s << 31)
-        else:
-            while not (f & 0x00000400):
-                f <<= 1
-                e -= 1
-            e += 1
-            f &= ~0x00000400
-            # print(s,e,f)
-    elif e == 31:
-        if f == 0:
-            return int((s << 31) | 0x7f800000)
-        else:
-            return int((s << 31) | 0x7f800000 | (f << 13))
-
-    e += 127 - 15
-    f <<= 13
-    result = int((s << 31) | (e << 23) | f)
-    return struct.unpack('f', struct.pack('I', result))[0]
