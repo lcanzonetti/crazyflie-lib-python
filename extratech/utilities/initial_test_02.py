@@ -2,7 +2,7 @@
 ### extratech 2022
 ### test iniziale:
 ############   standard libraries 
-import   time, os, sys, signal, threading,importlib
+import   time, os, sys, signal, threading, importlib
 
 ############   dependencies
 import   pandas                                     as     pd
@@ -16,10 +16,13 @@ load_dotenv()
 
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH      = os.environ.get('CFLIB_PATH')
-sys.path.append(CFLIB_PATH)
-print(*sys.path, sep='\n')
-# cflib                   = importlib.import_module('.cflib')
+# print(CFLIB_PATH)
+sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente
+# print(*sys.path, sep='\n')
+# cflib                   = importlib.import_module('.crazyflie', package='cflib')
 
+
+import   cflib     
 
 from     cflib.crazyflie                            import Crazyflie
 from     cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -28,17 +31,18 @@ from     cflib.crazyflie.mem                        import Poly4D
 from     cflib.utils                                import uri_helper
 from     cflib.crazyflie.log                        import LogConfig
 from     cflib.utils.power_switch                   import PowerSwitch
-import cflib.crtp
+import   cflib.crtp
 ############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
-SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')
+SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')                          ### vedi sopra 
 SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
-sys.path.append(SYS_TEST_PATH)
+sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
+print(*sys.path, sep='\n')
 
 ############   local scripts
 import   wakeUppatore, stenBaiatore, DataDrogno  
 
-isExist    = os.path.exists(sys.path[0] + '/Test_Resultsss')                   ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
-if not isExist: os.makedirs(sys.path[0] + '/Test_Resultsss')
+isExist    = os.path.exists(sys.path[3] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+if not isExist: os.makedirs(sys.path[3] + '/Test_Resultsss')
 
 oggieora   = str(datetime.now())                                              ### Crea stringa in formato yyyymmddhhmmss per creazione nome json
 oggieora   = oggieora.replace('-', '')
@@ -80,7 +84,7 @@ def scan_for_crazyflies():
     return available
 
 def istanziaClassi():
-    cancellami = DataDrogno.dataDrone(IDFromURI('E7E7E7E7E1'),'E7E7E7E7E1')
+    # cancellami = DataDrogno.dataDrone(IDFromURI('E7E7E7E7E1'),'E7E7E7E7E1')
 
     for uro in available:
         iddio = IDFromURI(uro)
@@ -99,9 +103,14 @@ def IDFromURI(uri) -> int:
 def check_if_test_is_completed():
     dati_mech = []                              ### Dati "elettromeccanici" dei droni
     dati_rev  = []                              ### Dati sulla "revisione del firmware"
+
+   
+
     while not (all (data_d[datadrogno].is_testing_over != False for datadrogno in data_d)):
         time.sleep(1)
     is_test_completed = True
+        
+
     for drogno in data_d:
         i = 0
         data_mech = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
@@ -110,7 +119,9 @@ def check_if_test_is_completed():
                                   'Battery Test Pass'      : [data_d[drogno].battery_test_passed],
                                   'Propeller Test'         : [data_d[drogno].propeller_test_result],
                                   'Propeller Test Pass'    : [data_d[drogno].propeller_test_passed],
-                                  'RSSI'                   : [data_d[drogno].RSSI],},
+                                  'RSSI'                   : [data_d[drogno].RSSI],
+                                  'Bandwidth'              : ['%s pkg/s %s kB/s' %(float("{:.2f}".format(data_d[drogno].bandwidth[0])), float("{:.2f}".format(data_d[drogno].bandwidth[1])))],
+                                  'Latency'                : ['%s ms' %float("{:.2f}".format(data_d[drogno].latency))]},
                                   index                    = ['Drone ' + str(drogno)])
         dati_mech.append(data_mech)
         data_rev = pd.DataFrame({'Revisione Firmware (1)' : [data_d[drogno].firmware_revision0],
@@ -124,8 +135,8 @@ def check_if_test_is_completed():
         display(df1)
         print()
         display(df2)
-        df1.to_json(sys.path[0] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
-        df2.to_json(sys.path[0] + '/Test_resultsss/Risultati_rev_' + oggieora + '.json', orient='index', indent=4)
+        df1.to_json(sys.path[3] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
+        df2.to_json(sys.path[3] + '/Test_resultsss/Risultati_rev_'  + oggieora + '.json', orient='index', indent=4)
         # df = df.align()
         print()
         print('tutti i test sono stati completati')

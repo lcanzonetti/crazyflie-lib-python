@@ -37,7 +37,7 @@ def stenbaya():
     print ('Done. Ciao.')
 
 def standBySingle(uri):
-    print('StandBying device %s' % uri)
+    print(Fore.WHITE + 'StandBying device %s' % uri)
     try:
         PowerSwitch(uri).stm_power_down()
         print(Fore.GREEN + '%s has been standbyied!' % uri)

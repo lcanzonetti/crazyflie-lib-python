@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import threading, time, sys, importlib
-test_single_cf_grounded = importlib.import_module('test_single_cf_grounded')
+import threading, time, sys, importlib 
+# test_single_cf_grounded = importlib.import_module('test_single_cf_grounded')
 cflib                   = importlib.import_module('cflib')
 
 from   cflib.crazyflie                            import Crazyflie
@@ -11,7 +11,7 @@ from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
-from   test_single_cf_grounded import test_link
+from   test_single_cf_grounded                    import test_link
 
 
  
@@ -23,6 +23,8 @@ class dataDrone(threading.Thread):
         self.name                   = 'dataDrone '+str(ID)
         self.test_tracker           = [0, 0, 0, 0] # val 0 = props; val 1 = battery; val 2 = leds; val 3 = radio
         self.is_testing_over        = False
+        self.bandwidth              = None
+        self.latency                = None
         self.propeller_test_result  = [0,0,0,0]
         self.battery_test_started   = False
         self.propeller_test_passed  = False
@@ -96,8 +98,17 @@ class dataDrone(threading.Thread):
                 self.close_link()
     
     def radio_test(self):
-        self.test_link.bandwidth(self.link_uri)
-        self.test_link.latency(self.link_uri)
+        self.bandwidth = self.test_link.bandwidth(self.link_uri)
+        self.latency   = self.test_link.latency(self.link_uri)
+
+        print('radio test finito')                          
+        self._cf.param.set_value('ring.effect', '7')            ### Fai violetto se test radio finito
+        self._cf.param.set_value('ring.solidRed', '100')
+        self._cf.param.set_value('ring.solidGreen', '0')
+        self._cf.param.set_value('ring.solidBlue', '100')
+        time.sleep(3)
+        self.spegni_led()
+        self.test_tracker[3] = 1
 
     def led_test(self):
         def led_test_sequence():
@@ -166,7 +177,7 @@ class dataDrone(threading.Thread):
         log_conf.add_variable('health.motorPass', 'uint8_t')
         log_conf.add_variable('health.motorTestCount', 'uint16_t')
         log_conf.add_variable('pm.vbat', 'FP16')
-        log_conf.add_variable('radio.rssi',    'uint8_t')
+        log_conf.add_variable('radio.rssi', 'uint8_t')
         log_conf.add_variable('health.batterySag', 'FP16')
         self._cf.log.add_config(log_conf)
         # time.sleep(0.5)
@@ -192,7 +203,7 @@ class dataDrone(threading.Thread):
         print("il drone %s inizia il led test... " % self.name)
         self.led_test()
 
-        time.sleep(1.5)
+        time.sleep(10)                                                 ### Attende che il test led sia finito prima di chiamare test radio
 
         print("il drone %s inizia i test radio... " % self.name)
         self.radio_test()       
@@ -209,7 +220,8 @@ class dataDrone(threading.Thread):
         self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
         self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
         self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
-        
+        # radio_thread = threading.Thread(target=self.radio_test).start()
+
     def connect(self):
         print("provo a connettermi al drone %s " % self.name)
         self._cf.open_link(self.link_uri)
