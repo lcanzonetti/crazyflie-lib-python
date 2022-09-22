@@ -2,12 +2,7 @@
 
 #rf 2022
 # native modules
-import logging
-import sys
-import multiprocessing
-import threading
-import time
-import signal
+import logging, sys, os, multiprocessing, threading, time, signal
 from   pathlib                    import Path
 #bitcraze modules
 import cflib.crtp
@@ -17,7 +12,6 @@ from   cflib.utils import uri_helper
 import OSCStuff       as OSC
 import GUI as GUI
 import Drogno
-import logging
 logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
@@ -42,11 +36,11 @@ uris = [
 #########################################################################
 
 lastRecordPath        = ''  
-WE_ARE_FAKING_IT      = True
+WE_ARE_FAKING_IT      = False
 LOGGING_ENABLED       = False
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
-COMMANDS_FREQUENCY    = 0.04
+COMMANDS_FREQUENCY    = 0.1
 FEEDBACK_SENDING_PORT = 6000
 BROADCAST_IP          = "192.168.1.21"
 
@@ -72,27 +66,34 @@ PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACI
 
 def radioStart():
     if not WE_ARE_FAKING_IT:
-        try:
-            cflib.crtp.init_drivers()
-            print('Scanning interfaces for Crazyflies...')
+        cflib.crtp.init_drivers()
+        print('Scanning usb for Crazy radios...')
+
+        if (cflib.crtp.get_interfaces_status()['radio'] == 'Crazyradio not found'):
+            raise Exception("no radio!")
+        else:
+            print ('Radio trovata:')
             print(cflib.crtp.get_interfaces_status())
-            availableRadios = []
-            for iuro in uris:
-                availableRadio  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))
-                if availableRadio:
-                    availableRadios.append(availableRadio)
 
-            if availableRadios:
-                print(f'gente in giro:')
-                print (availableRadios)     
 
-                # for i in availableRadios:
-                #     print ('Found %s radios.' % len(availableRadios))
-                #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
-            else:
-                print('no available radios?')     
-        except IndexError:
-            print(IndexError)
+        available_crazyfliess = []
+        
+        print('Scanning interfaces for Crazyflies...')
+        for iuro in uris:
+            print ('looking for %s ' % iuro)
+            available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))
+            if available_crazyflies:
+                available_crazyfliess.append(available_crazyflies)
+
+        if available_crazyfliess:
+            print(f'gente in giro:')
+            print (available_crazyfliess)     
+
+            # for i in available_crazyfliess:
+            #     print ('Found %s radios.' % len(available_crazyfliess))
+            #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
+        else:
+            print('no available radios?')     
 
 def autoReconnect():
     while not threads_exit_event.is_set() :
@@ -149,8 +150,15 @@ def main():
     if WE_ARE_FAKING_IT:
         print('ATTENZIONE! STIAMO FACENDO FINTA!')
         time.sleep(2)
-    radioStart()
-    restart_devices()
+    else:
+        print("Controller started. No fake shit.")
+    try:
+        radioStart()
+        restart_devices()
+
+    except Exception as e:
+        print(e)
+        quit()
 
     for uro in connectedUris:
         iddio = IDFromURI(uro)
@@ -176,7 +184,10 @@ def main():
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
-    print('esco')
+    ciao_ciao()
+
+def ciao_ciao():
+    print('Bye bye.')
     GUI.resetCompanion()
     OSC.finished = True
     GUI.ends_it_when_it_needs_to_end()
@@ -184,12 +195,14 @@ def exit_signal_handler(signum, frame):
     processes_exit_event.set()
 
     for drogno in drogni:
-        try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
-        except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % drogni[drogno].link_uri)
-        drogni[drogno].exit()
-        drogni[drogno].join()
+        if (drogno):
+            try: PowerSwitch(drogni[drogno].link_uri).stm_power_down()
+            except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % drogni[drogno].link_uri)
+            drogni[drogno].exit()
+            drogni[drogno].join()
+    print('I said bye.')
    
-    sys.exit()
+    sys.exit("Putin merda")
 
 def IDFromURI(uri) -> int:
     # Get the address part of the uri
@@ -207,8 +220,8 @@ if __name__ == '__main__':
     # with open(patto, 'r') as f:
     #     lastRecordPath = f.read()
     #     print ('last record path: ' + lastRecordPath)
-    main()
     signal.signal(signal.SIGINT, exit_signal_handler)
+    main()
 
     while True:
         time.sleep(0.1)
