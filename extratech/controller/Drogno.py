@@ -133,7 +133,7 @@ class Drogno(threading.Thread):
             self.LoggerObject.info('This is dronelog running on %s' % self.name)
 
     def run(self):
-        print (Fore.LIGHTBLUE_EX + "starting " + self.name)
+        print (Fore.LIGHTBLUE_EX + "starting " + self.name + " class instance")
         # self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
         # self.TRAJECTORIES [7] = figure8Triple
         # self.TRAJECTORIES [8] = figure8
@@ -287,7 +287,7 @@ class Drogno(threading.Thread):
                         self._cf.open_link(self.link_uri)
                         self.connection_time = time.time()
                         while not self.exitFlag or self.is_connected:
-                            print('.')
+                            print('...in connessione...')
                     except IndexError:
                         print('capperi')
                     except:

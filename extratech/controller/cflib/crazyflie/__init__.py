@@ -159,11 +159,14 @@ class Crazyflie():
 
     def _start_connection_setup(self):
         """Start the connection setup by refreshing the TOCs"""
-        logger.info('We are connected[%s], request connection setup',
-                    self.link_uri)
+        logger.info('We are connected[%s], request connection setup',  self.link_uri)
         self.platform.fetch_platform_informations(self._platform_info_fetched)
+        print( 'chiedo le informazioni sulla piattaforma')
+
 
     def _platform_info_fetched(self):
+        print( 'ho ricevuto le informazioni sulla piattaforma')
+
         self.log.refresh_toc(self._log_toc_updated_cb, self._toc_cache)
 
     def _param_toc_updated_cb(self):
@@ -227,10 +230,10 @@ class Crazyflie():
         self.connection_requested.call(link_uri)
         self.state = State.INITIALIZED
         self.link_uri = link_uri
+
         try:
             self.link = cflib.crtp.get_link_driver(
                 link_uri, self._link_quality_cb, self._link_error_cb)
-
             if not self.link:
                 message = 'No driver found or malformed URI: {}' \
                     .format(link_uri)
@@ -241,9 +244,7 @@ class Crazyflie():
                     self.incoming.start()
                 # Add a callback so we can check that any data is coming
                 # back from the copter
-                self.packet_received.add_callback(
-                    self._check_for_initial_packet_cb)
-
+                self.packet_received.add_callback( self._check_for_initial_packet_cb)
                 self._start_connection_setup()
         except Exception as ex:  # pylint: disable=W0703
             # We want to catch every possible exception here and show

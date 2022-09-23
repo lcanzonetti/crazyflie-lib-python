@@ -81,10 +81,10 @@ def resetCompanion():
 
 def updateCompanion():
     global bufferone
-    print("\n\n\n partito!")
-    # companionLock = Lock()
-
+ 
     def daje():
+        print("Update di companion partito.")
+
         takeOffOrLandText = 'take off'
         takeOffOrLandColor = [200, 20, 40]
         engageText = 'not engaged'

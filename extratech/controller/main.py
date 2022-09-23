@@ -15,26 +15,28 @@ import Drogno
 logging.basicConfig(level=logging.ERROR)
 #########################################################################
 uris = [    
-        'radio://0/80/2M/E7E7E7E7E0',
-        'radio://0/80/2M/E7E7E7E7E1',
-        'radio://0/80/2M/E7E7E7E7E2',
-        'radio://0/90/2M/E7E7E7E7E3',
+        # 'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/80/2M/E7E7E7E7E1',
+        # 'radio://0/80/2M/E7E7E7E7E2',
+        # 'radio://0/90/2M/E7E7E7E7E3',
         'radio://1/120/2M/E7E7E7E7E4', 
         'radio://0/80/2M/E7E7E7E7E5',
-        'radio://3/100/2M/E7E7E7E7E6',
-        'radio://3/100/2M/E7E7E7E7E7',
-        'radio://2/100/2M/E7E7E7E7E8', 
-        'radio://2/110/2M/E7E7E7E7E9',
-        'radio://0/110/2M/E7E7E7E7EA',
-        'radio://0/120/2M/E7E7E7E7EB',
-        'radio://0/120/2M/E7E7E7E7EC',
-        'radio://0/120/2M/E7E7E7E7ED',
-        'radio://0/120/2M/E7E7E7E7EE',
-        'radio://0/120/2M/E7E7E7E7EF',
+        # 'radio://3/100/2M/E7E7E7E7E6',
+        # 'radio://3/100/2M/E7E7E7E7E7',
+        # 'radio://2/100/2M/E7E7E7E7E8', 
+        # 'radio://2/110/2M/E7E7E7E7E9',
+        # 'radio://0/110/2M/E7E7E7E7EA',
+        # 'radio://0/120/2M/E7E7E7E7EB',
+        # 'radio://0/120/2M/E7E7E7E7EC',
+        # 'radio://0/120/2M/E7E7E7E7ED',
+        # 'radio://0/120/2M/E7E7E7E7EE',
+        # 'radio://0/120/2M/E7E7E7E7EF',
         ]
         
 #########################################################################
 
+from dotenv import load_dotenv
+load_dotenv()
 lastRecordPath        = ''  
 WE_ARE_FAKING_IT      = False
 LOGGING_ENABLED       = False
@@ -50,7 +52,8 @@ processes_exit_event = multiprocessing.Event()
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
 OSC.commandsFrequency      = COMMANDS_FREQUENCY
-GUI.COMPANION_FEEDBACK_IP  = "192.168.10.101" 
+OSC.RECEIVING_IP           = os.getenv("RECEIVING_IP")
+GUI.COMPANION_FEEDBACK_IP  = os.getenv("COMPANION_FEEDBACK_IP")
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 
@@ -93,7 +96,7 @@ def radioStart():
             #     print ('Found %s radios.' % len(available_crazyfliess))
             #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
         else:
-            print('no available radios?')     
+            print('no crazyflies?')     
 
 def autoReconnect():
     while not threads_exit_event.is_set() :
@@ -117,7 +120,7 @@ def restart_devices():
             try: PowerSwitch(uri).stm_power_down()
             except Exception:
                 print('%s is not there to be shut down' % uri)
-                raise Exception
+                # raise Exception
         print('uris meant to be switched on:')
         print(uris)
         urisToBeRemoved = []

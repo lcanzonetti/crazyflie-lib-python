@@ -9,8 +9,7 @@ from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
 import queue
 from   random                import random, uniform
-import logging
-import time
+import time, os
 import numpy as np
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
@@ -36,7 +35,7 @@ timecode      = '00:00:00:00'
 framerate     = 25
 
 ################################################  this module osc receiving:
-RECEIVING_IP            = "192.168.10.161"
+RECEIVING_IP            = "127.0.0.1"
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
