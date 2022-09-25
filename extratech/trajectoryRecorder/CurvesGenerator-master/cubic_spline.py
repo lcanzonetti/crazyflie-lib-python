@@ -258,5 +258,5 @@ def test_spline():
 
 
 if __name__ == '__main__':
-    test_spline()
-    # test_spline2d()
+    # test_spline()
+    test_spline2d()
