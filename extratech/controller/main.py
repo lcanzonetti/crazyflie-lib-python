@@ -161,6 +161,7 @@ def main():
 
     except Exception as e:
         print(e)
+        print('Nice try, mate, ciao ciao.')
         quit()
 
     for uro in connectedUris:
