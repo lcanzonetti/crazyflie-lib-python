@@ -5,6 +5,7 @@ from scipy import interpolate
 from numpy import asarray, unique, split, sum
 x = [-0.5, 0.0, 0.8, 2.0, 1.5, -0.5, 0.0, 0.8, 2.0, 1.5, -0.5, 0.0, 0.8, 2.0, 1.5, -0.5, 0.0, 0.8, 2.0, 1.5, -0.5, 0.0, 0.8, 2.0, 1.5]
 y = [3.2,  2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5  ,3.2, 2.7,   6,   5,  3]
+z = [3.2,  2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5,  3.2, 2.7,   6,   5, 6.5  ,3.2, 2.7,   6,   5,  3]
 
 
 def b_spline_to_bezier_series(tck, per = False):
@@ -67,13 +68,24 @@ def b_spline_to_bezier_series(tck, per = False):
 
 
 
-tck,u = interpolate.splprep([x,y],s=3)
+tck,u = interpolate.splprep([x,y,z],s=3)
 unew = np.arange(0,1.01,0.01)
 out = interpolate.splev(unew,tck)
-# print (tck)
+print (tck)
 print('ecco: ')
 carlo = pprint.pformat (b_spline_to_bezier_series(tck, False))
-print (carlo)
+# print (carlo)
+
 plt.figure()
-plt.plot(x,y,out[0],out[1])
+plt.plot(x,y,z,out[0],out[1],out[2])
 plt.show()
+
+
+# fig2 = plt.figure(2)
+# ax3d = fig2.add_subplot(111, projection='3d')
+# ax3d.plot(x_true, y_true, z_true, 'b')
+# ax3d.plot(x_sample, y_sample, z_sample, 'r*')
+# # ax3d.plot(x_knots, y_knots, z_knots, 'go')
+# ax3d.plot(x_fine, y_fine, z_fine, 'g')
+# fig2.show()
+# plt.show()
