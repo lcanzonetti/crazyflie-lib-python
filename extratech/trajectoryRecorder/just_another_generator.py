@@ -52,14 +52,35 @@ if __name__== '__main__':
 
     # fit the points with Bezier interpolation
     # use 50 points between each consecutive points to draw the curve
-    path = evaluate_bezier(points, 50)
-
+    path = evaluate_bezier(points, 5)
     # extract x & y coordinates of points
     x, y = points[:,0], points[:,1]
     px, py = path[:,0], path[:,1]
 
     # plot
-    plt.figure(figsize=(11, 8))
-    plt.plot(px, py, 'b-')
-    plt.plot(x, y, 'ro')
+    # plt.figure(figsize=(11, 8))
+    # plt.plot(px, py, 'b-')
+    # plt.plot(x, y, 'ro')
+    # plt.show()
+
+    from scipy.interpolate import interp1d
+    import numpy as np
+
+    # dummy data
+    x = np.arange(-100,100,10)
+    y = x**2 + np.random.normal(0,1, len(x))
+
+    # interpolate:
+    f = interp1d(x,y, kind='cubic')
+
+    # resample at k intervals, with k = 100:
+    k = 100
+    # generate x axis:
+    xnew = np.linspace(np.min(x), np.max(x), k)
+
+    # call f on xnew to sample y values:
+    ynew = f(xnew)
+
+    plt.scatter(x,y)
+    plt.plot(xnew, ynew)
     plt.show()
