@@ -327,8 +327,8 @@ class Drogno(threading.Thread):
         # print('TOC downloaded for %s, it took %s seconds, waiting for parameters.' % (link_uri, (time.time()-self.connection_time)))
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
         
-    def _all_params_there(self, link_uri):
-        print('Parametri scricati per' % self.name)
+    def _all_params_there(self):
+        print('Parametri scricati per %s' % self.name)
 
     def _fully_connected(self, link_uri):  ##########   where a lot of things happen
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
@@ -444,7 +444,7 @@ class Drogno(threading.Thread):
                 elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
                     self.statoDiVolo = 'BAD kalman'
                     return False
-                elif not self.motorPass [1,1,1,1]:
+                elif not all (self.motorPass):
                     self.statoDiVolo = 'BAD propellers'
                     return False
                 elif not self.batterySag < 0.7:
