@@ -65,19 +65,20 @@ class Drogno(threading.Thread):
         self.isLogEnabled           = LOGGING_ENABLED
         self.printThread            = False
         self.printRate              = STATUS_PRINT_RATE
-        # self.currentSequenceThread  = False
+        self.currentSequenceThread  = 0
+        self.currentSequence_killingPill = threading.Event()
         self.recconnectionAttempts  = 0
         self.is_connected           = False
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
-        self.starting_x, self.starting_y, self.starting_z = 0.0
-        self.x, self.y, self.z      = 0.0
+        self.starting_x =  self.starting_y =  self.starting_z = 0.0
+        self.x =  self.y =  self.z  = 0.0
         self.yaw                    = 0.0
-        self.requested_X, self.requested_Y, self.requested_Z = 0.0
-        self.requested_R, self.requested_G, self.requested_B = 0
+        self.requested_X = self.requested_Y = self.requested_Z = 0.0
+        self.requested_R = self.requested_G = self.requested_B = 0
         self.ledMem                 = 0
-        self.kalman_VarX, self.kalman_VarY, self.kalman_VarZ = 0
+        self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
         self.esteemsCount           = 0
         self.prefStartPoint_X, self.prefStartPoint_Y = startingPoint[0], startingPoint[1]
         self.batteryVoltage         = 'n.p.'
@@ -624,7 +625,6 @@ class Drogno(threading.Thread):
             self.ledMem[0].write_data(None)
 
         # print ('vado al colore %s' % (vr, vg, vb))
-
     def alternativeSetRingColor(self, rgb ):
         r = int( rgb[0] / 255 * 100 )
         g = int( rgb[1] / 255 * 100 )
@@ -686,39 +686,52 @@ class Drogno(threading.Thread):
             else:
                 print(self._cf.state)
         def sequenzaUno():
-            print('inizio prima sequenza di test')
-            self.positionHLCommander.go_to(0.0, 0.0, 1)
-            self.setRingColor(255,   0,   0)
-            time.sleep(1)
+            if (self.currentSequenceThread == 1): # if this sequence is running already we stop it
+                self.currentSequence_killingPill.set()
+                print("interrompo la sequenza 1")
+                return
+            def antani():
+                print('inizio prima sequenza di test')
+                self.currentSequenceThread == 1
+                while not self.currentSequence_killingPill.is_set():
+                    self.takeOff()      
+                    self.positionHLCommander.go_to(0.0, 0.0, 1)
+                    self.setRingColor(255,   0,   0)
+                    time.sleep(1)
 
-            self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
-            self.setRingColor(255,   0,   0)
+                    self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
+                    self.setRingColor(255,   0,   0)
+                    time.sleep(1)
 
-            self.positionHLCommander.go_to(1, 1, 1, 0.2)
-            self.setRingColor(  0, 255,  0)
-            
-            self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
-            self.setRingColor(  0,   0, 255)
+                    self.positionHLCommander.go_to(1, 1, 1, 0.2)
+                    self.setRingColor(  0, 255,  0)
+                    time.sleep(1)
+                    
+                    self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
+                    self.setRingColor(  0,   0, 255)
+                    time.sleep(1)
 
-            self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
-            self.setRingColor(255, 255,   0)
-            time.sleep(1)
+                    self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
+                    self.setRingColor(255, 255,   0)
+                    time.sleep(1)
 
-            self.setRingColor(255, 0,   0)
-            time.sleep(1)
-            self.setRingColor(0, 255,   0)
-            time.sleep(1)
-            self.setRingColor(0, 0,   255)
-            time.sleep(1)
+                    self.setRingColor(255, 0,   0)
+                    time.sleep(1)
+                    self.setRingColor(0, 255,   0)
+                    time.sleep(1)
+                    self.setRingColor(0, 0,   255)
+                    time.sleep(1)
 
-            self.setRingColor(0, 255,   255)
-            time.sleep(1)
-            self.setRingColor(255, 255,   0)
-            time.sleep(1)
-            self.setRingColor(255, 0,   255)
-            time.sleep(1)
-            
-            print('fine prima sequenza di test')
+                    self.setRingColor(0, 255,   255)
+                    time.sleep(0.8)
+                    self.setRingColor(255, 255,   0)
+                    time.sleep(0.8)
+                    self.setRingColor(255, 0,   255)
+                    time.sleep(0.8)
+                    self.land()
+                print('fine prima sequenza di test')
+            sequenza = threading.Thread(target=antani, args=[self.currentSequence_killingPill])
+            sequenza.start()
             self.statoDiVolo = 'hovering'
         def sequenzaDue():
             pass
@@ -832,6 +845,7 @@ class Drogno(threading.Thread):
         self.standBy = True
         self.isFlying = False
         self.killingPill.set()
+        self.currentSequence_killingPill.set()
         time.sleep(0.2)
         if not WE_ARE_FAKING_IT:
             self._cf.close_link()
