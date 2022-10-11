@@ -23,9 +23,9 @@ from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
 import OSC_feedabcker as feedbacker
 
-BOX_X                   = 2.2
-BOX_Y                   = 2.2
-BOX_Z                   = 2.2
+BOX_X                   = 2.3
+BOX_Y                   = 2.8
+BOX_Z                   = 2.4
 LIGHTHOUSE_METHOD       = '0'
 DEFAULT_HEIGHT          = 0.8
 DEFAULT_VELOCITY        = 0.85
@@ -41,6 +41,8 @@ FEEDBACK_ENABLED        = True
 CLAMPING                = True
 RING_FADE_TIME          = 0.001
 INITIAL_TEST            = True
+BATTERY_WARNING_LEVEL   = 3.5
+BATTERY_DRAINED_LEVEL   = 3.2
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
@@ -690,10 +692,10 @@ class Drogno(threading.Thread):
                 self.currentSequence_killingPill.set()
                 print("interrompo la sequenza 1")
                 return
-            def antani():
+            def antani(pill):
                 print('inizio prima sequenza di test')
                 self.currentSequenceThread == 1
-                while not self.currentSequence_killingPill.is_set():
+                while not pill.is_set():
                     self.takeOff()      
                     self.positionHLCommander.go_to(0.0, 0.0, 1)
                     self.setRingColor(255,   0,   0)
@@ -809,13 +811,13 @@ class Drogno(threading.Thread):
                 level = 99.
             else:
                 level  = float(self.batteryVoltage)
-            if level<3.50:
+            if level<BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 if (self.isLogEnabled):  self.LoggerObject.warning("battery under 3.50v")
 
                 # self.isReadyToFly = False
-            if level<3.33:
+            if level<BATTERY_DRAINED_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
