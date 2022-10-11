@@ -35,7 +35,7 @@ timecode      = '00:00:00:00'
 framerate     = 25
 
 ################################################  this module osc receiving:
-RECEIVING_IP            = "127.0.0.1"
+RECEIVING_IP            = ""
 RECEIVING_PORT          = 9200
 OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:

@@ -444,9 +444,9 @@ class Drogno(threading.Thread):
                 elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
                     self.statoDiVolo = 'BAD kalman'
                     return False
-                elif not all (self.motorPass):
-                    self.statoDiVolo = 'BAD propellers'
-                    return False
+                # elif not all (self.motorPass):
+                #     self.statoDiVolo = 'BAD propellers'
+                #     return False
                 elif not self.batterySag < 0.7:
                     self.statoDiVolo = 'BAD battery!'
                     return False
