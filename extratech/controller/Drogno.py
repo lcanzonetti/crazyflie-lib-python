@@ -71,26 +71,15 @@ class Drogno(threading.Thread):
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
-        self.starting_x             = 0.0
-        self.starting_y             = 0.0
-        self.starting_z             = 0.0
-        self.x                      = 0.0
-        self.y                      = 0.0 
-        self.z                      = 0.0
+        self.starting_x, self.starting_y, self.starting_z = 0.0
+        self.x, self.y, self.z      = 0.0
         self.yaw                    = 0.0
-        self.requested_X            = 0.0
-        self.requested_Y            = 0.0
-        self.requested_Z            = 0.0
-        self.requested_R            = 0
-        self.requested_G            = 0
-        self.requested_B            = 0
+        self.requested_X, self.requested_Y, self.requested_Z = 0.0
+        self.requested_R, self.requested_G, self.requested_B = 0
         self.ledMem                 = 0
-        self.kalman_VarX            = 0
-        self.kalman_VarY            = 0
-        self.kalman_VarZ            = 0
+        self.kalman_VarX, self.kalman_VarY, self.kalman_VarZ = 0
         self.esteemsCount           = 0
-        self.prefStartPoint_X       = startingPoint[0]
-        self.prefStartPoint_Y       = startingPoint[1]
+        self.prefStartPoint_X, self.prefStartPoint_Y = startingPoint[0], startingPoint[1]
         self.batteryVoltage         = 'n.p.'
         self.batterySag             = 0.50 # sta carica
         self.motorPass              = [1,1,1,1]
@@ -267,7 +256,7 @@ class Drogno(threading.Thread):
         self.y = self.starting_y
         self.z = 0
         self._cf.param.set_value('kalman.resetEstimation', '1')
-        time.sleep(0.1)
+        time.sleep(0.5)
         self._cf.param.set_value('kalman.resetEstimation', '0')
         print(Fore.MAGENTA + 'estimator reset done on ' + self.name)
 

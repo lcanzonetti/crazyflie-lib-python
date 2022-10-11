@@ -21,7 +21,7 @@ uris = [
         # 'radio://0/90/2M/E7E7E7E7E3',
         # 'radio://1/120/2M/E7E7E7E7E4', 
         # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://3/100/2M/E7E7E7E7E6',
+        'radio://0/100/2M/E7E7E7E7E6',
         # 'radio://3/100/2M/E7E7E7E7E7',
         # 'radio://2/100/2M/E7E7E7E7E8', 
         # 'radio://2/110/2M/E7E7E7E7E9',
@@ -39,7 +39,7 @@ from dotenv import load_dotenv
 load_dotenv()
 lastRecordPath        = ''  
 WE_ARE_FAKING_IT      = False
-LOGGING_ENABLED       = False
+LOGGING_ENABLED       = True
 AUTO_RECONNECT        = False
 RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.1

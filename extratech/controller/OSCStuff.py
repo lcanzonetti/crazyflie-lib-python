@@ -25,14 +25,14 @@ import OSCaggregator
 from GUI import setCompanionRate, setFlyability, set_command_frequency,weMaySend
 
 
-drogni        = {} 
-bufferone     = {}
-isSendEnabled = False
+drogni            = {} #main script will copy a list into this
+bufferone         = {}
+isSendEnabled     = False
 isSwarmReadyToFly = False
-finished      = False
-msgCount      = 0 
-timecode      = '00:00:00:00'
-framerate     = 25
+finished          = False
+msgCount          = 0 
+timecode          = '00:00:00:00'
+framerate         = 25
 
 ################################################  this module osc receiving:
 RECEIVING_IP            = ""
@@ -41,14 +41,14 @@ OSC_PROCESS_RATE        = 0.003
 ################################################  notch osc aggregator:
 AGGREGATION_ENABLED       = True
 AGGREGATOR_RECEIVING_PORT = 9201
-aggregatorInstance      = None
-aggregatorProcess       = None
-aggregatorCue           = Queue()
-aggregatorExitEvent     = None
+aggregatorInstance        = None
+aggregatorProcess         = None
+aggregatorCue             = Queue()
+aggregatorExitEvent       = None
 posLock = Lock()
 
 ##################################################  global rates:
-commandsFrequency               = 0.04   # actual command'd rate to uavss
+commandsFrequency               = 0.1   # actual command'd rate to uavss
 RECEIVED_MESSAGES_SAMPLING_RATE = 10
 ###########################  companion
 def setSendEnabled (*args):
@@ -88,14 +88,11 @@ def checkSwarmFlyability():
 ###########################  whole swarm
 def takeOff   (coddii, decollante):
     global bufferone
-    # safeLocckino = Lock()
     def authorizedScrambleCommand():
-        # safeLocckino.acquire()
         for drogno in drogni:
             bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
             bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
             drogni[drogno].takeOff()
-        # safeLocckino.release()
 
     authorizedDrognos = 0
     if decollante == 'all':    # whole swarm logic
@@ -233,7 +230,7 @@ def wakeUp    (coddii, chi):
     else:
         drogni[chi].wakeUp()
 def resetEstimator  (coddii, chi):
-    print(' %s  resetEstimator' % chi )
+    # print(' %s  resetEstimator' % chi )
     if chi == 'all':    
         for drogno in drogni:
             drogni[drogno].resetEstimator()
