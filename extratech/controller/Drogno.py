@@ -107,12 +107,12 @@ class Drogno(threading.Thread):
         self.killingPill            = None
         self._cf = Crazyflie(rw_cache='./cache_test')
         # Connect some callbacks from the Crazyflie API
-        self._cf.connected.add_callback(self._connected)
+        self._cf.connected.add_callback        (self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there) 
-        self._cf.fully_connected.add_callback(self._fully_connected)
-        self._cf.disconnected.add_callback(self._disconnected)
+        self._cf.fully_connected.add_callback  (self._fully_connected)
+        self._cf.disconnected.add_callback     (self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
-        self._cf.connection_lost.add_callback(self._connection_lost)
+        self._cf.connection_lost.add_callback  (self._connection_lost)
         # Feedback instance in his own process
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
@@ -149,7 +149,7 @@ class Drogno(threading.Thread):
             time.sleep(0.4)
             while not connectedToFeedback:
                 try:
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                     self.multiprocessConnection = Client(self.feedbacker_address)
                     connectedToFeedback = True
                 except ConnectionRefusedError:

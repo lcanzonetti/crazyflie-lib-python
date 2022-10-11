@@ -180,7 +180,7 @@ def main():
 
 
     GUI.startCompanionFeedback()
-    time.sleep(1)
+    time.sleep(0.6)
     GUI.resetCompanion()
     GUI.updateCompanion()
 

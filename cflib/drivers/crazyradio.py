@@ -153,7 +153,8 @@ class Crazyradio:
             self.set_cont_carrier(False)
             self.set_address((0xE7,) * 5)
             self.set_power(self.P_0DBM)
-            self.set_arc(3)
+            self.set_arc(1)
+            print('\nIl numero di tentativi di ritrasmissione è settato a 1')
             self.set_ard_bytes(32)
             self.set_ack_enable(True)
 
