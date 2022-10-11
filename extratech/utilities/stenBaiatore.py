@@ -17,7 +17,6 @@ def cercaya():
 
     print('Scanning interfaces for Crazyflies...')
     available = cflib.crtp.scan_interfaces() 
-    cflib.crtp.scan_interfaces()
     print('Crazyflies found:')
     for i in available:
         print(i[0])
@@ -67,5 +66,5 @@ def create_CF_list_address_only(numero_massimo_droni = 10, radio_installate = 1)
     return list
 
 if __name__ == '__main__':
-    # stenbaya()
-    cercaya()
+    stenbaya()
+    # cercaya()
