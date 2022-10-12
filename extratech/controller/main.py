@@ -60,7 +60,7 @@ OSC.aggregatorExitEvent    = processes_exit_event
 connectedUris = uris.copy()
 drogni = {}
 
-SPACING = 0.5
+SPACING = 0.4
 PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
                                 ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
                                 ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 

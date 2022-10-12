@@ -1,5 +1,6 @@
 #rf 2022
 
+from ast import Break
 import time, sys, os
 import threading
 from   datetime import datetime
@@ -681,39 +682,50 @@ class Drogno(threading.Thread):
                 self.setRingColor(255,   0,   0)
                 time.sleep(1)
 
-                self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
+                self.positionHLCommander.go_to(1.5, 1.5, 1.0, 0.2)
                 self.setRingColor(255,   0,   0)
                 time.sleep(1)
 
-                self.positionHLCommander.go_to(1, 1, 1, 0.2)
+                self.positionHLCommander.go_to(1.5, -1.5, 1,0, 0.2)
                 self.setRingColor(  0, 255,  0)
                 time.sleep(1)
                 
-                self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
+                self.positionHLCommander.go_to(-1.50, -1.5, 1.0, 0.2)
+                self.setRingColor(  0,  0, 255)
+                time.sleep(1)
+
+                self.positionHLCommander.go_to(-1.5, 1.5, 1, 0.2)
+
+                if self.currentSequence_killingPill.is_set(): Break 
+                self.setRingColor(255, 255,   0)
+                time.sleep(1)
+                self.currentSequence_killingPill.is_set()
+                self.setRingColor(255,   0,   0)
+                time.sleep(1)
+                self.setRingColor(  0, 255,   0)
+                time.sleep(1)
                 self.setRingColor(  0,   0, 255)
                 time.sleep(1)
 
-                self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
-                self.setRingColor(255, 255,   0)
-                time.sleep(1)
-
-                self.setRingColor(255, 0,   0)
-                time.sleep(1)
-                self.setRingColor(0, 255,   0)
-                time.sleep(1)
-                self.setRingColor(0, 0,   255)
-                time.sleep(1)
-
-                self.setRingColor(0, 255,   255)
+                self.setRingColor  (0, 255, 255)
                 time.sleep(0.8)
                 self.setRingColor(255, 255,   0)
                 time.sleep(0.8)
-                self.setRingColor(255, 0,   255)
+                self.setRingColor(255,   0, 255)
                 time.sleep(0.8)
                 self.land()
             print('fine prima sequenza di test')
+            
         def sequenzaDue():
-            pass
+            self.takeOff(3.)
+            self._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)
+            time.sleep(1)
+            self._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1)
+            time.sleep(1)
+            self._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1)
+            time.sleep(1)
+            self._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
+
         sequenzeTest = [sequenzaUno, sequenzaDue]
 
         print('dio bono')
@@ -782,9 +794,6 @@ class Drogno(threading.Thread):
         #     else:
         #         print(self._cf.state)
         # sequenzeTest = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque]
-        
-       
-    
 
     def upload_trajectory(self, trajectory_id):
         trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
@@ -798,19 +807,14 @@ class Drogno(threading.Thread):
             yaw = Poly4D.Poly(row[25:33])
             trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
             total_duration += duration
-
         upload_result = Uploader().upload(trajectory_mem)
         if not upload_result:
             print('Upload failed, aborting!')
         self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
         self.currentTrajectoryLenght =  total_duration
-
     def evaluateBattery(self):
-        # print (Fore.LIGHTYELLOW_EX + 'Exiting class: %s\t Being killed:%s\tConnected: %s ' % (self.exitFlag.is_set(), self.killingPill.is_set(), self.is_connected))
-        # batteryLock = Lock()
         while not self.killingPill.is_set() and not self.exitFlag.is_set() and self.is_connected:
             level = 0.0
-            # batteryLock.acquire()
             if self.batteryVoltage == 'n.p.':
                 level = 99.
             else:
@@ -819,7 +823,6 @@ class Drogno(threading.Thread):
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 if (self.isLogEnabled):  self.LoggerObject.warning("battery under 3.50v")
-
                 # self.isReadyToFly = False
             if level<BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
@@ -839,7 +842,6 @@ class Drogno(threading.Thread):
         print('battery thread for drone %s stopped'% self.ID)
         del self.killingPill
         del self.batteryThread
-        
     def killMeSoftly(self):
         self.land(thenGoToSleep=True)
     def killMeHardly(self):
@@ -857,7 +859,6 @@ class Drogno(threading.Thread):
             self._cf.close_link()
             PowerSwitch(self.link_uri).stm_power_down()
         self.statoDiVolo = 'stand by'
-
     def wakeUp(self):
         def wakeUpProcedure():
             self.statoDiVolo = 'waking up'
@@ -875,22 +876,10 @@ class Drogno(threading.Thread):
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
         if (self.isLogEnabled): self.LoggerObject.warning("closing %s"% self.name)
-
         self.isKilled = True
         self._cf.close_link()
         self.isReadyToFly = False
         self.exitFlag.set()
-
-    def sequenzaDiVoloSimulata(self):     
-        def volo():
-            print('il drone %s vola! e volerà per %s secondi' % (self.ID, self.durataVolo))
-            time.sleep(self.durataVolo)
-            self.statoDiVolo = 'hovering'
-
-        if not self.currentSequenceThread:
-            self.currentSequenceThread = threading.Thread(target=volo)
-            self.currentSequenceThread.start()
-            print('start!')
 
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
