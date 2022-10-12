@@ -40,7 +40,7 @@ FEEDBACK_SENDING_PORT   = 9203
 FEEDBACK_ENABLED        = True
 CLAMPING                = True
 RING_FADE_TIME          = 0.001
-INITIAL_TEST            = True
+INITIAL_TEST            = False
 BATTERY_WARNING_LEVEL   = 3.5
 BATTERY_DRAINED_LEVEL   = 3.2
 
@@ -67,20 +67,22 @@ class Drogno(threading.Thread):
         self.isLogEnabled           = LOGGING_ENABLED
         self.printThread            = False
         self.printRate              = STATUS_PRINT_RATE
-        self.currentSequenceThread  = 0
+
+        self.current_sequence       = None
+        self.currentSequenceThread  = None
         self.currentSequence_killingPill = threading.Event()
+
         self.recconnectionAttempts  = 0
         self.is_connected           = False
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
-        self.starting_x =  self.starting_y =  self.starting_z = 0.0
-        self.x =  self.y =  self.z  = 0.0
-        self.yaw                    = 0.0
+        self.x =  self.y =  self.z  =  self.yaw                = 0.0
+        self.starting_x =  self.starting_y =  self.starting_z  = 0.0
+        self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
         self.requested_X = self.requested_Y = self.requested_Z = 0.0
         self.requested_R = self.requested_G = self.requested_B = 0
         self.ledMem                 = 0
-        self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
         self.esteemsCount           = 0
         self.prefStartPoint_X, self.prefStartPoint_Y = startingPoint[0], startingPoint[1]
         self.batteryVoltage         = 'n.p.'
@@ -165,7 +167,7 @@ class Drogno(threading.Thread):
                     if self.is_connected:
                         self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
                         if self.isEngaged:
-                            if INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t batterySag: {self.motorPass}")
+                            if INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
                             print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                         else:
                             print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
@@ -397,8 +399,9 @@ class Drogno(threading.Thread):
         self.yaw               = float(data['stabilizer.yaw'])
         self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
-        self.batterySag        = float(data['health.batterySag'])
-        self.motorPass         = float(data['health.motorPass'])
+        if INITIAL_TEST:
+          self.batterySag        = float(data['health.batterySag'])
+          self.motorPass         = float(data['health.motorPass'])
         self.kalman_VarX       = float(data['kalman.varPX'])
         self.kalman_VarY       = float(data['kalman.varPY'])
         self.kalman_VarZ       = float(data['kalman.varPZ'])
@@ -407,6 +410,7 @@ class Drogno(threading.Thread):
         if self.isFlying:
             if abs(self.x) > (BOX_X + 1.0) or abs(self.y) > (BOX_Y+1.0) or self.z > (BOX_Y + 0.5):
                 print(Fore.RED + 'Landing due trespassing!')
+                self.currentSequence_killingPill.set()
                 self.LoggerObject.info("Landing due trespassing!")
                 self.land(thenGoToSleep=True)
         
@@ -665,122 +669,122 @@ class Drogno(threading.Thread):
         commander.land(0.0, 4.0)
         time.sleep(4)
         # commander.stop()
- 
-    def startTestSequence(self,sequenceNumber=0,loop=False):
-        print ('orcodo %d'% sequenceNumber)
-        def sequenzaZero():
-            print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
-            # input("enter to continue")
-            self.alternativeSetRingColor([255,0,0])
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,0,0])
-            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,255,0])
-            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,255,255])
+    def porco(self):
+            print('il clero')
 
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
-            
-            print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
-            self.statoDiVolo = 'landed'
-            if loop:
-                self.sequenzaTest(sequenceNumber,loop)
-            else:
-                print(self._cf.state)
-        def sequenzaUno():
-            if (self.currentSequenceThread == 1): # if this sequence is running already we stop it
-                self.currentSequence_killingPill.set()
-                print("interrompo la sequenza 1")
-                return
-            def antani(pill):
-                print('inizio prima sequenza di test')
-                self.currentSequenceThread == 1
-                while not pill.is_set():
-                    self.takeOff()      
-                    self.positionHLCommander.go_to(0.0, 0.0, 1)
-                    self.setRingColor(255,   0,   0)
-                    time.sleep(1)
+    def testSequence(self,requested_sequenceNumber):
+        def sequenzaUno():   
+            print('inizio prima sequenza di test')
+            while not self.currentSequence_killingPill.is_set():
+                self.takeOff()      
+                self.positionHLCommander.go_to(0.0, 0.0, 1)
+                self.setRingColor(255,   0,   0)
+                time.sleep(1)
 
-                    self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
-                    self.setRingColor(255,   0,   0)
-                    time.sleep(1)
+                self.positionHLCommander.go_to(0.0, 1, 1, 0.2)
+                self.setRingColor(255,   0,   0)
+                time.sleep(1)
 
-                    self.positionHLCommander.go_to(1, 1, 1, 0.2)
-                    self.setRingColor(  0, 255,  0)
-                    time.sleep(1)
-                    
-                    self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
-                    self.setRingColor(  0,   0, 255)
-                    time.sleep(1)
+                self.positionHLCommander.go_to(1, 1, 1, 0.2)
+                self.setRingColor(  0, 255,  0)
+                time.sleep(1)
+                
+                self.positionHLCommander.go_to(1.0, 0.0, 1, 0.2)
+                self.setRingColor(  0,   0, 255)
+                time.sleep(1)
 
-                    self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
-                    self.setRingColor(255, 255,   0)
-                    time.sleep(1)
+                self.positionHLCommander.go_to(0.0, 0.0, 1, 0.2)
+                self.setRingColor(255, 255,   0)
+                time.sleep(1)
 
-                    self.setRingColor(255, 0,   0)
-                    time.sleep(1)
-                    self.setRingColor(0, 255,   0)
-                    time.sleep(1)
-                    self.setRingColor(0, 0,   255)
-                    time.sleep(1)
+                self.setRingColor(255, 0,   0)
+                time.sleep(1)
+                self.setRingColor(0, 255,   0)
+                time.sleep(1)
+                self.setRingColor(0, 0,   255)
+                time.sleep(1)
 
-                    self.setRingColor(0, 255,   255)
-                    time.sleep(0.8)
-                    self.setRingColor(255, 255,   0)
-                    time.sleep(0.8)
-                    self.setRingColor(255, 0,   255)
-                    time.sleep(0.8)
-                    self.land()
-                print('fine prima sequenza di test')
-            sequenza = threading.Thread(target=antani, args=[self.currentSequence_killingPill])
-            sequenza.start()
-            self.statoDiVolo = 'hovering'
+                self.setRingColor(0, 255,   255)
+                time.sleep(0.8)
+                self.setRingColor(255, 255,   0)
+                time.sleep(0.8)
+                self.setRingColor(255, 0,   255)
+                time.sleep(0.8)
+                self.land()
+            print('fine prima sequenza di test')
         def sequenzaDue():
             pass
-        def sequenzaTre():
-            print('Drogno: %s. Inizioquadrato di test' % self.ID)
-            # input("enter to continue")
-            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
-            self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
-            self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
-            self.positionHLCommander.land()
-            print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
-            self.statoDiVolo = 'landed'
-        contatore = 0
-        def sequenzaQuattro():
-            print('Drogno: %s. Inizio test 4' % self.ID)
-            self.setRingColor(80,   80,   80)
+        sequenzeTest = [sequenzaUno, sequenzaDue]
 
-            self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
-            time.sleep(1)
-            self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
-            time.sleep(1)
-            self._cf.high_level_commander.go_to(-0.5, -0.5, 1, 0, 1)
-            time.sleep(1)
-            self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
-            time.sleep(1)
-            self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
-            time.sleep(1)
-            self._cf.high_level_commander.go_to(0.0, 0.0, 1, 0, 1)
-            # self._cf.commander.set_client_xmode()
-            time.sleep(1)
-            if contatore < 5: sequenzaQuattro()
-
-        sequenzeTest = [sequenzaZero, sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro]
-        if self.isFlying:
-            if self.WE_ARE_FAKING_IT:
-                self.statoDiVolo = 'sequenza simulata!'
-            else:
-                self.statoDiVolo = 'sequenza ' + str(sequenceNumber)
-                print ('eseguo la sequenza %s' % sequenceNumber)
-                if not self.currentSequenceThread:
-                    self.currentSequenceThread = threading.Thread(target=sequenzeTest[sequenceNumber])
-                    self.currentSequenceThread.start()
-                    print('non ci sono sequenze in esecuzione, parto con la %s' % sequenceNumber)
-                else:
-                 print('la sequenza in esecuzione non può essere fermata. \nMAI')
+        print('dio bono')
+        print('startTestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
+        if self.WE_ARE_FAKING_IT:
+            self.statoDiVolo = 'sequenza simulata!'
         else:
-            print('not ready!')
+            print('yollo')
+            if requested_sequenceNumber == self.current_sequence:
+                self.currentSequence_killingPill.set()
+                print('stoppo la sequenza test' + requested_sequenceNumber)
+                self.statoDiVolo = 'idle'
+                return
+
+            if self.current_sequence is None:
+                self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
+                print ('eseguo la sequenza %s' % requested_sequenceNumber)
+                self.current_sequence       = requested_sequenceNumber
+                self.currentSequenceThread = threading.Thread(target=sequenzeTest[requested_sequenceNumber])
+                self.currentSequenceThread.start()
+
+        # def sequenzaTre():
+        #     print('Drogno: %s. Inizio quadrato di test' % self.ID)
+        #     self.takeOff()
+        #     # input("enter to continue")
+        #     self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+        #     self.positionHLCommander.go_to(0.0, 0.0, 1.0, 0.2)
+        #     self.positionHLCommander.go_to(0.0, 0.0, 0.5, 0.2)
+        #     self.positionHLCommander.land()
+        #     print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
+        #     self.statoDiVolo = 'landed'
+        # def sequenzaQuattro():
+        #     print('Drogno: %s. Inizio test 4' % self.ID)
+        #     self.takeOff()
+        #     self.setRingColor(80,   80,   80)
+        #     self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
+        #     time.sleep(1)
+        #     self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
+        #     time.sleep(1)
+        #     self._cf.high_level_commander.go_to(-0.5, -0.5, 1, 0, 1)
+        #     time.sleep(1)
+        #     self._cf.high_level_commander.go_to(0.5, -0.5, 1, 0, 1)
+        #     time.sleep(1)
+        #     self._cf.high_level_commander.go_to(0.5, 0.5, 1, 0, 1)
+        #     time.sleep(1)
+        #     self._cf.high_level_commander.go_to(0.0, 0.0, 1, 0, 1)
+        #     # self._cf.commander.set_client_xmode()
+        #     time.sleep(1)
+        # def sequenzaCinque():
+        #     print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
+        #     # input("enter to continue")
+        #     self.alternativeSetRingColor([255,0,0])
+        #     self.positionHLCommander.go_to(self.starting_x,  self.starting_y, 1.2, 0.2)
+        #     self.alternativeSetRingColor([255,0,0])
+        #     self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
+        #     self.alternativeSetRingColor([255,255,0])
+        #     self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
+        #     self.alternativeSetRingColor([255,255,255])
+
+        #     self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
+            
+        #     print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
+        #     self.statoDiVolo = 'landed'
+        #     if loop:
+        #         self.sequenzaTest(sequenceNumber,loop)
+        #     else:
+        #         print(self._cf.state)
+        # sequenzeTest = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque]
+        
+       
+    
 
     def upload_trajectory(self, trajectory_id):
         trajectory_mem = self._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
@@ -817,7 +821,7 @@ class Drogno(threading.Thread):
                 if (self.isLogEnabled):  self.LoggerObject.warning("battery under 3.50v")
 
                 # self.isReadyToFly = False
-            if level<BATTERY_DRAINED_LEVEL:
+            if level<BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))

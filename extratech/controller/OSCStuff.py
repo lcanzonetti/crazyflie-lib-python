@@ -136,8 +136,12 @@ def startTestSequence (coddii,quale):
         print('chief says we\'re gonna do testsss at sequence %s' % quale)
         for drogno in drogni:
             if drogni[drogno].is_connected:
-                # print('cazzodio')
-                drogni[drogno].startTestSequence(quale, False)
+                print('TEST!')
+                drogni[drogno].testSequence(quale)
+
+
+
+
             else:
                 print('il drogno %s non è connesso' % drogni[drogno].name)
 def go        (coddii,quale):
