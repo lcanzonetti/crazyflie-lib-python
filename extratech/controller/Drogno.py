@@ -686,7 +686,7 @@ class Drogno(threading.Thread):
                 self.setRingColor(255,   0,   0)
                 time.sleep(1)
 
-                self.positionHLCommander.go_to(1.5, -1.5, 1,0, 0.2)
+                self.positionHLCommander.go_to(1.5, -1.5, 1.0, 0.2)
                 self.setRingColor(  0, 255,  0)
                 time.sleep(1)
                 
