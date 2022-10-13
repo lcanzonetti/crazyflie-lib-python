@@ -15,8 +15,8 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 
-# from   main                  import WE_ARE_FAKING_IT
-
+from   URI_map               import uri_map
+import connections
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
@@ -33,6 +33,7 @@ finished          = False
 msgCount          = 0 
 timecode          = '00:00:00:00'
 framerate         = 25
+add_one = None
 
 ################################################  this module osc receiving:
 RECEIVING_IP            = ""
@@ -216,16 +217,31 @@ def kill      (coddii, chi):
             drogni[drogno].killMeHardly()
     else:
         drogni[chi].killMeHardly()
+
+carlo = ''
+def cambiaCarlo(funzione):
+    global carlo
+    carlo = funzione
+
 def standBy   (coddii, chi):
-    print(' %s  just go to sleep' % chi )
+    print('drogno %s sleeps, or wakes' % chi )
     if chi == 'all':    
         for drogno in drogni:
             drogni[drogno].goToSleep()
     else:
-        if not drogni[int(chi)].standBy:
-            drogni[int(chi)].goToSleep()
+        print(drogni)
+        if not int(chi) in drogni:
+            print ('ka')
+            # print(uri_map[str(chi)])
+            connections.add_just_one_crazyflie(uri_map[str(chi)])
+            print('boom')
+
         else:
-            drogni[int(chi)].wakeUp()
+            print('cddio')
+            if not drogni[int(chi)].standBy:
+                drogni[int(chi)].goToSleep()
+            else:
+                drogni[int(chi)].wakeUp()
 def wakeUp    (coddii, chi):
     print(' %s  wakeUp' % chi )
     if chi == 'all':    
@@ -358,12 +374,13 @@ def start_server():      ######################    #### OSC init    #########   
     print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
    
     if AGGREGATION_ENABLED:
-        global aggregatorInstance
-        global aggregatorProcess
-        aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE, framerate )
-        aggregatorProcess  = Process(target=aggregatorInstance.start)
-        aggregatorProcess.daemon = True
-        aggregatorProcess.start() 
+        pass
+        # global aggregatorInstance
+        # global aggregatorProcess
+        # aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE, framerate )
+        # aggregatorProcess  = Process(target=aggregatorInstance.start)
+        # aggregatorProcess.daemon = True
+        # aggregatorProcess.start() 
     
     ###########################  single fella requested position
     osc_method("/notch/drone*/pos",   setRequestedPos, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)

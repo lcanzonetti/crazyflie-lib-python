@@ -8,10 +8,10 @@ import multiprocessing
 from   multiprocessing.connection import Client
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
+coloInit(convert=True)
 
 from main import WE_ARE_FAKING_IT
 from main import LOGGING_ENABLED
-coloInit(convert=True)
 
 #crazyflie'sm
 import logging
@@ -715,7 +715,7 @@ class Drogno(threading.Thread):
                 time.sleep(0.8)
                 self.land()
             print('fine prima sequenza di test')
-            
+
         def sequenzaDue():
             self.takeOff(3.)
             self._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)

@@ -8,11 +8,11 @@ from   pathlib                    import Path
 import cflib.crtp
 from   cflib.utils.power_switch import PowerSwitch
 from   cflib.utils import uri_helper
-#custom modules
-import OSCStuff       as OSC
-import GUI as GUI
-import Drogno
+
 logging.basicConfig(level=logging.ERROR)
+from rich import print
+
+
 #########################################################################
 uris = [    
         # 'radio://0/80/2M/E7E7E7E7E0',
@@ -45,9 +45,16 @@ RECONNECT_FREQUENCY   = 1
 COMMANDS_FREQUENCY    = 0.1
 FEEDBACK_SENDING_PORT = 6000
 BROADCAST_IP          = "192.168.1.21"
-
+#custom modules
+import OSCStuff       as OSC
+import GUI as GUI
+import Drogno
+import connections
+from   URI_map import PREFERRED_STARTING_POINTS as PFS
 threads_exit_event   = threading.Event()
 processes_exit_event = multiprocessing.Event()
+connections.threads_exit_event = threads_exit_event
+connections.processes_exit_event = processes_exit_event
 
 Drogno.COMMANDS_FREQUENCY  = COMMANDS_FREQUENCY
 Drogno.FEEDBACK_SENDING_IP = BROADCAST_IP
@@ -60,25 +67,22 @@ OSC.aggregatorExitEvent    = processes_exit_event
 connectedUris = uris.copy()
 drogni = {}
 
-SPACING = 0.4
-PREFERRED_STARTING_POINTS =   [ ( -SPACING, SPACING),    (0, SPACING)   , (SPACING, SPACING), 
-                                ( -SPACING, -0),         (0, 0)         , (SPACING, 0), 
-                                ( -SPACING, -SPACING),   (0, -SPACING)  , (SPACING, -SPACING), 
-                                ( -SPACING*1.5, -SPACING), (0, 0), (0,0) , (0,0), (0,0), (0,0), (0,0)
-                                ]
+
 
 def radioStart():
     if not WE_ARE_FAKING_IT:
         cflib.crtp.init_drivers()
         print('Scanning usb for Crazy radios...')
-
         if (cflib.crtp.get_interfaces_status()['radio'] == 'Crazyradio not found'):
             raise Exception("no radio!")
         else:
-            print ('Radio trovata:')
+            print("[bold blue]Radio trovata:")
             print(cflib.crtp.get_interfaces_status())
+    else: 
+        time.sleep('simulo di aver trovato una radio')
 
-
+def add_crazyflies():
+    if not WE_ARE_FAKING_IT:
         available_crazyfliess = []
         
         print('Scanning interfaces for Crazyflies...')
@@ -96,8 +100,10 @@ def radioStart():
             #     print ('Found %s radios.' % len(available_crazyfliess))
             #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
         else:
-            print('no crazyflies?')     
-
+            print('no crazyflies?')
+    else: 
+        time.sleep('simulo di aver aggiunto i crazifliii') 
+ 
 def autoReconnect():
     while not threads_exit_event.is_set() :
         time.sleep(RECONNECT_FREQUENCY)
@@ -107,7 +113,7 @@ def autoReconnect():
                 IDToBeRenewed  = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
-                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[IDToBeRenewed], lastRecordPath)
+                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PFS[IDToBeRenewed], lastRecordPath)
                 drogni[IDToBeRenewed].start()
 
 def restart_devices():
@@ -147,7 +153,7 @@ def restart_devices():
             sys.exit()
     else:
         # Wait for devices to boot
-        time.sleep(5)
+        time.sleep(4)
 
 def main():
     if WE_ARE_FAKING_IT:
@@ -157,24 +163,26 @@ def main():
         print("Controller started. No fake shit.")
     try:
         radioStart()
+        add_crazyflies()
         restart_devices()
 
     except Exception as e:
         print(e)
-        print('Nice try, mate, ciao ciao.')
+        print('Nice try mate, ciao.')
         quit()
 
     for uro in connectedUris:
         iddio = IDFromURI(uro)
-        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PREFERRED_STARTING_POINTS[iddio], lastRecordPath)
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PFS[iddio], lastRecordPath)
         drogni[iddio].start()
+        print('i drogni:')
         print(drogni)
 
     #send drogni's array to submodules
     OSC.drogni = drogni
     OSC.faiIlBufferon()
     GUI.drogni = drogni
-    # OSCRefreshThread      = threading.Thread(target=OSC.start_server,daemon=True).start()
+    connections.drogni = drogni
     OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates).start()
 
@@ -208,7 +216,7 @@ def ciao_ciao():
    
     sys.exit("Putin merda")
 
-def IDFromURI(uri) -> int:
+def IDFromURI(uri):
     # Get the address part of the uri
     address = uri.rsplit('/', 1)[-1]
     try:
@@ -226,7 +234,6 @@ if __name__ == '__main__':
     #     print ('last record path: ' + lastRecordPath)
     signal.signal(signal.SIGINT, exit_signal_handler)
     main()
-
     while True:
         time.sleep(0.1)
         pass
