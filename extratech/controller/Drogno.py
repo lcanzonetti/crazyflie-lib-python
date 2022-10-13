@@ -100,7 +100,7 @@ class Drogno(threading.Thread):
         self.flyingTime             = 0
         self.connectionThread       = None
         self.killingPill            = None
-        self._cf = Crazyflie(rw_cache='./cache_test')
+        self._cf = Crazyflie(rw_cache='./cache_test/'+self.name)
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback        (self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there) 
@@ -323,7 +323,7 @@ class Drogno(threading.Thread):
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
         
     def _all_params_there(self):
-        print('Parametri scricati per %s' % self.name)
+        print('Parametri scaricati per %s' % self.name)
 
     def _fully_connected(self, link_uri):  ##########   where a lot of things happen
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)

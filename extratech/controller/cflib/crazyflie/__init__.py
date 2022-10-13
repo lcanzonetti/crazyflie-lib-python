@@ -211,6 +211,7 @@ class Crazyflie():
         """Called from link driver to report link quality"""
         self.link_quality_updated.call(percentage)
 
+
     def _check_for_initial_packet_cb(self, data):
         """
         Called when first packet arrives from Crazyflie.

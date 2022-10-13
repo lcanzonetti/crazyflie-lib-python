@@ -64,7 +64,7 @@ __all__ = ['RadioDriver']
 logger = logging.getLogger(__name__)
 
 _nr_of_retries = 100
-_nr_of_arc_retries = 3
+_nr_of_arc_retries = 1
 
 DEFAULT_ADDR_A = [0xe7, 0xe7, 0xe7, 0xe7, 0xe7]
 DEFAULT_ADDR = 0xE7E7E7E7E7
