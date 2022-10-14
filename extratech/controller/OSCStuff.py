@@ -15,17 +15,16 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 
-from   URI_map               import uri_map
-import connections
+
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
-
+import GLOBALS as GB
+import connections
 import OSCaggregator
 from GUI import setCompanionRate, setFlyability, set_command_frequency,weMaySend
 
 
-drogni            = {} #main script will copy a list into this
 bufferone         = {}
 isSendEnabled     = False
 isSwarmReadyToFly = False
@@ -71,11 +70,11 @@ def checkSwarmFlyability():
         while not finished:
             time.sleep(0.1)
             swarmFlyabilityArray = []
-            for drogno in drogni:
-                if drogni[drogno].isReadyToFly : swarmFlyabilityArray.append(True)
-                elif not drogni[drogno].isReadyToFly and not drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
-                # if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged and drogni[drogno].batterySag < 0.85: swarmFlyabilityArray.append(True)
-                # if drogni[drogno].isReadyToFly and drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
+            for drogno in GB.drogni:
+                if GB.drogni[drogno].isReadyToFly : swarmFlyabilityArray.append(True)
+                elif not GB.drogni[drogno].isReadyToFly and not GB.drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
+                # if GB.drogni[drogno].isReadyToFly and GB.drogni[drogno].isEngaged and GB.drogni[drogno].batterySag < 0.85: swarmFlyabilityArray.append(True)
+                # if GB.drogni[drogno].isReadyToFly and GB.drogni[drogno].isEngaged: swarmFlyabilityArray.append(True)
                 else: swarmFlyabilityArray.append(False)
             if all (swarmFlyabilityArray):
                 isSwarmReadyToFly = True
@@ -90,133 +89,133 @@ def checkSwarmFlyability():
 def takeOff   (coddii, decollante):
     global bufferone
     def authorizedScrambleCommand():
-        for drogno in drogni:
-            bufferone[drogni[drogno].ID].requested_X = drogni[drogno].x
-            bufferone[drogni[drogno].ID].requested_Y = drogni[drogno].y
-            drogni[drogno].takeOff()
+        for drogno in GB.drogni:
+            bufferone[GB.drogni[drogno].ID].requested_X = GB.drogni[drogno].x
+            bufferone[GB.drogni[drogno].ID].requested_Y = GB.drogni[drogno].y
+            GB.drogni[drogno].takeOff()
 
     authorizedDrognos = 0
     if decollante == 'all':    # whole swarm logic
         print('chief says %s gonna take the fuck off' %(decollante))
-        for drogno in drogni:
-            if drogni[drogno].is_connected and drogni[drogno].evaluateFlyness():               
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected and GB.drogni[drogno].evaluateFlyness():               
                 authorizedDrognos += 1
                 print(Fore.WHITE + 'Got %s drognos ready to scramble.' % authorizedDrognos)
-                if authorizedDrognos == len(drogni):
+                if authorizedDrognos == len(GB.drogni):
                     print(Fore.GREEN + 'Got ENOUGH drognos ready to scramble!')
                     authorizedScrambleCommand()
             else:
-                print('can\'t scramble drogno %s, not connected or not ready' % drogni[drogno].name)
+                print('can\'t scramble drogno %s, not connected or not ready' % GB.drogni[drogno].name)
     else:                         # single drogno logic, scramble or land
-        if drogni[decollante].is_connected:
-            if not drogni[decollante].isFlying:   # if it is not flying
-                print('chief says %s gonna take the fuck off' %(drogni[decollante]))
-                if drogni[decollante].evaluateFlyness():  # and might fly
-                    bufferone[drogni[decollante].ID].requested_X = drogni[decollante].x
-                    bufferone[drogni[decollante].ID].requested_Y = drogni[decollante].y
+        if GB.drogni[decollante].is_connected:
+            if not GB.drogni[decollante].isFlying:   # if it is not flying
+                print('chief says %s gonna take the fuck off' %(GB.drogni[decollante]))
+                if GB.drogni[decollante].evaluateFlyness():  # and might fly
+                    bufferone[GB.drogni[decollante].ID].requested_X = GB.drogni[decollante].x
+                    bufferone[GB.drogni[decollante].ID].requested_Y = GB.drogni[decollante].y
                     try:
-                        gino = threading.Thread(target=drogni[decollante].takeOff).start()
-                        # drogni[decollante].takeOff(0.45, 2.45)
+                        gino = threading.Thread(target=GB.drogni[decollante].takeOff).start()
+                        # GB.drogni[decollante].takeOff(0.45, 2.45)
                     except Exception:
                         print('already taking off %s' % Exception)
                 else: 
-                    print('drone %s is not ready to fly' % drogni[decollante])
+                    print('drone %s is not ready to fly' % GB.drogni[decollante])
             else:            #if is flying already it may very well land
                 print('chief says %s gonna land' %(decollante))
-                drogni[decollante].land()
+                GB.drogni[decollante].land()
         else:
-            print('il drogno %s non è connesso' % drogni[decollante].name)
+            print('il drogno %s non è connesso' % GB.drogni[decollante].name)
 def uploadSequence(coddii,quale):
         print('chief says we\'re upload shit at sequence %s' % quale)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].upload_trajectory(quale)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].upload_trajectory(quale)
             else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+                print('il drogno %s non è connesso' % GB.drogni[drogno].name)
 def startTestSequence (coddii,quale):
         print('chief says we\'re gonna do testsss at sequence %s' % quale)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
                 print('TEST!')
-                drogni[drogno].testSequence(quale)
+                GB.drogni[drogno].testSequence(quale)
 
 
 
 
             else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+                print('il drogno %s non è connesso' % GB.drogni[drogno].name)
 def go        (coddii,quale):
         print('chief says we\'re gonna do shit at sequence %s' % quale)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].go(quale)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].go(quale)
 def goLeft    (coddii, quanto):
         print('chief says we\'re gonna go leftwards by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goLeft(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goLeft(quanto)
 def goRight   (coddii, quanto):
         print('chief says we\'re gonna go rightwards by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goRight(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goRight(quanto)
 def goForward (coddii, quanto):
         print('chief says we\'re gonna go forward by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goForward(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goForward(quanto)
 def goBack    (coddii, quanto):
         print('chief says we\'re gonna go back by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goBack(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goBack(quanto)
 def goUp      (coddii, quanto):
         print('chief says we\'re gonna go up by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goUp(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goUp(quanto)
 def goDown    (coddii, quanto):
         print('chief says we\'re gonna go down by %s ' % quanto)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goDown(quanto)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goDown(quanto)
 def land      (bullshit, landingCandidate):
     print('chief says %s gotta be grounded' % (landingCandidate))
     if landingCandidate == 'all':    
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].land()
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].land()
             else:
-                print('il drogno %s non è connesso' % drogni[drogno].name)
+                print('il drogno %s non è connesso' % GB.drogni[drogno].name)
     else:
-        drogni[landingCandidate].land()
+        GB.drogni[landingCandidate].land()
 def home      (coddii, chi):
         print('chief says drogno_%s gonna go home' % chi)
-        if drogni[chi].is_connected:
-            if drogni[chi].isFlying:
-                drogni[chi].goHome()
+        if GB.drogni[chi].is_connected:
+            if GB.drogni[chi].isFlying:
+                GB.drogni[chi].goHome()
             else:
-                print('il drogno %s non è connesso' % drogni[chi].name)
+                print('il drogno %s non è connesso' % GB.drogni[chi].name)
 def goToStart (coddii, chi):
         print('chief says we (%s) are back at the start.' % chi)
-        for drogno in drogni:
-            if drogni[drogno].is_connected:
-                drogni[drogno].goToStart(0.2)
+        for drogno in GB.drogni:
+            if GB.drogni[drogno].is_connected:
+                GB.drogni[drogno].goToStart(0.2)
 def ringColor (*args):
     # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
     # print (bullshit)
     # print  (rgb[0])
-    for drogno in drogni:
-        if drogni[drogno].is_Connected:
-            drogni[drogno].setRingColor(args[1][0], args[1][1], args[1][2])
-        # drogni[drogno].alternativeSetRingColor(args)
+    for drogno in GB.drogni:
+        if GB.drogni[drogno].is_Connected:
+            GB.drogni[drogno].setRingColor(args[1][0], args[1][1], args[1][2])
+        # GB.drogni[drogno].alternativeSetRingColor(args)
 def kill      (coddii, chi):
     print(' %s  fuck now' % chi )
     if chi == 'all':    
-        for drogno in drogni:
-            drogni[drogno].killMeHardly()
+        for drogno in GB.drogni:
+            GB.drogni[drogno].killMeHardly()
     else:
-        drogni[chi].killMeHardly()
+        GB.drogni[chi].killMeHardly()
 
 carlo = ''
 def cambiaCarlo(funzione):
@@ -226,11 +225,11 @@ def cambiaCarlo(funzione):
 def standBy   (coddii, chi):
     print('drogno %s sleeps, or wakes' % chi )
     if chi == 'all':    
-        for drogno in drogni:
-            drogni[drogno].goToSleep()
+        for drogno in GB.drogni:
+            GB.drogni[drogno].goToSleep()
     else:
-        print(drogni)
-        if not int(chi) in drogni:
+        print(GB.drogni)
+        if not int(chi) in GB.drogni:
             print ('ka')
             # print(uri_map[str(chi)])
             connections.add_just_one_crazyflie(uri_map[str(chi)])
@@ -238,66 +237,64 @@ def standBy   (coddii, chi):
 
         else:
             print('cddio')
-            if not drogni[int(chi)].standBy:
-                drogni[int(chi)].goToSleep()
+            if not GB.drogni[int(chi)].standBy:
+                GB.drogni[int(chi)].goToSleep()
             else:
-                drogni[int(chi)].wakeUp()
+                GB.drogni[int(chi)].wakeUp()
 def wakeUp    (coddii, chi):
     print(' %s  wakeUp' % chi )
     if chi == 'all':    
-        for drogno in drogni:
-            drogni[drogno].wakeUp()
+        for drogno in GB.drogni:
+            GB.drogni[drogno].wakeUp()
     else:
-        drogni[chi].wakeUp()
+        GB.drogni[chi].wakeUp()
 def resetEstimator  (coddii, chi):
     # print(' %s  resetEstimator' % chi )
     if chi == 'all':    
-        for drogno in drogni:
-            drogni[drogno].resetEstimator()
+        for drogno in GB.drogni:
+            GB.drogni[drogno].resetEstimator()
     else:
-        drogni[chi].resetEstimator()
+        GB.drogni[chi].resetEstimator()
 def engage    (coddii, chi):
     if chi == 'all':    
-        for drogno in drogni:
-            if not drogni[drogno].isEngaged:
-                drogni[drogno].isEngaged = True
+        for drogno in GB.drogni:
+            if not GB.drogni[drogno].isEngaged:
+                GB.drogni[drogno].isEngaged = True
                 print(' %s  engaging' % chi )
             else:
-                drogni[drogno].isEngaged = False
+                GB.drogni[drogno].isEngaged = False
                 print(' %s  disengaging' % chi )
     else:
-        if not drogni[chi].isEngaged: drogni[chi].isEngaged = True
-        else: drogni[chi].isEngaged = False
+        if not GB.drogni[chi].isEngaged: GB.drogni[chi].isEngaged = True
+        else: GB.drogni[chi].isEngaged = False
 def enable_log(coddii, chi):
     if chi == 'all':    
-        for drogno in drogni:
-            if not drogni[drogno].isLogEnabled:
-                drogni[drogno].isLogEnabled = True
+        for drogno in GB.drogni:
+            if not GB.drogni[drogno].isLogEnabled:
+                GB.drogni[drogno].isLogEnabled = True
                 print(' enabling Logging for %s' % chi )
             else:
-                drogni[drogno].isLogEnabled = False
+                GB.drogni[drogno].isLogEnabled = False
                 print(' disabling Logging for %s' % chi )
 
     else:
-        if not drogni[chi].isLogEnabled: drogni[chi].isLogEnabled = True
-        else: drogni[chi].isLogEnabled = False
+        if not GB.drogni[chi].isLogEnabled: GB.drogni[chi].isLogEnabled = True
+        else: GB.drogni[chi].isLogEnabled = False
 ###########################  single fella
 def printAndSendCoordinates():
-    global drogni
-    global bufferone
     while not finished:
         time.sleep(commandsFrequency)
         if isSendEnabled:
-            for drogno in drogni:
-                iddio = drogni[drogno].ID
-                drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
+            for drogno in GB.drogni:
+                iddio = GB.drogni[drogno].ID
+                GB.drogni[drogno].setRingColor(bufferone[iddio].requested_R, bufferone[iddio].requested_G, bufferone[iddio].requested_B)
 
-                if drogni[drogno].is_connected and drogni[drogno].isEngaged:
+                if GB.drogni[drogno].is_connected and GB.drogni[drogno].isEngaged:
                     # print ('il drone %s dovrebbe colorarsi a %s %s %s' %( bufferone[iddio].ID, bufferone[iddio].requested_R,bufferone[iddio].requested_G,bufferone[iddio].requested_B))
                     # with posLock:
-                    drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
+                    GB.drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
-    print ('Non potrò mai più inviare ai drogni comandi di movimento, mai più')
+    print ('Non potrò mai più inviare ai GB.drogni comandi di movimento, mai più')
 
 def printHowManyMessages():
     # howManyMessagesLock = Lock()
@@ -352,8 +349,8 @@ def setCommandsRate(address, args):
         if commandsFrequency > 0:
             commandsFrequency -= 0.05
     commandsFrequency = round(commandsFrequency, 2)
-    for drogno in drogni:
-        drogni[drogno].commandsFrequency = commandsFrequency
+    for drogno in GB.drogni:
+        GB.drogni[drogno].commandsFrequency = commandsFrequency
     set_command_frequency(commandsFrequency)
     
     

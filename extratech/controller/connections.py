@@ -3,7 +3,9 @@ import OSCStuff as OSC
 
 import GUI
 import Drogno
-from   URI_map import PREFERRED_STARTING_POINTS as PFS
+import GLOBALS
+from   GLOBALS import PREFERRED_STARTING_POINTS as PFS
+
 
 
 from   cflib.utils.power_switch import PowerSwitch
@@ -14,7 +16,7 @@ lastRecordPath        = ''
 
 threads_exit_event   = processes_exit_event = None
 drogni = {}
-from main import WE_ARE_FAKING_IT
+WE_ARE_FAKING_IT = GLOBALS.WE_ARE_FAKING_IT
 
 def add_just_one_crazyflie(one_CF_I_am_looking_for):
     print('boom %s' % one_CF_I_am_looking_for)

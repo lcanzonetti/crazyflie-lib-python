@@ -10,8 +10,9 @@ from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
 coloInit(convert=True)
 
-from main import WE_ARE_FAKING_IT
-from main import LOGGING_ENABLED
+import GLOBALS as GB
+WE_ARE_FAKING_IT = GB.WE_ARE_FAKING_IT
+LOGGING_ENABLED  = GB.LOGGING_ENABLED
 
 #crazyflie'sm
 import logging
@@ -24,33 +25,13 @@ from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
 import OSC_feedabcker as feedbacker
 
-BOX_X                   = 2.3
-BOX_Y                   = 2.8
-BOX_Z                   = 2.4
-LIGHTHOUSE_METHOD       = '0'
-DEFAULT_HEIGHT          = 0.8
-DEFAULT_VELOCITY        = 0.85
-DEFAULT_SCRAMBLING_TIME = 2.2
-RELATIVE_SPACING        = 0.4
-BATTERY_CHECK_RATE      = 0.5
-STATUS_PRINT_RATE       = 1.1
-LOGGING_FREQUENCY       = 1000
-COMMANDS_FREQUENCY      = 0.1
-FEEDBACK_SENDING_IP     = '127.0.0.1'
-FEEDBACK_SENDING_PORT   = 9203
-FEEDBACK_ENABLED        = True
-CLAMPING                = True
-RING_FADE_TIME          = 0.001
-INITIAL_TEST            = False
-BATTERY_WARNING_LEVEL   = 3.5
-BATTERY_DRAINED_LEVEL   = 3.2
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, exitFlag, processes_exit_event, perhapsWeReFakingIt, startingPoint, lastRecordPath):
         threading.Thread.__init__(self)
         # self.lastRecordPath  = lastRecordPath
         # self.lastTrajectory  = ''
-        # self.TRAJECTORIES    = {}
+        self.TRAJECTORIES    = {}
         # self.currentTrajectoryLenght = 0
         self.link_uri    = link_uri
         self.ID          = int(ID)
@@ -67,7 +48,7 @@ class Drogno(threading.Thread):
         self.controlThread          = False
         self.isLogEnabled           = LOGGING_ENABLED
         self.printThread            = False
-        self.printRate              = STATUS_PRINT_RATE
+        self.printRate              = GB.STATUS_PRINT_RATE
 
         self.current_sequence       = None
         self.currentSequenceThread  = None
@@ -94,7 +75,7 @@ class Drogno(threading.Thread):
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
-        self.commandsFrequency      = COMMANDS_FREQUENCY
+        self.commandsFrequency      = GB.COMMANDS_FREQUENCY
         self.connection_time        = None
         self.scramblingTime         = None
         self.flyingTime             = 0
@@ -111,7 +92,7 @@ class Drogno(threading.Thread):
         # Feedback instance in his own process
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
-        self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, FEEDBACK_SENDING_IP,FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
+        self.feedbacker                = feedbacker.Feedbacco(self.ID, processes_exit_event, GB.FEEDBACK_SENDING_IP,GB.FEEDBACK_SENDING_PORT, self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start).start()
         ################################################## logging
         if (LOGGING_ENABLED):
@@ -140,7 +121,7 @@ class Drogno(threading.Thread):
          # Modifying the log file we are using
 
         connectedToFeedback = False
-        if FEEDBACK_ENABLED and not self.exitFlag.is_set():
+        if GB.FEEDBACK_ENABLED and not self.exitFlag.is_set():
             time.sleep(0.4)
             while not connectedToFeedback:
                 try:
@@ -168,7 +149,7 @@ class Drogno(threading.Thread):
                     if self.is_connected:
                         self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
                         if self.isEngaged:
-                            if INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
+                            if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
                             print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                         else:
                             print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
@@ -195,7 +176,7 @@ class Drogno(threading.Thread):
         controller = 1
         if use_mellinger:
             controller = 2
-        self._cf.cf.param.set_value('stabilizer.controller', controller)
+        self._cf.param.set_value('stabilizer.controller', controller)
 
     def wait_for_position_estimator(self):   # la proviamo 'sta cosa?
         self.isReadyToFly = False
@@ -342,7 +323,7 @@ class Drogno(threading.Thread):
         self._lg_kalm.add_variable('stabilizer.yaw','FP16')
         self._lg_kalm.add_variable('pm.vbat', 'FP16')
 
-        if INITIAL_TEST:
+        if GB.INITIAL_TEST:
              self._lg_kalm.add_variable('health.batterySag', 'FP16')
              self._lg_kalm.add_variable('health.motorPass', 'FP16')
         try:
@@ -364,23 +345,23 @@ class Drogno(threading.Thread):
 
         if not WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
             self._cf.param.set_value('commander.enHighLevel', '1')
-            if INITIAL_TEST: 
+            if GB.INITIAL_TEST: 
                 self._cf.param.set_value('health.startBatTest', '1')
                 self._cf.param.set_value('health.startPropTest', '1')
 
             self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
-            self._cf.param.set_value('lighthouse.method', LIGHTHOUSE_METHOD)
+            self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
             self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
             self.positionHLCommander = PositionHlCommander(
                 self._cf,
                 x=self.x, y=self.y, z=0.0,
-                default_velocity=DEFAULT_VELOCITY,
-                default_height=DEFAULT_HEIGHT,
+                default_velocity=GB.DEFAULT_VELOCITY,
+                default_height=GB.DEFAULT_HEIGHT,
                 controller=PositionHlCommander.CONTROLLER_PID) 
 
             time.sleep(0.3)
             if not self.batteryThread.is_alive():  self.batteryThread.start()
-            self._cf.param.set_value('ring.fadeTime', RING_FADE_TIME)
+            self._cf.param.set_value('ring.fadeTime', GB.RING_FADE_TIME)
             # time.sleep(1.0)
             self.resetEstimator()
 
@@ -400,7 +381,7 @@ class Drogno(threading.Thread):
         self.yaw               = float(data['stabilizer.yaw'])
         self.linkQuality       = data['radio.rssi']
         self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
-        if INITIAL_TEST:
+        if GB.INITIAL_TEST:
           self.batterySag        = float(data['health.batterySag'])
           self.motorPass         = float(data['health.motorPass'])
         self.kalman_VarX       = float(data['kalman.varPX'])
@@ -409,7 +390,7 @@ class Drogno(threading.Thread):
         self.isTumbled         = bool (data['sys.isTumbled'])
         if self.isTumbled: self.goToSleep()
         if self.isFlying:
-            if abs(self.x) > (BOX_X + 1.0) or abs(self.y) > (BOX_Y+1.0) or self.z > (BOX_Y + 0.5):
+            if abs(self.x) > (GB.BOX_X + 1.0) or abs(self.y) > (GB.BOX_Y+1.0) or self.z > (GB.BOX_Y + 0.5):
                 print(Fore.RED + 'Landing due trespassing!')
                 self.currentSequence_killingPill.set()
                 self.LoggerObject.info("Landing due trespassing!")
@@ -419,7 +400,7 @@ class Drogno(threading.Thread):
         
 
         try:
-            if FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
+            if GB.FEEDBACK_ENABLED and not self.isKilled and not self.exitFlag.is_set():
                 self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
             # print('carlo')
         except ConnectionRefusedError:
@@ -428,7 +409,7 @@ class Drogno(threading.Thread):
     def evaluateFlyness(self):
         if not WE_ARE_FAKING_IT:
             if self.is_connected and not self.standBy:
-                if  abs(self.x) > BOX_X or abs(self.y) > BOX_Y or self.z > BOX_Y or self.isTumbled:
+                if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
                     self.statoDiVolo = 'out of BOX'
                     self._cf.param.set_value('ring.effect', '11')  #alert
                     return False
@@ -486,12 +467,12 @@ class Drogno(threading.Thread):
  
     #################################################################### movement
 
-    def takeOff(self, height=DEFAULT_HEIGHT, scramblingTime = DEFAULT_SCRAMBLING_TIME):
+    def takeOff(self, height=GB.DEFAULT_HEIGHT, scramblingTime =GB.DEFAULT_SCRAMBLING_TIME):
         def scramblingsequence():
             self.starting_x  = self.x
             self.starting_y  = self.y
             self.statoDiVolo = 'scrambling!'
-            self._cf.high_level_commander.takeoff(DEFAULT_HEIGHT,scramblingTime)
+            self._cf.high_level_commander.takeoff(GB.DEFAULT_HEIGHT,scramblingTime)
             self.scramblingTime = time.time()
             self.isFlying    = True
             self.statoDiVolo = 'hovering'
@@ -548,10 +529,10 @@ class Drogno(threading.Thread):
         self.commandsCount += 1
         duration = self.commandsFrequency*3
         if self.isFlying:
-            if CLAMPING:
-                clamp(x, -BOX_X, BOX_X)
-                clamp(y, -BOX_Y, BOX_Y)
-                clamp(z, 0.20   , BOX_Z)
+            if GB.CLAMPING:
+                clamp(x, -GB.BOX_X, GB.BOX_X)
+                clamp(y, -GB.BOX_Y, GB.BOX_Y)
+                clamp(z, 0.20     , GB.BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
@@ -819,12 +800,12 @@ class Drogno(threading.Thread):
                 level = 99.
             else:
                 level  = float(self.batteryVoltage)
-            if level<BATTERY_WARNING_LEVEL:
+            if level<GB.BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 if (self.isLogEnabled):  self.LoggerObject.warning("battery under 3.50v")
                 # self.isReadyToFly = False
-            if level<BATTERY_WARNING_LEVEL:
+            if level<GB.BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
@@ -838,7 +819,7 @@ class Drogno(threading.Thread):
                     self.isFlying = False
                     self.isReadyToFly = False
             # batteryLock.release()
-            time.sleep(BATTERY_CHECK_RATE)
+            time.sleep(GB.BATTERY_CHECK_RATE)
         print('battery thread for drone %s stopped'% self.ID)
         del self.killingPill
         del self.batteryThread
@@ -884,7 +865,7 @@ class Drogno(threading.Thread):
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
 
-def IDFromURI(uri) -> int:
+def IDFromURI(uri):
     # Get the address part of the uri
     address = uri.rsplit('/', 1)[-1]
     try:
