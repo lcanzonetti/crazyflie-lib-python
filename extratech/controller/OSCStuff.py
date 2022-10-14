@@ -24,7 +24,6 @@ import connections
 import OSCaggregator
 from GUI import setCompanionRate, setFlyability, set_command_frequency,weMaySend
 
-
 bufferone         = {}
 isSendEnabled     = False
 isSwarmReadyToFly = False
@@ -34,22 +33,13 @@ timecode          = '00:00:00:00'
 framerate         = 25
 add_one = None
 
-################################################  this module osc receiving:
-RECEIVING_IP            = ""
-RECEIVING_PORT          = 9200
-OSC_PROCESS_RATE        = 0.003
-################################################  notch osc aggregator:
-AGGREGATION_ENABLED       = True
-AGGREGATOR_RECEIVING_PORT = 9201
 aggregatorInstance        = None
 aggregatorProcess         = None
 aggregatorCue             = Queue()
 aggregatorExitEvent       = None
 posLock = Lock()
 
-##################################################  global rates:
-commandsFrequency               = 0.1   # actual command'd rate to uavss
-RECEIVED_MESSAGES_SAMPLING_RATE = 10
+
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
@@ -138,10 +128,6 @@ def startTestSequence (coddii,quale):
             if GB.drogni[drogno].is_connected:
                 print('TEST!')
                 GB.drogni[drogno].testSequence(quale)
-
-
-
-
             else:
                 print('il drogno %s non è connesso' % GB.drogni[drogno].name)
 def go        (coddii,quale):
@@ -228,11 +214,11 @@ def standBy   (coddii, chi):
         for drogno in GB.drogni:
             GB.drogni[drogno].goToSleep()
     else:
-        print(GB.drogni)
+        # print(GB.drogni)
         if not int(chi) in GB.drogni:
             print ('ka')
             # print(uri_map[str(chi)])
-            connections.add_just_one_crazyflie(uri_map[str(chi)])
+            connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print('boom')
 
         else:
@@ -283,7 +269,7 @@ def enable_log(coddii, chi):
 ###########################  single fella
 def printAndSendCoordinates():
     while not finished:
-        time.sleep(commandsFrequency)
+        time.sleep(GB.commandsFrequency)
         if isSendEnabled:
             for drogno in GB.drogni:
                 iddio = GB.drogni[drogno].ID
@@ -301,10 +287,10 @@ def printHowManyMessages():
     def printa():
         while not finished:
             global msgCount
-            time.sleep(RECEIVED_MESSAGES_SAMPLING_RATE)
+            time.sleep(GB.RECEIVED_MESSAGES_SAMPLING_RATE)
             # with howManyMessagesLock:
             if msgCount > 0.:
-                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (RECEIVED_MESSAGES_SAMPLING_RATE ,str(msgCount/RECEIVED_MESSAGES_SAMPLING_RATE)))
+                print('\nNegli ultimi %s secondi ho ricevuto la media di %s messaggi OSC al secondo.' % (GB.RECEIVED_MESSAGES_SAMPLING_RATE ,str(msgCount/GB.RECEIVED_MESSAGES_SAMPLING_RATE)))
             msgCount = 0
         print('D\'ora in poi la smetto di ricevere messaggi')
 
@@ -339,22 +325,20 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_B = args[3]
 
 def setCommandsRate(address, args):
-    global commandsFrequency
+    # global GB.commandsFrequency
     # print(args)
     if args[0] == '+':
-        commandsFrequency += 0.05
+        GB.commandsFrequency += 0.05
     elif args[0] == '-':
-        if commandsFrequency > 0 and commandsFrequency <= 0.05:
-            commandsFrequency -= 0.01
-        if commandsFrequency > 0:
-            commandsFrequency -= 0.05
-    commandsFrequency = round(commandsFrequency, 2)
+        if GB.commandsFrequency > 0 and GB.commandsFrequency <= 0.05:
+            GB.commandsFrequency -= 0.01
+        if GB.commandsFrequency > 0:
+            GB.commandsFrequency -= 0.05
+    GB.commandsFrequency = round(GB.commandsFrequency, 2)
     for drogno in GB.drogni:
-        GB.drogni[drogno].commandsFrequency = commandsFrequency
-    set_command_frequency(commandsFrequency)
-    
-    
-    print(Fore.RED + 'commandsFrequency has been set to ' + str(commandsFrequency))
+        GB.drogni[drogno].GB.commandsFrequency = GB.commandsFrequency
+    set_command_frequency(GB.commandsFrequency)
+    print(Fore.RED + 'commandsFrequency has been set to ' + str(GB.commandsFrequency))
 
 def start_server():      ######################    #### OSC init    #########    acts as main()
     """ one day we'd call this function main, that day hasn't come yet"""
@@ -367,10 +351,10 @@ def start_server():      ######################    #### OSC init    #########   
     # logger.setLevel(logging.DEBUG)
     # osc_startup(logger=logger)
 
-    osc_udp_server(RECEIVING_IP,             RECEIVING_PORT,   "receivingServer")
-    print(Fore.GREEN + 'OSC receiving server initalized on',   RECEIVING_IP, RECEIVING_PORT)
+    osc_udp_server(GB.RECEIVING_IP,             GB.RECEIVING_PORT,   "receivingServer")
+    print(Fore.GREEN + 'OSC receiving server initalized on',   GB.RECEIVING_IP, GB.RECEIVING_PORT)
    
-    if AGGREGATION_ENABLED:
+    if GB.AGGREGATION_ENABLED:
         pass
         # global aggregatorInstance
         # global aggregatorProcess
@@ -414,9 +398,9 @@ def start_server():      ######################    #### OSC init    #########   
 
     # aggregationLock = Lock()
     while not finished:
-        time.sleep(OSC_PROCESS_RATE)
+        time.sleep(GB.OSC_PROCESS_RATE)
         osc_process()
-        if AGGREGATION_ENABLED:
+        if GB.AGGREGATION_ENABLED:
             global timecode
             try:
                 roba = aggregatorCue.get(block=False)
@@ -457,4 +441,5 @@ if __name__ == '__main__':
     OSCPrintAndSendThread = threading.Thread(name='printAndSendThread', target=printAndSendCoordinates).start()
     # sendPose()
     while not finished:
+        time.sleep(1)
         pass

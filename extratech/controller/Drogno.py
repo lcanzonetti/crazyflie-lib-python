@@ -48,7 +48,6 @@ class Drogno(threading.Thread):
         self.controlThread          = False
         self.isLogEnabled           = LOGGING_ENABLED
         self.printThread            = False
-        self.printRate              = GB.STATUS_PRINT_RATE
 
         self.current_sequence       = None
         self.currentSequenceThread  = None
@@ -56,6 +55,7 @@ class Drogno(threading.Thread):
 
         self.recconnectionAttempts  = 0
         self.is_connected           = False
+
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
@@ -75,7 +75,6 @@ class Drogno(threading.Thread):
         self.multiprocessConnection = None
         self.linkQuality            = 0
         self.isTumbled              = False
-        self.commandsFrequency      = GB.COMMANDS_FREQUENCY
         self.connection_time        = None
         self.scramblingTime         = None
         self.flyingTime             = 0
@@ -130,12 +129,11 @@ class Drogno(threading.Thread):
                     connectedToFeedback = True
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
-
-        # self.printThread   = threading.Thread(target=self.printStatus).start()
-        if WE_ARE_FAKING_IT: self.printRate = 10
+        if GB.PRINTING_ENABLED:
+            self.printThread   = threading.Thread(target=self.print_status).start()
         self.connect()
      
-    def printStatus(self):
+    def print_status(self):
         # printLock = Lock()
         # A good rule of thumb is that one radio can handle at least 500 packets per seconds 
         # in each direction and each log block uses one packet per log.
@@ -144,22 +142,22 @@ class Drogno(threading.Thread):
         if self.isLogEnabled:
             self.LoggerObject.info('Logger started')
             while not self.exitFlag.is_set():
-                time.sleep(self.printRate)
+                time.sleep(GB.print_rate)
                 if not WE_ARE_FAKING_IT:    
                     if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/self.printRate),1)}")
+                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
                         if self.isEngaged:
-                            if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
-                            print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                            if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
+                            print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                         else:
-                            print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                            print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                     else:
                         print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
                 else:
                     if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: fake\tkalman var: fake\t batterySag: fake\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos: fake somewhere\tyaw: fake\tmsg/s {round((self.commandsCount/self.printRate),1)}")
+                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: fake\tkalman var: fake\t batterySag: fake\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos: fake somewhere\tyaw: fake\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
                         if self.isEngaged:
-                            print(Fore.LIGHTRED_EX + f"{self.name}: {self.statoDiVolo}\t\tbatteryfake\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/self.printRate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                            print(Fore.LIGHTRED_EX + f"{self.name}: {self.statoDiVolo}\t\tbatteryfake\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                         else:
                             print(Fore.GREEN + f"{self.name}: {self.statoDiVolo}\t\tbattery fake\tpos super fake\tyaw: fake\tflight time: {self.flyingTime}s ")
                     else:
@@ -262,8 +260,15 @@ class Drogno(threading.Thread):
                     try:
                         self._cf.open_link(self.link_uri)
                         self.connection_time = time.time()
-                        while not self.exitFlag or self.is_connected:
-                            print('...in connessione...')
+                        while not self.exitFlag or not self.is_connected:
+                            for cursor in '\\|/-':
+                                # print('...in connessione...')
+                                time.sleep(0.1)
+                                # Use '\r' to move cursor back to line beginning
+                                # Or use '\b' to erase the last character
+                                sys.stdout.write('\r{}'.format(cursor))
+                                # Force Python to write data into terminal.
+                                sys.stdout.flush()
                     except IndexError:
                         print('capperi')
                     except:
@@ -300,15 +305,16 @@ class Drogno(threading.Thread):
     def _connected(self, link_uri):   
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
-        # print('TOC downloaded for %s, it took %s seconds, waiting for parameters.' % (link_uri, (time.time()-self.connection_time)))
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
         
     def _all_params_there(self):
         print('Parametri scaricati per %s' % self.name)
+        print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, time.time()-self.connection_time))
 
-    def _fully_connected(self, link_uri):  ##########   where a lot of things happen
+
+    def _fully_connected(self, link_uri):  ##################################################   where a lot of things happen
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
-        print('Il drone %s è tutto connesso.' % link_uri)
+        print('Imposto il logging del drone %s ' % link_uri)
         # The definition of the logconfig can be made before connecting
         self._lg_kalm = LogConfig(name='Stabilizer', period_in_ms=200)
         # The fetch-as argument can be set to FP16 to save space in the log packet
@@ -334,7 +340,6 @@ class Drogno(threading.Thread):
             if not WE_ARE_FAKING_IT:                    ####
                 self._lg_kalm.start()
             self.is_connected = True
-            print(Fore.LIGHTGREEN_EX + '%s fully connesso'% (self.name))
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
@@ -527,7 +532,7 @@ class Drogno(threading.Thread):
                
     def goTo(self,x,y,z, yaw=0, duration=0.5):  #la zeta è in alto!
         self.commandsCount += 1
-        duration = self.commandsFrequency*3
+        duration = GB.commandsFrequency*3
         if self.isFlying:
             if GB.CLAMPING:
                 clamp(x, -GB.BOX_X, GB.BOX_X)

@@ -1,22 +1,16 @@
 import time,sys,threading,multiprocessing
 import OSCStuff as OSC
-
-import GUI
 import Drogno
-import GLOBALS
+import GLOBALS as GB
 from   GLOBALS import PREFERRED_STARTING_POINTS as PFS
-
-
 
 from   cflib.utils.power_switch import PowerSwitch
 import cflib.crtp
 from   cflib.utils import uri_helper
 
-lastRecordPath        = ''  
 
 threads_exit_event   = processes_exit_event = None
-drogni = {}
-WE_ARE_FAKING_IT = GLOBALS.WE_ARE_FAKING_IT
+WE_ARE_FAKING_IT = GB.WE_ARE_FAKING_IT
 
 def add_just_one_crazyflie(one_CF_I_am_looking_for):
     print('boom %s' % one_CF_I_am_looking_for)
@@ -26,7 +20,7 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
         if available_single_CF_I_am_looking_for:
             print(f'Effettivamente potrei aggiungere: ' + one_CF_I_am_looking_for)
         else:
-            print('non credo potrò aggiungere ' + one_CF_I_am_looking_for)
+            print('non raggiungo ' + one_CF_I_am_looking_for)
         try: 
             PowerSwitch(one_CF_I_am_looking_for).stm_power_cycle()
         except Exception:
@@ -37,15 +31,14 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
         time.sleep(1) 
     iddio = IDFromURI(one_CF_I_am_looking_for)
     print('provo ad aggiunger il drone con l\'iddio %s ' % iddio)
-    newDrogno = Drogno.Drogno(iddio, one_CF_I_am_looking_for, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PFS[iddio], lastRecordPath)
-    drogni[iddio] = newDrogno
-    drogni[iddio].start()
+    newDrogno = Drogno.Drogno(iddio, one_CF_I_am_looking_for, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PFS[iddio], GB.lastRecordPath)
+    GB.drogni[iddio] = newDrogno
+    time.sleep(3)
+    GB.drogni[iddio].start()
     print('crazyflie aggiunto')
 
     # send drogni's array to submodules
-    OSC.drogni[iddio] = newDrogno
-    GUI.drogni[iddio] = newDrogno
-
+    GB.drogni[iddio] = newDrogno
 
 def IDFromURI(uri):
     # Get the address part of the uri

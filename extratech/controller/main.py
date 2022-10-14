@@ -3,36 +3,38 @@
 # native modules
 import logging, sys, os, multiprocessing, threading, time, signal
 from   pathlib                    import Path
-#bitcraze modules
+from rich import print
+from dotenv import load_dotenv
+load_dotenv()
+#bitcraze modules  
+CFLIB_PATH      = os.environ.get('CFLIB_PATH')  ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
+# print(CFLIB_PATH)
+sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente
+# print(*sys.path, sep='\n')
 import cflib.crtp
 from   cflib.utils.power_switch import PowerSwitch
 from   cflib.utils import uri_helper
 
 logging.basicConfig(level=logging.ERROR)
-from rich import print
-from dotenv import load_dotenv
-load_dotenv()
 
 #custom modules
 import OSCStuff       as OSC
 import GUI as GUI
 import Drogno
 import connections
-import GLOBALS
-from   GLOBALS import PREFERRED_STARTING_POINTS as PFS
-threads_exit_event   = threading.Event()
-processes_exit_event = multiprocessing.Event()
-connections.threads_exit_event = threads_exit_event
+import GLOBALS as GB
+
+threads_exit_event               = threading.Event()
+processes_exit_event             = multiprocessing.Event()
+connections.threads_exit_event   = threads_exit_event
 connections.processes_exit_event = processes_exit_event
 
-OSC.commandsFrequency      = GLOBALS.COMMANDS_FREQUENCY
-WE_ARE_FAKING_IT           = GLOBALS.WE_ARE_FAKING_IT
-OSC.RECEIVING_IP           = os.getenv("RECEIVING_IP")
+WE_ARE_FAKING_IT           = GB.WE_ARE_FAKING_IT
 GUI.COMPANION_FEEDBACK_IP  = os.getenv("COMPANION_FEEDBACK_IP")
 OSC.aggregatorExitEvent    = processes_exit_event 
 
 
-connectedUris = GLOBALS.uris.copy()
+connectedUris = GB.uris.copy()
 drogni = {}
 
 def radioStart():
@@ -42,46 +44,48 @@ def radioStart():
         if (cflib.crtp.get_interfaces_status()['radio'] == 'Crazyradio not found'):
             raise Exception("no radio!")
         else:
-            print("[bold blue]Radio trovata:")
-            print(cflib.crtp.get_interfaces_status())
+            radios = cflib.crtp.get_interfaces_status()
+            print("[bold blue]%s radio trovata:"%len(radios))
+            print(radios)
     else: 
         print('simulo di aver trovato una radio')
         time.sleep(1)
 
 def add_crazyflies():
-    if not WE_ARE_FAKING_IT:
-        available_crazyfliess = []
-        
-        print('Scanning interfaces for Crazyflies...')
-        for iuro in GLOBALS.uris:
-            print ('looking for %s ' % iuro)
-            available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))
-            if available_crazyflies:
-                available_crazyfliess.append(available_crazyflies)
-
-        if available_crazyfliess:
-            print(f'gente in giro:')
-            print (available_crazyfliess)     
-
-            # for i in available_crazyfliess:
-            #     print ('Found %s radios.' % len(available_crazyfliess))
-            #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
-        else:
-            print('no crazyflies?')
-    else: 
+    if WE_ARE_FAKING_IT:
         print('simulo di aver aggiunto i crazifliii')
         time.sleep(1) 
+        return
+
+    available_crazyfliess = []
+    print('Scanning interfaces for Crazyflies...')
+    for iuro in GB.uris:
+        print ('looking for %s ' % iuro)
+        available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))
+        if available_crazyflies:
+            available_crazyfliess.append(available_crazyflies)
+
+    if available_crazyfliess:
+        print(f'gente in giro:')
+        print (available_crazyfliess)     
+
+        # for i in available_crazyfliess:
+        #     print ('Found %s radios.' % len(available_crazyfliess))
+        #     print ("URI: [%s]   ---   name/comment [%s]" % (i[0], i[1]))
+    else:
+        print('no crazyflies?')
+    
  
 def autoReconnect():
     while not threads_exit_event.is_set() :
-        time.sleep(GLOBALS.RECONNECT_FREQUENCY)
+        time.sleep(GB.RECONNECT_FREQUENCY)
         for drogno in drogni:
             if not drogni[drogno].isKilled:
                 print('il drogno %s è sparito, provo a riconnettermi' % drogni[drogno].ID)
                 IDToBeRenewed  = drogni[drogno].ID
                 uriToBeRenewed = drogni[drogno].link_uri
                 del drogni[drogno]
-                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, PFS[IDToBeRenewed], GLOBALS.lastRecordPath)
+                drogni[IDToBeRenewed] = Drogno.Drogno(IDToBeRenewed, uriToBeRenewed, threads_exit_event, WE_ARE_FAKING_IT, GB.PREFERRED_STARTING_POINTS[IDToBeRenewed], GB.lastRecordPath)
                 drogni[IDToBeRenewed].start()
 
 def restart_devices():
@@ -89,49 +93,54 @@ def restart_devices():
     print('Restarting devices')
 
     if not WE_ARE_FAKING_IT:
-        for uri in GLOBALS.uris:
+        for uri in GB.uris:
             # time.sleep(0.5)
             try: PowerSwitch(uri).stm_power_down()
             except Exception:
                 print('%s is not there to be shut down' % uri)
                 # raise Exception
         print('GLOBALS.uris meant to be switched on:')
-        print(GLOBALS.uris)
+        print(GB.uris)
         urisToBeRemoved = []
-        for urico in range(len(GLOBALS.uris)):
+        for urico in range(len(GB.uris)):
             try:
-                # print('trying to power up %s' % GLOBALS.uris[urico]) 
-                PowerSwitch(GLOBALS.uris[urico]).stm_power_up()
+                # print('trying to power up %s' % GB.uris[urico]) 
+                PowerSwitch(GB.uris[urico]).stm_power_up()
             except Exception: 
-                print('%s is not there to be woken up, gonna pop it out from my list' % GLOBALS.uris[urico])
-                urisToBeRemoved.append(GLOBALS.uris[urico])
-        connectedUris = GLOBALS.uris.copy()
+                print('%s is not there to be woken up, gonna pop it out from my list' % GB.uris[urico])
+                urisToBeRemoved.append(GB.uris[urico])
+        connectedUris = GB.uris.copy()
         for u in urisToBeRemoved:
             connectedUris.remove(u)
     else:
-        connectedUris = GLOBALS.uris.copy()
+        connectedUris = GB.uris.copy()
 
     print('at the end these are drognos we have:')
     print(connectedUris)
-    if len(connectedUris) == 0:
-        opinion = input('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit.')
-        if opinion == 'r' or opinion == 'R':
-            restart_devices()
-        if opinion == 'q' or opinion == 'Q':
-            sys.exit()
-    else:
-        # Wait for devices to boot
-        time.sleep(4)
+    # if len(connectedUris) == 0:
+    #     opinion = input('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit, or S to stand-by.')
+    #     if opinion == 'r' or opinion == 'R':
+    #         restart_devices()
+    #     if opinion == 's' or opinion == 'S':
+    #         return
+    #     if opinion == 'q' or opinion == 'Q':
+    #         sys.exit()
+    # else:
+    #     # Wait for devices to boot
+    #     time.sleep(4)
+    time.sleep(4)
 
 def main():
     if WE_ARE_FAKING_IT:
         print('ATTENZIONE! STIAMO FACENDO FINTA!')
         time.sleep(2)
+        return
     else:
         print("Controller started. No fake shit.")
     try:
         radioStart()
-        add_crazyflies()
+        # cflib.crtp.init_drivers()
+        # add_crazyflies()
         restart_devices()
 
     except Exception as e:
@@ -141,16 +150,14 @@ def main():
 
     for uro in connectedUris:
         iddio = IDFromURI(uro)
-        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, PFS[iddio], GLOBALS.lastRecordPath)
+        drogni[iddio] = Drogno.Drogno(iddio, uro, threads_exit_event, processes_exit_event, WE_ARE_FAKING_IT, GB.PREFERRED_STARTING_POINTS[iddio], GB.lastRecordPath)
         drogni[iddio].start()
         print('i drogni:')
         print(drogni)
 
     #send drogni's array to submodules
-    OSC.drogni = drogni
     OSC.faiIlBufferon()
     GUI.drogni = drogni
-    connections.drogni = drogni
     OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
     OSCPrintAndSendThread = threading.Thread(target=OSC.printAndSendCoordinates).start()
 
@@ -160,7 +167,7 @@ def main():
     GUI.resetCompanion()
     GUI.updateCompanion()
 
-    if GLOBALS.AUTO_RECONNECT:
+    if GB.AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=autoReconnect).start()  
 
 def exit_signal_handler(signum, frame):
