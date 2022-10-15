@@ -36,7 +36,7 @@ add_one = None
 aggregatorInstance        = None
 aggregatorProcess         = None
 aggregatorCue             = Queue()
-aggregatorExitEvent       = None
+aggregatorExitEvent       = multiprocessing.Event()
 posLock = Lock()
 
 

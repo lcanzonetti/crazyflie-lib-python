@@ -10,23 +10,22 @@ from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
 
-import socket
-
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 from   random                import random, uniform
 import logging
-logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '
-    '%(levelname)s - %(message)s')
+logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("osc")
 logger.setLevel(logging.DEBUG)
 
+import GLOBALS as GB
+
 finished = False
+
+
 class Feedbacco():
-    def __init__(self, ID, eventoFinaleTremendo, sendingIP, sendingPort,receiving_port):
-        self.OSC_SENDING_IP   = sendingIP
-        self.sendingPort      = sendingPort
+    def __init__(self, ID, eventoFinaleTremendo, receiving_port):
         self.port             = receiving_port
         self.finished         = eventoFinaleTremendo
         self.ID               = ID
@@ -70,18 +69,16 @@ class Feedbacco():
         osc_startup()
         # osc_startup(logger=logger)
 
-        osc_broadcast_client(self.OSC_SENDING_IP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'osc feedbacker for drogno %s sending on %s %s'%  (self.ID, self.OSC_SENDING_IP,self.sendingPort))
+        osc_udp_client(GB.FEEDBACK_SENDING_IP, GB.FEEDBACK_SENDING_PORT, "feedbackClient")
+        # osc_broadcast_client(self.OSC_SENDING_IP, self.sendingPort, "feedbackClient")
+        print(Fore.YELLOW + 'osc feedbacker for drogno %s sending on %s %s'%  (self.ID, GB.FEEDBACK_SENDING_IP, GB.FEEDBACK_SENDING_PORT))
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
         
 
 class CompanionFeedbacco():
-    def __init__(self, cuia, sendingIP, sendingPort):
-        self.sendingIP       = sendingIP
-        self.sendingPort     = sendingPort
+    def __init__(self, cuia):
         self.cuia            = cuia
-        print('companion OSC feedback process initalized on %s %s' %  (self.sendingIP,  self.sendingPort))
 
     def sendCompanionFeedback(self, stuff):
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, stuff) 
@@ -109,8 +106,9 @@ class CompanionFeedbacco():
 
         
         # osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
-        osc_udp_client(self.sendingIP, self.sendingPort, "feedbackClient")
-        print(Fore.YELLOW + 'companion osc feedbacker sending on %s'%  self.sendingPort)
+        print(Fore.YELLOW + 'COMPANION OSC feedbacker sending on %s:%s'%  (GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT))
+
+        osc_udp_client(GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT, "companionFeedbackClient")
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
     
