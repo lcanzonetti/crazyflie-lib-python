@@ -215,10 +215,10 @@ def standBy   (coddii, chi):
     else:
         # print(GB.drogni)
         if not int(chi) in GB.drogni:
-            print ('ka')
+            print (Back.blue + 'kaaaaaaaaaaaaaaa---------------')
             # print(uri_map[str(chi)])
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
-            print('boom')
+            print(Back.blue +'-----------------booooooooooom')
 
         else:
             print('cddio')
@@ -227,7 +227,7 @@ def standBy   (coddii, chi):
             else:
                 GB.drogni[int(chi)].wakeUp()
 def wakeUp    (coddii, chi):
-    print(' %s  wakeUp' % chi )
+    print(' %s  wakes up' % chi )
     if chi == 'all':    
         for drogno in GB.drogni:
             GB.drogni[drogno].wakeUp()
