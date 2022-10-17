@@ -13,13 +13,11 @@ coloInit(convert=True)
 #crazyflie'sm
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
-# from   cflib.utils                                import uri_helper
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 from   cflib.crazyflie.mem import MemoryElement
 from   cflib.crazyflie.mem import Poly4D
 from   cflib.utils.power_switch import PowerSwitch
-# import OSC_feedabcker as feedbacker
 
 BOX_X                 = 2.2
 BOX_Y                 = 2.2

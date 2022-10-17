@@ -60,8 +60,8 @@ def ciao_ciao():
     GUI.reset_companion()
     OSC.finished = True
     GUI.ends_it_when_it_needs_to_end()
-    GB.eventi.set_threads_exit_event() 
-    GB.eventi.set_processes_exit_event()
+    GB.eventi.set_thread_exit_event() 
+    GB.eventi.set_process_exit_event()
 
     for drogno in GB.drogni:
         if (drogno):

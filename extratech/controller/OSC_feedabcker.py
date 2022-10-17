@@ -21,7 +21,6 @@ logger.setLevel(logging.DEBUG)
 
 import GLOBALS as GB
 
-finished = False
 
 
 class Feedbacco():
@@ -79,22 +78,25 @@ class Feedbacco():
 class CompanionFeedbacco():
     def __init__(self, cuia):
         self.cuia            = cuia
+        self.end_of_story    = False
+
 
     def sendCompanionFeedback(self, stuff):
         bandoleon   = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY, stuff) 
-        osc_send(bandoleon, "feedbackClient")
+        osc_send(bandoleon, "companionFeedbackClient")
   
     def start(self):
         def oscLoop():
-            while True:
+            while not self.end_of_story:
                 osc_process()
                 msg = self.cuia.get()
                 if msg == 'fuck you':
                     # self.finished.set()
+                    self.end_of_story = True
                     break
                 else:
                     self.sendCompanionFeedback(msg)
-                time.sleep(0.01)
+                time.sleep(0.1)
             # Properly close the system.
             self.cuia.close()
             # self.cuia.join_thread()
@@ -103,12 +105,11 @@ class CompanionFeedbacco():
 
         osc_startup()
         # osc_startup(logger=logger)
-
         
-        # osc_broadcast_client(self.sendingIP, self.sendingPort, "feedbackClient")
+        osc_broadcast_client(GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT, "companionFeedbackClient")
         print(Fore.YELLOW + 'COMPANION OSC feedbacker sending on %s:%s'%  (GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT))
 
-        osc_udp_client(GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT, "companionFeedbackClient")
+        # osc_udp_client(GB.COMPANION_FEEDBACK_IP, GB.COMPANION_FEEDBACK_PORT, "companionFeedbackClient")
         tridio = threading.Thread(target=oscLoop).start()
         ###########################  single fella
     
@@ -141,7 +142,8 @@ if __name__ == '__main__':
     connectionToFeedbackProcess = Client(address)
     connectionToFeedbackProcess.send('fuck your mother')
 
-    while not finished:
+    while not end_of_story:
+        time.sleep(1)
         pass
 
 

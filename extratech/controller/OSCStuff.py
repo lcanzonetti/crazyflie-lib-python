@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #rf 2021
-from OSC_feedabcker import CompanionFeedbacco
 import multiprocessing
 import threading
 from   threading import Lock

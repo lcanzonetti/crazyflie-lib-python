@@ -116,20 +116,20 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
         time.sleep(1) 
     iddio = IDFromURI(one_CF_I_am_looking_for)
     print('provo ad aggiunger il drone con l\'iddio %s ' % iddio)
-    newDrogno = Drogno.Drogno(iddio, one_CF_I_am_looking_for,  GB.WE_ARE_FAKING_IT, PFS[iddio], GB.lastRecordPath)
-    GB.drogni[iddio] = newDrogno
     time.sleep(3)
+
+    newDrogno = Drogno.Drogno(iddio, one_CF_I_am_looking_for, GB.lastRecordPath)
+    GB.drogni[iddio] = newDrogno
     GB.drogni[iddio].start()
+    GB.connected_uris.append = one_CF_I_am_looking_for
     print('crazyflie aggiunto')
 
-    # send drogni's array to submodules
-    GB.drogni[iddio] = newDrogno
 
 def create_classes():
     for uro in GB.connected_uris:
         iddio = IDFromURI(uro)
         try:
-            GB.drogni[iddio] = Drogno.Drogno(iddio, uro, GB.PREFERRED_STARTING_POINTS[iddio], GB.lastRecordPath)
+            GB.drogni[iddio] = Drogno.Drogno(iddio, uro, GB.lastRecordPath)
             GB.drogni[iddio].start()
         except Exception as e:
             print (' non ho istanziato %s perché %s' % (uro, e))

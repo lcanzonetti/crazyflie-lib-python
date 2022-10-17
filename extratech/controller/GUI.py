@@ -9,7 +9,7 @@ from osc4py3 import oscmethod as osm
 from osc4py3 import oscbuildparse
 
 import GLOBALS as GB
-from OSC_feedabcker import CompanionFeedbacco
+import OSC_feedabcker 
 
 ################################################  companion feedback via OSC:
 companionFeedbackCue           = Queue()
@@ -20,8 +20,8 @@ can_we_send                    = False
 
 def startCompanionFeedback():
     if GB.COMPANION_FEEDBACK_ENABLED:
-        companionFeedbackerInstance = CompanionFeedbacco(companionFeedbackCue)
-        companionFeedbackProcess = Process(target=companionFeedbackerInstance.start)
+        companionFeedbackerInstance = OSC_feedabcker.CompanionFeedbacco(companionFeedbackCue)
+        companionFeedbackProcess    = Process(target=companionFeedbackerInstance.start)
         companionFeedbackProcess.daemon = True
         companionFeedbackProcess.start()
 
