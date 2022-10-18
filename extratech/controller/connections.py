@@ -1,9 +1,10 @@
 import time,sys
+from   inputimeout import inputimeout, TimeoutOccurred
 from   concurrent.futures       import ThreadPoolExecutor
-from   functools                import partial
 from   cflib.utils.power_switch import PowerSwitch
 import cflib.crtp
 from   cflib.utils import uri_helper
+from   rich import print
 
 import OSCStuff as OSC
 import Drogno
@@ -35,7 +36,7 @@ def add_crazyflies():
     if len(GB.uris) > 0:
         for iuro in GB.uris:
             print ('looking for %s ' % iuro)
-            available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))
+            available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))  ## davvero non ho capito perché sta roba non funzioni
             if available_crazyflies:
                 available_crazyfliess.append(available_crazyflies)
 
@@ -67,33 +68,42 @@ def restart_devices():
         print('se fosse la vita vera ora riavvierei i drogni')
         time.sleep(4)
         return
-    print('Restarting devices in URI list')
-    print('GLOBALS.uris meant to be switched on:')
-    print(GB.uris)
-    with ThreadPoolExecutor(max_workers = 10) as executor:
-        executor.map(restarta, GB.uris, timeout=10)
-               
-    print('at the end these are drognos we have:')
-    print(GB.connected_uris)
-    # if len(connectedUris) == 0:
-    #     opinion = input('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit, or S to stand-by.')
-    #     if opinion == 'r' or opinion == 'R':
-    #         restart_devices()
-    #     if opinion == 's' or opinion == 'S':
-    #         return
-    #     if opinion == 'q' or opinion == 'Q':
-    #         sys.exit()
-    # else:
-    #     # Wait for devices to boot
-    #     time.sleep(4)
-    print ('aspetto 4 secondi che i CF si sveglino')
-    time.sleep(1)
-    print('3')
-    time.sleep(1)
-    print('2')
-    time.sleep(1)
-    print('1')
-    time.sleep(1)
+    is_anyone_there = False
+    if not len(GB.uris) == 0:
+        is_anyone_there = True
+        print('Restarting devices in URI list')
+        print('GLOBALS.uris meant to be switched on:')
+        print(GB.uris)
+        with ThreadPoolExecutor(max_workers = 10) as executor:
+            executor.map(restarta, GB.uris, timeout=10)
+    else:
+        is_anyone_there = True
+  
+    if len(GB.connected_uris) == 0 or is_anyone_there == False:
+        opinion = ('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit, or S to stand-by. I am startinmg in five seconds anyway')
+      
+        try:
+            something = inputimeout(prompt=opinion, timeout=5)
+            if opinion == 'r' or opinion == 'R':
+                restart_devices()
+            if opinion == 's' or opinion == 'S':
+                return
+            if opinion == 'q' or opinion == 'Q':
+                sys.exit()
+        except TimeoutOccurred:
+            print('Parto, va.')
+            return
+    else:
+        print('at the end these are drognos we have:')
+        print(GB.connected_uris)
+        print ('aspetto 4 secondi che i CF si sveglino')
+        time.sleep(1)
+        print('3')
+        time.sleep(1)
+        print('2')
+        time.sleep(1)
+        print('1')
+        time.sleep(1)
 
  
 

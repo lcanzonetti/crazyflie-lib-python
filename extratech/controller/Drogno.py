@@ -12,7 +12,7 @@ coloInit(convert=True)
 
 import GLOBALS as GB
 import OSC_feedabcker 
-
+import trajectories
 #crazyflie'sm
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
@@ -101,18 +101,20 @@ class Drogno(threading.Thread):
             self.file_handler.setFormatter(self.formatter)
             self.LoggerObject.addHandler(self.file_handler)
             self.LoggerObject.info('This is dronelog running on %s' % self.name)
-
+    ##  here trajectories are loaded from separate file or from trajectory module, then Feedback is instantiated and connection is started
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name + " class instance")
-        # self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
-        # self.TRAJECTORIES [7] = figure8Triple
-        # self.TRAJECTORIES [8] = figure8
-    
-        # print ('my trajectories are: %s' % self.TRAJECTORIES [8])
-        # with open(trajectory, 'r') as t:
-        #     # print(t.readlines())
-        #     self.lastTrajectory = t.readlines()
-         # Modifying the log file we are using
+        try:
+            self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+            self.TRAJECTORIES [7] = trajectories.figure8Triple
+            self.TRAJECTORIES [8] = trajectories.figure8
+            print ('my trajectories are: %s' % self.TRAJECTORIES )
+            with open(self.TRAJECTORIES[0], 'r') as t:
+                print(t.readlines())
+                self.lastTrajectory = t.readlines()
+        except Exception as e:
+            print('loading trajectories encountered an issu:\n%s' % e)
+      
 
         connectedToFeedback = False
         if GB.FEEDBACK_ENABLED :
