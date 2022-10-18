@@ -206,22 +206,23 @@ def cambiaCarlo(funzione):
     global carlo
     carlo = funzione
 def standBy   (coddii, chi):
-    print('drogno %s sleeps, or wakes' % chi )
     if chi == 'all':    
+        print('addormenterei tutti' )
         for drogno in GB.drogni:
             GB.drogni[drogno].goToSleep()
-    else:
+    else:  ## singolo
         print(GB.drogni)
         if not int(chi) in GB.drogni:
+            print ( 'Il drogno che vuoi svegliare non è ancora in lista')
             print ( 'kaaaaaaaaaaaaaaa---------------')
-            # print(uri_map[str(chi)])
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print( '-----------------booooooooooom')
         else:
-            print('cddio')
             if not GB.drogni[int(chi)].standBy:
+                print('addormento ' + chi)
                 GB.drogni[int(chi)].goToSleep()
             else:
+                print('sveglio ' + chi)
                 GB.drogni[int(chi)].wakeUp()
 def wakeUp    (coddii, chi):
     print(' %s  wakes up' % chi )

@@ -2,10 +2,9 @@
 #rf 2022
 
 # native modules
-import logging, sys, os, multiprocessing, threading, time, signal
-from   pathlib                    import Path
+import logging, sys, os, threading, time, signal
 from   rich import print
- 
+
 #bitcraze modules  
 CFLIB_PATH      = os.environ.get('CFLIB_PATH')  ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente

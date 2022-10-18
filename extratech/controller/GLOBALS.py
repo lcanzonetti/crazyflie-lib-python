@@ -2,7 +2,7 @@ import os, threading, multiprocessing
 from   sqlite3 import connect
 from   dotenv  import load_dotenv
 load_dotenv()
-
+ROOT_DIR                   = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 ######################################    OPTIONS

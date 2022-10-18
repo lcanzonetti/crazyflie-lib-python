@@ -103,7 +103,7 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
         print ('looking for %s ' % one_CF_I_am_looking_for)
         available_single_CF_I_am_looking_for  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(one_CF_I_am_looking_for))
         if available_single_CF_I_am_looking_for:
-            print(f'Effettivamente potrei aggiungere: ' + one_CF_I_am_looking_for)
+            print(f'Effettivamente potrei aggiungere: ' + uri_helper.address_from_env(one_CF_I_am_looking_for))
         else:
             print('non raggiungo ' + one_CF_I_am_looking_for)
         try: 

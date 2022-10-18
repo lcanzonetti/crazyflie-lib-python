@@ -74,8 +74,8 @@ class Drogno(threading.Thread):
         self.flyingTime             = 0
         self.connectionThread       = None
         self.killingPill            = threading.Event()
-        
-        self._cf = Crazyflie(rw_cache='./cache_test/'+self.name)
+        self.cache_location         = os.path.join(GB.ROOT_DIR, 'crazyflies_cache', self.name)
+        self._cf = Crazyflie(rw_cache=self.cache_location)
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback        (self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there) 
@@ -92,7 +92,7 @@ class Drogno(threading.Thread):
         if (GB.LOGGING_ENABLED):
             now = datetime.now() # current date and time
             date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
-            logName = "./extratech/controller/drognoLogs/" + self.name + "_" +date_time + ".log"
+            logName = os.path.join(GB.ROOT_DIR, 'drognoLogs', (self.name + "_" +date_time + ".log"))
             os.makedirs(os.path.dirname(logName), exist_ok=True)
             self.LoggerObject = logging.getLogger(self.name)
             self.LoggerObject.setLevel(logging.DEBUG)
