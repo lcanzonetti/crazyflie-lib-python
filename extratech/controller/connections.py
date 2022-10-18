@@ -8,7 +8,7 @@ from   cflib.utils import uri_helper
 import OSCStuff as OSC
 import Drogno
 import GLOBALS as GB
-from   GLOBALS import PREFERRED_STARTING_POINTS as PFS
+import utils
 
 def radioStart():
     if not GB.WE_ARE_FAKING_IT:
@@ -114,7 +114,7 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
     else: 
         print('simulo di aver aggiunto un crazifliio') 
         time.sleep(1) 
-    iddio = IDFromURI(one_CF_I_am_looking_for)
+    iddio = utils.IDFromURI(one_CF_I_am_looking_for)
     print('provo ad aggiunger il drone con l\'iddio %s ' % iddio)
     time.sleep(3)
 
@@ -127,7 +127,7 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
 
 def create_classes():
     for uro in GB.connected_uris:
-        iddio = IDFromURI(uro)
+        iddio = utils.IDFromURI(uro)
         try:
             GB.drogni[iddio] = Drogno.Drogno(iddio, uro, GB.lastRecordPath)
             GB.drogni[iddio].start()
@@ -156,12 +156,3 @@ def restarta(urico):
         # urisToBeRemoved.append(GB.uris[urico])
 
 
-def IDFromURI(uri):
-    # Get the address part of the uri
-    address = uri.rsplit('/', 1)[-1]
-    try:
-        # print(int(address, 16) - 996028180448)
-        return int(address, 16) - 996028180448
-    except ValueError:
-        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
-        return None

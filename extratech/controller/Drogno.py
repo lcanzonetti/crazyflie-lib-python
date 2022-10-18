@@ -247,7 +247,6 @@ class Drogno(threading.Thread):
         
         if not GB.WE_ARE_FAKING_IT:   ## true life
             if self.isKilled == False:
-                self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
                 print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
 
                 def connection():
@@ -277,23 +276,22 @@ class Drogno(threading.Thread):
 
     def reconnect(self):
         def mariconnetto():
-            if self.recconnectionAttempts == 0:
-                print(f'provo a riaprire la connessione con il drogno {self.name}')
-                self.recconnectionAttempts+=1
-                self.statoDiVolo = 'connecting'
-                self._cf.open_link( self.link_uri)
-
-            elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
-                while self.is_connected == False and self.recconnectionAttempts < 10: 
+            I_still_have_hope = True
+            while I_still_have_hope:
+                if self.recconnectionAttempts == 0:
+                    print(f'provo a riaprire la connessione con il drogno {self.name}')
+                    self.recconnectionAttempts+=1
+                    self.statoDiVolo = 'connecting'
+                    self._cf.open_link( self.link_uri)
+                elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
                     self.recconnectionAttempts +=1
                     print('Aspetto 1 secondo prima di ritentare')
                     time.sleep(1)
                     print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
                     self.connect()
-            else:
-                print('con il drogno %s ho perso le speranze' % self.ID)
-                self.exit()
-        tio = 'something'
+                else:
+                    print('con il drogno %s ho perso le speranze' % self.ID)
+                    I_still_have_hope = False
         tio = threading.Thread(name=self.name+'_reconnectThread',target=mariconnetto)
         tio.start()
 
@@ -305,9 +303,11 @@ class Drogno(threading.Thread):
     def _all_params_there(self):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
+        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
+        self.batteryThread.start()
 
-
-    def _fully_connected(self, link_uri):  ##################################################   where a lot of things happen
+    ##################################################   where a lot of things happen
+    def _fully_connected(self, link_uri):  
         # print ('\nil crazyflie %s ha scaricato i parametri \n' % link_uri)
         print('Imposto il logging del drone %s ' % link_uri)
         # The definition of the logconfig can be made before connecting
@@ -360,7 +360,7 @@ class Drogno(threading.Thread):
                 controller=PositionHlCommander.CONTROLLER_PID) 
 
             time.sleep(0.3)
-            if not self.batteryThread.is_alive():  self.batteryThread.start()
+         
             self._cf.param.set_value('ring.fadeTime', GB.RING_FADE_TIME)
             # time.sleep(1.0)
             self.resetEstimator()
@@ -453,6 +453,8 @@ class Drogno(threading.Thread):
         self.is_connected = False
         self.statoDiVolo = 'sconnesso'
         self.isReadyToFly = False
+        print('Me son perso %s dice: %s' % (link_uri, msg))
+
         # if not self.statoDiVolo == 'connecting':  self.reconnect()
 
     def _disconnected(self, link_uri):
@@ -461,19 +463,20 @@ class Drogno(threading.Thread):
             self.is_connected = False
             self.statoDiVolo  = 'sconnesso'
             self.isReadyToFly = False
-            # if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
+            if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
  
     #################################################################### movement
 
-    def takeOff(self, height=GB.DEFAULT_HEIGHT, scramblingTime =GB.DEFAULT_SCRAMBLING_TIME):
+    def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_time=GB.DEFAULT_SCRAMBLING_TIME):
         def scramblingsequence():
-            self.starting_x  = self.x
-            self.starting_y  = self.y
-            self.statoDiVolo = 'scrambling!'
-            self._cf.high_level_commander.takeoff(GB.DEFAULT_HEIGHT,scramblingTime)
+            self.starting_x     = self.x
+            self.starting_y     = self.y
+            self.statoDiVolo    = 'scrambling!'
             self.scramblingTime = time.time()
-            self.isFlying    = True
-            self.statoDiVolo = 'hovering'
+            self._cf.high_level_commander.takeoff(GB.DEFAULT_HEIGHT, scrambling_time)
+            self.isFlying       = True
+            time.sleep( scrambling_time)
+            self.statoDiVolo    = 'hovering'
 
         def fake_scramblingsequence():
             self.starting_x  = self.x
@@ -484,12 +487,14 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'hovering'
 
         if not GB.WE_ARE_FAKING_IT:
-            print('for real')
-            # self.resetEstimator()
+            if self.isFlying:
+                print('%s can\'t take off, as is already in the air!'% self.name)
+                return
             if self.isReadyToFly:
                 scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
+                print('%s SCRAMBLING!'% self.name)
             else:
-                print('NOT READY TO SCRAMBLE!')
+                print('%s can\'t take off, not ready!'% self.name)
         else:
             scremblingThread = threading.Thread(target=fake_scramblingsequence, name=self.name+'_scramblingThread').start()
 
@@ -586,8 +591,8 @@ class Drogno(threading.Thread):
     
     def goToStart(self, speed=0.5):
         if self.isFlying:                
-            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.4, 0, 2, False)
-        print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start to %s %s' % (self.name, self.starting_x, self.starting_y ) )
+            self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.5, 180, 2, False)
+        print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start toward %s %s' % (self.name, self.starting_x, self.starting_y ) )
 
     def setRingColor(self, vr, vg, vb, speed=0.25):
         self.commandsCount += 1
@@ -653,6 +658,7 @@ class Drogno(threading.Thread):
             print('il clero')
 
     def testSequence(self,requested_sequenceNumber):
+        #  un quadratone di 3mt x 3mt
         def sequenzaUno():   
             print('inizio prima sequenza di test')
             while not self.currentSequence_killingPill.is_set():
@@ -707,7 +713,6 @@ class Drogno(threading.Thread):
 
         sequenzeTest = [sequenzaUno, sequenzaDue]
 
-        print('dio bono')
         print('startTestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'sequenza simulata!'
@@ -840,16 +845,15 @@ class Drogno(threading.Thread):
         self.statoDiVolo = 'stand by'
     def wakeUp(self):
         def wakeUpProcedure():
+            self.killingPill.clear()
+            self.currentSequence_killingPill.clear()
+            self.standBy = False
             self.statoDiVolo = 'waking up'
             if not GB.WE_ARE_FAKING_IT:
                 PowerSwitch(self.link_uri).stm_power_up()
             time.sleep(3)
-            self.killingPill.clear()
-            self.currentSequence_killingPill.clear()
-            self.standBy = False
             self.connect()
         daje = threading.Thread(target=wakeUpProcedure).start()
-
     def exit(self):
         print('drogno %s is now doomed, bye kiddo' % self.name)
         self.multiprocessConnection.send('fuck you')
@@ -865,83 +869,4 @@ class Drogno(threading.Thread):
 def clamp(num, min_value, max_value):
    return max(min(num, max_value), min_value)
 
-def IDFromURI(uri):
-    # Get the address part of the uri
-    address = uri.rsplit('/', 1)[-1]
-    try:
-        return int(address, 16) - 996028180448
-    except ValueError:
-        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
-        return None
 
-def convert_motor_pass(numeroBinario):
-    motori = [1,1,1,1]
-    motori[0] = (numeroBinario >> 3) & 1
-    motori[1] = (numeroBinario >> 2) & 1
-    motori[2] = (numeroBinario >> 1) & 1
-    motori[3] = (numeroBinario >> 0) & 1
-    return motori
-
-
-
-
-
-   # The trajectory to fly
-# See https://github.com/whoenig/uav_trajectories for a tool to generate
-# trajectories
-
-# Duration,x^0,x^1,x^2,x^3,x^4,x^5,x^6,x^7,y^0,y^1,y^2,y^3,y^4,y^5,y^6,y^7,z^0,z^1,z^2,z^3,z^4,z^5,z^6,z^7,yaw^0,yaw^1,yaw^2,yaw^3,yaw^4,yaw^5,yaw^6,yaw^7
-figure8 = [
-    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-]
-figure8Triple = [
-    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.710000, 0.396058, 0.918033, 0.128965, -0.773546, 0.339704, 0.034310, -0.026417, -0.030049, -0.445604, -0.684403, 0.888433, 1.493630, -1.361618, -0.139316, 0.158875, 0.095799, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.620000, 0.922409, 0.405715, -0.582968, -0.092188, -0.114670, 0.101046, 0.075834, -0.037926, -0.291165, 0.967514, 0.421451, -1.086348, 0.545211, 0.030109, -0.050046, -0.068177, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.700000, 0.923174, -0.431533, -0.682975, 0.177173, 0.319468, -0.043852, -0.111269, 0.023166, 0.289869, 0.724722, -0.512011, -0.209623, -0.218710, 0.108797, 0.128756, -0.055461, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.620000, -0.921641, -0.464596, 0.661875, 0.286582, -0.228921, -0.051987, 0.004669, 0.038463, -0.292459, 0.777682, 0.565788, -0.432472, -0.060568, -0.082048, -0.009439, 0.041158, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.710000, -0.923935, 0.447832, 0.627381, -0.259808, -0.042325, -0.032258, 0.001420, 0.005294, 0.288570, 0.873350, -0.515586, -0.730207, -0.026023, 0.288755, 0.215678, -0.148061, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [1.050000, 0.000000, -0.000000, 0.000000, -0.000000, 0.830443, -0.276140, -0.384219, 0.180493, -0.000000, 0.000000, -0.000000, 0.000000, -1.356107, 0.688430, 0.587426, -0.329106, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [1.053185, -0.398611, 0.850510, -0.144007, -0.485368, -0.079781, 0.176330, 0.234482, -0.153567, 0.447039, -0.532729, -0.855023, 0.878509, 0.775168, -0.391051, -0.713519, 0.391628, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.405364, -0.834716, 0.158939, 0.288175, -0.373738, -0.054995, 0.036090, 0.078627, 0.450742, -0.385534, -0.954089, 0.128288, 0.442620, 0.055630, -0.060142, -0.076163, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.560000, 0.001062, -0.646270, -0.012560, -0.324065, 0.125327, 0.119738, 0.034567, -0.063130, 0.001593, -1.031457, 0.015159, 0.820816, -0.152665, -0.130729, -0.045679, 0.080444, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    [0.700000, -0.402804, -0.820508, -0.132914, 0.236278, 0.235164, -0.053551, -0.088687, 0.031253, -0.449354, -0.411507, 0.902946, 0.185335, -0.239125, -0.041696, 0.016857, 0.016709, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],  # noqa
-    ]
-
-class Uploader:
-    def __init__(self):
-        self._is_done = False
-        self._sucess = True
-
-    def upload(self, trajectory_mem):
-        print('Uploading data')
-        trajectory_mem.write_data(self._upload_done,
-                                  write_failed_cb=self._upload_failed)
-
-        while not self._is_done:
-            time.sleep(0.2)
-
-        return self._sucess
-
-    def _upload_done(self, mem, addr):
-        print('Data uploaded')
-        self._is_done = True
-        self._sucess = True
-
-    def _upload_failed(self, mem, addr):
-        print('Data upload failed')
-        self._is_done = True
-        self._sucess = False

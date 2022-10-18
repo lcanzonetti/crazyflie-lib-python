@@ -20,7 +20,7 @@ from   colorama              import init as coloInit
 coloInit(convert=True)
 import GLOBALS as GB
 import connections
-import OSCaggregator
+import OSC_aggregator
 from GUI import setCompanionRate, setFlyability, set_command_frequency,weMaySend
 
 bufferone         = {}
@@ -185,7 +185,7 @@ def goToStart (coddii, chi):
         print('chief says we (%s) are back at the start.' % chi)
         for drogno in GB.drogni:
             if GB.drogni[drogno].is_connected:
-                GB.drogni[drogno].goToStart(0.2)
+                GB.drogni[drogno].goToStart()
 def ringColor (*args):
     # print('how fancy would it be to all look %s %s %s ?' % (args[1][0], args[1][1], args[1][2]) )
     # print (bullshit)
@@ -201,25 +201,22 @@ def kill      (coddii, chi):
             GB.drogni[drogno].killMeHardly()
     else:
         GB.drogni[chi].killMeHardly()
-
 carlo = ''
 def cambiaCarlo(funzione):
     global carlo
     carlo = funzione
-
 def standBy   (coddii, chi):
     print('drogno %s sleeps, or wakes' % chi )
     if chi == 'all':    
         for drogno in GB.drogni:
             GB.drogni[drogno].goToSleep()
     else:
-        # print(GB.drogni)
+        print(GB.drogni)
         if not int(chi) in GB.drogni:
-            print (Back.blue + 'kaaaaaaaaaaaaaaa---------------')
+            print ( 'kaaaaaaaaaaaaaaa---------------')
             # print(uri_map[str(chi)])
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
-            print(Back.blue +'-----------------booooooooooom')
-
+            print( '-----------------booooooooooom')
         else:
             print('cddio')
             if not GB.drogni[int(chi)].standBy:
@@ -280,7 +277,6 @@ def printAndSendCoordinates():
                     GB.drogni[drogno].goTo(bufferone[iddio].requested_X, bufferone[iddio].requested_Y, bufferone[iddio].requested_Z)
                     # print ('il drone %s dovrebbe andare a %s %s %s' %( bufferone[iddio].name, bufferone[iddio].requested_X,bufferone[iddio].requested_Y,bufferone[iddio].requested_Z))
     print ('Non potrò mai più inviare ai GB.drogni comandi di movimento, mai più')
-
 def printHowManyMessages():
     # howManyMessagesLock = Lock()
     def printa():
@@ -294,7 +290,6 @@ def printHowManyMessages():
         print('D\'ora in poi la smetto di ricevere messaggi')
 
     threading.Thread(target=printa).start()
-
 def setRequestedPos(address, args):
     global msgCount
     global timecode
@@ -313,7 +308,6 @@ def setRequestedPos(address, args):
     bufferone[iddio].requested_Z = round(float(args[3]),3)
     print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s!!' %(iddio,round(float(args[1]),3), round(float(args[2]),3), round(float(args[3]),3)))
     msgCount += 1
-
 def setRequestedCol(address, args):
     global msgCount
     iddio     = int(address[-7])
@@ -322,7 +316,6 @@ def setRequestedCol(address, args):
     bufferone[iddio].requested_R = args[1]
     bufferone[iddio].requested_G = args[2]
     bufferone[iddio].requested_B = args[3]
-
 def setCommandsRate(address, args):
     # global GB.commandsFrequency
     # print(args)
@@ -338,7 +331,6 @@ def setCommandsRate(address, args):
         GB.drogni[drogno].GB.commandsFrequency = GB.commandsFrequency
     set_command_frequency(GB.commandsFrequency)
     print(Fore.RED + 'commandsFrequency has been set to ' + str(GB.commandsFrequency))
-
 def start_server():      ######################    #### OSC init    #########    acts as main()
     """ one day we'd call this function main, that day hasn't come yet"""
     global finished 
@@ -357,7 +349,7 @@ def start_server():      ######################    #### OSC init    #########   
         pass
         # global aggregatorInstance
         # global aggregatorProcess
-        # aggregatorInstance = OSCaggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE, framerate )
+        # aggregatorInstance = OSC_aggregator.Aggregator(aggregatorExitEvent, aggregatorCue, AGGREGATOR_RECEIVING_PORT, bufferone, OSC_PROCESS_RATE, framerate )
         # aggregatorProcess  = Process(target=aggregatorInstance.start)
         # aggregatorProcess.daemon = True
         # aggregatorProcess.start() 

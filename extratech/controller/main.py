@@ -16,9 +16,9 @@ logging.basicConfig(level=logging.ERROR)
 
 #custom modules
 import OSCStuff   as OSC
-import GUI        as GUI
-import Drogno
+import GUI       
 import connections
+import trajectories
 import GLOBALS    as GB
 
 def main():
@@ -26,19 +26,15 @@ def main():
 
     if GB.WE_ARE_FAKING_IT:
         print('ATTENZIONE! STIAMO FACENDO FINTA!')
-        time.sleep(2)
-        return
     
-    
-    print("Controller started. No fake shit.")
-    set_trajectory_path()
-    # GB.init()                          ## initialize exit events
-    connections.radioStart()
-    # connections.add_crazyflies()       ## chek if we already got CFs reachable
-    connections.restart_devices()
-    connections.create_classes()
+    else:
+        print("Controller started. No fake shit.")
+        connections.radioStart()
+        # connections.add_crazyflies()       ## chek if we already got CFs reachable
+        connections.restart_devices()
+        connections.create_classes()
 
-
+    trajectories.set_trajectory_path()
     #send drogni's array to submodules
     OSC.faiIlBufferon()
     OSCRefreshThread      = threading.Thread(target=OSC.start_server).start()
@@ -51,9 +47,6 @@ def main():
 
     if GB.AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=connections.autoReconnect).start()  
-
-def exit_signal_handler(signum, frame):
-    ciao_ciao()
 
 def ciao_ciao():
     print('Bye bye.')
@@ -73,23 +66,8 @@ def ciao_ciao():
    
     sys.exit("Putin merda")
 
-def set_trajectory_path():
-     # os.chdir(os.path.join('..', 'trajectoryRecorder', 'registrazioniOSC'))
-    # patto = Path('./lastRecord.txt')
-    # with open(patto, 'r') as f:
-    #     lastRecordPath = f.read()
-    #     print ('last record path: ' + lastRecordPath)
-    pass
-
-def IDFromURI(uri):
-    # Get the address part of the uri
-    address = uri.rsplit('/', 1)[-1]
-    try:
-        # print(int(address, 16) - 996028180448)
-        return int(address, 16) - 996028180448
-    except ValueError:
-        print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
-        return None
+def exit_signal_handler(signum, frame):
+    ciao_ciao()
 
 if __name__ == '__main__':
     main()
