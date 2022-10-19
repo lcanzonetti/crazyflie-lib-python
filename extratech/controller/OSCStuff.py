@@ -211,18 +211,19 @@ def standBy   (coddii, chi):
         for drogno in GB.drogni:
             GB.drogni[drogno].goToSleep()
     else:  ## singolo
-        print(GB.drogni)
+        print('Attualmente nello sciame: %s' % GB.drogni)
         if not int(chi) in GB.drogni:
-            print ( 'Il drogno che vuoi svegliare non è ancora in lista')
+            print ( 'Il drogno che vuoi raggiungere non è ancora in lista')
             print ( 'kaaaaaaaaaaaaaaa---------------')
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print( '-----------------booooooooooom')
         else:
-            if not GB.drogni[int(chi)].standBy:
-                print('addormento ' + chi)
+            print ( 'Il drogno che vuoi è già in lista, in standby? %s' % GB.drogni[int(chi)].standBy)
+            if GB.drogni[int(chi)].standBy == False:
+                print('addormento %s' % chi)
                 GB.drogni[int(chi)].goToSleep()
             else:
-                print('sveglio ' + chi)
+                print('sveglio %s' % chi)
                 GB.drogni[int(chi)].wakeUp()
 def wakeUp    (coddii, chi):
     print(' %s  wakes up' % chi )

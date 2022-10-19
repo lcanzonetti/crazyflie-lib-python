@@ -26,3 +26,5 @@ docs/api/cflib
 #vscode config folder
 .vscode/
 extratech/utilities/.env
+extratech/drognoLogs
+extratech/crazyflies_cache

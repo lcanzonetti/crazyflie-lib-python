@@ -9,16 +9,19 @@ from   rich import print
 import OSCStuff as OSC
 import Drogno
 import GLOBALS as GB
-import utils
+import common_utils
 
 def radioStart():
     if not GB.WE_ARE_FAKING_IT:
         cflib.crtp.init_drivers()
+       
+
         print('Scanning usb for Crazy radios...')
-        if (cflib.crtp.get_interfaces_status()['radio'] == 'Crazyradio not found'):
+        radios = cflib.crtp.get_interfaces_status()
+
+        if (radios['radio'] == 'Crazyradio not found'):
             raise Exception("no radio!")
         else:
-            radios = cflib.crtp.get_interfaces_status()
             print("[bold blue]%s radio trovata:"%len(radios))
             print(radios)
     else: 
@@ -80,10 +83,10 @@ def restart_devices():
         is_anyone_there = True
   
     if len(GB.connected_uris) == 0 or is_anyone_there == False:
-        opinion = ('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit, or S to stand-by. I am startinmg in five seconds anyway')
+        opinion = ('there actually no drognos, wanna retry?\nPress R to retry,\nQ to exit, or S to stand-by. Starting in 3 seconds anyway')
       
         try:
-            something = inputimeout(prompt=opinion, timeout=5)
+            something = inputimeout(prompt=opinion, timeout=3)
             if opinion == 'r' or opinion == 'R':
                 restart_devices()
             if opinion == 's' or opinion == 'S':
@@ -105,17 +108,18 @@ def restart_devices():
         print('1')
         time.sleep(1)
 
- 
-
 def add_just_one_crazyflie(one_CF_I_am_looking_for):
     print('boom %s' % one_CF_I_am_looking_for)
     if not GB.WE_ARE_FAKING_IT:
         print ('looking for %s ' % one_CF_I_am_looking_for)
-        available_single_CF_I_am_looking_for  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(one_CF_I_am_looking_for))
-        if available_single_CF_I_am_looking_for:
-            print(f'Effettivamente potrei aggiungere: ' + uri_helper.address_from_env(one_CF_I_am_looking_for))
-        else:
-            print('non raggiungo ' + one_CF_I_am_looking_for)
+        try:
+            available_single_CF_I_am_looking_for  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(one_CF_I_am_looking_for))
+            if available_single_CF_I_am_looking_for:
+                print('Effettivamente potrei aggiungere: %s' % uri_helper.address_from_env(one_CF_I_am_looking_for))
+            else:
+                print('non raggiungo %s' % one_CF_I_am_looking_for)
+        except Exception:
+                print('%s is unreachable and says %s' % (one_CF_I_am_looking_for, e))    
         try: 
             PowerSwitch(one_CF_I_am_looking_for).stm_power_cycle()
         except Exception:
@@ -124,7 +128,7 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
     else: 
         print('simulo di aver aggiunto un crazifliio') 
         time.sleep(1) 
-    iddio = utils.IDFromURI(one_CF_I_am_looking_for)
+    iddio = common_utils.IDFromURI(one_CF_I_am_looking_for)
     print('provo ad aggiunger il drone con l\'iddio %s ' % iddio)
     time.sleep(3)
 
@@ -134,10 +138,9 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
     GB.connected_uris.append = one_CF_I_am_looking_for
     print('crazyflie aggiunto')
 
-
 def create_classes():
     for uro in GB.connected_uris:
-        iddio = utils.IDFromURI(uro)
+        iddio = common_utils.IDFromURI(uro)
         try:
             GB.drogni[iddio] = Drogno.Drogno(iddio, uro, GB.lastRecordPath)
             GB.drogni[iddio].start()
@@ -148,7 +151,7 @@ def create_classes():
 
 def restarta(urico):
     try: 
-        print('spengo '+ urico)
+        print('spengo %s'% urico)
         PowerSwitch(urico).stm_power_down()
 
     except Exception:

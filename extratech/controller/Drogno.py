@@ -21,7 +21,7 @@ from   cflib.positioning.position_hl_commander    import PositionHlCommander
 from   cflib.crazyflie.mem                        import MemoryElement
 from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils.power_switch                   import PowerSwitch
-
+import cflib.crtp
 
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, lastRecordPath):
@@ -49,7 +49,7 @@ class Drogno(threading.Thread):
 
         self.recconnectionAttempts  = 0
         self.is_connected           = False
-
+        self.still_have_hope_to_reconnect = True
         self.standBy                = False
         self.isPositionEstimated    = False
         self.positionHLCommander    = None 
@@ -105,15 +105,17 @@ class Drogno(threading.Thread):
     def run(self):
         print (Fore.LIGHTBLUE_EX + "starting " + self.name + " class instance")
         try:
-            self.TRAJECTORIES [0] = self.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
+            self.TRAJECTORIES [0] = GB.lastRecordPath + '/trajectory_' + str(self.ID) + '.txt'
             self.TRAJECTORIES [7] = trajectories.figure8Triple
             self.TRAJECTORIES [8] = trajectories.figure8
-            print ('my trajectories are: %s' % self.TRAJECTORIES )
+            print ('there are %s trajectories' % len(self.TRAJECTORIES) )
             with open(self.TRAJECTORIES[0], 'r') as t:
                 print(t.readlines())
                 self.lastTrajectory = t.readlines()
+        except FileNotFoundError as ff:
+            print(ff)
         except Exception as e:
-            print('loading trajectories encountered an issu:\n%s' % e)
+            print('loading trajectories encountered an issue:\n%s' % e)
       
 
         connectedToFeedback = False
@@ -146,7 +148,7 @@ class Drogno(threading.Thread):
                         self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
                         if self.isEngaged:
                             if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
-                            print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
+                            else: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                         else:
                             print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
                     else:
@@ -245,8 +247,6 @@ class Drogno(threading.Thread):
 
     #################################################################### connection
     def connect(self):
-        print(self.link_uri)
-        
         if not GB.WE_ARE_FAKING_IT:   ## true life
             if self.isKilled == False:
                 print(f'Provo a connettermi al drone { self.ID} all\'indirizzo { self.link_uri}    ')
@@ -277,34 +277,39 @@ class Drogno(threading.Thread):
             self._fully_connected(self.link_uri)           
 
     def reconnect(self):
-        def mariconnetto():
-            I_still_have_hope = True
-            while I_still_have_hope:
-                if self.recconnectionAttempts == 0:
-                    print(f'provo a riaprire la connessione con il drogno {self.name}')
-                    self.recconnectionAttempts+=1
-                    self.statoDiVolo = 'connecting'
-                    self._cf.open_link( self.link_uri)
-                elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
-                    self.recconnectionAttempts +=1
-                    print('Aspetto 1 secondo prima di ritentare')
-                    time.sleep(1)
-                    print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
-                    self.connect()
-                else:
-                    print('con il drogno %s ho perso le speranze' % self.ID)
-                    I_still_have_hope = False
-        tio = threading.Thread(name=self.name+'_reconnectThread',target=mariconnetto)
-        tio.start()
+        # def mariconnetto():
+        #     self.still_have_hope_to_reconnect = True
+        #     while self.still_have_hope_to_reconnect:
+        #         if self.recconnectionAttempts == 0:
+        #             print(f'provo a riaprire la connessione con il drogno {self.name}')
+        #             self.recconnectionAttempts+=1
+        #             self.statoDiVolo = 'connecting'
+        #             self.connect()
+        #         elif self.recconnectionAttempts >= 1 and self.recconnectionAttempts < 10:
+        #             self.recconnectionAttempts +=1
+        #             print('Aspetto 3 secondi prima di ritentare')
+        #             time.sleep(3)
+        #             print(f'provo a riaprire la connessione con il drogno {self.name} dopo {self.recconnectionAttempts} tentativi.')
+        #             self.connect()
+        #         else:
+        #             print('con il drogno %s ho perso le speranze' % self.ID)
+        #             self.still_have_hope_to_reconnect = False
+        # tio = threading.Thread(name=self.name+'_reconnectThread',target=mariconnetto)
+        # tio.start()
+        pass
 
     def _connected(self, link_uri):   
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
+        self.still_have_hope_to_reconnect = False
         
     def _all_params_there(self):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
+        self.linkone = cflib.crtp.get_link_driver(self.link_uri)
+        # self.linkone.set_retries(1)
+        self.linkone._retry_before_disconnect = 3
         self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
         self.batteryThread.start()
 
@@ -446,7 +451,7 @@ class Drogno(threading.Thread):
         self.is_connected = False
         self.isReadyToFly = False
         self.statoDiVolo = 'sconnesso'
-        # self.reconnect()
+        self.still_have_hope_to_reconnect = True
 
     def _connection_lost(self, link_uri, msg):
         """Callback when disconnected after a connection has been made (i.e
@@ -793,7 +798,7 @@ class Drogno(threading.Thread):
             yaw = Poly4D.Poly(row[25:33])
             trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
             total_duration += duration
-        upload_result = Uploader().upload(trajectory_mem)
+        upload_result = trajectories.Uploader().upload(trajectory_mem)
         if not upload_result:
             print('Upload failed, aborting!')
         self._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
@@ -844,16 +849,21 @@ class Drogno(threading.Thread):
         if not GB.WE_ARE_FAKING_IT:
             self._cf.close_link()
             PowerSwitch(self.link_uri).stm_power_down()
+            PowerSwitch(self.link_uri).
         self.statoDiVolo = 'stand by'
     def wakeUp(self):
         def wakeUpProcedure():
-            self.killingPill.clear()
-            self.currentSequence_killingPill.clear()
-            self.standBy = False
+            print('mi sveglio')
             self.statoDiVolo = 'waking up'
+        
             if not GB.WE_ARE_FAKING_IT:
+                self.killingPill.clear()
+                self.currentSequence_killingPill.clear()
+                self.standBy = False
                 PowerSwitch(self.link_uri).stm_power_up()
-            time.sleep(3)
+            print('stiamo aspettando 4 secondi')
+            time.sleep(6)
+            print('aspettati')
             self.connect()
         daje = threading.Thread(target=wakeUpProcedure).start()
     def exit(self):

@@ -157,7 +157,7 @@ def start_companion_update():
                         engageColor = [240, 20, 80]
                     else:
                         engageText = 'not engaged'
-                        engageColor = [20, 240, 80]
+                        engageColor = [20, 210, 40]
 
                     rgb = [GB.drogni[drogno].requested_R, GB.drogni[drogno].requested_G, GB.drogni[drogno].requested_B]
                     if not any(rgb):
@@ -169,8 +169,7 @@ def start_companion_update():
                     int_col = oscbuildparse.OSCMessage(
                         "/style/color/"+cp+"/" + str(iddio+2),    ",iii",   [255, 255, 255])
 
-                    status = oscbuildparse.OSCMessage("/style/text/"+cp+"/" + str(iddio+2+8),
-                                                      ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage])
+                    status = oscbuildparse.OSCMessage("/style/text/"+cp+"/" + str(iddio+2+8), ",s",   [d.statoDiVolo + ' ' + d.batteryVoltage])
                     status_bkgcol = oscbuildparse.OSCMessage(
                         "/style/bgcolor/"+cp+"/" + str(iddio+2+8),  ",iii",   [1, 1, 1])
                     status_col = oscbuildparse.OSCMessage(

@@ -3,6 +3,8 @@
 
 # native modules
 import logging, sys, os, threading, time, signal
+import ssl
+from re import S
 from   rich import print
 
 #bitcraze modules  
@@ -20,8 +22,24 @@ import connections
 import trajectories
 import GLOBALS    as GB
 
+text = "extratech swarm controller"
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+myfont = ImageFont.truetype("verdanab.ttf", 12)
+size = myfont.getsize(text)
+img = Image.new("1",size,"black")
+draw = ImageDraw.Draw(img)
+draw.text((0, 0), text, "white", font=myfont)
+pixels = np.array(img, dtype=np.uint8)
+chars = np.array([' ','#'], dtype="U1")[pixels]
+strings = chars.view('U' + str(chars.shape[1])).flatten()
+
+
 def main():
-    signal.signal(signal.SIGINT, exit_signal_handler)
+    print( "\n".join(strings))
+    print('\n')
+
+    signal.signal(signal.SIGINT, exit_signal_handler) 
 
     if GB.WE_ARE_FAKING_IT:
         print('ATTENZIONE! STIAMO FACENDO FINTA!')
