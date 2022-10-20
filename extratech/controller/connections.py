@@ -112,14 +112,14 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
     print('boom %s' % one_CF_I_am_looking_for)
     if not GB.WE_ARE_FAKING_IT:
         print ('looking for %s ' % one_CF_I_am_looking_for)
-        try:
-            available_single_CF_I_am_looking_for  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(one_CF_I_am_looking_for))
-            if available_single_CF_I_am_looking_for:
-                print('Effettivamente potrei aggiungere: %s' % uri_helper.address_from_env(one_CF_I_am_looking_for))
-            else:
-                print('non raggiungo %s' % one_CF_I_am_looking_for)
-        except Exception:
-                print('%s is unreachable and says %s' % (one_CF_I_am_looking_for, e))    
+        # try:
+        #     available_single_CF_I_am_looking_for  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(one_CF_I_am_looking_for))
+        #     if available_single_CF_I_am_looking_for:
+        #         print('Effettivamente potrei aggiungere: %s' % uri_helper.address_from_env(one_CF_I_am_looking_for))
+        #     else:
+        #         print('non raggiungo %s' % one_CF_I_am_looking_for)
+        # except Exception:
+        #         print('%s is unreachable and says %s' % (one_CF_I_am_looking_for, e))    
         try: 
             PowerSwitch(one_CF_I_am_looking_for).stm_power_cycle()
         except Exception:

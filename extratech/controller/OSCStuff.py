@@ -210,6 +210,9 @@ def standBy   (coddii, chi):
         print('addormenterei tutti' )
         for drogno in GB.drogni:
             GB.drogni[drogno].goToSleep()
+        ## svuotone!
+        GB.drogni         = []
+        GB.connected_uris = []
     else:  ## singolo
         print('Attualmente nello sciame: %s' % GB.drogni)
         if not int(chi) in GB.drogni:
@@ -218,13 +221,20 @@ def standBy   (coddii, chi):
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print( '-----------------booooooooooom')
         else:
-            print ( 'Il drogno che vuoi è già in lista, in standby? %s' % GB.drogni[int(chi)].standBy)
+            # print ( 'Il drogno %s che vuoi è già in lista, lo mettiamo in standby.' % chi)
             if GB.drogni[int(chi)].standBy == False:
                 print('addormento %s' % chi)
                 GB.drogni[int(chi)].goToSleep()
+                del GB.drogni[int(chi)]
+                # del GB.connected_uris[int(chi)]
+                print(f'cancellata la classe del drogno {chi}')
+                print('Attualmente nello sciame: %s' % GB.drogni)
+
             else:
                 print('sveglio %s' % chi)
-                GB.drogni[int(chi)].wakeUp()
+                # GB.drogni[int(chi)].wakeUp()
+                connections.add_just_one_crazyflie(GB.uri_map[int(chi)])
+        
 def wakeUp    (coddii, chi):
     print(' %s  wakes up' % chi )
     if chi == 'all':    

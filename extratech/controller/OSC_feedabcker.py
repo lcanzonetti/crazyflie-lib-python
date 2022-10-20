@@ -56,6 +56,8 @@ class Feedbacco():
                 msg = connessione.recv()
                 if msg == 'fuck you':
                     self.finished.set()
+                    print('\nFeedbacker process for drogno %s received a fuck you.' % self.ID)
+
                     break
                 else:
                     self.sendPose(msg)
@@ -64,6 +66,9 @@ class Feedbacco():
             print('\nFeedbacker process for drogno %s leaving.' % self.ID)
             osc_terminate()
             listener.close()
+            self.finished.clear()
+            print('Feedbacker process for drogno %s left.' % self.ID)
+
         
         osc_startup()
         # osc_startup(logger=logger)
@@ -142,7 +147,7 @@ if __name__ == '__main__':
     connectionToFeedbackProcess = Client(address)
     connectionToFeedbackProcess.send('fuck your mother')
 
-    while not end_of_story:
+    while True:
         time.sleep(1)
         pass
 

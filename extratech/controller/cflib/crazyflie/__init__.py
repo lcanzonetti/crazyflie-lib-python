@@ -160,7 +160,11 @@ class Crazyflie():
     def _start_connection_setup(self):
         """Start the connection setup by refreshing the TOCs"""
         logger.info('We are connected[%s], request connection setup',  self.link_uri)
-        self.platform.fetch_platform_informations(self._platform_info_fetched)
+        try:
+            self.platform.fetch_platform_informations(self._platform_info_fetched)
+        except Exception as e:
+            print('errore richiedendo le informazioni di piattaforma:%s' % e)
+
         print( 'connessi alla radio, chiedo le informazioni sulla piattaforma')
 
 
@@ -193,8 +197,8 @@ class Crazyflie():
 
     def _link_error_cb(self, errmsg):
         """Called from the link driver when there's an error"""
-        logger.warning('Got link error callback [%s] in state [%s]',
-                       errmsg, self.state)
+        logger.warning('Got link error callback [%s] in state [%s]', errmsg, self.state)
+        print('Got link error callback [%s] in state [%s]', errmsg, self.state)
         if (self.link is not None):
             self.link.close()
         self.link = None
@@ -263,6 +267,8 @@ class Crazyflie():
     def close_link(self):
         """Close the communication link."""
         logger.info('Closing link')
+        print('closing link')
+
         if (self.link is not None):
             self.commander.send_setpoint(0, 0, 0, 0)
         if (self.link is not None):
