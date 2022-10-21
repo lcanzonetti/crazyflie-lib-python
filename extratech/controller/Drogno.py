@@ -723,16 +723,17 @@ class Drogno(threading.Thread):
                     if self.currentSequence_killingPill.is_set(): Break
                     self.setRingColor(255,   0, 255)
                     time.sleep(0.5)
-                    self.statoDiVolo = 'landing'
+                    
+                self.statoDiVolo = 'landing'
                 self.land()
                 self.statoDiVolo = 'idle'
                 self.currentSequence_killingPill.clear()
-                print('fine prima sequenza di test')
+                print('fine quadratone di test')
 
-            print('Drogno: %s. Inizio quadrato di test' % self.ID)
+            print('Drogno: %s. Inizio quadratone di test' % self.ID)
             threading.Thread(target=seq1, daemon=True).start()
         #  un giro di yaw
-        def sequenzaDue():
+        def sequenzaDue(): #   blocking?
             print(Fore.LIGHTRED_EX + 'Drogno: %s. Inizio giretto sul posto' % self.ID)
             while not self.currentSequence_killingPill.is_set():
                 self.takeOff(3.)
@@ -744,7 +745,7 @@ class Drogno(threading.Thread):
                 time.sleep(1)
                 self._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
             self.currentSequence_killingPill.clear()
-        #  un giro di yaw
+        #  un giro relativo con diametro 1.5 mt
         def sequenzaTre():
             print('Drogno: %s. Inizio giretto da 0.75 di test' % self.ID)
             self.motionCommander.take_off(height=1.1,velocity=0.4)
@@ -756,7 +757,7 @@ class Drogno(threading.Thread):
             self.motionCommander.land(0.3)
             self.statoDiVolo = 'idle'
             print('Drogno: %s. Fine circoletto da 0.75 di test' % self.ID)
-        
+        #  un giro relativo con diametro 3 mt
         def sequenzaQuattro():
             print('Drogno: %s. Inizio giretto da 1.5 di test' % self.ID)
             self.motionCommander.take_off(height=1.1,velocity=0.4)
@@ -770,20 +771,36 @@ class Drogno(threading.Thread):
             print('Drogno: %s. Fine circoletto da 1.5 di test' % self.ID)
 
         def sequenzaCinque():
-            print('Drogno: %s. Inizio ciclo decollo/atterraggio di test' % self.ID)
-            # input("enter to continue")
-            self.alternativeSetRingColor([255,0,0])
-            self.positionHLCommander.go_to(self.starting_x,  self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,0,0])
-            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,255,0])
-            self.positionHLCommander.go_to(self.starting_x, -self.starting_y, 1.2, 0.2)
-            self.alternativeSetRingColor([255,255,255])
+            def seq5():
+                while not self.currentSequence_killingPill.is_set():
+                    self.statoDiVolo = 'taking off'
+                    self.takeOff()     
+                    self.statoDiVolo = 'seq5'
+                    self.motionCommander.left(1.5,1.5)
+                    self.motionCommander.start_turn_left(150)
+                    if self.currentSequence_killingPill.is_set(): break
+                    time.sleep(0.8)
+                    self.motionCommander.forward(1.5,1.5)
+                    self.motionCommander.start_turn_right(150)
+                    if self.currentSequence_killingPill.is_set(): break
+                    time.sleep(0.8)
+                    self.motionCommander.right(1.5,1.5)
+                    self.motionCommander.start_turn_right(150)
+                    if self.currentSequence_killingPill.is_set(): break
+                    time.sleep(0.8)
+                    self.motionCommander.back(1.5,1.5)
+                    self.motionCommander.start_turn_right(150)
+                    if self.currentSequence_killingPill.is_set(): break
+                    time.sleep(0.8)
 
-            self.positionHLCommander.go_to(self.starting_x, self.starting_y, 1.2, 0.2)
-            
-            print('Drogno: %s. Fine ciclo decollo/atterraggio di test' % self.ID)
-            self.statoDiVolo = 'landed'
+                self.statoDiVolo = 'landing'
+                self.land()
+                self.statoDiVolo = 'idle'
+                self.currentSequence_killingPill.clear()
+                print('fine quadrato di test')
+            print('Drogno: %s. Inizio quadrato relativo di test' % self.ID)
+            threading.Thread(target=seq5, daemon=True).start()
+          
          
 
         sequenzeTest = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque]
