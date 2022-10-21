@@ -59,8 +59,8 @@ class Uav:
         
         Returns:
             None
-        '''
-
+        # '''
+        # print (f'DRAWO A {x[0], x[1], x[2]}')
         # First, clear the axis of all the previous plots
         # self.ax.clear()
 
