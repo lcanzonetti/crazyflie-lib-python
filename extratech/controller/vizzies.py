@@ -4,8 +4,8 @@
 # built-ins
 import random, threading, time, signal, sys
 # numpy and matlib
-from pyplot3d.utils import ypr_to_R
-from pyplot3d.uav   import Uav
+from plotterie.utils import ypr_to_R
+from plotterie.uav   import Uav
 from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
