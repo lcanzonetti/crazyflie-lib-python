@@ -728,7 +728,7 @@ class Drogno(threading.Thread):
             print('Drogno: %s. Inizio giretto da un metro di test' % self.ID)
             self.motionCommander.take_off(height=1.1,velocity=0.4)
             self.statoDiVolo = 'taking off'
-            self.motionCommander.start_circle_left(radius_m=1, velocity=0.4)
+            self.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
             self.statoDiVolo = 'test 3'
             self.currentSequence_killingPill.wait()
             self.motionCommander.land(0.3)
