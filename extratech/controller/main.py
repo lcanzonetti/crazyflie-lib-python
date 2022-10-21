@@ -9,8 +9,7 @@ from   rich import print
 
 #bitcraze modules  
 CFLIB_PATH      = os.environ.get('CFLIB_PATH')  ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
-sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente
-import cflib.crtp
+sys.path        = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente
 from   cflib.utils.power_switch import PowerSwitch
 from   cflib.utils import uri_helper
 logging.basicConfig(level=logging.ERROR)
@@ -22,24 +21,9 @@ import connections
 import trajectories
 import GLOBALS    as GB
 
-text = "extratech swarm controller"
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
-myfont = ImageFont.truetype("verdanab.ttf", 12)
-size = myfont.getsize(text)
-img = Image.new("1",size,"black")
-draw = ImageDraw.Draw(img)
-draw.text((0, 0), text, "white", font=myfont)
-pixels = np.array(img, dtype=np.uint8)
-chars = np.array([' ','#'], dtype="U1")[pixels]
-strings = chars.view('U' + str(chars.shape[1])).flatten()
-
 
 def main():
-    print( "\n".join(strings))
-    print('\n')
-
-    signal.signal(signal.SIGINT, exit_signal_handler) 
+    print_greetings()
 
     if GB.WE_ARE_FAKING_IT:
         print('ATTENZIONE! STIAMO FACENDO FINTA!')
@@ -86,7 +70,22 @@ def ciao_ciao():
 def exit_signal_handler(signum, frame):
     ciao_ciao()
 
+def print_greetings():
+    text = "extratech swarm controller"
+    from PIL import Image, ImageDraw, ImageFont
+    import numpy as np
+    myfont = ImageFont.truetype("verdanab.ttf", 12)
+    size = myfont.getsize(text)
+    img = Image.new("1",size,"black")
+    draw = ImageDraw.Draw(img)
+    draw.text((0, 0), text, "white", font=myfont)
+    pixels = np.array(img, dtype=np.uint8)
+    chars = np.array([' ','#'], dtype="U1")[pixels]
+    strings = chars.view('U' + str(chars.shape[1])).flatten()
+    print( "\n".join(strings))
+    print('\n')
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, exit_signal_handler) 
     main()
     while True:
         time.sleep(0.1)

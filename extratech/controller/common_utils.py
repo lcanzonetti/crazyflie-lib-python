@@ -1,3 +1,4 @@
+import sys
 
 def IDFromURI(uri):
     # Get the address part of the uri
@@ -17,3 +18,12 @@ def convert_motor_pass(numeroBinario):
     motori[2] = (numeroBinario >> 1) & 1
     motori[3] = (numeroBinario >> 0) & 1
     return motori
+
+"""
+
+500 p/s
+
+logs =   10
+gotos =  20
+rgbs  =  10
+ 
