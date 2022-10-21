@@ -34,9 +34,9 @@ RECEIVING_IP                = "0.0.0.0"
 RECEIVING_PORT              = 9200
 
 ######################################    COSTANTI SPAZIALI E DI VOLO
-BOX_X                       = 2.3
+BOX_X                       = 2.5
 BOX_Y                       = 2.8
-BOX_Z                       = 2.4
+BOX_Z                       = 2.5
 RELATIVE_SPACING            = 0.4
 DEFAULT_HEIGHT              = 0.8
 DEFAULT_VELOCITY            = 0.85
