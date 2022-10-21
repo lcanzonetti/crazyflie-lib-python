@@ -86,6 +86,7 @@ def print_greetings():
     print('\n')
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, exit_signal_handler) 
+
     main()
     while True:
         time.sleep(0.1)
