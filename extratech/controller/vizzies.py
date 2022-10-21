@@ -15,7 +15,12 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 # custom
 import GLOBALS as GB
-quanti_vizzidroni     = 8
+
+
+is_test = False
+quanti_vizzidroni     = 6
+
+
 insieme_di_vizzidroni = []
 
 # Initiate the plot
@@ -31,7 +36,6 @@ rotation_matrix = ypr_to_R(yaw_pitch_roll, degrees=True)
 
 
 finished        = threading.Event()
-is_test = True
 
 def update_plot(frame):
     # print('frame %s ' % frame)
