@@ -91,7 +91,7 @@ class Drogno(threading.Thread):
         self.feedbacker                = OSC_feedabcker.Feedbacco(self.ID, GB.eventi.get_process_exit_event(), self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start, daemon=True).start()
         ################################################## logging
-        self.logger_manager = logger_manager.Logger_manager(self._cf, self.ID)
+        self.logger_manager = logger_manager.Logger_manager(self, self._cf, self.ID)
 
         if (GB.LOGGING_ENABLED):
             now = datetime.now() # current date and time
