@@ -43,9 +43,14 @@ def add_crazyflies():
             if available_crazyflies:
                 available_crazyfliess.append(available_crazyflies)
 
+    available = cflib.crtp.scan_interfaces()
+    for i in available:
+        print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
+
     if available_crazyfliess:
         print(f'gente già in giro:')
         print (available_crazyfliess)    
+        print (available)    
         return available_crazyfliess 
 
         # for i in available_crazyfliess:
@@ -122,14 +127,15 @@ def add_just_one_crazyflie(one_CF_I_am_looking_for):
         #         print('%s is unreachable and says %s' % (one_CF_I_am_looking_for, e))    
         try: 
             PowerSwitch(one_CF_I_am_looking_for).stm_power_cycle()
-        except Exception:
-                print('%s is not there to be shut down' % one_CF_I_am_looking_for)
+        except Exception as e:
+                print('%s is not there to be shut down, nor can be added, %s' % (one_CF_I_am_looking_for,e))
+                return
                 # raise Exception
     else: 
         print('simulo di aver aggiunto un crazifliio') 
         time.sleep(1) 
     iddio = common_utils.IDFromURI(one_CF_I_am_looking_for)
-    print('provo ad aggiunger il drone con l\'iddio %s ' % iddio)
+    print('Aggiungo il drone con l\'iddio %s tra tre secondi.' % iddio)
     time.sleep(3)
 
     newDrogno = Drogno.Drogno(iddio, one_CF_I_am_looking_for, GB.lastRecordPath)

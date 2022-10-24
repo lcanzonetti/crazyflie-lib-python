@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #rf 2022
 
 # native modules
 import logging, sys, os, threading, time, signal
-import ssl
-from re import S
 from   rich import print
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 
 #bitcraze modules  
 CFLIB_PATH      = os.environ.get('CFLIB_PATH')  ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
@@ -49,7 +50,7 @@ def main():
     if GB.AUTO_RECONNECT:
         reconnectThread = threading.Thread(target=connections.autoReconnect).start()  
 
-def ciao_ciao():
+def ciao_ciao(signum, frame):
     print('Bye bye.')
     GUI.reset_companion()
     OSC.finished = True
@@ -67,25 +68,21 @@ def ciao_ciao():
    
     sys.exit("Putin merda")
 
-def exit_signal_handler(signum, frame):
-    ciao_ciao()
-
 def print_greetings():
-    text = "extratech swarm controller"
-    from PIL import Image, ImageDraw, ImageFont
-    import numpy as np
-    myfont = ImageFont.truetype("verdanab.ttf", 12)
-    size = myfont.getsize(text)
-    img = Image.new("1",size,"black")
-    draw = ImageDraw.Draw(img)
+    text   = "extratech swarm controller"
+    myfont = ImageFont.load_default()
+    size   = myfont.getsize(text)
+    img    = Image.new("1",size,"black")
+    draw   = ImageDraw.Draw(img)
     draw.text((0, 0), text, "white", font=myfont)
     pixels = np.array(img, dtype=np.uint8)
     chars = np.array([' ','#'], dtype="U1")[pixels]
     strings = chars.view('U' + str(chars.shape[1])).flatten()
     print( "\n".join(strings))
     print('\n')
+
 if __name__ == '__main__':
-    signal.signal(signal.SIGINT, exit_signal_handler) 
+    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare ciao ciao 
 
     main()
     while True:
