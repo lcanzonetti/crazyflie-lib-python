@@ -1,10 +1,7 @@
 #rf 2022
 
-from ast import Break
-import time, sys, os
-import threading
+import time, sys, os, threading, multiprocessing
 from   datetime import datetime
-import multiprocessing
 from   multiprocessing.connection import Client
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
@@ -14,11 +11,11 @@ import GLOBALS as GB
 import OSC_feedabcker 
 import trajectories
 import logger_manager
+import common_utils
 
 #crazyflie's
 import logging
 from   cflib.crazyflie                            import Crazyflie, commander
-from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 from   cflib.positioning.motion_commander         import MotionCommander
 from   cflib.crazyflie.mem                        import MemoryElement
@@ -28,71 +25,74 @@ from   cflib.utils.power_switch                   import PowerSwitch
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, lastRecordPath):
         threading.Thread.__init__(self)
-        # self.lastRecordPath  = lastRecordPath
-        # self.lastTrajectory  = ''
-        self.TRAJECTORIES    = {}
-        # self.currentTrajectoryLenght = 0
-        self.link_uri                = link_uri
+        #####################################  identity
+        self.cache_location         = os.path.join(GB.ROOT_DIR, 'crazyflies_cache', self.name)
+        self._cf                    = Crazyflie(rw_cache=self.cache_location)
+        self.link_uri               = link_uri
         self.ID                     = int(ID)
         self.name                   = 'Drogno_'+str(ID)
-        self.statoDiVolo            = 'starting'
-        self.isKilled               = False
-        self.isReadyToFly           = False
-        self.isEngaged              = True
-        self.isBatterytestPassed    = False
-        self.isFlying               = False
+        #####################################  threadsss
+        self.connectionThread       = None
+        self.killingPill            = threading.Event()
         self.controlThread          = False
-        self.isLogEnabled           = GB.LOGGING_ENABLED
         self.printThread            = False
-
         self.current_sequence       = None
         self.currentSequenceThread  = None
         self.currentSequence_killingPill = threading.Event()
-
         self.recconnectionAttempts  = 0
+        #####################################  statusss
         self.is_connected           = False
         self.still_have_hope_to_reconnect = True
         self.standBy                = False
         self.isPositionEstimated    = False
+        self.statoDiVolo            = 'starting'
+        self.isKilled               = False
+        self.isReadyToFly           = False
+        self.isEngaged              = True
+        self.isFlying               = False
+        self.isTumbled              = False
+        self.linkQuality            = 0
+        self.batteryVoltage         = 'n.p.'
+
+        #####################################  position
         self.positionHLCommander    = None 
         self.x           = self.y           = self.z           = self.yaw = 0.0
         self.starting_x  = self.starting_y  = self.starting_z  = 0.0
         self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
         self.requested_X = self.requested_Y = self.requested_Z = 0.0
         self.requested_R = self.requested_G = self.requested_B = 0
-        self.ledMem                 = 0
-        self.esteemsCount           = 0
         self.prefStartPoint_X, self.prefStartPoint_Y = GB.PREFERRED_STARTING_POINTS[self.ID][0], GB.PREFERRED_STARTING_POINTS[self.ID][1]
-        self.batteryVoltage         = 'n.p.'
+        #####################################  initial testss
         self.batterySag             = 0.50 # sta carica
+        self.isBatterytestPassed    = False
         self.motorPass              = [1,1,1,1]
-        self.ringIntensity          = 0.1
+        #####################################  counterssss
         self.commandsCount          = 0.0
-        self.multiprocessConnection = None
-        self.linkQuality            = 0
-        self.isTumbled              = False
         self.connection_time        = None
         self.scramblingTime         = None
         self.flyingTime             = 0
-        self.connectionThread       = None
-        self.killingPill            = threading.Event()
-        self.cache_location         = os.path.join(GB.ROOT_DIR, 'crazyflies_cache', self.name)
-        self._cf                    = Crazyflie(rw_cache=self.cache_location)
-        # Connect some callbacks from the Crazyflie API
+        self.ledMem                 = 0
+        self.esteemsCount           = 0
+        #####################################  trajextoriesss
+        # self.lastRecordPath  = lastRecordPath
+        # self.lastTrajectory  = ''
+        self.TRAJECTORIES    = {}
+        # self.currentTrajectoryLenght = 0
+        ################################              Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback        (self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there) 
         self._cf.fully_connected.add_callback  (self._fully_connected)
         self._cf.disconnected.add_callback     (self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback  (self._connection_lost)
-        # Feedback instance in his own process
+        ################################                 Feedback instance in his own process
+        self.multiprocessConnection    = None
         self.feedbacker_receiving_port = 9100 + self.ID
         self.feedbacker_address        = ('127.0.0.1', self.feedbacker_receiving_port)
         self.feedbacker                = OSC_feedabcker.Feedbacco(self.ID, GB.eventi.get_process_exit_event(), self.feedbacker_receiving_port  )
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start, daemon=True).start()
         ################################################## logging
         self.logger_manager = logger_manager.Logger_manager(self, self._cf, self.ID)
-
         if (GB.LOGGING_ENABLED):
             now = datetime.now() # current date and time
             date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
@@ -141,7 +141,7 @@ class Drogno(threading.Thread):
         # in each direction and each log block uses one packet per log.
         # So it should be possible to log at 100Hz a couple of log blocks. 
 
-        if self.isLogEnabled:
+        if GB.LOGGING_ENABLED:
             self.LoggerObject.info('Logger started')
             while not self.killingPill.is_set():
                 time.sleep(GB.print_rate)
@@ -164,7 +164,6 @@ class Drogno(threading.Thread):
                             print(Fore.GREEN + f"{self.name}: {self.statoDiVolo}\t\tbattery fake\tpos super fake\tyaw: fake\tflight time: {self.flyingTime}s ")
                     else:
                         print(Fore.LIGHTBLUE_EX + f"{self.name}: {self.statoDiVolo}")
-
 
                 self.commandsCount = 0
 
@@ -315,94 +314,68 @@ class Drogno(threading.Thread):
         # self.linkone._retry_before_disconnect = 3
         self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
         self.batteryThread.start()
+        self.statoDiVolo = 'landed'
+    def _connection_failed(self, link_uri, msg):
+        """Callback when connection initial connection fails (i.e no Crazyflie
+        at the specified address)"""
+        print('Connessione con drogno %s fallita: %s' % (self.ID, msg))
+        self.is_connected = False
+        self.isReadyToFly = False
+        self.statoDiVolo = 'sconnesso'
+        self.still_have_hope_to_reconnect = True
 
-    ##################################################   pienamente connesso anche e non ho tutti i parametri? Il logging storicament epartiva qui
+    def _connection_lost(self, link_uri, msg):
+        """Callback when disconnected after a connection has been made (i.e
+        Crazyflie moves out of range)"""
+        print('Me son perso %s dice: %s' % (link_uri, msg))
+        self.is_connected = False
+        self.statoDiVolo = 'sconnesso'
+        self.isReadyToFly = False
+        print('Me son perso %s dice: %s' % (link_uri, msg))
+        if not self.statoDiVolo == 'connecting':  self.reconnect()
+
+    def _disconnected(self, link_uri):
+        """Callback when the Crazyflie is disconnected (called in all cases)"""
+        print('Deh, son sconnesso da %s' % link_uri)
+        self.is_connected = False
+        self.statoDiVolo  = 'sconnesso'
+        self.isReadyToFly = False
+        if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
+
+    ##################################################   pienamente connesso anche e non ho tutti i parametri? Il logging parte qui e si impostano i motion commanders
     def _fully_connected(self, link_uri): 
         print('Imposto il logging del drone %s ' % link_uri)
         self.logger_manager.add_log_configurations()
         self.logger_manager.set_logging_level(0) ## start
- 
-        # if GB.INITIAL_TEST:
-        #      self._lg_kalm.add_variable('health.batterySag', 'FP16')
-        #      self._lg_kalm.add_variable('health.motorPass', 'FP16')
-
-        # try:
-        #     if not GB.WE_ARE_FAKING_IT:                    #### Se stiamo facendo finta evitiamo di fare .add_config e ._lg_kalm.start
-        #         self._cf.log.add_config(self._lg_kalm)
-        #     # self._lg_kalm.data_received_cb.add_callback(self._stab_log_data)
-        #     # self._lg_kalm.error_cb.add_callback(self._stab_log_error)
-        #     if not GB.WE_ARE_FAKING_IT:                    ####
-        #         self._lg_kalm.start()
-        #     self.is_connected = True
-        # except KeyError as e:
-        #     print('Could not start log configuration,'
-        #           '{} not found in TOC'.format(str(e)))
-        # except AttributeError:
-        #   print('Could not add log config, bad configuration.')
-        # except RuntimeError:
-        #   print('Porco il padre eterno e al su madonnina')
 
         if not GB.WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
-            self._cf.param.set_value('commander.enHighLevel', '1')
-            if GB.INITIAL_TEST: 
-                self._cf.param.set_value('health.startBatTest', '1')
-                self._cf.param.set_value('health.startPropTest', '1')
-            
-            self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
-            self._cf.param.set_value('ring.effect', '13')     #solid color? Missing docs?
-            self._cf.param.set_value('ring.fadeTime', GB.RING_FADE_TIME)
-            self.setRingColor(0,0,255)
-
-            self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
-
-            self.positionHLCommander = PositionHlCommander(
-                self._cf,
-                x=self.x, y=self.y, z=0.0,
-                default_velocity=GB.DEFAULT_VELOCITY,
-                default_height=GB.DEFAULT_HEIGHT,
-                controller=PositionHlCommander.CONTROLLER_PID) 
-
-            self.motionCommander = MotionCommander(
-                self._cf,
-                default_height=1.0
-            )
-            self.resetEstimator()
-        self.statoDiVolo = 'landed'
-        # time.sleep(2)
-        if GB.WE_ARE_FAKING_IT:
-            self.isReadyToFly = self.evaluateFlyness()
-
-      
-
-    # def _stab_log_data(self, timestamp, data, logconf):  #riceve il feedback dei sensori e registra i dati - gira il feedback indietro via osc
-    #     self.x                 = float(data['kalman.stateX'])
-    #     self.y                 = float(data['kalman.stateY'])
-    #     self.z                 = float(data['kalman.stateZ'])
-    #     self.yaw               = float(data['stabilizer.yaw'])
-    #     self.linkQuality       = data['radio.rssi']
-    #     self.batteryVoltage    = str(round(float(data['pm.vbat']),2))
-    #     if GB.INITIAL_TEST:
-    #       self.batterySag        = float(data['health.batterySag'])
-    #       self.motorPass         = float(data['health.motorPass'])
-    #     self.kalman_VarX       = float(data['kalman.varPX'])
-    #     self.kalman_VarY       = float(data['kalman.varPY'])
-    #     self.kalman_VarZ       = float(data['kalman.varPZ'])
-    #     self.isTumbled         = bool (data['sys.isTumbled'])
-    #     if self.isTumbled: self.goToSleep()
-    #     if self.isFlying:
-    #         if abs(self.x) > (GB.BOX_X + 1.0) or abs(self.y) > (GB.BOX_Y+1.0) or self.z > (GB.BOX_Y + 0.5):
-    #             print(Fore.RED + 'Landing due trespassing!')
-    #             self.currentSequence_killingPill.set()
-    #             self.LoggerObject.info("Landing due trespassing!")
-    #             self.land(thenGoToSleep=True)
+            return
+    
+        self._cf.param.set_value('commander.enHighLevel', '1')
+        if GB.INITIAL_TEST: 
+            self._cf.param.set_value('health.startBatTest', '1')
+            self._cf.param.set_value('health.startPropTest', '1')
         
-    #     self.isReadyToFly      = self.evaluateFlyness()
-    #     try:
-    #         if GB.FEEDBACK_ENABLED and not self.isKilled and not GB.eventi.get_thread_exit_event().is_set():
-    #             self.multiprocessConnection.send([self.ID, self.x, self.y, self.z, self.batteryVoltage, self.yaw])
-    #         # print('carlo')
-    #     except ConnectionRefusedError:
-    #         print('Noooo! Non le riesco a dire a nessuno le cose di ' + self.name)
+        self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
+        self._cf.param.set_value('ring.effect', '13')     #solid color? Missing docs?
+        self._cf.param.set_value('ring.fadeTime', GB.RING_FADE_TIME)
+        self.setRingColor(0,0,255)
+
+        self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
+
+        self.positionHLCommander = PositionHlCommander(
+            self._cf,
+            x=self.x, y=self.y, z=0.0,
+            default_velocity=GB.DEFAULT_VELOCITY,
+            default_height=GB.DEFAULT_HEIGHT,
+            controller=PositionHlCommander.CONTROLLER_PID) 
+
+        self.motionCommander = MotionCommander(
+            self._cf,
+            default_height=1.0
+        )
+        self.resetEstimator()
+        self.isReadyToFly = self.evaluateFlyness()
        
     def evaluateFlyness(self):
         if GB.WE_ARE_FAKING_IT:
@@ -437,34 +410,7 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'ready'
             return True
 
-    def _connection_failed(self, link_uri, msg):
-        """Callback when connection initial connection fails (i.e no Crazyflie
-        at the specified address)"""
-        print('Connessione la drogno %s fallita: %s' % (self.ID, msg))
-        self.is_connected = False
-        self.isReadyToFly = False
-        self.statoDiVolo = 'sconnesso'
-        self.still_have_hope_to_reconnect = True
-
-    def _connection_lost(self, link_uri, msg):
-        """Callback when disconnected after a connection has been made (i.e
-        Crazyflie moves out of range)"""
-        print('Me son perso %s dice: %s' % (link_uri, msg))
-        self.is_connected = False
-        self.statoDiVolo = 'sconnesso'
-        self.isReadyToFly = False
-        print('Me son perso %s dice: %s' % (link_uri, msg))
-        if not self.statoDiVolo == 'connecting':  self.reconnect()
-
-    def _disconnected(self, link_uri):
-            """Callback when the Crazyflie is disconnected (called in all cases)"""
-            print('Deh, son sconnesso da %s' % link_uri)
-            self.is_connected = False
-            self.statoDiVolo  = 'sconnesso'
-            self.isReadyToFly = False
-            if not self.standBy and not self.isKilled and not self.statoDiVolo == 'connecting':  self.reconnect()
- 
-    #################################################################### movement
+    ####################################################################     mmmmooovement
 
     def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_time=GB.DEFAULT_SCRAMBLING_TIME):
         def scramblingsequence():
@@ -472,10 +418,11 @@ class Drogno(threading.Thread):
             self.starting_y     = self.y
             self.statoDiVolo    = 'scrambling!'
             self.scramblingTime = time.time()
-            self._cf.high_level_commander.takeoff(GB.DEFAULT_HEIGHT, scrambling_time)
+            self._cf.high_level_commander.takeoff(height, scrambling_time)
             self.isFlying       = True
             time.sleep( scrambling_time)
             self.statoDiVolo    = 'hovering'
+            self.logger_manager.set_logging_level(1)  ## sets logging level to FAST fly mode
 
         def fake_scramblingsequence():
             self.starting_x  = self.x
@@ -485,17 +432,18 @@ class Drogno(threading.Thread):
             self.isFlying    = True
             self.statoDiVolo = 'hovering'
 
-        if not GB.WE_ARE_FAKING_IT:
-            if self.isFlying:
-                print('%s can\'t take off, as is already in the air!'% self.name)
-                return
-            if self.isReadyToFly:
-                scremblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
-                print('%s SCRAMBLING!'% self.name)
-            else:
-                print('%s can\'t take off, not ready!'% self.name)
+        if GB.WE_ARE_FAKING_IT:
+            scramblingThread = threading.Thread(target=fake_scramblingsequence, name=self.name+'_scramblingThread').start()
+            return
+
+        if self.isFlying:
+            print('%s can\'t take off, as is already in the air!'% self.name)
+            return
+        if self.isReadyToFly:
+            scramblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
+            print('%s SCRAMBLING!'% self.name)
         else:
-            scremblingThread = threading.Thread(target=fake_scramblingsequence, name=self.name+'_scramblingThread').start()
+            print('%s can\'t take off, not ready!'% self.name)
 
     def land(self, speed=2.5, landing_height=0.05,thenGoToSleep=False):
         def landing_sequence():
@@ -503,6 +451,8 @@ class Drogno(threading.Thread):
             time.sleep(3)
             self.isFlying     = False
             self.statoDiVolo = 'landed'
+            self.logger_manager.set_logging_level(1)  ## sets logging level to landed mode
+
             if (thenGoToSleep): self.goToSleep()
             self.isReadyToFly = self.evaluateFlyness()
         
@@ -532,9 +482,9 @@ class Drogno(threading.Thread):
         duration = GB.commandsFrequency*3
         if self.isFlying:
             if GB.CLAMPING:
-                clamp(x, -GB.BOX_X, GB.BOX_X)
-                clamp(y, -GB.BOX_Y, GB.BOX_Y)
-                clamp(z, 0.20     , GB.BOX_Z)
+                common_utils.clamp(x, -GB.BOX_X, GB.BOX_X)
+                common_utils.clamp(y, -GB.BOX_Y, GB.BOX_Y)
+                common_utils.clamp(z, 0.20     , GB.BOX_Z)
             # print('%s va a %s %s %s girato a %s' % (self.name,  x,y,z, yaw))
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(x,y,z, yaw,duration)
@@ -600,9 +550,9 @@ class Drogno(threading.Thread):
         self.requested_G    = vg
         self.requested_B    = vb
 
-        vr = int(vr * self.ringIntensity)
-        vg = int(vg * self.ringIntensity)
-        vb = int(vb * self.ringIntensity)
+        vr = int(vr * GB.RING_INTENSITY)
+        vg = int(vg * GB.RING_INTENSITY)
+        vb = int(vb * GB.RING_INTENSITY)
         if len(self.ledMem) > 0:
             self.ledMem[0].leds[10].set(r=vr, g=vg, b=vb)
             self.ledMem[0].leds[9].set(r=vr, g=vg, b=vb)
@@ -846,7 +796,7 @@ class Drogno(threading.Thread):
             if level < GB.BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
-                if (self.isLogEnabled):  self.LoggerObject.warning("battery under %sv" % GB.BATTERY_WARNING_LEVEL)
+                if (GB.LOGGING_ENABLED):  self.LoggerObject.warning("battery under %sv" % GB.BATTERY_WARNING_LEVEL)
                 # self.isReadyToFly = False
             if level < GB.BATTERY_DRAINED_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
@@ -856,7 +806,7 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    if (self.isLogEnabled): self.LoggerObject.error("battery under %sV ! I AM GOING DOWN" % GB.BATTERY_DRAINED_LEVEL )
+                    if (GB.LOGGING_ENABLED): self.LoggerObject.error("battery under %sV ! I AM GOING DOWN" % GB.BATTERY_DRAINED_LEVEL )
                     self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
@@ -913,7 +863,7 @@ class Drogno(threading.Thread):
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
-        if (self.isLogEnabled): self.LoggerObject.warning("closing %s"% self.name)
+        if (GB.LOGGING_ENABLED): self.LoggerObject.warning("closing %s"% self.name)
         if not GB.WE_ARE_FAKING_IT:
             self._cf.close_link()
             self._cf.is_connected()
@@ -925,8 +875,3 @@ class Drogno(threading.Thread):
             PowerSwitch(self.link_uri).stm_power_down()
 
         
-
-def clamp(num, min_value, max_value):
-   return max(min(num, max_value), min_value)
-
-

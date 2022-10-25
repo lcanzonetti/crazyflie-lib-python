@@ -14,7 +14,6 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 
-
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
@@ -38,20 +37,17 @@ aggregatorCue             = Queue()
 aggregatorExitEvent       = multiprocessing.Event()
 posLock = Lock()
 
-
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
     weMaySend(isSendEnabled)
     print(Fore.RED +  'Master della ricezione OSC: %s' % isSendEnabled)
-    
 def getSendEnabled():
     return isSendEnabled
 def comè(uno): # è booleano oppure no?
     uno = uno *1
     return uno
-
    
 def checkSwarmFlyability():
     def loppo():
@@ -201,10 +197,7 @@ def kill      (coddii, chi):
             GB.drogni[drogno].killMeHardly()
     else:
         GB.drogni[chi].killMeHardly()
-carlo = ''
-def cambiaCarlo(funzione):
-    global carlo
-    carlo = funzione
+
 def standBy   (coddii, chi):
     if chi == 'all':    
         print('addormenterei tutti' )
@@ -270,7 +263,6 @@ def enable_log(coddii, chi):
             else:
                 GB.drogni[drogno].isLogEnabled = False
                 print(' disabling Logging for %s' % chi )
-
     else:
         if not GB.drogni[chi].isLogEnabled: GB.drogni[chi].isLogEnabled = True
         else: GB.drogni[chi].isLogEnabled = False

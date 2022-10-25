@@ -44,8 +44,9 @@ DEFAULT_SCRAMBLING_TIME     = 2.2
 SPACING                     = 0.4
 CLAMPING                    = True
 LIGHTHOUSE_METHOD           = '0'
+RING_INTENSITY              = 0.1
 
-##################################################  global rates:
+##################################################  constant global rates:
 LOGGING_FREQUENCY                = 1000
 RECEIVED_MESSAGES_SAMPLING_RATE  = 10
 RING_FADE_TIME                   = 0.001
@@ -57,7 +58,7 @@ BATTERY_CHECK_RATE          = 0.5
 BATTERY_WARNING_LEVEL       = 3.45
 BATTERY_DRAINED_LEVEL       = 3.2
 
-######################################             GLOBAL RATES AND VARIABLES
+######################################             variables RATES AND VARIABLES
 print_rate               = 1.1
 commandsFrequency        = 0.1   # actual command'd rate to uavss
 lastRecordPath           = ''  
