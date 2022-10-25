@@ -21,7 +21,7 @@ from   cflib.positioning.motion_commander         import MotionCommander
 from   cflib.crazyflie.mem                        import MemoryElement
 from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils.power_switch                   import PowerSwitch
-
+from   cflib                                      import crtp as radio
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, lastRecordPath):
         threading.Thread.__init__(self)
@@ -309,7 +309,8 @@ class Drogno(threading.Thread):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
         self.is_connected = True
-        # self.linkone = cflib.crtp.get_link_driver(self.link_uri)
+        self.linkone = radio.get_link_driver(self.link_uri)
+        print(f'linkone= {self.linkone}')
         # self.linkone.set_retries(1)
         # self.linkone._retry_before_disconnect = 3
         self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
@@ -381,7 +382,7 @@ class Drogno(threading.Thread):
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'ready'
             return True
-            
+
         if self.is_connected and not self.standBy:
             if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
                 self.statoDiVolo = 'out of BOX'
