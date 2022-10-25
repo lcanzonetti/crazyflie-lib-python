@@ -379,36 +379,37 @@ class Drogno(threading.Thread):
        
     def evaluateFlyness(self):
         if GB.WE_ARE_FAKING_IT:
-            if self.is_connected and not self.standBy:
-                if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
-                    self.statoDiVolo = 'out of BOX'
-                    self._cf.param.set_value('ring.effect', '11')  #alert
-                    return False
-                elif abs(self.x) > 10 or abs(self.y) > 10 or abs(self.x) > 5:
-                    print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
-                    self.statoDiVolo = 'lost'
-                    self.resetEstimator()
-                    self._cf.param.set_value('ring.effect', '11')  #alert
-                    return False
-                elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
-                    self.statoDiVolo = 'BAD kalman'
-                    return False
-                # elif not all (self.motorPass):
-                #     self.statoDiVolo = 'BAD propellers'
-                #     return False
-                elif not self.batterySag < 0.7:
-                    self.statoDiVolo = 'BAD battery!'
-                    return False
-                else:
-                    self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
-                    self.statoDiVolo = 'ready'
-                    return True
-            else:
-                # print ('nope nope nope!')
-                pass
-        else:
             self.statoDiVolo = 'ready'
             return True
+            
+        if self.is_connected and not self.standBy:
+            if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
+                self.statoDiVolo = 'out of BOX'
+                self._cf.param.set_value('ring.effect', '11')  #alert
+                return False
+            elif abs(self.x) > 10 or abs(self.y) > 10 or abs(self.x) > 5:
+                print(Fore.RED + 'drone %s is way way off, resetting kalman...' % self.ID)
+                self.statoDiVolo = 'lost'
+                self.resetEstimator()
+                self._cf.param.set_value('ring.effect', '11')  #alert
+                return False
+            elif self.kalman_VarX > 0.01 or self.kalman_VarZ > 0.01 or self.kalman_VarZ > 0.01:
+                self.statoDiVolo = 'BAD kalman'
+                return False
+            # elif not all (self.motorPass):
+            #     self.statoDiVolo = 'BAD propellers'
+            #     return False
+            elif not self.batterySag < 0.7:
+                self.statoDiVolo = 'BAD battery!'
+                return False
+            else:
+                self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
+                self.statoDiVolo = 'ready'
+                return True
+        else:
+            # print ('nope nope nope!')
+            pass
+            
 
     ####################################################################     mmmmooovement
 

@@ -115,11 +115,7 @@ class Logger_manager():
             print('charge_current: %s' % data['pm.chargeCurrent'])
             print('battery_level:  %s' % data['pm.batteryLevel'])
             print('pm state:       %s' % data['pm.state'])
-            """
-              self.starting_logging.add_variable('pm.chargeCurrent',    'FP16')
-        self.starting_logging.add_variable('pm.state',         'uint8_t')
-        self.starting_logging.add_variable('pm.batteryLevel',  'uint8_t')
-            """
+ 
         elif logconf == self.fast_logging:
             self.parent_drogno.x                 = float(data['stateEstimateZ.x'])
             self.parent_drogno.y                 = float(data['stateEstimateZ.x'])
@@ -135,6 +131,7 @@ class Logger_manager():
         self.parent_drogno.batteryVoltage    = str(round(float(data['pm.vbat']),2))
         self.parent_drogno.linkQuality       = data['radio.rssi']
         self.parent_drogno.isTumbled         = bool (data['sys.isTumbled'])
+
         # immediately use data to start some checks
         if self.parent_drogno.isTumbled: self.parent_drogno.goToSleep()
         if self.parent_drogno.isFlying:  self.parent_drogno.check_out_of_boxiness()
@@ -153,6 +150,10 @@ class Logger_manager():
 
 
     def set_logging_level(self, new_level):
+        if new_level == -1:
+            for ll in self.logging_levels:
+                self.logging_levels[ll].stop()
+                
         old_level = self.current_logging
         self.current_logging = new_level
         self.logging_levels[old_level].start()
