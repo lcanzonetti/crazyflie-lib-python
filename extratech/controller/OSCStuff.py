@@ -258,7 +258,9 @@ def set_log_level(coddii, level):
     print('Setting log level at %s.' % level)
     for drogno in GB.drogni:
         drogno.logger_manager.set_logging_level(level)
-            
+def enable_print_status(coddii, is_print_time):
+    print('Setting printing to %s.' % bool(is_print_time))
+    GB.PRINTING_ENABLED = bool(is_print_time)                       
   
 ###########################  single fella
 def printAndSendCoordinates():
@@ -374,11 +376,12 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/wakeUp",           wakeUp,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/resetEstimator",   resetEstimator,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-    osc_method("/set_log_level",    set_log_level,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/engage",           engage,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    osc_method("/setCommandsRate",  setCommandsRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/set_log_level",    set_log_level,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/enable_print_status", enable_print_status, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/engage",           engage,                 argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/companion/isSendEnabled", setSendEnabled,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/setCompanionRate", setCompanionRate,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/setCommandsRate",  setCommandsRate,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     
     ############################################################ loops on their own threads:
     printHowManyMessages()

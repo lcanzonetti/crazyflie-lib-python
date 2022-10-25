@@ -96,14 +96,18 @@ class Drogno(threading.Thread):
         ################################################## logging
         self.logger_manager = logger_manager.Logger_manager(self, self._cf, self.ID)
         if (GB.FILE_LOGGING_ENABLED):
+            logging.basicConfig(filename='gino',
+                        format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+                        filemode='w',
+                        level=logging.INFO)
             now = datetime.now() # current date and time
             date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
             logName = os.path.join(GB.ROOT_DIR, 'drognoLogs', (self.name + "_" +date_time + ".log"))
             os.makedirs(os.path.dirname(logName), exist_ok=True)
             self.LoggerObject = logging.getLogger(self.name)
             self.LoggerObject.setLevel(logging.DEBUG)
-            self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
             self.formatter    = logging.Formatter('%(levelname)s: %(asctime)s %(funcName)s(%(lineno)d) -- %(message)s', datefmt = '%d-%m-%Y %H:%M:%S')
+            self.file_handler = logging.FileHandler(logName, mode="w", encoding=None, delay=False)
             self.file_handler.setFormatter(self.formatter)
             self.LoggerObject.addHandler(self.file_handler)
             self.LoggerObject.info('This is drone log from %s' % self.name)
@@ -134,7 +138,7 @@ class Drogno(threading.Thread):
                     connectedToFeedback = True
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
-        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=logger_manager.print_status).start()
+        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status).start()
         if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.log_status).start()
         self.connect()
                     

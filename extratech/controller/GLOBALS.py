@@ -7,7 +7,7 @@ ROOT_DIR                   = os.path.realpath(os.path.join(os.path.dirname(__fil
 
 ######################################    OPTIONS
 WE_ARE_FAKING_IT           = False
-PRINTING_ENABLED           = False
+PRINTING_ENABLED           = True
 FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
 INITIAL_TEST               = False
@@ -42,8 +42,8 @@ DEFAULT_HEIGHT              = 0.8
 DEFAULT_VELOCITY            = 0.85
 DEFAULT_SCRAMBLING_TIME     = 2.2
 SPACING                     = 0.4
-CLAMPING                    = True
-LIGHTHOUSE_METHOD           = '0'
+CLAMPING                    = True   ## si 'clampa' dentro il BOX un comando ODC che porterebbe a una posizione fuori BOX
+LIGHTHOUSE_METHOD           = '0'    ## forse andrebbe fatto un esperimento su quale sia il metodo miglior con più lighthouse
 RING_INTENSITY              = 0.1
 
 ##################################################  constant global rates:

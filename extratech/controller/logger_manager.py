@@ -71,8 +71,6 @@ class Logger_manager():
         self.slow_logging.add_variable('pm.vbat',                 'FP16')
         self.starting_logging.add_variable('sys.isTumbled',    'uint8_t')
 
-
-
     ## aggiunge il log al crazyflie quando  è collegato e innesca il controllo
     def add_log_configurations(self):
         print('aggungo le configurazioni di logging del drone %s ' % self.ID)
@@ -150,7 +148,6 @@ class Logger_manager():
         """Callback from the log API when an error occurs"""
         print('Error when logging %s for CF %s: %s' % (logconf.name, self.ID, msg))
 
-
     def set_logging_level(self, new_level):
         if new_level == -1:
             for ll in self.logging_levels:
@@ -169,33 +166,18 @@ class Logger_manager():
     # A good rule of thumb is that one radio can handle at least 500 packets per seconds 
     # in each direction and each log block uses one packet per log.
     # So it should be possible to log at 100Hz a couple of log blocks. 
-        if GB.FILE_LOGGING_ENABLED:
-            self.LoggerObject.info('Logger started')
-            while not self.killingPill.is_set():
+        if not GB.WE_ARE_FAKING_IT and GB.PRINTING_ENABLED:
+            while not self.parent_drogno.killingPill.is_set():
                 time.sleep(GB.print_rate)
-                if not GB.WE_ARE_FAKING_IT:    
-                    if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                        if self.isEngaged:
-                            if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
-                            else: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                        else:
-                            print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                    else:
-                        print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
+                if self.parent_drogno.is_connected and self.parent_drogno.isEngaged:
+                    if GB.INITIAL_TEST:   print(f'battery SAG: {self.parent_drogno.batterySag}\tisBatteryTestPassed:{self.parent_drogno.isBatteryTestPassed}\tmotor_pass:{self.parent_drogno.motorPass}')
+                    print (Fore.LIGHTRED_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\
+                                            \tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\
+                                            \tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tlink quality: {self.parent_drogno.linkQuality}\
+                                            \tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}\
+                                            \tflight time: {self.parent_drogno.flyingTime}s\t batterySag: {self.parent_drogno.batterySag}\t motorPass: {self.parent_drogno.motorPass}")
                 else:
-                    if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: fake\tkalman var: fake\t batterySag: fake\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos: fake somewhere\tyaw: fake\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                        if self.isEngaged:
-                            print(Fore.LIGHTRED_EX + f"{self.name}: {self.statoDiVolo}\t\tbatteryfake\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                        else:
-                            print(Fore.GREEN + f"{self.name}: {self.statoDiVolo}\t\tbattery fake\tpos super fake\tyaw: fake\tflight time: {self.flyingTime}s ")
-                    else:
-                        print(Fore.LIGHTBLUE_EX + f"{self.name}: {self.statoDiVolo}")
+                    print (Fore.LIGHTBLUE_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}")
 
-                self.commandsCount = 0
 
-                if not self.scramblingTime == None and self.isFlying:
-                    self.flyingTime = int(time.time() - self.scramblingTime)
-            print('Log chiuso per %s ' % self.name)
 
