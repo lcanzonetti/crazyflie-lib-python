@@ -383,10 +383,21 @@ class Drogno(threading.Thread):
             pass
             
     def log_status(self):
+        ### non so se  questo è il posto giusto per 'sta roba:
+        self.commandsCount = 0
+        if not self.scramblingTime == None and self.isFlying:  self.flyingTime = int(time.time() - self.scramblingTime)
+        
         if GB.FILE_LOGGING_ENABLED:
             self.LoggerObject.info('Logger started')
             while not self.killingPill.is_set():
                 time.sleep(GB.print_rate)
+                if not GB.WE_ARE_FAKING_IT and self.is_connected:
+                    self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\
+                    \tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\
+                    \tbatterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\
+                    \tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
+            print('Log chiuso per %s ' % self.name)
+
     ####################################################################     mmmmooovement
 
     def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_time=GB.DEFAULT_SCRAMBLING_TIME):
