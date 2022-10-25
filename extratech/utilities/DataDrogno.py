@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import threading, time, sys, importlib 
-# test_single_cf_grounded = importlib.import_module('test_single_cf_grounded')
+test_single_cf_grounded = importlib.import_module('test_single_cf_grounded')
 cflib                   = importlib.import_module('cflib')
 
 from   cflib.crazyflie                            import Crazyflie
