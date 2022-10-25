@@ -36,6 +36,7 @@ class Drogno(threading.Thread):
         self.killingPill            = threading.Event()
         self.controlThread          = False
         self.printThread            = False
+        self.loggingThread          = False
         self.current_sequence       = None
         self.currentSequenceThread  = None
         self.currentSequence_killingPill = threading.Event()
@@ -53,6 +54,7 @@ class Drogno(threading.Thread):
         self.isTumbled              = False
         self.linkQuality            = 0
         self.batteryVoltage         = 'n.p.'
+        self.batteryStatus          = 2
 
         #####################################  position
         self.positionHLCommander    = None 
@@ -93,7 +95,7 @@ class Drogno(threading.Thread):
         self.feedbackProcess           = multiprocessing.Process(name=self.name+'_feedback',target=self.feedbacker.start, daemon=True).start()
         ################################################## logging
         self.logger_manager = logger_manager.Logger_manager(self, self._cf, self.ID)
-        if (GB.LOGGING_ENABLED):
+        if (GB.FILE_LOGGING_ENABLED):
             now = datetime.now() # current date and time
             date_time = now.strftime("%m_%d_%Y__%H_%M_%S")
             logName = os.path.join(GB.ROOT_DIR, 'drognoLogs', (self.name + "_" +date_time + ".log"))
@@ -132,44 +134,9 @@ class Drogno(threading.Thread):
                     connectedToFeedback = True
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
-        if GB.PRINTING_ENABLED:
-            self.printThread   = threading.Thread(target=self.print_status).start()
+        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=logger_manager.print_status).start()
+        if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.log_status).start()
         self.connect()
-     
-    def print_status(self):
-        # A good rule of thumb is that one radio can handle at least 500 packets per seconds 
-        # in each direction and each log block uses one packet per log.
-        # So it should be possible to log at 100Hz a couple of log blocks. 
-
-        if GB.LOGGING_ENABLED:
-            self.LoggerObject.info('Logger started')
-            while not self.killingPill.is_set():
-                time.sleep(GB.print_rate)
-                if not GB.WE_ARE_FAKING_IT:    
-                    if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\t batterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                        if self.isEngaged:
-                            if GB.INITIAL_TEST: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s\t batterySag: {self.batterySag}\t motorPass: {self.motorPass}")
-                            else: print (Fore.LIGHTRED_EX  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                        else:
-                            print (Fore.GREEN  +  f"{self.name}: {self.statoDiVolo}\t\tbattery {self.batteryVoltage}\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                    else:
-                        print (Fore.LIGHTBLUE_EX  +  f"{self.name}: {self.statoDiVolo}")
-                else:
-                    if self.is_connected:
-                        self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: fake\tkalman var: fake\t batterySag: fake\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\tpos: fake somewhere\tyaw: fake\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                        if self.isEngaged:
-                            print(Fore.LIGHTRED_EX + f"{self.name}: {self.statoDiVolo}\t\tbatteryfake\tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {self.commandsCount/GB.print_rate}\tlink quality: {self.linkQuality}\tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\tflight time: {self.flyingTime}s ")
-                        else:
-                            print(Fore.GREEN + f"{self.name}: {self.statoDiVolo}\t\tbattery fake\tpos super fake\tyaw: fake\tflight time: {self.flyingTime}s ")
-                    else:
-                        print(Fore.LIGHTBLUE_EX + f"{self.name}: {self.statoDiVolo}")
-
-                self.commandsCount = 0
-
-                if not self.scramblingTime == None and self.isFlying:
-                    self.flyingTime = int(time.time() - self.scramblingTime)
-            print('Log chiuso per %s ' % self.name)
                     
     def activate_mellinger_controller(self, use_mellinger):
         controller = 1
@@ -309,8 +276,8 @@ class Drogno(threading.Thread):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
         self.is_connected = True
-        self.linkone      = radio.get_link_driver(self.link_uri)
-        print(f'linkone= {self.linkone}')
+        # self.linkone      = radio.get_link_driver(self.link_uri)
+        # print(f'linkone= {self.linkone}')
         # self.linkone.set_retries(1)
         # linkone.set_arc(1) ## retries
         # self.linkone._retry_before_disconnect = 3
@@ -404,6 +371,9 @@ class Drogno(threading.Thread):
             elif not self.batterySag < 0.7:
                 self.statoDiVolo = 'BAD battery!'
                 return False
+            elif self.batteryStatus == 3:
+                self.statoDiVolo = 'LOW battery!'
+                return False
             else:
                 self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
                 self.statoDiVolo = 'ready'
@@ -412,7 +382,11 @@ class Drogno(threading.Thread):
             # print ('nope nope nope!')
             pass
             
-
+    def log_status(self):
+        if GB.FILE_LOGGING_ENABLED:
+            self.LoggerObject.info('Logger started')
+            while not self.killingPill.is_set():
+                time.sleep(GB.print_rate)
     ####################################################################     mmmmooovement
 
     def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_time=GB.DEFAULT_SCRAMBLING_TIME):
@@ -799,7 +773,7 @@ class Drogno(threading.Thread):
             if level < GB.BATTERY_WARNING_LEVEL:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
-                if (GB.LOGGING_ENABLED):  self.LoggerObject.warning("battery under %sv" % GB.BATTERY_WARNING_LEVEL)
+                if (GB.FILE_LOGGING_ENABLED):  self.LoggerObject.warning("battery under %sv" % GB.BATTERY_WARNING_LEVEL)
                 # self.isReadyToFly = False
             if level < GB.BATTERY_DRAINED_LEVEL:
                 self._cf.param.set_value('ring.effect', '11')  #alert
@@ -809,7 +783,7 @@ class Drogno(threading.Thread):
                     self.isReadyToFly = False
                 else:
                     print (Fore.RED + 'ciao, sono il drone %s e sono così scarico che atterrerei. (%s)' %  (self.ID, level))
-                    if (GB.LOGGING_ENABLED): self.LoggerObject.error("battery under %sV ! I AM GOING DOWN" % GB.BATTERY_DRAINED_LEVEL )
+                    if (GB.FILE_LOGGING_ENABLED): self.LoggerObject.error("battery under %sV ! I AM GOING DOWN" % GB.BATTERY_DRAINED_LEVEL )
                     self.land(thenGoToSleep=True)
                     self.statoDiVolo = 'landed'
                     self.isFlying = False
@@ -866,7 +840,7 @@ class Drogno(threading.Thread):
         print ('waiting for drogno %s\'s feedback to close' % self.ID)
         # self.feedbackProcess.join()
         print ('closing drogno %s\'s radio' % self.ID)
-        if (GB.LOGGING_ENABLED): self.LoggerObject.warning("closing %s"% self.name)
+        if (GB.FILE_LOGGING_ENABLED): self.LoggerObject.warning("closing %s"% self.name)
         if not GB.WE_ARE_FAKING_IT:
             self._cf.close_link()
             self._cf.is_connected()

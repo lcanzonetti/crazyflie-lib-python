@@ -8,7 +8,7 @@ ROOT_DIR                   = os.path.realpath(os.path.join(os.path.dirname(__fil
 ######################################    OPTIONS
 WE_ARE_FAKING_IT           = False
 PRINTING_ENABLED           = False
-LOGGING_ENABLED            = True
+FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
 INITIAL_TEST               = False
 AGGREGATION_ENABLED        = False
