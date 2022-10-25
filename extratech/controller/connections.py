@@ -174,4 +174,3 @@ def restarta(urico):
         print('%s is not there to be woken up, gonna pop it out from my list' % GB.uris[urico])
         # urisToBeRemoved.append(GB.uris[urico])
 
-

@@ -14,7 +14,6 @@ from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
 
-
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
 coloInit(convert=True)
@@ -38,20 +37,17 @@ aggregatorCue             = Queue()
 aggregatorExitEvent       = multiprocessing.Event()
 posLock = Lock()
 
-
 ###########################  companion
 def setSendEnabled (*args):
     global isSendEnabled
     isSendEnabled = not isSendEnabled
     weMaySend(isSendEnabled)
     print(Fore.RED +  'Master della ricezione OSC: %s' % isSendEnabled)
-    
 def getSendEnabled():
     return isSendEnabled
 def comè(uno): # è booleano oppure no?
     uno = uno *1
     return uno
-
    
 def checkSwarmFlyability():
     def loppo():
@@ -201,10 +197,7 @@ def kill      (coddii, chi):
             GB.drogni[drogno].killMeHardly()
     else:
         GB.drogni[chi].killMeHardly()
-carlo = ''
-def cambiaCarlo(funzione):
-    global carlo
-    carlo = funzione
+
 def standBy   (coddii, chi):
     if chi == 'all':    
         print('addormenterei tutti' )
@@ -261,19 +254,12 @@ def engage    (coddii, chi):
     else:
         if not GB.drogni[chi].isEngaged: GB.drogni[chi].isEngaged = True
         else: GB.drogni[chi].isEngaged = False
-def enable_log(coddii, chi):
-    if chi == 'all':    
-        for drogno in GB.drogni:
-            if not GB.drogni[drogno].isLogEnabled:
-                GB.drogni[drogno].isLogEnabled = True
-                print(' enabling Logging for %s' % chi )
-            else:
-                GB.drogni[drogno].isLogEnabled = False
-                print(' disabling Logging for %s' % chi )
-
-    else:
-        if not GB.drogni[chi].isLogEnabled: GB.drogni[chi].isLogEnabled = True
-        else: GB.drogni[chi].isLogEnabled = False
+def set_log_level(coddii, level):
+    print('Setting log level at %s.' % level)
+    for drogno in GB.drogni:
+        drogno.logger_manager.set_logging_level(level)
+            
+  
 ###########################  single fella
 def printAndSendCoordinates():
     while not finished:
@@ -388,7 +374,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/wakeUp",           wakeUp,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/resetEstimator",   resetEstimator,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/ringColor",        ringColor,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-    osc_method("/enable_log",       enable_log,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/set_log_level",    set_log_level,    argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/engage",           engage,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

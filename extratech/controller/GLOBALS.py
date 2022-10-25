@@ -6,9 +6,9 @@ ROOT_DIR                   = os.path.realpath(os.path.join(os.path.dirname(__fil
 
 
 ######################################    OPTIONS
-WE_ARE_FAKING_IT           = True
+WE_ARE_FAKING_IT           = False
 PRINTING_ENABLED           = False
-LOGGING_ENABLED            = True
+FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
 INITIAL_TEST               = False
 AGGREGATION_ENABLED        = False
@@ -44,8 +44,9 @@ DEFAULT_SCRAMBLING_TIME     = 2.2
 SPACING                     = 0.4
 CLAMPING                    = True
 LIGHTHOUSE_METHOD           = '0'
+RING_INTENSITY              = 0.1
 
-##################################################  global rates:
+##################################################  constant global rates:
 LOGGING_FREQUENCY                = 1000
 RECEIVED_MESSAGES_SAMPLING_RATE  = 10
 RING_FADE_TIME                   = 0.001
@@ -57,7 +58,7 @@ BATTERY_CHECK_RATE          = 0.5
 BATTERY_WARNING_LEVEL       = 3.45
 BATTERY_DRAINED_LEVEL       = 3.2
 
-######################################             GLOBAL RATES AND VARIABLES
+######################################             variables RATES AND VARIABLES
 print_rate               = 1.1
 commandsFrequency        = 0.1   # actual command'd rate to uavss
 lastRecordPath           = ''  
@@ -121,7 +122,7 @@ uri_map = \
    "3":     'radio://0/90/2M/E7E7E7E7E3',
    "4":     'radio://1/120/2M/E7E7E7E7E4', 
    "5":     'radio://0/80/2M/E7E7E7E7E5',
-   "6":     'radio://1/100/2M/E7E7E7E7E6',
+   "6":     'radio://0/100/2M/E7E7E7E7E6',
    "7":     'radio://3/100/2M/E7E7E7E7E7',
    "8":     'radio://1/100/2M/E7E7E7E7E8', 
    "9":     'radio://2/110/2M/E7E7E7E7E9',

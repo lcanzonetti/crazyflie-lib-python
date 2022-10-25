@@ -19,6 +19,8 @@ def convert_motor_pass(numeroBinario):
     motori[3] = (numeroBinario >> 0) & 1
     return motori
 
+def clamp(num, min_value, max_value):
+   return max(min(num, max_value), min_value)
 """
 
 500 p/s

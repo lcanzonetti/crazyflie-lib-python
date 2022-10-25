@@ -15,9 +15,9 @@ from     dotenv                                     import load_dotenv
 load_dotenv()
 
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
-CFLIB_PATH      = os.environ.get('CFLIB_PATH')
+CFLIB_PATH         = os.environ.get('CFLIB_PATH')
 # print(CFLIB_PATH)
-sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio delle variabili d'ambiente
+sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
 # print(*sys.path, sep='\n')
 # cflib                   = importlib.import_module('.crazyflie', package='cflib')
 
