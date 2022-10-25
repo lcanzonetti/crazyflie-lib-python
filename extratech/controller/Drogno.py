@@ -620,49 +620,49 @@ class Drogno(threading.Thread):
 
                     self.positionHLCommander.go_to(0.0, 0.0, 1, 1)
                     self.setRingColor(255,   0,   0)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(1)
                     
                     self.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
                     self.setRingColor(255,   0,   0)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(1)
 
                     self.positionHLCommander.go_to(1.5, -1.5, 1.0,1)
                     self.setRingColor(  0, 255,  0)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(1)
                     
                     self.positionHLCommander.go_to(-1.50, -1.5, 1.0,1)
                     self.setRingColor(  0,  0, 255)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(1)
                     self.positionHLCommander.go_to(-1.5, 1.5, 1,1)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(1)
                     self.positionHLCommander.go_to(0,   0, 1.5,1 )
 
 
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     self.setRingColor(255, 255,   0)
                     time.sleep(0.5)
                     self.currentSequence_killingPill.is_set()
                     self.setRingColor(255,   0,   0)
                     time.sleep(0.5)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     self.setRingColor(  0, 255,   0)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(0.5)
                     self.setRingColor(  0,   0, 255)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(0.5)
                     self.setRingColor  (0, 255, 255)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(0.5)
                     self.setRingColor(255, 255,   0)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     time.sleep(0.5)
-                    if self.currentSequence_killingPill.is_set(): Break
+                    if self.currentSequence_killingPill.is_set(): break
                     self.setRingColor(255,   0, 255)
                     time.sleep(0.5)
                     
