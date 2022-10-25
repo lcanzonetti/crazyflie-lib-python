@@ -309,9 +309,10 @@ class Drogno(threading.Thread):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
         self.is_connected = True
-        self.linkone = radio.get_link_driver(self.link_uri)
+        self.linkone      = radio.get_link_driver(self.link_uri)
         print(f'linkone= {self.linkone}')
         # self.linkone.set_retries(1)
+        # linkone.set_arc(1) ## retries
         # self.linkone._retry_before_disconnect = 3
         self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
         self.batteryThread.start()
