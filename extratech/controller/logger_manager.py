@@ -58,6 +58,7 @@ class Logger_manager():
         self.fast_logging.add_variable('stateEstimate.yaw',       'FP16')
         self.fast_logging.add_variable('radio.rssi',           'uint8_t')
         self.fast_logging.add_variable('pm.vbat',                 'FP16')
+        self.fast_logging.add_variable('pm.state',             'uint8_t')
         self.fast_logging.add_variable('sys.isTumbled',        'uint8_t')
 
 
@@ -69,6 +70,7 @@ class Logger_manager():
         self.slow_logging.add_variable('sys.isTumbled',        'uint8_t')
         self.slow_logging.add_variable('radio.rssi',           'uint8_t')
         self.slow_logging.add_variable('pm.vbat',                 'FP16')
+        self.slow_logging.add_variable('pm.state',             'uint8_t')
         self.starting_logging.add_variable('sys.isTumbled',    'uint8_t')
 
     ## aggiunge il log al crazyflie quando  è collegato e innesca il controllo
@@ -171,13 +173,10 @@ class Logger_manager():
                 time.sleep(GB.print_rate)
                 if self.parent_drogno.is_connected and self.parent_drogno.isEngaged:
                     if GB.INITIAL_TEST:   print(f'battery SAG: {self.parent_drogno.batterySag}\tisBatteryTestPassed:{self.parent_drogno.isBatteryTestPassed}\tmotor_pass:{self.parent_drogno.motorPass}')
-                    print (Fore.LIGHTRED_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\
+                    print (Fore.GREEN  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\
                                             \tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\
-                                            \tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tlink quality: {self.parent_drogno.linkQuality}\
-                                            \tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}\
+                                            \tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tlink quality: {self.parent_drogno.linkQuality}\tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}\
                                             \tflight time: {self.parent_drogno.flyingTime}s\t batterySag: {self.parent_drogno.batterySag}\t motorPass: {self.parent_drogno.motorPass}")
                 else:
                     print (Fore.LIGHTBLUE_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}")
-
-
 

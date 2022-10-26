@@ -1,5 +1,211 @@
 
-import time
+import time, threading
+from   colorama             import Fore, Back, Style
+from   colorama             import init as coloInit
+coloInit(convert=True)
+
+from   cflib.crazyflie.mem                        import Poly4D
+from   cflib.crazyflie.mem                        import MemoryElement
+
+import GLOBALS as GB
+
+
+
+####################################################################     trst sequencesss
+
+
+
+def sequenzaUno(CF):   
+    def seq1():
+        while not CF.currentSequence_killingPill.is_set():
+            CF.statoDiVolo = 'taking off'
+            CF.takeOff()     
+            CF.statoDiVolo = 'seq1'
+
+            CF.positionHLCommander.go_to(0.0, 0.0, 1, 1)
+            CF.setRingColor(255,   0,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
+            
+            CF.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
+            CF.setRingColor(255,   0,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
+
+            CF.positionHLCommander.go_to(1.5, -1.5, 1.0,1)
+            CF.setRingColor(  0, 255,  0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
+            
+            CF.positionHLCommander.go_to(-1.50, -1.5, 1.0,1)
+            CF.setRingColor(  0,  0, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
+            CF.positionHLCommander.go_to(-1.5, 1.5, 1,1)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
+            CF.positionHLCommander.go_to(0,   0, 1.5,1 )
+
+
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(255, 255,   0)
+            time.sleep(0.5)
+            CF.currentSequence_killingPill.is_set()
+            CF.setRingColor(255,   0,   0)
+            time.sleep(0.5)
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(  0, 255,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor(  0,   0, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor  (0, 255, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor(255, 255,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(255,   0, 255)
+            time.sleep(0.5)
+            
+        CF.statoDiVolo = 'landing'
+        CF.land()
+        CF.statoDiVolo = 'idle'
+        CF.currentSequence_killingPill.clear()
+        print('fine quadratone di test')
+    print('Drogno: %s. Inizio quadratone di test' % CF.ID)
+    threading.Thread(target=seq1, daemon=True).start()
+    
+#  un giro di yaw
+def sequenzaDue(CF): #   blocking?
+    print(Fore.LIGHTRED_EX + 'Drogno: %s. Inizio giretto sul posto' % CF.ID)
+    while not CF.currentSequence_killingPill.is_set():
+        CF.takeOff(3.)
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)
+        time.sleep(1)
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1)
+        time.sleep(1)
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1)
+        time.sleep(1)
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
+    CF.currentSequence_killingPill.clear()
+
+#  un giro relativo con diametro 1.5 mt
+def sequenzaTre(CF):
+    print('Drogno: %s. Inizio giretto da 0.75 di test' % CF.ID)
+    CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    CF.statoDiVolo = 'taking off'
+    CF.motionCommander.start_circle_left(radius_m=0.7, velocity=1)
+    CF.statoDiVolo = 'test 3'
+    CF.currentSequence_killingPill.wait()
+    CF.statoDiVolo = 'landing'
+    CF.motionCommander.land(0.3)
+    CF.statoDiVolo = 'idle'
+    print('Drogno: %s. Fine circoletto da 0.75 di test' % CF.ID)
+#  un giro relativo con diametro 3 mt
+def sequenzaQuattro(CF):
+    print('Drogno: %s. Inizio giretto da 1.5 di test' % CF.ID)
+    CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    CF.statoDiVolo = 'taking off'
+    CF.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
+    CF.statoDiVolo = 'test 3'
+    CF.currentSequence_killingPill.wait()
+    CF.statoDiVolo = 'landing'
+    CF.motionCommander.land(0.3)
+    CF.statoDiVolo = 'idle'
+    print('Drogno: %s. Fine circoletto da 1.5 di test' % CF.ID)
+    
+def sequenzaCinque(CF):
+        def seq5():
+            while not CF.currentSequence_killingPill.is_set():
+                CF.statoDiVolo = 'taking off'
+                CF.takeOff()     
+                CF.statoDiVolo = 'seq5'
+                CF.motionCommander.left(1.5,1.5)
+                CF.motionCommander.start_turn_left(150)
+                if CF.currentSequence_killingPill.is_set(): break
+                time.sleep(0.8)
+                CF.motionCommander.forward(1.5,1.5)
+                CF.motionCommander.start_turn_right(150)
+                if CF.currentSequence_killingPill.is_set(): break
+                time.sleep(0.8)
+                CF.motionCommander.right(1.5,1.5)
+                CF.motionCommander.start_turn_right(150)
+                if CF.currentSequence_killingPill.is_set(): break
+                time.sleep(0.8)
+                CF.motionCommander.back(1.5,1.5)
+                CF.motionCommander.start_turn_right(150)
+                if CF.currentSequence_killingPill.is_set(): break
+                time.sleep(0.8)
+
+            CF.statoDiVolo = 'landing'
+            CF.land()
+            CF.statoDiVolo = 'idle'
+            CF.currentSequence_killingPill.clear()
+            print('fine quadrato di test')
+        print('Drogno: %s. Inizio quadrato relativo di test' % CF.ID)
+        threading.Thread(target=seq5, daemon=True).start()
+        
+sequenze_test = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque]
+   
+
+
+
+
+####################################################################     pre-recorded trajectories
+
+def go_on_your_way(CF, sequenceNumber=0):
+    if CF.isFlying:
+        if GB.WE_ARE_FAKING_IT:
+            CF.statoDiVolo = 'sequenza simulata!'
+        else:
+            trajectory_id = sequenceNumber
+            CF.statoDiVolo = 'sequenza ' + str(sequenceNumber)
+            # duration = CF.upload_trajectory(trajectory_id, figure8)
+            # if sequenceNumber == 0:
+            #     duration = CF.upload_trajectory(trajectory_id, CF.lastTrajectory)
+            # else:
+            #     duration = CF.upload_trajectory(trajectory_id, figure8)
+
+            print ('eseguo la traiettoria %s lunga %s' % (sequenceNumber, CF.currentTrajectoryLenght))
+            CF.run_trajectory(trajectory_id)
+    else:
+        print('not ready!')
+
+def run_trajectory(CF, trajectory_id):
+    commander = CF._cf.high_level_commander
+    commander.takeoff(1.0, 2.0)
+    time.sleep(3.0)
+    relative = True
+    commander.start_trajectory(trajectory_id, 1.0, relative)
+    # commander.start_compressed
+    time.sleep(CF.currentTrajectoryLenght)
+    commander.land(0.0, 4.0)
+    time.sleep(4)
+    # commander.stop()
+    pass
+    #  un quadratone di 3mt x 3mt con high level commander
+def upload_trajectory(CF, trajectory_id):
+    trajectory_mem = CF._cf.mem.get_mems(MemoryElement.TYPE_TRAJ)[0]
+    print ('sì! uppa la %s'% trajectory_id)
+    total_duration = 0
+    for row in CF.TRAJECTORIES[trajectory_id]:
+        duration = row[0]
+        x = Poly4D.Poly(row[1:9])
+        y = Poly4D.Poly(row[9:17])
+        z = Poly4D.Poly(row[17:25])
+        yaw = Poly4D.Poly(row[25:33])
+        trajectory_mem.poly4Ds.append(Poly4D(duration, x, y, z, yaw))
+        total_duration += duration
+    upload_result = Uploader().upload(trajectory_mem)
+    if not upload_result:
+        print('Upload failed, aborting!')
+    CF._cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.poly4Ds))
+    CF.currentTrajectoryLenght =  total_duration
+
+
 
 # The trajectory to fly
 # See https://github.com/whoenig/uav_trajectories for a tool to generate
@@ -37,7 +243,7 @@ figure8Triple = [
     ]
 
 class Uploader:
-    def __init__(self):
+    def __init__(self, CF):
         self._is_done = False
         self._sucess = True
 

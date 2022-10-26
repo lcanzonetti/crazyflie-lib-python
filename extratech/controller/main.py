@@ -32,7 +32,7 @@ def main():
     else:
         print("Controller started. No fake shit.")
         connections.radioStart()
-        # connections.add_crazyflies()       ## chek if we already got CFs reachable
+        connections.add_crazyflies()       ## chek if we already got CFs reachable
         connections.restart_devices()
         connections.create_classes()
 

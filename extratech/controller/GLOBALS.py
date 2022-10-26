@@ -29,7 +29,7 @@ COMPANION_ENABLE_BUTTON     = '25'
 COMPANION_UPDATE_RATE       = 2
 GLOBAL_FREQUENCY            = 0.9
 
-######################   osc receiving:
+#######################################   osc receiving:
 RECEIVING_IP                = "0.0.0.0"
 RECEIVING_PORT              = 9200
 

@@ -42,10 +42,14 @@ def add_crazyflies():
             available_crazyflies  = cflib.crtp.scan_interfaces(uri_helper.address_from_env(iuro))  ## davvero non ho capito perché sta roba non funzioni
             if available_crazyflies:
                 available_crazyfliess.append(available_crazyflies)
-
+   
+    print('Scanning interfaces for Crazyflies NOT in start list')
     available = cflib.crtp.scan_interfaces()
-    for i in available:
-        print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
+    if len(available) > 0:
+        for i in available:
+            print ("Interface with URI [%s] found and name/comment [%s]" % (i[0], i[1]))
+    else:
+        print('none available')
 
     if available_crazyfliess:
         print(f'gente già in giro:')
