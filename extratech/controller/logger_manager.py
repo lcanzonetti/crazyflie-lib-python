@@ -20,8 +20,7 @@ class Logger_manager():
         self.ID = ID
         self.cf = cf
         self.parent_drogno = parent_drogno
-        print('tipo')
-        print(self.parent_drogno)
+        
         self.starting_logging = LogConfig(name='start_log', period_in_ms=200)
         self.fast_logging     = LogConfig(name='fast_log',  period_in_ms=100)
         self.slow_logging     = LogConfig(name='slow_log',  period_in_ms=1000)

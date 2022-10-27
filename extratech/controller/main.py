@@ -58,12 +58,15 @@ def ciao_ciao(signum, frame):
     GB.eventi.set_thread_exit_event() 
     GB.eventi.set_process_exit_event()
 
-    for drogno in GB.drogni:
-        if (drogno):
-            try: PowerSwitch(GB.drogni[drogno].link_uri).stm_power_down()
-            except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % GB.drogni[drogno].link_uri)
-            GB.drogni[drogno].exit()
-            GB.drogni[drogno].join()
+    try:
+        for drogno in GB.drogni:
+            if (drogno):
+                try: PowerSwitch(GB.drogni[drogno].link_uri).stm_power_down()
+                except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % GB.drogni[drogno].link_uri)
+                GB.drogni[drogno].exit()
+                GB.drogni[drogno].join()
+    except Exception as e:
+        print(e)
     print('I said bye.')
    
     sys.exit("Putin merda")

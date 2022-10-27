@@ -49,7 +49,7 @@ class Drogno(threading.Thread):
         self.statoDiVolo            = 'starting'
         self.isKilled               = False
         self.isReadyToFly           = False
-        self.isEngaged              = True
+        self.isEngaged              = False
         self.isFlying               = False
         self.isTumbled              = False
         self.linkQuality            = 0
@@ -57,6 +57,7 @@ class Drogno(threading.Thread):
         self.batteryStatus          = 2
         #####################################  position
         self.positionHLCommander    = None 
+        self.motionCommander        = None
         self.x           = self.y           = self.z           = self.yaw = 0.0
         self.starting_x  = self.starting_y  = self.starting_z  = 0.0
         self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
@@ -343,11 +344,13 @@ class Drogno(threading.Thread):
             default_velocity=GB.DEFAULT_VELOCITY,
             default_height=GB.DEFAULT_HEIGHT,
             controller=PositionHlCommander.CONTROLLER_PID) 
-
+            
         self.motionCommander = MotionCommander(
             self._cf,
             default_height=1.0
         )
+        print('ho inizalizzato il motion commander: %s'% self.motionCommander)
+     
         self.resetEstimator()
         self.isReadyToFly = self.evaluateFlyness()
        
@@ -538,7 +541,7 @@ class Drogno(threading.Thread):
   
     def testSequence(self,requested_sequenceNumber):
 
-        print('startTestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
+        print('start TestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'sequenza simulata!'
             return
