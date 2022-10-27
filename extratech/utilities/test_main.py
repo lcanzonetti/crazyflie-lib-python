@@ -17,10 +17,7 @@ load_dotenv()
 
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH         = os.environ.get('CFLIB_PATH')
-# print(CFLIB_PATH)
 sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
-# print(*sys.path, sep='\n')
-# cflib                   = importlib.import_module('.crazyflie', package='cflib')
 
 
 import   cflib     
@@ -37,7 +34,7 @@ import   cflib.crtp
 ############   local scripts
 import   wakeUppatore, stenBaiatore
 from     common_utils                               import IDFromURI, exit_signal_handler
-from     test_utils                                 import istanziaClassi, check_if_test_is_completed
+from     test_utils                                 import istanziaClassi, check_if_test_is_completed, scan_for_crazyflies
 
 isExist    = os.path.exists(sys.path[3] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
 if not isExist: os.makedirs(sys.path[3] + '/Test_Resultsss')

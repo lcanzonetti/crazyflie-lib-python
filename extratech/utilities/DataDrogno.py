@@ -11,10 +11,17 @@ from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
-from   test_single_cf_grounded                    import test_link
-from   common_utils                               import convert_motor_pass
 from   dotenv                                     import load_dotenv
 load_dotenv()
+
+############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
+SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')                          ### vedi sopra 
+SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
+sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
+
+from   test_single_cf_grounded                    import test_link
+from   common_utils                               import convert_motor_pass
+
 
 
  

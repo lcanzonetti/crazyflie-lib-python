@@ -9,9 +9,9 @@ paginegialle = [
     # 'E7E7E7E7E3',
     # 'E7E7E7E7E4',
     # 'E7E7E7E7E5',
-     'E7E7E7E7E6',
+    # 'E7E7E7E7E6',
     # 'E7E7E7E7E7',
-    # 'E7E7E7E7E8',
+     'E7E7E7E7E8',
     # 'E7E7E7E7E9'
 ]
 

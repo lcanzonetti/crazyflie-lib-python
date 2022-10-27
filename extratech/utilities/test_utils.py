@@ -5,14 +5,8 @@ import   time, os, sys, signal, threading, importlib
 from     common_utils                                         import IDFromURI
 from     colorama              import Fore, Back, Style
 from     datetime                                             import datetime
-from     dotenv                                     import load_dotenv
+from     dotenv                                               import load_dotenv
 load_dotenv()
-
-############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
-SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')                          ### vedi sopra 
-SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
-sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
-# print(*sys.path, sep='\n')
 
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH         = os.environ.get('CFLIB_PATH')
