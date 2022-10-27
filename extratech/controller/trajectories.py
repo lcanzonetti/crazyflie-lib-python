@@ -147,8 +147,64 @@ def sequenzaCinque(CF):
             print('fine quadrato di test')
         print('Drogno: %s. Inizio quadrato relativo di test' % CF.ID)
         threading.Thread(target=seq5, daemon=True).start()
+#  non proprio una sequenza ma controllo manuale con gamepad:
+def sequenzaSei(CF):
+    def seq6():
+        MAX_VELOCITY_XY   = 0.60
+        MAX_VELOCITY_Z    = 0.95
+        MAX_VELOCITY_YAW  = 120
+        # import pygame
+        import pygame
+        # Initialize pygame for joystick support
+        pygame.display.init()
+        pygame.joystick.init()
+        controller = pygame.joystick.Joystick(0)
+        controller.init()
+        comandi = {
+            'destraSinistra':0,
+            'avantiDietro': 0,
+            'leftRight': 0,
+            'changeHeight': 0
+        }
+        def getGamepadCommands():
+            pygame.event.pump()
+
+            for k in range(controller.get_numaxes()):
+                if k == 2: 
+                    # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
+                    comandi['destraSinistra'] = controller.get_axis(k) * -1.
+                elif k == 3:
+                    comandi['avantiDietro'] = controller.get_axis(k) * -1.
+                elif k == 1:
+                    comandi['changeHeight'] = controller.get_axis(k)
+                elif k == 0:
+                    comandi['leftRight'] = controller.get_axis(k)
+
+        while not CF.currentSequence_killingPill.is_set():
+            getGamepadCommands()
+            
+            if comandi['destraSinistra'] != 0:
+                velocity_y = comandi['destraSinistra'] * MAX_VELOCITY_XY
+            if comandi['avantiDietro'] != 0:
+                velocity_x = comandi['avantiDietro'] * MAX_VELOCITY_XY
+            if comandi['changeHeight'] != 0:
+                velocity_z = comandi['changeHeight'] * MAX_VELOCITY_Z
+            if comandi['leftRight'] != 0:
+                velocity_yaw = comandi['leftRight'] * MAX_VELOCITY_YAW
+
+            print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
+            CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
+            time.sleep(0.08)
         
-sequenze_test = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque]
+        CF.statoDiVolo = 'landing'
+        CF.land()
+        CF.statoDiVolo = 'idle'
+        CF.currentSequence_killingPill.clear()
+        print('fine quadratone di test')
+    print('Drogno: %s. Inizio quadratone di test' % CF.ID)
+    threading.Thread(target=seq6, daemon=True).start()
+
+sequenze_test = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque, sequenzaSei]
    
 
 

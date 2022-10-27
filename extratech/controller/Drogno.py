@@ -162,16 +162,18 @@ class Drogno(threading.Thread):
             var_y_history.append(currentEsteem_y)
             var_z_history.append(currentEsteem_z)
             self.esteemsCount =  0
+            self.isPositionEstimated = False
             def addKalmanDatas():
                 # var_y_history = [1000] * 10
                 # var_x_history = [1000] * 10
                 # var_z_history = [1000] * 10
                 # threshold =5
-                threshold = 0.01
+                threshold = 0.05
                 if self.kalman_VarX != currentEsteem_x:
                     var_x_history.append(self.kalman_VarX)
                     var_x_history.pop(0)
                     self.esteemsCount += 1
+                    
                 if self.kalman_VarY != currentEsteem_x:
                     var_y_history.append(self.kalman_VarY)
                     var_y_history.pop(0) 
@@ -200,6 +202,7 @@ class Drogno(threading.Thread):
                         self.isPositionEstimated = True
                 # self.isPositionEstimated = False
                 print('position not yet estimated, got %s esteems' % self.esteemsCount)
+            
             while not self.isPositionEstimated:
                 addKalmanDatas()
             print('positionEstimated')
