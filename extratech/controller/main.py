@@ -22,6 +22,7 @@ import connections
 import trajectories
 import GLOBALS    as GB
 
+finished = False
 
 def main():
     print_greetings()
@@ -31,7 +32,11 @@ def main():
     
     else:
         print("Controller started. No fake shit.")
-        connections.radioStart()
+        try:
+            connections.radioStart()
+        except Exception as e:
+            print(e)
+            ciao_ciao('ciao', 'ciao')
         connections.add_crazyflies()       ## chek if we already got CFs reachable
         connections.restart_devices()
         connections.create_classes()
@@ -51,7 +56,7 @@ def main():
         reconnectThread = threading.Thread(target=connections.autoReconnect).start()  
 
 def ciao_ciao(signum, frame):
-    print('Bye bye.')
+    print('Bye bye. \n%s' % signum)
     GUI.reset_companion()
     OSC.finished = True
     GUI.ends_it_when_it_needs_to_end()
@@ -68,8 +73,10 @@ def ciao_ciao(signum, frame):
     except Exception as e:
         print(e)
     print('I said bye.')
-   
+    global finished
+    finished = True
     sys.exit("Putin merda")
+     
 
 def print_greetings():
     text   = "extratech swarm controller"
@@ -88,7 +95,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare ciao ciao 
 
     main()
-    while True:
+    while not finished:
         time.sleep(0.1)
         pass
         

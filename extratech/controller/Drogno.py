@@ -323,7 +323,7 @@ class Drogno(threading.Thread):
         self.logger_manager.add_log_configurations()
         self.logger_manager.set_logging_level(0) ## start
 
-        if not GB.WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
+        if GB.WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
             return
     
         self._cf.param.set_value('commander.enHighLevel', '1')
@@ -349,6 +349,7 @@ class Drogno(threading.Thread):
             self._cf,
             default_height=1.0
         )
+        self.motionCommander.
         print('ho inizalizzato il motion commander: %s'% self.motionCommander)
      
         self.resetEstimator()
@@ -547,7 +548,6 @@ class Drogno(threading.Thread):
             return
         ## se nessuna sequenza in volo parte la scelta
         if self.current_sequence is None and requested_sequenceNumber <= len (sequenze_test):
-            self.currentSequence_killingPill.clear()
             self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
             print ('eseguo la sequenza %s' % requested_sequenceNumber)
             self.current_sequence       = requested_sequenceNumber
@@ -563,7 +563,15 @@ class Drogno(threading.Thread):
         elif requested_sequenceNumber != self.current_sequence and requested_sequenceNumber <= len (sequenze_test):
             self.currentSequence_killingPill.set()
             print('stoppo la sequenza test' + requested_sequenceNumber)
-            self.current_sequence = None
+            while self.current_sequence != 0:
+                print('.')
+                time.sleep(0.1)
+            print ('eseguo la sequenza %s' % requested_sequenceNumber)
+            self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
+            self.current_sequence       = requested_sequenceNumber
+            self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
+            
+        else:print('porco cazzo')
     ####################################################################     management
 
     def setRingColor(self, vr, vg, vb, speed=0.25):
