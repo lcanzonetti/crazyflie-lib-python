@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import threading, time, sys, importlib 
-cflib                    = importlib.import_module('cflib')
-test_single_cf_grounded  = importlib.import_module('test_single_cf_grounded')
+import threading, time, sys, importlib, os
+# cflib                    = importlib.import_module('cflib')
+# test_single_cf_grounded  = importlib.import_module('test_single_cf_grounded')
 
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
@@ -12,6 +12,9 @@ from   cflib.utils                                import uri_helper
 import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
 from   test_single_cf_grounded                    import test_link
+from   common_utils                               import convert_motor_pass
+from   dotenv                                     import load_dotenv
+load_dotenv()
 
 
  
@@ -245,12 +248,4 @@ class dataDrone(threading.Thread):
         self.battery_sag        = float(data['health.batterySag'])
         self.battery_voltage    = float(data['pm.vbat'])
         self.RSSI               = float(data['radio.rssi'])
- 
-def convert_motor_pass(numeroBinario):
-    motori    = [1,1,1,1]
-    motori[0] = (numeroBinario >> 3) & 1
-    motori[1] = (numeroBinario >> 2) & 1
-    motori[2] = (numeroBinario >> 1) & 1
-    motori[3] = (numeroBinario >> 0) & 1
-    return motori
 

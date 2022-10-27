@@ -5,9 +5,10 @@
 import   time, os, sys, signal, threading, importlib
 
 ############   dependencies
+import   GLOBALS                                    as     GB
 import   pandas                                     as     pd
-from     IPython.display                            import display          ### Serve per "stampare" il DataFrame contenente i risultati
-from     datetime                                   import datetime
+import   numpy                                      as     np
+from     PIL                                        import Image, ImageDraw, ImageFont 
 from     colorama              import Fore, Back, Style
 from     colorama              import init as coloInit  
 coloInit(convert=True)
@@ -32,140 +33,33 @@ from     cflib.utils                                import uri_helper
 from     cflib.crazyflie.log                        import LogConfig
 from     cflib.utils.power_switch                   import PowerSwitch
 import   cflib.crtp
-############    SYS_TEST è assoluto e va specificato nel file .env su ogni macchina
-SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')                          ### vedi sopra 
-SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
-sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
-print(*sys.path, sep='\n')
 
 ############   local scripts
-import   wakeUppatore, stenBaiatore, DataDrogno  
+import   wakeUppatore, stenBaiatore
+from     common_utils                               import IDFromURI, exit_signal_handler
+from     test_utils                                 import istanziaClassi, check_if_test_is_completed
 
 isExist    = os.path.exists(sys.path[3] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
 if not isExist: os.makedirs(sys.path[3] + '/Test_Resultsss')
 
-oggieora   = str(datetime.now())                                              ### Crea stringa in formato yyyymmddhhmmss per creazione nome json
-oggieora   = oggieora.replace('-', '')
-oggieora   = oggieora.replace(' ', '')
-oggieora   = oggieora.replace(':', '')
-oggieora   = oggieora[:-7]
-
-available  = []
-data_d     = {}
-iddio      = 0
-PRINTRATE  = 1
-paginegialle = [
-    # 'E7E7E7E7E0',
-    # 'E7E7E7E7E1',
-    # 'E7E7E7E7E2',
-    'E7E7E7E7E3',
-    # 'E7E7E7E7E4',
-    # 'E7E7E7E7E5',
-    # 'E7E7E7E7E6',
-    # 'E7E7E7E7E7',
-    # 'E7E7E7E7E8',
-    # 'E7E7E7E7E9'
-]
-
-is_test_completed = False
-
-
-def scan_for_crazyflies():
-    global available
-    print(Fore.WHITE + "Scanning for available radios...")
-    for i in paginegialle:
-        available.extend(cflib.crtp.scan_interfaces(address=int(i, 16)))
-    available = list(filter(None, available))
-    available = [x[0] for x in available]
-    print("\nTrovate %s radio!" %(len(available)))
-    for i in available:
-        print(i)
-    print("\n")
-    return available
-
-def istanziaClassi():
-    # cancellami = DataDrogno.dataDrone(IDFromURI('E7E7E7E7E1'),'E7E7E7E7E1')
-
-    for uro in available:
-        iddio = IDFromURI(uro)
-        data_d[iddio] = DataDrogno.dataDrone(iddio, uro)
-        data_d[iddio].connect()
-
-def IDFromURI(uri) -> int:
-    # Get the address part of the uri
-        address = uri.rsplit('/', 1)[-1]
-        try:
-            return int(address, 16) - 996028180448
-        except ValueError:
-            print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
-            return None
-
-def check_if_test_is_completed():
-    dati_mech = []                              ### Dati "elettromeccanici" dei droni
-    dati_rev  = []                              ### Dati sulla "revisione del firmware"
-
-   
-
-    while not (all (data_d[datadrogno].is_testing_over != False for datadrogno in data_d)):
-        time.sleep(1)
-    is_test_completed = True
-        
-
-    for drogno in data_d:
-        i = 0
-        data_mech = pd.DataFrame({'Indirizzo'              : [data_d[drogno].link_uri], 
-                                  'Battery Sag'            : [data_d[drogno].battery_sag],
-                                  'Battery Voltage'        : [data_d[drogno].battery_voltage],
-                                  'Battery Test Pass'      : [data_d[drogno].battery_test_passed],
-                                  'Propeller Test'         : [data_d[drogno].propeller_test_result],
-                                  'Propeller Test Pass'    : [data_d[drogno].propeller_test_passed],
-                                  'RSSI'                   : [data_d[drogno].RSSI],
-                                  'Bandwidth'              : ['%s pkg/s %s kB/s' %(float("{:.2f}".format(data_d[drogno].bandwidth[0])), float("{:.2f}".format(data_d[drogno].bandwidth[1])))],
-                                  'Latency'                : ['%s ms' %float("{:.2f}".format(data_d[drogno].latency))]},
-                                  index                    = ['Drone ' + str(drogno)])
-        dati_mech.append(data_mech)
-        data_rev = pd.DataFrame({'Revisione Firmware (1)' : [data_d[drogno].firmware_revision0],
-                                 'Revisione Firmware (2)' : [data_d[drogno].firmware_revision1]},
-                                  index                   = ['Drone ' + str(drogno)])
-        dati_rev.append(data_rev)
-        i += 1
-    try:
-        df1 = pd.concat([drogno for drogno in dati_mech])
-        df2 = pd.concat([drogno for drogno in dati_rev])
-        display(df1)
-        print()
-        display(df2)
-        df1.to_json(sys.path[3] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
-        df2.to_json(sys.path[3] + '/Test_resultsss/Risultati_rev_'  + oggieora + '.json', orient='index', indent=4)
-        # df = df.align()
-        print()
-        print('tutti i test sono stati completati')
-        time.sleep(2)
-        print('sto per mettere a ninna tutti...')
-
-        ### Aspetta finché il LED di ogni drone non ha finito di "lampeggiare"
-        while not (all(data_d[drogno].lampeggio_finito for drogno in data_d)):
-            time.sleep(0.5)
-        print('addormento tutti... ')
-        for drogno in data_d:
-            stenBaiatore.standBySingle(data_d[drogno].link_uri)
-    except ValueError:
-        print('mi sa che \'sto test è ito buco')
-        # sys.exit(0)
-        os._exit(0)
-        return
-
-def exit_signal_handler(signum, frame):
-    print('\nEsco.')
-    # threads_exit_event.set() 
-
-    for drogno in data_d:
-        try: PowerSwitch(data_d[drogno].link_uri).stm_power_down()
-        except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % data_d[drogno].link_uri)
-    os._exit(0)
-    sys.exit(0)
+def print_greetings():
+    text   = "EXTRATECH TESTING PLATFORM"
+    myfont = ImageFont.truetype("verdana.ttf", 8, encoding="unic")
+    text_width, text_height   = myfont.getsize(text)
+    img    = Image.new("1",(text_width, text_height),"black")
+    draw   = ImageDraw.Draw(img)
+    draw.text((0, 0), text, "white", font=myfont)
+    pixels = np.array(img, dtype=np.uint8)
+    chars = np.array([' ','#'], dtype="U1")[pixels]
+    strings = chars.view('U' + str(chars.shape[1])).flatten()
+    print( "\n".join(strings))
+    print('\n')
 
 def main():
+    print_greetings()
+
+    time.sleep(2)
+    
     cflib.crtp.init_drivers()
     wakeUppatore.wekappa()
     try:
@@ -180,7 +74,7 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-        while not is_test_completed:
+        while not GB.is_test_completed:
             time.sleep(1)
             pass
     except KeyboardInterrupt:
