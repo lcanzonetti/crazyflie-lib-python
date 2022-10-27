@@ -179,6 +179,8 @@ def sequenzaSei(CF):
                     comandi['changeHeight'] = controller.get_axis(k)
                 elif k == 0:
                     comandi['leftRight'] = controller.get_axis(k)
+        
+        CF.motionCommander.take_off(height=1.1,velocity=0.4)
 
         while not CF.currentSequence_killingPill.is_set():
             getGamepadCommands()
@@ -195,6 +197,7 @@ def sequenzaSei(CF):
             print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
             CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
             time.sleep(0.08)
+        CF.motionCommander.land(0.3)
         
         CF.statoDiVolo = 'landing'
         CF.land()

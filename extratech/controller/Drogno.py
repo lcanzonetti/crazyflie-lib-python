@@ -534,6 +534,7 @@ class Drogno(threading.Thread):
         if self.isFlying:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.5, 180, 2, False)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start toward %s %s' % (self.name, self.starting_x, self.starting_y ) )
+    ####################################################################     sequences
   
     def testSequence(self,requested_sequenceNumber):
 
@@ -601,7 +602,7 @@ class Drogno(threading.Thread):
                 self.flyingTime = int(time.time() - self.scramblingTime)
             else:
                 self.flyingTime = 0
-            print(f'flying time: {self.flyingTime}')
+            # print(f'flying time: {self.flyingTime}')
             
             level = 0.0
             if self.batteryVoltage == 'n.p.':
