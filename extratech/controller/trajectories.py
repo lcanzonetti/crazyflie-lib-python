@@ -18,32 +18,38 @@ import GLOBALS as GB
 def sequenzaUno(CF):   
     def seq1():
         while not CF.currentSequence_killingPill.is_set():
+            print('taking off')
             CF.statoDiVolo = 'taking off'
             CF.takeOff()     
             CF.statoDiVolo = 'seq1'
-
-            CF.positionHLCommander.go_to(0.0, 0.0, 1, 1)
             CF.setRingColor(255,   0,   0)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
             
+            print('going to 1.5 1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
             CF.setRingColor(255,   0,   0)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
 
+            print('going to 1.5 -1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(1.5, -1.5, 1.0,1)
             CF.setRingColor(  0, 255,  0)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
-            
+
+            print('going to -1.5 -1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(-1.50, -1.5, 1.0,1)
             CF.setRingColor(  0,  0, 255)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
+
+            print('going to -1.5 1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(-1.5, 1.5, 1,1)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
+
+            print('going to 0 0 1.5 in 1 sec')
             CF.positionHLCommander.go_to(0,   0, 1.5,1 )
 
 
