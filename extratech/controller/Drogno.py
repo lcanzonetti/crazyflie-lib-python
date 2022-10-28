@@ -137,8 +137,7 @@ class Drogno(threading.Thread):
                     connectedToFeedback = True
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
-        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status).start()
-        if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.log_status).start()
+ 
         self.connect()
                     
     def activate_mellinger_controller(self, use_mellinger):
@@ -287,8 +286,9 @@ class Drogno(threading.Thread):
         # self.linkone.set_retries(1)
         # linkone.set_arc(1) ## retries
         # self.linkone._retry_before_disconnect = 3
-        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
-        self.batteryThread.start()
+        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery).start()
+        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status).start()
+        if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.logger_manager.log_status).start()
         self.statoDiVolo = 'landed'
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -349,9 +349,6 @@ class Drogno(threading.Thread):
             self._cf,
             default_height=1.0
         )
-        self.motionCommander.
-        print('ho inizalizzato il motion commander: %s'% self.motionCommander)
-     
         self.resetEstimator()
         self.isReadyToFly = self.evaluateFlyness()
        
@@ -391,19 +388,7 @@ class Drogno(threading.Thread):
             # print ('nope nope nope!')
             pass
             
-    def log_status(self):
-        if GB.FILE_LOGGING_ENABLED:
-            self.LoggerObject.info('Logger started')
-            while not self.killingPill.is_set():
-                time.sleep(GB.print_rate)
-                if not GB.WE_ARE_FAKING_IT and self.is_connected:
-                    self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\
-                    \tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\
-                    \tbatterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\
-                    \tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                    self.commandsCount = 0
-            print('Log chiuso per %s ' % self.name)
-
+  
     ####################################################################     mmmmooovement
     def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_duration=GB.DEFAULT_SCRAMBLING_TIME):
         def scramblingsequence():
@@ -445,7 +430,7 @@ class Drogno(threading.Thread):
                 time.sleep(3)
                 self.isFlying     = False
                 self.statoDiVolo = 'landed'
-                self.logger_manager.set_logging_level(1)  ## sets logging level to landed mode
+                self.logger_manager.set_logging_level(0)  ## sets logging level to landed mode
 
                 if (thenGoToSleep): self.goToSleep()
                 self.isReadyToFly = self.evaluateFlyness()
@@ -541,37 +526,35 @@ class Drogno(threading.Thread):
     ####################################################################     sequences
   
     def testSequence(self,requested_sequenceNumber):
-
-        print('start TestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
+        print('yo attuale %s, nuova %s quindi:' % (self.current_sequence, requested_sequenceNumber))
+        print(self.current_sequence == requested_sequenceNumber)
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'sequenza simulata!'
             return
         ## se nessuna sequenza in volo parte la scelta
         if self.current_sequence is None and requested_sequenceNumber <= len (sequenze_test):
             self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
-            print ('eseguo la sequenza %s' % requested_sequenceNumber)
+            print ('starting test sequence %s' % requested_sequenceNumber)
             self.current_sequence       = requested_sequenceNumber
             self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
-
-        ## se in volo la stessa la si stoppa
-        elif requested_sequenceNumber == self.current_sequence:
+        elif self.current_sequence == requested_sequenceNumber:     ## se in volo la stessa la si stopp
+            print('stopping test sequence %s' % requested_sequenceNumber)
             self.currentSequence_killingPill.set()
-            print('stoppo la sequenza test' + requested_sequenceNumber)
-            self.current_sequence = None
-
-        ## se in volo un'altra la si cambia
-        elif requested_sequenceNumber != self.current_sequence and requested_sequenceNumber <= len (sequenze_test):
+        elif requested_sequenceNumber != self.current_sequence and requested_sequenceNumber <= len (sequenze_test):    ## se in volo un'altra la si cambia
             self.currentSequence_killingPill.set()
-            print('stoppo la sequenza test' + requested_sequenceNumber)
-            while self.current_sequence != 0:
-                print('.')
-                time.sleep(0.1)
-            print ('eseguo la sequenza %s' % requested_sequenceNumber)
-            self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
-            self.current_sequence       = requested_sequenceNumber
-            self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
-            
-        else:print('porco cazzo')
+            print('stoppin test sequence %s, then starting %s' % (self.current_sequence, requested_sequenceNumber))
+            def start_it():
+                while self.current_sequence != None:
+                    print('.')
+                    time.sleep(0.1)
+                print ('eventually starting %s as promised' % requested_sequenceNumber)
+                self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
+                self.current_sequence       = requested_sequenceNumber
+                self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
+            wait_and_start = threading.Thread(target=start_it).start()
+        else:
+            print('porco cazzo')
+
     ####################################################################     management
 
     def setRingColor(self, vr, vg, vb, speed=0.25):

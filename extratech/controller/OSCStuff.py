@@ -118,10 +118,10 @@ def uploadSequence(coddii,quale):
             else:
                 print('il drogno %s non è connesso' % GB.drogni[drogno].name)
 def startTestSequence (coddii,quale):
-        print('chief says we\'re gonna do testsss at sequence %s' % quale)
+        print('comando testsss %s' % quale)
         for drogno in GB.drogni:
             if GB.drogni[drogno].is_connected:
-                print('TEST!')
+                # print('TEST!')
                 GB.drogni[drogno].testSequence(quale)
             else:
                 print('il drogno %s non è connesso' % GB.drogni[drogno].name)
@@ -255,9 +255,10 @@ def engage    (coddii, chi):
         if not GB.drogni[chi].isEngaged: GB.drogni[chi].isEngaged = True
         else: GB.drogni[chi].isEngaged = False
 def set_log_level(coddii, level):
-    print('Setting log level at %s.' % level)
+    print('Setting log level at %s' % level)
     for drogno in GB.drogni:
         drogno.logger_manager.set_logging_level(level)
+        drogno.logger_manager.set_logging_level
 def enable_print_status(coddii, is_print_time):
     print('Setting printing to %s.' % bool(is_print_time))
     GB.PRINTING_ENABLED = bool(is_print_time)                       

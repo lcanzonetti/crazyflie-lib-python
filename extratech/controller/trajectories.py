@@ -24,59 +24,59 @@ def sequenzaUno(CF):
     def seq1():
         print('taking off')
         CF.statoDiVolo = 'taking off'
-        CF.takeOff()     
+        # CF.takeOff()     
         CF.statoDiVolo = 'seq1'
         CF.setRingColor(255,   0,   0)
         time.sleep(1)
         while not CF.currentSequence_killingPill.is_set():
-            # print('going to 1.5 1.5 1.0 in 1 sec')
+            print('going to 1.5 1.5 1.0 in 1 sec')
             # CF.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
-            # CF.setRingColor(255,   0,   0)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(1)
+            CF.setRingColor(255,   0,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
 
-            # print('going to 1.5 -1.5 1.0 in 1 sec')
+            print('going to 1.5 -1.5 1.0 in 1 sec')
             # CF.positionHLCommander.go_to(1.5, -1.5, 1.0,1)
-            # CF.setRingColor(  0, 255,  0)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(1)
+            CF.setRingColor(  0, 255,  0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
 
-            # print('going to -1.5 -1.5 1.0 in 1 sec')
+            print('going to -1.5 -1.5 1.0 in 1 sec')
             # CF.positionHLCommander.go_to(-1.50, -1.5, 1.0,1)
-            # CF.setRingColor(  0,  0, 255)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(1)
+            CF.setRingColor(  0,  0, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
 
-            # print('going to -1.5 1.5 1.0 in 1 sec')
+            print('going to -1.5 1.5 1.0 in 1 sec')
             # CF.positionHLCommander.go_to(-1.5, 1.5, 1,1)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(1)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(1)
 
-            # print('going to 0 0 1.5 in 1 sec')
+            print('going to 0 0 1.5 in 1 sec')
             # CF.positionHLCommander.go_to(0,   0, 1.5,1 )
 
 
-            # if CF.currentSequence_killingPill.is_set(): break
-            # CF.setRingColor(255, 255,   0)
-            # time.sleep(0.5)
-            # CF.currentSequence_killingPill.is_set()
-            # CF.setRingColor(255,   0,   0)
-            # time.sleep(0.5)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # CF.setRingColor(  0, 255,   0)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(0.5)
-            # CF.setRingColor(  0,   0, 255)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(0.5)
-            # CF.setRingColor  (0, 255, 255)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(0.5)
-            # CF.setRingColor(255, 255,   0)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # time.sleep(0.5)
-            # if CF.currentSequence_killingPill.is_set(): break
-            # CF.setRingColor(255,   0, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(255, 255,   0)
+            time.sleep(0.5)
+            CF.currentSequence_killingPill.is_set()
+            CF.setRingColor(255,   0,   0)
+            time.sleep(0.5)
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(  0, 255,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor(  0,   0, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor  (0, 255, 255)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            CF.setRingColor(255, 255,   0)
+            if CF.currentSequence_killingPill.is_set(): break
+            time.sleep(0.5)
+            if CF.currentSequence_killingPill.is_set(): break
+            CF.setRingColor(255,   0, 255)
             time.sleep(0.5)
             
         land_and_clear(CF)
@@ -87,17 +87,21 @@ def sequenzaUno(CF):
 #  un giro di yaw
 def sequenzaDue(CF): #   blocking?
     print(Fore.LIGHTRED_EX + 'Drogno: %s. Inizio giretto sul posto' % CF.ID)
-    CF.takeOff(3.)
+    # CF.takeOff(3.)
     while not CF.currentSequence_killingPill.is_set():
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)
+        print('giro a 90°')
+        # CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)
         time.sleep(1)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1)
+        print('giro a 180°')
+        # CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1)
         time.sleep(1)
         if CF.currentSequence_killingPill.is_set():
             break
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1)
+        print('giro a 270°')
+        # CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1)
         time.sleep(1)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
+        print('torno a 0°')
+        # CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
         time.sleep(1)
     land_and_clear(CF)
     print('fine quadratone di test')
@@ -112,7 +116,7 @@ def sequenzaTre(CF):
     CF.currentSequence_killingPill.wait()
     land_and_clear(CF)
     print('Drogno: %s. Fine circoletto da 0.75 di test' % CF.ID)
-#  un giro relativo con diametro 3 mt
+#  un giro relativo con diametro 3 mt con il motion commander
 def sequenzaQuattro(CF):
     print('Drogno: %s. Inizio giretto (seq4) da 1.5mt' % CF.ID)
     CF.statoDiVolo = 'taking off'
@@ -124,30 +128,31 @@ def sequenzaQuattro(CF):
     land_and_clear(CF)
 
     print('Drogno: %s. Fine circoletto (seq4) da 1.5 mt' % CF.ID)
-    
+    # quadrato con il motion commander
 def sequenzaCinque(CF):
         def seq5():
             CF.statoDiVolo = 'taking off'
-            CF.takeOff()     
+            # CF.takeOff()     
             CF.statoDiVolo = 'seq5'
             while not CF.currentSequence_killingPill.is_set():
-                CF.motionCommander.left(1.5,1.5)
+                print('faccio quadrati col motion commader fino a che non mi si dice il contrario')
+                # CF.motionCommander.left(1.5,1.5)
                 time.sleep(0.8)
-                CF.motionCommander.start_turn_left(150)
+                # CF.motionCommander.start_turn_left(150)
                 time.sleep(0.8)
-                CF.motionCommander.stop()
+                # CF.motionCommander.stop()
                 if CF.currentSequence_killingPill.is_set(): break
                 time.sleep(0.8)
-                CF.motionCommander.forward(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
+                # CF.motionCommander.forward(1.5,1.5)
+                # CF.motionCommander.start_turn_right(150)
                 if CF.currentSequence_killingPill.is_set(): break
                 time.sleep(0.8)
-                CF.motionCommander.right(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
+                # CF.motionCommander.right(1.5,1.5)
+                # CF.motionCommander.start_turn_right(150)
                 if CF.currentSequence_killingPill.is_set(): break
                 time.sleep(0.8)
-                CF.motionCommander.back(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
+                # CF.motionCommander.back(1.5,1.5)
+                # CF.motionCommander.start_turn_right(150)
                 if CF.currentSequence_killingPill.is_set(): break
                 time.sleep(0.8)
             print('fine quadrato di test')
