@@ -428,7 +428,7 @@ class Drogno(threading.Thread):
         else:
             print('%s can\'t take off, not ready!'% self.name)
 
-    def land(self, speed=2., landing_height=0.05,thenGoToSleep=False, with_motion_commander=False):
+    def land(self, speed=2.1, landing_height=0.05,thenGoToSleep=False, with_motion_commander=False):
         def landing_sequence():
             try:
                 if self.statoDiVolo == 'landing': return
