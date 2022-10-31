@@ -9,9 +9,9 @@ import GLOBALS as GB
 
 ####################################################################     test sequencesss
 
-def land_and_clear(CF):
+def land_and_clear(CF,with_motion_commander=False ):
     CF.statoDiVolo = 'landing'
-    CF.land()
+    CF.land(with_motion_commander)
     CF.statoDiVolo = 'idle'
     CF.current_sequence = None
     CF.currentSequence_killingPill.clear()
@@ -107,19 +107,26 @@ def sequenzaDue(CF): #   blocking?
 # ####### Motion commander -->  un giro relativo con diametro 1.5 mt
 def sequenzaTre(CF):
     print('Drogno: %s. Inizio giretto da 0.75 di test' % CF.ID)
-    CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    try:
+        CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    except Exception as ex:
+        print('motion commander says %s'%ex)
     CF.isFlying    = True
     CF.statoDiVolo = 'taking off'
     CF.motionCommander.start_circle_left(radius_m=0.7, velocity=1)
     CF.statoDiVolo = 'test 3'
     CF.currentSequence_killingPill.wait()
-    land_and_clear(CF)
+    land_and_clear(CF, with_motion_commander=True)
     print('Drogno: %s. Fine circoletto da 0.75 di test' % CF.ID)
 #  # ####### Motion commander -->  un giro relativo con diametro 3 mt con il motion commander
 def sequenzaQuattro(CF):
     print('Drogno: %s. Inizio giretto (seq4) da 1.5mt' % CF.ID)
     CF.statoDiVolo = 'taking off'
-    CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    try:
+        CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    except Exception as ex:
+        print('motion commander says %s'%ex)
+
     CF.isFlying    = True
     CF.statoDiVolo = 'test 4'
     CF.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
@@ -131,7 +138,10 @@ def sequenzaQuattro(CF):
 def sequenzaCinque(CF):
         def seq5():
             CF.statoDiVolo = 'taking off'
-            CF.takeOff()     
+            try:
+                CF.motionCommander.take_off(height=1.1,velocity=0.4)
+            except Exception as ex:
+                print('motion commander says %s'%ex)    
             CF.isFlying    = True
 
             CF.statoDiVolo = 'seq5'

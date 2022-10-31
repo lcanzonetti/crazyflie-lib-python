@@ -11,6 +11,7 @@ PRINTING_ENABLED           = True
 FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
 INITIAL_TEST               = False
+IS_TEST_MODE               = False
 AGGREGATION_ENABLED        = False
 
 ######################################    NETWORK

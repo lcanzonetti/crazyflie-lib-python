@@ -261,7 +261,12 @@ def set_log_level(coddii, level):
         drogno.logger_manager.set_logging_level
 def enable_print_status(coddii, is_print_time):
     print('Setting printing to %s.' % bool(is_print_time))
-    GB.PRINTING_ENABLED = bool(is_print_time)                       
+    GB.PRINTING_ENABLED = bool(is_print_time)   
+def toggle_test_mode(coddii, toggle):
+         GB.IS_TEST_MODE =  not GB.IS_TEST_MODE                       
+         print('Setting test mode to %s.' % GB.IS_TEST_MODE)
+         for drogno in GB.drogni:
+             GB.drogni[drogno].isTestMode = GB.IS_TEST_MODE
   
 ###########################  single fella
 def printAndSendCoordinates():
@@ -297,12 +302,8 @@ def setRequestedPos(address, args):
 
     x = address.split('/')
     y = x[2].split('_')
-
     iddio = int(y[1])
-    
-    
     # print(timecode)
-    # with posLock: 
     timecode   = args[0]
     bufferone[iddio].requested_X = round(float(args[1]),3)
     bufferone[iddio].requested_Y = round(float(args[2]),3)
@@ -312,7 +313,6 @@ def setRequestedPos(address, args):
 def setRequestedCol(address, args):
     global msgCount
     iddio     = int(address[-7])
-    # with colLock:
     msgCount += 1
     bufferone[iddio].requested_R = args[1]
     bufferone[iddio].requested_G = args[2]
@@ -380,6 +380,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/set_log_level",    set_log_level,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/enable_print_status", enable_print_status, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/engage",           engage,                 argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/toggle_test_mode", toggle_test_mode,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
