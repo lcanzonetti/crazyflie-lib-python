@@ -10,7 +10,7 @@ WE_ARE_FAKING_IT           = False
 PRINTING_ENABLED           = True
 FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
-INITIAL_TEST               = True
+INITIAL_TEST               = False
 AGGREGATION_ENABLED        = False
 
 ######################################    NETWORK
@@ -98,10 +98,10 @@ uris = [
         # 'radio://0/80/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        'radio://0/90/2M/E7E7E7E7E3',
+        # 'radio://0/90/2M/E7E7E7E7E3',
         # 'radio://1/120/2M/E7E7E7E7E4', 
         # 'radio://0/80/2M/E7E7E7E7E5',
-        # 'radio://0/100/2M/E7E7E7E7E6',
+        'radio://0/100/2M/E7E7E7E7E6',
         # 'radio://3/100/2M/E7E7E7E7E7',
         # 'radio://1/100/2M/E7E7E7E7E8', 
         # 'radio://2/110/2M/E7E7E7E7E9',

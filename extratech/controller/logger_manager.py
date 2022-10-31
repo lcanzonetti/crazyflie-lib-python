@@ -116,9 +116,9 @@ class Logger_manager():
             # print('pm state:       %s' % data['pm.state'])
  
         elif logconf == self.fast_logging:
-            self.parent_drogno.x                 = float(data['stateEstimateZ.x'])
-            self.parent_drogno.y                 = float(data['stateEstimateZ.x'])
-            self.parent_drogno.z                 = float(data['stateEstimateZ.x'])
+            self.parent_drogno.x                 = float(data['stateEstimateZ.x'])/1000
+            self.parent_drogno.y                 = float(data['stateEstimateZ.x'])/1000
+            self.parent_drogno.z                 = float(data['stateEstimateZ.x'])/1000
             self.parent_drogno.yaw               = float(data['stateEstimate.yaw'])
            
         else:
@@ -180,7 +180,7 @@ class Logger_manager():
                     if self.current_logging == 0:
                         print (Fore.GREEN  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tlink quality: {self.parent_drogno.linkQuality}\tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}")
                     elif self.current_logging == 1 or self.current_logging == 2:
-                        print (Fore.ORANGE  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tlink quality: {self.parent_drogno.linkQuality}\tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tflight time: {self.parent_drogno.flyingTime}")
+                        print (Fore.YELLOW  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tlink quality: {self.parent_drogno.linkQuality}\tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tflight time: {self.parent_drogno.flyingTime}")
                     # print (Fore.GREEN  +  f"battery state: {self.parent_drogno.batteryStatus}")
                     if GB.INITIAL_TEST:   print(f'battery SAG: {self.parent_drogno.batterySag}\tisBatteryTestPassed:{self.parent_drogno.isBatteryTestPassed}\tmotor_pass:{self.parent_drogno.motorPass}')
                 else:

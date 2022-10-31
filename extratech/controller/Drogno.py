@@ -426,10 +426,12 @@ class Drogno(threading.Thread):
     def land(self, speed=2.5, landing_height=0.05,thenGoToSleep=False):
         def landing_sequence():
             try:
+                if self.statoDiVolo == 'landing': return
+                self.statoDiVolo = 'landing'
                 self._cf.high_level_commander.land(landing_height, speed)
                 time.sleep(3)
                 self.isFlying     = False
-                self.statoDiVolo = 'landed'
+                self.statoDiVolo  = 'landed'
                 self.logger_manager.set_logging_level(0)  ## sets logging level to landed mode
 
                 if (thenGoToSleep): self.goToSleep()
@@ -628,7 +630,7 @@ class Drogno(threading.Thread):
         del self.batteryThread
     def check_out_of_boxiness(self):
         if abs(self.x) > (GB.BOX_X + 1.0) or abs(self.y) > (GB.BOX_Y+1.0) or self.z > (GB.BOX_Y + 0.5):
-                    print(Fore.RED + 'Landing due trespassing!')
+                    print(Fore.RED + f'Landing due trespassing! -> x: {self.x}\ty: {self.y}\tz: {self.z}')
                     self.currentSequence_killingPill.set()
                     self.LoggerObject.info("Landing due trespassing!")
                     self.land(thenGoToSleep=True)

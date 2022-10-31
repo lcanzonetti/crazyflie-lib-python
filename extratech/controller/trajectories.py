@@ -108,6 +108,7 @@ def sequenzaDue(CF): #   blocking?
 def sequenzaTre(CF):
     print('Drogno: %s. Inizio giretto da 0.75 di test' % CF.ID)
     CF.motionCommander.take_off(height=1.1,velocity=0.4)
+    CF.isFlying    = True
     CF.statoDiVolo = 'taking off'
     CF.motionCommander.start_circle_left(radius_m=0.7, velocity=1)
     CF.statoDiVolo = 'test 3'
@@ -119,7 +120,8 @@ def sequenzaQuattro(CF):
     print('Drogno: %s. Inizio giretto (seq4) da 1.5mt' % CF.ID)
     CF.statoDiVolo = 'taking off'
     CF.motionCommander.take_off(height=1.1,velocity=0.4)
-    CF.statoDiVolo = 'test 3'
+    CF.isFlying    = True
+    CF.statoDiVolo = 'test 4'
     CF.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
     CF.currentSequence_killingPill.wait()
     land_and_clear(CF)
@@ -129,7 +131,9 @@ def sequenzaQuattro(CF):
 def sequenzaCinque(CF):
         def seq5():
             CF.statoDiVolo = 'taking off'
-            # CF.takeOff()     
+            CF.takeOff()     
+            CF.isFlying    = True
+
             CF.statoDiVolo = 'seq5'
             while not CF.currentSequence_killingPill.is_set():
                 print('faccio quadrati col motion commader fino a che non mi si dice il contrario')
