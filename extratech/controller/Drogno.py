@@ -359,7 +359,11 @@ class Drogno(threading.Thread):
             return True
 
         if self.is_connected and not self.standBy:
-            if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
+            if self.isTestMode:
+                self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
+                self.statoDiVolo = 'ready'
+                return True
+            elif  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
                 self.statoDiVolo = 'out of BOX'
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
@@ -424,13 +428,16 @@ class Drogno(threading.Thread):
         else:
             print('%s can\'t take off, not ready!'% self.name)
 
-    def land(self, speed=2.5, landing_height=0.05,thenGoToSleep=False):
+    def land(self, speed=2., landing_height=0.05,thenGoToSleep=False, with_motion_commander=False):
         def landing_sequence():
             try:
                 if self.statoDiVolo == 'landing': return
                 self.statoDiVolo = 'landing'
-                self._cf.high_level_commander.land(landing_height, speed)
-                time.sleep(3)
+                if with_motion_commander:
+                    self.motionCommander.land(0.3)
+                else: ## with standard high level motion commander
+                    self._cf.high_level_commander.land(landing_height, speed)
+                time.sleep(2.)
                 self.isFlying     = False
                 self.statoDiVolo  = 'landed'
                 self.logger_manager.set_logging_level(0)  ## sets logging level to landed mode

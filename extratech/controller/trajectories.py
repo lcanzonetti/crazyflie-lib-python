@@ -15,7 +15,7 @@ def land_and_clear(CF,with_motion_commander=False ):
     CF.statoDiVolo = 'idle'
     CF.current_sequence = None
     CF.currentSequence_killingPill.clear()
-#  HIgh Level Motion commander
+ 
 def sequenzaUno(CF):   
     def seq1():
         print('taking off')
