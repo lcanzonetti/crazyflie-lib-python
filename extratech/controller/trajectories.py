@@ -177,6 +177,7 @@ def sequenzaSei(CF):
         MAX_VELOCITY_XY   = 0.60
         MAX_VELOCITY_Z    = 0.95
         MAX_VELOCITY_YAW  = 120
+        velocity_y = velocity_x = velocity_z = velocity_yaw = 0
         # import pygame
         import pygame
         # Initialize pygame for joystick support
@@ -217,13 +218,8 @@ def sequenzaSei(CF):
             print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
             CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
             time.sleep(0.08)
-        CF.motionCommander.land(0.8)
-        
-        CF.statoDiVolo = 'landing'
-        CF.land()
-        CF.statoDiVolo = 'idle'
-        CF.currentSequence_killingPill.clear()
-        print('fine quadratone di test')
+        print('esco dal controllo con joypad del drogno %s' % CF.ID)
+        land_and_clear(CF, with_motion_commander=True)
     print('Drogno: %s.Controllo con joypad' % CF.ID)
     threading.Thread(target=seq6, daemon=True).start()
 
