@@ -70,7 +70,7 @@ if __name__ == '__main__':
     cflib.crtp.init_drivers()
     PowerSwitch(uro).stm_power_up()
     time.sleep(3)
-    cf = Crazyflie(rw_cache='./cache')
+    cf = Crazyflie(rw_cache='./solitario_cache')
     print('hi!')
     with SyncCrazyflie(uro, cf=cf) as scf:
         with MotionCommander(scf, default_height=1) as motion_commander:

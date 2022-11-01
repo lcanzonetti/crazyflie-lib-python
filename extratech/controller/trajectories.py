@@ -10,7 +10,6 @@ import GLOBALS as GB
 ####################################################################     test sequencesss
 
 def land_and_clear(CF,with_motion_commander=False ):
-    CF.statoDiVolo = 'landing'
     CF.land(with_motion_commander)
     CF.statoDiVolo = 'idle'
     CF.current_sequence = None
@@ -23,7 +22,7 @@ def sequenzaUno(CF):
         CF.takeOff()     
         CF.statoDiVolo = 'seq1'
         CF.setRingColor(255,   0,   0)
-        time.sleep(1)
+        # time.sleep(1)
         while not CF.currentSequence_killingPill.is_set():
             print('going to 1.5 1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
@@ -107,12 +106,8 @@ def sequenzaDue(CF): #   blocking?
 # ####### Motion commander -->  un giro relativo con diametro 1.5 mt
 def sequenzaTre(CF):
     print('Drogno: %s. Inizio giretto da 0.75 di test' % CF.ID)
-    try:
-        CF.motionCommander.take_off(height=1.1,velocity=0.4)
-    except Exception as ex:
-        print('motion commander says %s'%ex)
-    CF.isFlying    = True
-    CF.statoDiVolo = 'taking off'
+    CF.takeOff(with_motion_commander=True)
+    time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
     CF.motionCommander.start_circle_left(radius_m=0.7, velocity=1)
     CF.statoDiVolo = 'test 3'
     CF.currentSequence_killingPill.wait()
@@ -121,29 +116,19 @@ def sequenzaTre(CF):
 #  # ####### Motion commander -->  un giro relativo con diametro 3 mt con il motion commander
 def sequenzaQuattro(CF):
     print('Drogno: %s. Inizio giretto (seq4) da 1.5mt' % CF.ID)
-    CF.statoDiVolo = 'taking off'
-    try:
-        CF.motionCommander.take_off(height=1.1,velocity=0.4)
-    except Exception as ex:
-        print('motion commander says %s'%ex)
-
-    CF.isFlying    = True
+    time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
+    CF.takeOff(with_motion_commander=True)
     CF.statoDiVolo = 'test 4'
     CF.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
     CF.currentSequence_killingPill.wait()
-    land_and_clear(CF)
+    land_and_clear(CF,with_motion_commander=True)
     print('Drogno: %s. Fine circoletto (seq4) da 1.5 mt' % CF.ID)
     
     # quadrato con il motion commander -- (relativo)
 def sequenzaCinque(CF):
         def seq5():
-            CF.statoDiVolo = 'taking off'
-            try:
-                CF.motionCommander.take_off(height=1.1,velocity=0.4)
-            except Exception as ex:
-                print('motion commander says %s'%ex)    
-            CF.isFlying    = True
-
+            CF.takeOff(with_motion_commander=True)
+            time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
             CF.statoDiVolo = 'seq5'
             while not CF.currentSequence_killingPill.is_set():
                 print('faccio quadrati col motion commader fino a che non mi si dice il contrario')
@@ -167,9 +152,9 @@ def sequenzaCinque(CF):
                 if CF.currentSequence_killingPill.is_set(): break
                 time.sleep(0.8)
             print('fine quadrato di test')
-            land_and_clear(CF)
+            land_and_clear(CF,with_motion_commander=True)
         print('Drogno: %s. Inizio quadrato relativo di test' % CF.ID)
-        threading.Thread(target=seq5, daemon=True).start()
+        threading.Thread(target=seq5).start()
 #  non proprio una sequenza ma controllo manuale con gamepad:
 
 def sequenzaSei(CF):
@@ -188,32 +173,36 @@ def sequenzaSei(CF):
         comandi = {
             'destraSinistra':0,
             'avantiDietro': 0,
-            'leftRight': 0,
+            'turn_left_right': 0,
             'changeHeight': 0
         }
         def getGamepadCommands():
             pygame.event.pump()
 
             for k in range(controller.get_numaxes()):
+                # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
+
                 if k == 2: 
-                    sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
                     comandi['destraSinistra'] = controller.get_axis(k) * -1.
                 elif k == 3:
-                    comandi['avantiDietro'] = controller.get_axis(k) * -1.
+                    comandi['avantiDietro']   = controller.get_axis(k) * -1.
                 elif k == 1:
-                    comandi['changeHeight'] = controller.get_axis(k)
+                    comandi['changeHeight']   = controller.get_axis(k)
                 elif k == 0:
-                    comandi['leftRight'] = controller.get_axis(k)
+                    comandi['turn_left_right'] = controller.get_axis(k)
+            print (comandi)
+            
         
-        CF.motionCommander.take_off(height=1.1,velocity=0.4)
-
+        CF.takeOff(with_motion_commander=True)
+        time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
+        CF.statoDiVolo = 'seq6'
         while not CF.currentSequence_killingPill.is_set():
             getGamepadCommands()
             
             if comandi['destraSinistra'] != 0:   velocity_y   = comandi['destraSinistra'] * MAX_VELOCITY_XY
             if comandi['avantiDietro']   != 0:   velocity_x   = comandi['avantiDietro']   * MAX_VELOCITY_XY
             if comandi['changeHeight']   != 0:   velocity_z   = comandi['changeHeight']   * MAX_VELOCITY_Z
-            if comandi['leftRight']      != 0:   velocity_yaw = comandi['leftRight']      * MAX_VELOCITY_YAW
+            if comandi['turn_left_right']      != 0:   velocity_yaw = comandi['turn_left_right']      * MAX_VELOCITY_YAW
 
             print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
             CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)

@@ -288,7 +288,7 @@ class Drogno(threading.Thread):
         # linkone.set_arc(1) ## retries
         # self.linkone._retry_before_disconnect = 3
         self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery).start()
-        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status).start()
+        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status,daemon=True).start()
         if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.logger_manager.log_status).start()
         self.statoDiVolo = 'landed'
     def _connection_failed(self, link_uri, msg):
@@ -395,13 +395,19 @@ class Drogno(threading.Thread):
             
   
     ####################################################################     mmmmooovement
-    def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_duration=GB.DEFAULT_SCRAMBLING_TIME):
+    def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_duration=GB.DEFAULT_SCRAMBLING_TIME, with_motion_commander = False):
         def scramblingsequence():
             self.starting_x     = self.x
             self.starting_y     = self.y
             self.statoDiVolo    = 'scrambling!'
             self.scramblingTime = time.time()
-            self._cf.high_level_commander.takeoff(height, scrambling_duration)
+            if with_motion_commander:
+                 try:
+                    self.motionCommander.take_off(height=height, velocity=0.3)
+                 except Exception as ex:
+                    print('motion commander says %s'%ex)
+            else:
+                self._cf.high_level_commander.takeoff(height, scrambling_duration)
             self.isFlying       = True
             time.sleep( scrambling_duration)
             self.statoDiVolo    = 'hovering'
@@ -434,6 +440,8 @@ class Drogno(threading.Thread):
                 if self.statoDiVolo == 'landing': return
                 self.statoDiVolo = 'landing'
                 if with_motion_commander:
+                    self.motionCommander.stop()
+                    time.sleep(1)
                     self.motionCommander.land(0.3)
                 else: ## with standard high level motion commander
                     self._cf.high_level_commander.land(landing_height, speed)
@@ -457,7 +465,6 @@ class Drogno(threading.Thread):
         if not GB.WE_ARE_FAKING_IT:
             if self.isFlying or self.isTestMode:
                 print('%s atterra! ' % self.name)
-                self.statoDiVolo = 'landing'
                 ld = threading.Thread(name=self.name+'_landingThread',target=landing_sequence).start()
                 # ld.join()
             else:
@@ -536,8 +543,7 @@ class Drogno(threading.Thread):
     ####################################################################     sequences
   
     def testSequence(self,requested_sequenceNumber):
-        print('Sequenza test attuale %s, nuova %s quindi:' % (self.current_sequence, requested_sequenceNumber))
-        print(self.current_sequence == requested_sequenceNumber)
+        print('Sequenza test attuale %s, nuova %s ' % (self.current_sequence, requested_sequenceNumber))
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'sequenza simulata!'
             return
@@ -658,6 +664,7 @@ class Drogno(threading.Thread):
         self.isFlying = False
         # self.killingPill.set()
         self.currentSequence_killingPill.set()
+        self.logger_manager.set_logging_level(-1)
         time.sleep(0.2)
             # self._cf.close_link()
         self.exit()

@@ -88,11 +88,12 @@ def print_greetings():
     pixels = np.array(img, dtype=np.uint8)
     chars = np.array([' ','#'], dtype="U1")[pixels]
     strings = chars.view('U' + str(chars.shape[1])).flatten()
+    os.system("cls")
     print( "\n".join(strings))
     print('\n')
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare ciao ciao 
+    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare il ciao, ciao 
 
     main()
     while not finished:

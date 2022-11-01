@@ -150,7 +150,6 @@ class Logger_manager():
         print('Error when logging %s for CF %s: %s' % (logconf.name, self.ID, msg))
 
     def set_logging_level(self, new_level):
-        print('yo')
         if new_level == -1:
             for ll in self.logging_levels:
                 self.logging_levels[ll].stop()
