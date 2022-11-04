@@ -199,18 +199,22 @@ def sequenzaSei(CF):
         while not CF.currentSequence_killingPill.is_set():
             getGamepadCommands()
             
-            if comandi['destraSinistra'] != 0:   velocity_y   = comandi['destraSinistra'] * MAX_VELOCITY_XY
-            if comandi['avantiDietro']   != 0:   velocity_x   = comandi['avantiDietro']   * MAX_VELOCITY_XY
-            if comandi['changeHeight']   != 0:   velocity_z   = comandi['changeHeight']   * MAX_VELOCITY_Z
-            if comandi['turn_left_right']      != 0:   velocity_yaw = comandi['turn_left_right']      * MAX_VELOCITY_YAW
+            # if comandi['destraSinistra']  != 0:   velocity_y   = comandi['destraSinistra']  * MAX_VELOCITY_XY
+            # if comandi['avantiDietro']    != 0:   velocity_x   = comandi['avantiDietro']    * MAX_VELOCITY_XY
+            # if comandi['changeHeight']    != 0:   velocity_z   = comandi['changeHeight']    * MAX_VELOCITY_Z
+            # if comandi['turn_left_right'] != 0:   velocity_yaw = comandi['turn_left_right'] * MAX_VELOCITY_YAW
+            velocity_y   = comandi['destraSinistra']  * MAX_VELOCITY_XY
+            velocity_x   = comandi['avantiDietro']    * MAX_VELOCITY_XY
+            velocity_z   = comandi['changeHeight']    * MAX_VELOCITY_Z
+            velocity_yaw = comandi['turn_left_right'] * MAX_VELOCITY_YAW
 
             print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
             CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
-            time.sleep(0.08)
+            time.sleep(0.15)
         print('esco dal controllo con joypad del drogno %s' % CF.ID)
         land_and_clear(CF, with_motion_commander=True)
     print('Drogno: %s.Controllo con joypad' % CF.ID)
-    threading.Thread(target=seq6, daemon=True).start()
+    threading.Thread(target=seq6).start()
 
 sequenze_test = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque, sequenzaSei]
    
