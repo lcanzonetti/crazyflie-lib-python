@@ -305,10 +305,12 @@ class Drogno(threading.Thread):
         Crazyflie moves out of range)"""
         print('Me son perso %s dice: %s' % (link_uri, msg))
         self.is_connected = False
-        self.statoDiVolo = 'sconnesso'
+        self.statoDiVolo = 'lost'
         self.isReadyToFly = False
+        self.exit()
         print('Me son perso %s dice: %s' % (link_uri, msg))
-        if not self.statoDiVolo == 'connecting':  self.reconnect()
+        # if not self.statoDiVolo == 'connecting':  self.reconnect()
+
 
     def _disconnected(self, link_uri):
         """Callback when the Crazyflie is disconnected (called in all cases)"""
@@ -437,15 +439,16 @@ class Drogno(threading.Thread):
     def land(self, speed=2.1, landing_height=0.05,thenGoToSleep=False, with_motion_commander=False):
         def landing_sequence():
             try:
-                if self.statoDiVolo == 'landing': return
+                if self.statoDiVolo == 'landing':
+                    return
                 self.statoDiVolo = 'landing'
                 if with_motion_commander:
                     self.motionCommander.stop()
                     time.sleep(1)
                     self.motionCommander.land(0.3)
                 else: ## with standard high level motion commander
-                    self._cf.high_level_commander.land(landing_height, speed)
-                time.sleep(2.)
+                    self._cf.high_level_commander.land(absolute_height_m=landing_height, duration_s=speed)
+                time.sleep(speed)
                 self.isFlying     = False
                 self.statoDiVolo  = 'landed'
                 self.logger_manager.set_logging_level(0)  ## sets logging level to landed mode
@@ -703,7 +706,10 @@ class Drogno(threading.Thread):
             time.sleep(0.2)
             PowerSwitch(self.link_uri).close()
             time.sleep(0.2)
+            try:
+                PowerSwitch(self.link_uri).stm_power_down()
+            except Exception as e:
+                print('could not switch down %s!'% self.name)
 
-            PowerSwitch(self.link_uri).stm_power_down()
 
         
