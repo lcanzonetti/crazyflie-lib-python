@@ -131,26 +131,12 @@ def sequenzaCinque(CF):
             time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
             CF.statoDiVolo = 'seq5'
             while not CF.currentSequence_killingPill.is_set():
-                print('faccio quadrati col motion commader fino a che non mi si dice il contrario')
-                CF.motionCommander.left(1.5,1.5)
-                time.sleep(0.8)
-                CF.motionCommander.start_turn_left(150)
-                time.sleep(0.8)
-                CF.motionCommander.stop()
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.forward(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.right(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.back(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
+                print('faccio quadrati col motion commander fino a che non mi si dice il contrario')
+                CF.motionCommander.forward(1.5,1)
+                time.sleep(1.1)
+                CF.motionCommander.start_turn_left(90)
+                time.sleep(1)
+                CF.motionCommander.stop()         
             print('fine quadrato di test')
             land_and_clear(CF,with_motion_commander=True)
         print('Drogno: %s. Inizio quadrato relativo di test' % CF.ID)

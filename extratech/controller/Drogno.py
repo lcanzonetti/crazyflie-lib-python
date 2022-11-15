@@ -444,8 +444,11 @@ class Drogno(threading.Thread):
                 self.statoDiVolo = 'landing'
                 if with_motion_commander:
                     self.motionCommander.stop()
-                    time.sleep(1)
-                    self.motionCommander.land(0.3)
+                    time.sleep(0.5)
+                    try:
+                        self.motionCommander.land(0.3)
+                    except Exception as e:
+                        print('%s could not complete landing with motion commander (%s)'%(self.name,e))
                 else: ## with standard high level motion commander
                     self._cf.high_level_commander.land(absolute_height_m=landing_height, duration_s=speed)
                 time.sleep(speed)
