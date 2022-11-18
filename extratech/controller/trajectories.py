@@ -99,8 +99,8 @@ def sequenzaDue(CF): #   blocking?
         print('torno a 0°')
         CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1.5)
         if CF.currentSequence_killingPill.is_set(): break
-        time.sleep(3)
-    land_and_clear(CF)
+        time.sleep(2)
+    land_and_clear(CF, with_motion_commander=False)
     print('fine quadratone di test')
 
 # ####### Motion commander -->  un giro relativo con diametro 1.5 mt

@@ -150,16 +150,22 @@ class Logger_manager():
         print('Error when logging %s for CF %s: %s' % (logconf.name, self.ID, msg))
 
     def set_logging_level(self, new_level):
+        old_level = self.current_logging
+
         if new_level == -1:
             for ll in self.logging_levels:
                 self.logging_levels[ll].stop()
-                
-        old_level = self.current_logging
-        self.current_logging = new_level
-        self.logging_levels[old_level].stop()
-        time.sleep(0.5)
-        self.logging_levels[new_level].start()
-        print('it happens I\'ve just stopped logging level %s to go for logging level %s instead, how fancy.' % (old_level, new_level))
+                print('it happens I\'ve just stopped every logging level ')
+                return
+        elif new_level == old_level:
+            self.logging_levels[new_level].start()
+            return
+        else:
+            self.current_logging = new_level
+            self.logging_levels[old_level].stop()
+            time.sleep(0.5)
+            self.logging_levels[new_level].start()
+            print('it happens I\'ve just stopped logging level %s to go for logging level %s instead, how fancy.' % (old_level, new_level))
 
     def get_logging_level(self):
         return self.logging_levels[self.current_logging]
