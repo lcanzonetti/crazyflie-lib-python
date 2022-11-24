@@ -1,5 +1,10 @@
+############    Generic Imports
 import sys, os
+
+############    Local Imports
 import GLOBALS                                    as GB
+
+############    CrazyFlie Imports
 from   cflib.utils.power_switch                   import PowerSwitch
 
 def IDFromURI(uri):

@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
+############    Generic Imports
 import threading, time, sys, importlib, os
-# cflib                    = importlib.import_module('cflib')
-# test_single_cf_grounded  = importlib.import_module('test_single_cf_grounded')
+from   colorama             import Fore, Back, Style
+from   colorama             import init as coloInit
+coloInit(convert=True)
 
+############    CrazyFlie Imports
 from   cflib.crazyflie                            import Crazyflie
-from   cflib.crazyflie.syncCrazyflie              import SyncCrazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
-from   cflib.crazyflie.mem                        import Poly4D
-from   cflib.utils                                import uri_helper
-import cflib.crtp
 from   cflib.crazyflie.log                        import LogConfig
+
+############    Environment Imports
 from   dotenv                                     import load_dotenv
 load_dotenv()
 
@@ -19,10 +20,10 @@ SYS_TEST_PATH      = os.environ.get('SYS_TEST_PATH')                          ##
 SINGLE_CF_GROUNDED = os.environ.get('SINGLE_CF_GROUNDED')
 sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
 
+############    Local Imports
+import test_container
 from   test_single_cf_grounded                    import test_link
 from   common_utils                               import convert_motor_pass
-
-
 
  
 class dataDrone(threading.Thread):
@@ -52,190 +53,42 @@ class dataDrone(threading.Thread):
         self.firmware0              = None
         self.firmware1              = None
         self.firmware_modified      = None
+        self.is_connected           = False
         self.test_link              = test_link.TestLink()
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
+        self.test_manager           = test_container.Test_Container(self, self._cf, self.ID, self.link_uri)
+        
         self._cf.connected.add_callback(self._connected)
+        self._cf.param.all_updated.add_callback(self._all_params_there)
         self._cf.fully_connected.add_callback(self._fully_connected)
-        self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)
-
-    ### Incapsulato cambi colore in funzioni 
-    def fai_rosso(self):
-        self._cf.param.set_value('ring.effect', '7')
-        self._cf.param.set_value('ring.solidRed', '255')
-        self._cf.param.set_value('ring.solidGreen', '0')
-        self._cf.param.set_value('ring.solidBlue', '0')
-    
-    def fai_verde(self):
-        self._cf.param.set_value('ring.effect', '7')
-        self._cf.param.set_value('ring.solidRed', '0')
-        self._cf.param.set_value('ring.solidGreen', '255')
-        self._cf.param.set_value('ring.solidBlue', '0')
-    
-    def fai_blu(self):
-        self._cf.param.set_value('ring.effect', '7')
-        self._cf.param.set_value('ring.solidRed', '0')
-        self._cf.param.set_value('ring.solidGreen', '0')
-        self._cf.param.set_value('ring.solidBlue', '255')
-    
-    def spegni_led(self):
-        self._cf.param.set_value('ring.effect', '7')
-        self._cf.param.set_value('ring.solidRed', '0')
-        self._cf.param.set_value('ring.solidGreen', '0')
-        self._cf.param.set_value('ring.solidBlue', '0')
-
-    def test_over_checker(self):
-        while not self.is_testing_over:
-            if not (all ( x != 0 for x in self.test_tracker)):
-                time.sleep(1)
-                pass
-            else:
-                self.is_testing_over = True
-                if self.battery_test_passed and self.propeller_test_passed:
-                    self.fai_verde()
-                    time.sleep(10)
-                    self.lampeggio_finito = True
-                else:
-                    for i in range(20):
-                        if i % 2 == 0:
-                            self.fai_rosso()
-                            time.sleep(0.5)
-                        else:
-                            self.spegni_led()
-                            time.sleep(0.5)
-                    self.lampeggio_finito = True
-                print ("test finiti per CF %s " % self.name)
-                print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.firmware_revision0, self.firmware_revision1, self.firmware_modified))
-                self.close_link()
-    
-    def radio_test(self):
-        self.bandwidth = self.test_link.bandwidth(self.link_uri)
-        self.latency   = self.test_link.latency(self.link_uri)
-
-        print('radio test finito')                          
-        self._cf.param.set_value('ring.effect', '7')            ### Fai violetto se test radio finito
-        self._cf.param.set_value('ring.solidRed', '100')
-        self._cf.param.set_value('ring.solidGreen', '0')
-        self._cf.param.set_value('ring.solidBlue', '100')
-        time.sleep(3)
-        self.spegni_led()
-        self.test_tracker[3] = 1
-
-    def led_test(self):
-        def led_test_sequence():
-            self.spegni_led()
-            time.sleep(1)
-            # Set solid color effect
-            self.fai_rosso()
-            time.sleep(2)
-            self.fai_verde()
-            time.sleep(2)
-            self.fai_blu()
-            time.sleep(2)
-            self.spegni_led()
-            time.sleep(2)
-            # # Set fade to color effect
-            # self._cf.param.set_value('ring.effect', '14')
-            # # Set fade time i seconds
-            # self._cf.param.set_value('ring.fadeTime', '1.0')
-            # # Set the RGB values in one uint32 0xRRGGBB
-            # self._cf.param.set_value('ring.fadeColor', int('0000A0', 16))
-            # time.sleep(1)
-            # self._cf.param.set_value('ring.fadeColor', int('00A000', 16))
-            # time.sleep(1)
-            # self._cf.param.set_value('ring.fadeColor', int('A00000', 16))
-            # time.sleep(1)
-            print('led test finito')
-            self.test_tracker[2] = 1   # led test completato
-        threading.Thread(target=led_test_sequence).start()
-
-    def battery_test(self):
-        self._cf.param.set_value('health.startBatTest', '1')
-        def batt_control_loop():
-            while self.battery_sag == 0.0:
-                time.sleep(0.3)
-            print("il drone %s ha finito il Battery Test. " % self.name)
-            if self.battery_sag < 0.9:
-                self.battery_test_passed = True
-                print("battery test per CF %s passato! il valore è %s" % (self.name, self.battery_sag))
-            else:
-                print("battery test per CF %s NON passato. il valore è %s" %  (self.name, self.battery_sag))
-            self.test_tracker[1] = 1   # battery test completato
-        threading.Thread(target=batt_control_loop).start()
-
-    def propeller_test(self):
-        self._cf.param.set_value('health.startPropTest', '1')
-        def prop_control_loop():
-            while   self.new_motorTestCount     == None                         or  \
-                    self.current_motorTestCount == None:                       
-                time.sleep(0.3)
-            while (self.new_motorTestCount - self.current_motorTestCount) != 1:
-                time.sleep(0.3)
-                # print(str(self.new_motorTestCount) + ' ' + str(self.current_motorTestCount))
-            print("il drone %s ha finito il Propeller Test. " % self.name)
-
-            time.sleep(1)
-            if all (self.propeller_test_result):                ### Resituisce True solo se tutti i risultati motori stanno a '1'
-                self.propeller_test_passed = True
-                
-
-            self.test_tracker[0] = 1   ##propeller test completato
-        threading.Thread(target=prop_control_loop).start()
-     
-    def configura_log(self):
-        log_conf = LogConfig(name='MotorPass', period_in_ms = 500)
-        log_conf.data_received_cb.add_callback(self._crazyflie_logData_receiver)
-        log_conf.add_variable('health.motorPass', 'uint8_t')
-        log_conf.add_variable('health.motorTestCount', 'uint16_t')
-        log_conf.add_variable('pm.vbat', 'FP16')
-        log_conf.add_variable('radio.rssi', 'uint8_t')
-        log_conf.add_variable('health.batterySag', 'FP16')
-        self._cf.log.add_config(log_conf)
-        # time.sleep(0.5)
-        log_conf.start()
-
-    def start_sequenza_test(self):       ### sequenza principale con tempi
-
-        self.fai_blu()                  ### Blue is for testing
-
-        print("il drone %s configura il log... " % self.name)
-        self.configura_log()
-
-        print("il drone %s inizia il Propeller Test... " % self.name)
-        self.propeller_test()
-
-        time.sleep(7)
-
-        print("il drone %s inizia il battery test... " % self.name)
-        self.battery_test()
-
-        time.sleep(1.5)
-
-        print("il drone %s inizia il led test... " % self.name)
-        self.led_test()
-
-        time.sleep(10)                                                 ### Attende che il test led sia finito prima di chiamare test radio
-
-        print("il drone %s inizia i test radio... " % self.name)
-        self.radio_test()       
+        self.ledMem = self._cf.mem.get_mems(MemoryElement.TYPE_DRIVER_LED)     
 
     def _connected(self, link_uri):   ## callback allo scaricamento del TOC
-        self._cf.is_connected = True
+        # self._cf.is_connected = True
         print("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
         print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
+   
+    def _all_params_there(self):
+        print('Parametri scaricati per %s' % self.name)
+        print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
+        self.is_connected = True
+        self.test_thread = threading.Thread(target = self.test_manager.start_sequenza_test)
+        self.test_thread_checker = threading.Thread(target = self.test_manager.test_over_checker)
+        self.test_thread.start()
+        self.test_thread_checker.start()
 
     def _fully_connected(self, link_uri):   ## callback con tutto scaricato, fa partire la sequenza test
-        # self.connectToEverything()
-        checker           = threading.Thread(target=self.test_over_checker).start()
-        start_test_thread = threading.Thread(target=self.start_sequenza_test).start()
+        
         self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
         self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
         self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
-        # radio_thread = threading.Thread(target=self.radio_test).start()
-
+ 
     def connect(self):
         print("provo a connettermi al drone %s " % self.name)
-        self._cf.open_link(self.link_uri)
-        self.connection_time = time.time()
+        def connection():
+            self._cf.open_link(self.link_uri)
+            self.connection_time = time.time()
+        self.connection_thread = threading.Thread(target = connection).start()
 
     def close_link(self):
         self._cf.close_link()

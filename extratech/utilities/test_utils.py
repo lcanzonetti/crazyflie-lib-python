@@ -1,10 +1,15 @@
-import   GLOBALS                                              as     GB
+############    Generic Imports
 import   pandas                                               as     pd
-from     IPython.display                                      import display
-import   time, os, sys, signal, threading, importlib
-from     common_utils                                         import IDFromURI
 from     colorama              import Fore, Back, Style
 from     datetime                                             import datetime
+from     IPython.display                                      import display
+import   time, os, sys, signal, threading, importlib
+
+############    Local Imports
+from     common_utils                                         import IDFromURI
+import   GLOBALS                                              as     GB
+
+############    Environment Imports
 from     dotenv                                               import load_dotenv
 load_dotenv()
 
@@ -13,6 +18,7 @@ CFLIB_PATH         = os.environ.get('CFLIB_PATH')
 # print(CFLIB_PATH)
 sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
 
+############    CrazyFlie Imports
 import cflib
 import cflib.crtp
 
@@ -55,6 +61,7 @@ def check_if_test_is_completed():
 
     while not (all (GB.data_d[datadrogno].is_testing_over != False for datadrogno in GB.data_d)):
         time.sleep(1)
+        # print('controllo il test... %s' %dati_mech)
     is_test_completed = True
         
 
