@@ -8,6 +8,8 @@ dist/*
 venv*
 **/cache/*.json
 
+.DS_Store
+
 #eclipse generated files
 .project
 .pydevproject

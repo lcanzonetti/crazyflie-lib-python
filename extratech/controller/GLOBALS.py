@@ -11,6 +11,7 @@ PRINTING_ENABLED           = True
 FILE_LOGGING_ENABLED       = True
 AUTO_RECONNECT             = False
 INITIAL_TEST               = False
+IS_TEST_MODE               = False
 AGGREGATION_ENABLED        = False
 
 ######################################    NETWORK
@@ -95,10 +96,10 @@ eventi.run()
 connected_uris = []
 ################################################## uris to be woke up at startup
 uris = [    
-        # 'radio://0/80/2M/E7E7E7E7E0',
+        # 'radio://0/90/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        # 'radio://0/90/2M/E7E7E7E7E3',
+        'radio://0/90/2M/E7E7E7E7E3',
         # 'radio://1/120/2M/E7E7E7E7E4', 
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/100/2M/E7E7E7E7E6',
@@ -116,7 +117,7 @@ uris = [
 #########################################################################
 uri_map = \
 {    
-   "0":     'radio://0/80/2M/E7E7E7E7E0',
+   "0":     'radio://0/90/2M/E7E7E7E7E0',
    "1":     'radio://0/80/2M/E7E7E7E7E1',
    "2":     'radio://0/80/2M/E7E7E7E7E2',
    "3":     'radio://0/90/2M/E7E7E7E7E3',

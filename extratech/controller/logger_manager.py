@@ -20,8 +20,7 @@ class Logger_manager():
         self.ID = ID
         self.cf = cf
         self.parent_drogno = parent_drogno
-        print('tipo')
-        print(self.parent_drogno)
+        
         self.starting_logging = LogConfig(name='start_log', period_in_ms=200)
         self.fast_logging     = LogConfig(name='fast_log',  period_in_ms=100)
         self.slow_logging     = LogConfig(name='slow_log',  period_in_ms=1000)
@@ -117,9 +116,9 @@ class Logger_manager():
             # print('pm state:       %s' % data['pm.state'])
  
         elif logconf == self.fast_logging:
-            self.parent_drogno.x                 = float(data['stateEstimateZ.x'])
-            self.parent_drogno.y                 = float(data['stateEstimateZ.x'])
-            self.parent_drogno.z                 = float(data['stateEstimateZ.x'])
+            self.parent_drogno.x                 = float(data['stateEstimateZ.x'])/1000
+            self.parent_drogno.y                 = float(data['stateEstimateZ.x'])/1000
+            self.parent_drogno.z                 = float(data['stateEstimateZ.x'])/1000
             self.parent_drogno.yaw               = float(data['stateEstimate.yaw'])
            
         else:
@@ -151,15 +150,22 @@ class Logger_manager():
         print('Error when logging %s for CF %s: %s' % (logconf.name, self.ID, msg))
 
     def set_logging_level(self, new_level):
+        old_level = self.current_logging
+
         if new_level == -1:
             for ll in self.logging_levels:
                 self.logging_levels[ll].stop()
-                
-        old_level = self.current_logging
-        self.current_logging = new_level
-        self.logging_levels[old_level].start()
-        time.sleep(0.5)
-        self.logging_levels[new_level].stop()
+                print('it happens I\'ve just stopped every logging level ')
+                return
+        elif new_level == old_level:
+            self.logging_levels[new_level].start()
+            return
+        else:
+            self.current_logging = new_level
+            self.logging_levels[old_level].stop()
+            time.sleep(0.5)
+            self.logging_levels[new_level].start()
+            print('it happens I\'ve just stopped logging level %s to go for logging level %s instead, how fancy.' % (old_level, new_level))
 
     def get_logging_level(self):
         return self.logging_levels[self.current_logging]
@@ -168,15 +174,34 @@ class Logger_manager():
     # A good rule of thumb is that one radio can handle at least 500 packets per seconds 
     # in each direction and each log block uses one packet per log.
     # So it should be possible to log at 100Hz a couple of log blocks. 
-        if not GB.WE_ARE_FAKING_IT and GB.PRINTING_ENABLED:
+        if GB.WE_ARE_FAKING_IT and GB.PRINTING_ENABLED:
+            print (Fore.LIGHTBLUE_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}")
+            return
+        
+        if GB.PRINTING_ENABLED:
             while not self.parent_drogno.killingPill.is_set():
                 time.sleep(GB.print_rate)
                 if self.parent_drogno.is_connected and self.parent_drogno.isEngaged:
+                    if self.current_logging == 0:
+                        print (Fore.GREEN  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tlink quality: {self.parent_drogno.linkQuality}\tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}")
+                    elif self.current_logging == 1 or self.current_logging == 2:
+                        print (Fore.YELLOW  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tlink quality: {self.parent_drogno.linkQuality}\tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tflight time: {self.parent_drogno.flyingTime}")
+                    # print (Fore.GREEN  +  f"battery state: {self.parent_drogno.batteryStatus}")
                     if GB.INITIAL_TEST:   print(f'battery SAG: {self.parent_drogno.batterySag}\tisBatteryTestPassed:{self.parent_drogno.isBatteryTestPassed}\tmotor_pass:{self.parent_drogno.motorPass}')
-                    print (Fore.GREEN  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\t\tbattery {self.parent_drogno.batteryVoltage}\
-                                            \tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\
-                                            \tmsg/s {self.parent_drogno.commandsCount/GB.print_rate}\tlink quality: {self.parent_drogno.linkQuality}\tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}\
-                                            \tflight time: {self.parent_drogno.flyingTime}s\t batterySag: {self.parent_drogno.batterySag}\t motorPass: {self.parent_drogno.motorPass}")
                 else:
                     print (Fore.LIGHTBLUE_EX  +  f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}")
+                    
+    def log_status(self):
+        if GB.FILE_LOGGING_ENABLED:
+            self.parent_drogno.LoggerObject.info('Logger started')
+            while not self.parent_drogno.killingPill.is_set():
+                time.sleep(GB.print_rate)
+                if not GB.WE_ARE_FAKING_IT and self.parent_drogno.is_connected:
+                    self.parent_drogno.LoggerObject.info(f"{self.parent_drogno.name}: {self.parent_drogno.statoDiVolo}\tbattery: {self.parent_drogno.batteryVoltage}\
+                    \tkalman var: {round(self.parent_drogno.kalman_VarX,3)} {round(self.parent_drogno.kalman_VarY,3)} {round(self.parent_drogno.kalman_VarZ,3)}\
+                    \tbatterySag: {round(self.parent_drogno.batterySag,3)}\tlink quality: {self.parent_drogno.linkQuality}\tflight time: {self.parent_drogno.flyingTime}s\
+                    \tpos {self.parent_drogno.x:0.2f} {self.parent_drogno.y:0.2f} {self.parent_drogno.z:0.2f}\tyaw: {self.parent_drogno.yaw:0.2f}\tmsg/s {round((self.parent_drogno.commandsCount/GB.print_rate),1)}")
+                    self.parent_drogno.commandsCount = 0
+            print('Log chiuso per %s ' % self.parent_drogno.name)
+
 

@@ -1,49 +1,53 @@
 
-import time, threading
+import time, threading, sys
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
 coloInit(convert=True)
-
 from   cflib.crazyflie.mem                        import Poly4D
 from   cflib.crazyflie.mem                        import MemoryElement
-
 import GLOBALS as GB
 
+####################################################################     test sequencesss
 
-
-####################################################################     trst sequencesss
-
-
-
+def land_and_clear(CF,with_motion_commander=False ):
+    CF.land(with_motion_commander)
+    CF.statoDiVolo = 'idle'
+    CF.current_sequence = None
+    CF.currentSequence_killingPill.clear()
+ 
 def sequenzaUno(CF):   
     def seq1():
+        print('taking off')
+        CF.statoDiVolo = 'taking off'
+        CF.takeOff()     
+        CF.statoDiVolo = 'seq1'
+        CF.setRingColor(255,   0,   0)
+        # time.sleep(1)
         while not CF.currentSequence_killingPill.is_set():
-            CF.statoDiVolo = 'taking off'
-            CF.takeOff()     
-            CF.statoDiVolo = 'seq1'
-
-            CF.positionHLCommander.go_to(0.0, 0.0, 1, 1)
-            CF.setRingColor(255,   0,   0)
-            if CF.currentSequence_killingPill.is_set(): break
-            time.sleep(1)
-            
+            print('going to 1.5 1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(1.5, 1.5, 1.0,1)
             CF.setRingColor(255,   0,   0)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
 
+            print('going to 1.5 -1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(1.5, -1.5, 1.0,1)
             CF.setRingColor(  0, 255,  0)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
-            
+
+            print('going to -1.5 -1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(-1.50, -1.5, 1.0,1)
             CF.setRingColor(  0,  0, 255)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
+
+            print('going to -1.5 1.5 1.0 in 1 sec')
             CF.positionHLCommander.go_to(-1.5, 1.5, 1,1)
             if CF.currentSequence_killingPill.is_set(): break
             time.sleep(1)
+
+            print('going to 0 0 1.5 in 1 sec')
             CF.positionHLCommander.go_to(0,   0, 1.5,1 )
 
 
@@ -70,89 +74,81 @@ def sequenzaUno(CF):
             CF.setRingColor(255,   0, 255)
             time.sleep(0.5)
             
-        CF.statoDiVolo = 'landing'
-        CF.land()
-        CF.statoDiVolo = 'idle'
-        CF.currentSequence_killingPill.clear()
+        land_and_clear(CF)
         print('fine quadratone di test')
     print('Drogno: %s. Inizio quadratone di test' % CF.ID)
     threading.Thread(target=seq1, daemon=True).start()
     
-#  un giro di yaw
+#  HIgh Level Motion commander --> un giro di yaw
 def sequenzaDue(CF): #   blocking?
     print(Fore.LIGHTRED_EX + 'Drogno: %s. Inizio giretto sul posto' % CF.ID)
+    CF.takeOff(3.)
     while not CF.currentSequence_killingPill.is_set():
-        CF.takeOff(3.)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1)
+        print('giro a 90°')
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 90, 1.5)
         time.sleep(1)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1)
+        print('giro a 180°')
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 180, 1.5)
+        if CF.currentSequence_killingPill.is_set(): break
         time.sleep(1)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1)
+        if CF.currentSequence_killingPill.is_set(): break
+        print('giro a 270°')
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 270, 1.5)
+        if CF.currentSequence_killingPill.is_set(): break
         time.sleep(1)
-        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1)
-    CF.currentSequence_killingPill.clear()
+        print('torno a 0°')
+        CF._cf.high_level_commander.go_to(0.0,0.0,1.2, 00, 1.5)
+        if CF.currentSequence_killingPill.is_set(): break
+        time.sleep(2)
+    land_and_clear(CF, with_motion_commander=False)
+    print('fine quadratone di test')
 
-#  un giro relativo con diametro 1.5 mt
+# ####### Motion commander -->  un giro relativo con diametro 1.5 mt
 def sequenzaTre(CF):
     print('Drogno: %s. Inizio giretto da 0.75 di test' % CF.ID)
-    CF.motionCommander.take_off(height=1.1,velocity=0.4)
-    CF.statoDiVolo = 'taking off'
+    CF.takeOff(with_motion_commander=True)
+    time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
     CF.motionCommander.start_circle_left(radius_m=0.7, velocity=1)
     CF.statoDiVolo = 'test 3'
     CF.currentSequence_killingPill.wait()
-    CF.statoDiVolo = 'landing'
-    CF.motionCommander.land(0.3)
-    CF.statoDiVolo = 'idle'
+    land_and_clear(CF, with_motion_commander=True)
     print('Drogno: %s. Fine circoletto da 0.75 di test' % CF.ID)
-#  un giro relativo con diametro 3 mt
+#  # ####### Motion commander -->  un giro relativo con diametro 3 mt con il motion commander
 def sequenzaQuattro(CF):
-    print('Drogno: %s. Inizio giretto da 1.5 di test' % CF.ID)
-    CF.motionCommander.take_off(height=1.1,velocity=0.4)
-    CF.statoDiVolo = 'taking off'
+    print('Drogno: %s. Inizio giretto (seq4) da 1.5mt' % CF.ID)
+    time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
+    CF.takeOff(with_motion_commander=True)
+    CF.statoDiVolo = 'test 4'
     CF.motionCommander.start_circle_left(radius_m=1.5, velocity=2)
-    CF.statoDiVolo = 'test 3'
     CF.currentSequence_killingPill.wait()
-    CF.statoDiVolo = 'landing'
-    CF.motionCommander.land(0.3)
-    CF.statoDiVolo = 'idle'
-    print('Drogno: %s. Fine circoletto da 1.5 di test' % CF.ID)
+    land_and_clear(CF,with_motion_commander=True)
+    print('Drogno: %s. Fine circoletto (seq4) da 1.5 mt' % CF.ID)
     
+    # quadrato con il motion commander -- (relativo)
 def sequenzaCinque(CF):
         def seq5():
+            CF.takeOff(with_motion_commander=True)
+            time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
+            CF.statoDiVolo = 'seq5'
             while not CF.currentSequence_killingPill.is_set():
-                CF.statoDiVolo = 'taking off'
-                CF.takeOff()     
-                CF.statoDiVolo = 'seq5'
-                CF.motionCommander.left(1.5,1.5)
-                CF.motionCommander.start_turn_left(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.forward(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.right(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-                CF.motionCommander.back(1.5,1.5)
-                CF.motionCommander.start_turn_right(150)
-                if CF.currentSequence_killingPill.is_set(): break
-                time.sleep(0.8)
-
-            CF.statoDiVolo = 'landing'
-            CF.land()
-            CF.statoDiVolo = 'idle'
-            CF.currentSequence_killingPill.clear()
+                print('faccio quadrati col motion commander fino a che non mi si dice il contrario')
+                CF.motionCommander.forward(1.5,1)
+                time.sleep(1.1)
+                CF.motionCommander.start_turn_left(90)
+                time.sleep(1)
+                CF.motionCommander.stop()         
             print('fine quadrato di test')
+            land_and_clear(CF,with_motion_commander=True)
         print('Drogno: %s. Inizio quadrato relativo di test' % CF.ID)
-        threading.Thread(target=seq5, daemon=True).start()
+        threading.Thread(target=seq5).start()
 #  non proprio una sequenza ma controllo manuale con gamepad:
+
 def sequenzaSei(CF):
     def seq6():
         MAX_VELOCITY_XY   = 0.60
         MAX_VELOCITY_Z    = 0.95
         MAX_VELOCITY_YAW  = 120
+        velocity_y = velocity_x = velocity_z = velocity_yaw = 0
         # import pygame
         import pygame
         # Initialize pygame for joystick support
@@ -163,46 +159,48 @@ def sequenzaSei(CF):
         comandi = {
             'destraSinistra':0,
             'avantiDietro': 0,
-            'leftRight': 0,
+            'turn_left_right': 0,
             'changeHeight': 0
         }
         def getGamepadCommands():
             pygame.event.pump()
 
             for k in range(controller.get_numaxes()):
+                # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
+
                 if k == 2: 
-                    # sys.stdout.write('%d:%+2.2f ' % (k, controller.get_axis(k)))
                     comandi['destraSinistra'] = controller.get_axis(k) * -1.
                 elif k == 3:
-                    comandi['avantiDietro'] = controller.get_axis(k) * -1.
+                    comandi['avantiDietro']   = controller.get_axis(k) * -1.
                 elif k == 1:
-                    comandi['changeHeight'] = controller.get_axis(k)
+                    comandi['changeHeight']   = controller.get_axis(k)
                 elif k == 0:
-                    comandi['leftRight'] = controller.get_axis(k)
-
+                    comandi['turn_left_right'] = controller.get_axis(k)
+            print (comandi)
+            
+        
+        CF.takeOff(with_motion_commander=True)
+        time.sleep(GB.DEFAULT_SCRAMBLING_TIME)
+        CF.statoDiVolo = 'seq6'
         while not CF.currentSequence_killingPill.is_set():
             getGamepadCommands()
             
-            if comandi['destraSinistra'] != 0:
-                velocity_y = comandi['destraSinistra'] * MAX_VELOCITY_XY
-            if comandi['avantiDietro'] != 0:
-                velocity_x = comandi['avantiDietro'] * MAX_VELOCITY_XY
-            if comandi['changeHeight'] != 0:
-                velocity_z = comandi['changeHeight'] * MAX_VELOCITY_Z
-            if comandi['leftRight'] != 0:
-                velocity_yaw = comandi['leftRight'] * MAX_VELOCITY_YAW
+            # if comandi['destraSinistra']  != 0:   velocity_y   = comandi['destraSinistra']  * MAX_VELOCITY_XY
+            # if comandi['avantiDietro']    != 0:   velocity_x   = comandi['avantiDietro']    * MAX_VELOCITY_XY
+            # if comandi['changeHeight']    != 0:   velocity_z   = comandi['changeHeight']    * MAX_VELOCITY_Z
+            # if comandi['turn_left_right'] != 0:   velocity_yaw = comandi['turn_left_right'] * MAX_VELOCITY_YAW
+            velocity_y   = comandi['destraSinistra']  * MAX_VELOCITY_XY
+            velocity_x   = comandi['avantiDietro']    * MAX_VELOCITY_XY
+            velocity_z   = comandi['changeHeight']    * MAX_VELOCITY_Z
+            velocity_yaw = comandi['turn_left_right'] * MAX_VELOCITY_YAW
 
             print ('moving with speed x:%s\ty:%s\tz:%s\tyaw:%s' % (velocity_x, velocity_y, velocity_z, velocity_z))
             CF.motionCommander.start_linear_motion( velocity_x, velocity_y, velocity_z, velocity_yaw)
-            time.sleep(0.08)
-        
-        CF.statoDiVolo = 'landing'
-        CF.land()
-        CF.statoDiVolo = 'idle'
-        CF.currentSequence_killingPill.clear()
-        print('fine quadratone di test')
-    print('Drogno: %s. Inizio quadratone di test' % CF.ID)
-    threading.Thread(target=seq6, daemon=True).start()
+            time.sleep(0.15)
+        print('esco dal controllo con joypad del drogno %s' % CF.ID)
+        land_and_clear(CF, with_motion_commander=True)
+    print('Drogno: %s.Controllo con joypad' % CF.ID)
+    threading.Thread(target=seq6).start()
 
 sequenze_test = [sequenzaUno, sequenzaDue, sequenzaTre, sequenzaQuattro, sequenzaCinque, sequenzaSei]
    

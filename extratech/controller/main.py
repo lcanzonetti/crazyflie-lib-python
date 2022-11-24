@@ -22,6 +22,7 @@ import connections
 import trajectories
 import GLOBALS    as GB
 
+finished = False
 
 def main():
     print_greetings()
@@ -31,7 +32,11 @@ def main():
     
     else:
         print("Controller started. No fake shit.")
-        connections.radioStart()
+        try:
+            connections.radioStart()
+        except Exception as e:
+            print(e)
+            ciao_ciao('ciao', 'ciao')
         connections.add_crazyflies()       ## chek if we already got CFs reachable
         connections.restart_devices()
         connections.create_classes()
@@ -51,22 +56,27 @@ def main():
         reconnectThread = threading.Thread(target=connections.autoReconnect).start()  
 
 def ciao_ciao(signum, frame):
-    print('Bye bye.')
+    print('Bye bye. \n%s' % signum)
     GUI.reset_companion()
     OSC.finished = True
     GUI.ends_it_when_it_needs_to_end()
     GB.eventi.set_thread_exit_event() 
     GB.eventi.set_process_exit_event()
 
-    for drogno in GB.drogni:
-        if (drogno):
-            try: PowerSwitch(GB.drogni[drogno].link_uri).stm_power_down()
-            except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % GB.drogni[drogno].link_uri)
-            GB.drogni[drogno].exit()
-            GB.drogni[drogno].join()
+    try:
+        for drogno in GB.drogni:
+            if (drogno):
+                try: PowerSwitch(GB.drogni[drogno].link_uri).stm_power_down()
+                except Exception: print('While closing the program I wanted to shut down %s, which is unfortunately not there to be shut down' % GB.drogni[drogno].link_uri)
+                GB.drogni[drogno].exit()
+                GB.drogni[drogno].join()
+    except Exception as e:
+        print(e)
     print('I said bye.')
-   
+    global finished
+    finished = True
     sys.exit("Putin merda")
+     
 
 def print_greetings():
     text   = "extratech swarm controller"
@@ -78,14 +88,15 @@ def print_greetings():
     pixels = np.array(img, dtype=np.uint8)
     chars = np.array([' ','#'], dtype="U1")[pixels]
     strings = chars.view('U' + str(chars.shape[1])).flatten()
+    os.system("cls")
     print( "\n".join(strings))
     print('\n')
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare ciao ciao 
+    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare il ciao, ciao 
 
     main()
-    while True:
+    while not finished:
         time.sleep(0.1)
         pass
         

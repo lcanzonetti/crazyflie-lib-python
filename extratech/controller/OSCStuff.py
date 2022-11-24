@@ -118,10 +118,10 @@ def uploadSequence(coddii,quale):
             else:
                 print('il drogno %s non è connesso' % GB.drogni[drogno].name)
 def startTestSequence (coddii,quale):
-        print('chief says we\'re gonna do testsss at sequence %s' % quale)
+        print('comando testsss %s' % quale)
         for drogno in GB.drogni:
             if GB.drogni[drogno].is_connected:
-                print('TEST!')
+                # print('TEST!')
                 GB.drogni[drogno].testSequence(quale)
             else:
                 print('il drogno %s non è connesso' % GB.drogni[drogno].name)
@@ -201,8 +201,10 @@ def kill      (coddii, chi):
 def standBy   (coddii, chi):
     if chi == 'all':    
         print('addormenterei tutti' )
+        print('Attualmente nello sciame: %s' % GB.drogni)
+
         for drogno in GB.drogni:
-            GB.drogni[drogno].goToSleep()
+            GB.drogni[drogno].exit()
         ## svuotone!
         GB.drogni         = []
         GB.connected_uris = []
@@ -214,8 +216,8 @@ def standBy   (coddii, chi):
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print( '-----------------booooooooooom')
         else:
-            # print ( 'Il drogno %s che vuoi è già in lista, lo mettiamo in standby.' % chi)
-            if GB.drogni[int(chi)].standBy == False:
+            print ( 'Il drogno %s che vuoi è già in lista.' % chi)
+            if GB.drogni[int(chi)].standBy == False or GB.drogni[int(chi)].is_connected == False:
                 print('addormento %s' % chi)
                 GB.drogni[int(chi)].goToSleep()
                 del GB.drogni[int(chi)]
@@ -255,12 +257,18 @@ def engage    (coddii, chi):
         if not GB.drogni[chi].isEngaged: GB.drogni[chi].isEngaged = True
         else: GB.drogni[chi].isEngaged = False
 def set_log_level(coddii, level):
-    print('Setting log level at %s.' % level)
+    print('Setting log level at %s' % level)
     for drogno in GB.drogni:
         drogno.logger_manager.set_logging_level(level)
+        drogno.logger_manager.set_logging_level
 def enable_print_status(coddii, is_print_time):
     print('Setting printing to %s.' % bool(is_print_time))
-    GB.PRINTING_ENABLED = bool(is_print_time)                       
+    GB.PRINTING_ENABLED = bool(is_print_time)   
+def toggle_test_mode(coddii, toggle):
+         GB.IS_TEST_MODE =  not GB.IS_TEST_MODE                       
+         print('Setting test mode to %s.' % GB.IS_TEST_MODE)
+         for drogno in GB.drogni:
+             GB.drogni[drogno].isTestMode = GB.IS_TEST_MODE
   
 ###########################  single fella
 def printAndSendCoordinates():
@@ -296,12 +304,8 @@ def setRequestedPos(address, args):
 
     x = address.split('/')
     y = x[2].split('_')
-
     iddio = int(y[1])
-    
-    
     # print(timecode)
-    # with posLock: 
     timecode   = args[0]
     bufferone[iddio].requested_X = round(float(args[1]),3)
     bufferone[iddio].requested_Y = round(float(args[2]),3)
@@ -311,7 +315,6 @@ def setRequestedPos(address, args):
 def setRequestedCol(address, args):
     global msgCount
     iddio     = int(address[-7])
-    # with colLock:
     msgCount += 1
     bufferone[iddio].requested_R = args[1]
     bufferone[iddio].requested_G = args[2]
@@ -379,6 +382,7 @@ def start_server():      ######################    #### OSC init    #########   
     osc_method("/set_log_level",    set_log_level,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/enable_print_status", enable_print_status, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/engage",           engage,                 argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+    osc_method("/toggle_test_mode", toggle_test_mode,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/companion/isSendEnabled", setSendEnabled,  argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCompanionRate", setCompanionRate,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
     osc_method("/setCommandsRate",  setCommandsRate,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

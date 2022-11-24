@@ -25,7 +25,7 @@ from   cflib                                      import crtp as radio
 class Drogno(threading.Thread):
     def __init__(self, ID, link_uri, lastRecordPath):
         threading.Thread.__init__(self)
-        #####################################  identity
+        ###########################################################  identity
         self.cache_location         = os.path.join(GB.ROOT_DIR, 'crazyflies_cache', self.name)
         self._cf                    = Crazyflie(rw_cache=self.cache_location)
         self.link_uri               = link_uri
@@ -49,7 +49,8 @@ class Drogno(threading.Thread):
         self.statoDiVolo            = 'starting'
         self.isKilled               = False
         self.isReadyToFly           = False
-        self.isEngaged              = True
+        self.isEngaged              = False
+        self.isTestMode             = False
         self.isFlying               = False
         self.isTumbled              = False
         self.linkQuality            = 0
@@ -57,6 +58,7 @@ class Drogno(threading.Thread):
         self.batteryStatus          = 2
         #####################################  position
         self.positionHLCommander    = None 
+        self.motionCommander        = None
         self.x           = self.y           = self.z           = self.yaw = 0.0
         self.starting_x  = self.starting_y  = self.starting_z  = 0.0
         self.kalman_VarX = self.kalman_VarY = self.kalman_VarZ = 0
@@ -136,8 +138,7 @@ class Drogno(threading.Thread):
                     connectedToFeedback = True
                 except ConnectionRefusedError:
                     print('server del drogno %s feedback non ancora connesso!' % self.ID)
-        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status).start()
-        if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.log_status).start()
+ 
         self.connect()
                     
     def activate_mellinger_controller(self, use_mellinger):
@@ -286,8 +287,9 @@ class Drogno(threading.Thread):
         # self.linkone.set_retries(1)
         # linkone.set_arc(1) ## retries
         # self.linkone._retry_before_disconnect = 3
-        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery)  # perché è qui?
-        self.batteryThread.start()
+        self.batteryThread = threading.Thread(name=self.name+'_batteryThread',target=self.evaluateBattery).start()
+        if GB.PRINTING_ENABLED    : self.printThread     = threading.Thread(target=self.logger_manager.print_status,daemon=True).start()
+        if GB.FILE_LOGGING_ENABLED: self.loggingThread   = threading.Thread(target=self.logger_manager.log_status).start()
         self.statoDiVolo = 'landed'
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -303,10 +305,12 @@ class Drogno(threading.Thread):
         Crazyflie moves out of range)"""
         print('Me son perso %s dice: %s' % (link_uri, msg))
         self.is_connected = False
-        self.statoDiVolo = 'sconnesso'
+        self.statoDiVolo = 'lost'
         self.isReadyToFly = False
+        self.exit()
         print('Me son perso %s dice: %s' % (link_uri, msg))
-        if not self.statoDiVolo == 'connecting':  self.reconnect()
+        # if not self.statoDiVolo == 'connecting':  self.reconnect()
+
 
     def _disconnected(self, link_uri):
         """Callback when the Crazyflie is disconnected (called in all cases)"""
@@ -322,7 +326,7 @@ class Drogno(threading.Thread):
         self.logger_manager.add_log_configurations()
         self.logger_manager.set_logging_level(0) ## start
 
-        if not GB.WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
+        if GB.WE_ARE_FAKING_IT:                        #### Se stiamo facendo finta non proviamo a comunicare con un drone che non esiste!
             return
     
         self._cf.param.set_value('commander.enHighLevel', '1')
@@ -343,7 +347,7 @@ class Drogno(threading.Thread):
             default_velocity=GB.DEFAULT_VELOCITY,
             default_height=GB.DEFAULT_HEIGHT,
             controller=PositionHlCommander.CONTROLLER_PID) 
-
+            
         self.motionCommander = MotionCommander(
             self._cf,
             default_height=1.0
@@ -357,7 +361,11 @@ class Drogno(threading.Thread):
             return True
 
         if self.is_connected and not self.standBy:
-            if  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
+            if self.isTestMode:
+                self._cf.param.set_value('ring.effect', '13')  #solid color? Missing docs?
+                self.statoDiVolo = 'ready'
+                return True
+            elif  abs(self.x) > GB.BOX_X or abs(self.y) > GB.BOX_Y or self.z > GB.BOX_Y or self.isTumbled:
                 self.statoDiVolo = 'out of BOX'
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 return False
@@ -387,27 +395,21 @@ class Drogno(threading.Thread):
             # print ('nope nope nope!')
             pass
             
-    def log_status(self):
-        if GB.FILE_LOGGING_ENABLED:
-            self.LoggerObject.info('Logger started')
-            while not self.killingPill.is_set():
-                time.sleep(GB.print_rate)
-                if not GB.WE_ARE_FAKING_IT and self.is_connected:
-                    self.LoggerObject.info(f"{self.name}: {self.statoDiVolo}\tbattery: {self.batteryVoltage}\
-                    \tkalman var: {round(self.kalman_VarX,3)} {round(self.kalman_VarY,3)} {round(self.kalman_VarZ,3)}\
-                    \tbatterySag: {round(self.batterySag,3)}\tlink quality: {self.linkQuality}\tflight time: {self.flyingTime}s\
-                    \tpos {self.x:0.2f} {self.y:0.2f} {self.z:0.2f}\tyaw: {self.yaw:0.2f}\tmsg/s {round((self.commandsCount/GB.print_rate),1)}")
-                    self.commandsCount = 0
-            print('Log chiuso per %s ' % self.name)
-
+  
     ####################################################################     mmmmooovement
-    def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_duration=GB.DEFAULT_SCRAMBLING_TIME):
+    def takeOff(self, height=GB.DEFAULT_HEIGHT,  scrambling_duration=GB.DEFAULT_SCRAMBLING_TIME, with_motion_commander = False):
         def scramblingsequence():
             self.starting_x     = self.x
             self.starting_y     = self.y
             self.statoDiVolo    = 'scrambling!'
             self.scramblingTime = time.time()
-            self._cf.high_level_commander.takeoff(height, scrambling_duration)
+            if with_motion_commander:
+                 try:
+                    self.motionCommander.take_off(height=height, velocity=0.3)
+                 except Exception as ex:
+                    print('motion commander says %s'%ex)
+            else:
+                self._cf.high_level_commander.takeoff(height, scrambling_duration)
             self.isFlying       = True
             time.sleep( scrambling_duration)
             self.statoDiVolo    = 'hovering'
@@ -425,23 +427,34 @@ class Drogno(threading.Thread):
             scramblingThread = threading.Thread(target=fake_scramblingsequence, name=self.name+'_scramblingThread').start()
             return
 
-        if self.isFlying:
+        if self.isFlying and not self.isTestMode:
             print('%s can\'t take off, as is already in the air!'% self.name)
             return
-        if self.isReadyToFly:
+        if self.isReadyToFly or self.isTestMode:
             scramblingThread = threading.Thread(target=scramblingsequence, name=self.name+'_scramblingThread').start()
             print('%s SCRAMBLING!'% self.name)
         else:
             print('%s can\'t take off, not ready!'% self.name)
 
-    def land(self, speed=2.5, landing_height=0.05,thenGoToSleep=False):
+    def land(self, speed=2.1, landing_height=0.05,thenGoToSleep=False, with_motion_commander=False):
         def landing_sequence():
             try:
-                self._cf.high_level_commander.land(landing_height, speed)
-                time.sleep(3)
+                if self.statoDiVolo == 'landing':
+                    return
+                self.statoDiVolo = 'landing'
+                if with_motion_commander:
+                    self.motionCommander.stop()
+                    time.sleep(0.5)
+                    try:
+                        self.motionCommander.land(0.3)
+                    except Exception as e:
+                        print('%s could not complete landing with motion commander (%s)'%(self.name,e))
+                else: ## with standard high level motion commander
+                    self._cf.high_level_commander.land(absolute_height_m=landing_height, duration_s=speed)
+                time.sleep(speed)
                 self.isFlying     = False
-                self.statoDiVolo = 'landed'
-                self.logger_manager.set_logging_level(1)  ## sets logging level to landed mode
+                self.statoDiVolo  = 'landed'
+                self.logger_manager.set_logging_level(0)  ## sets logging level to landed mode
 
                 if (thenGoToSleep): self.goToSleep()
                 self.isReadyToFly = self.evaluateFlyness()
@@ -456,15 +469,14 @@ class Drogno(threading.Thread):
             self.isReadyToFly = self.evaluateFlyness()
 
         if not GB.WE_ARE_FAKING_IT:
-            if self.isFlying:
+            if self.isFlying or self.isTestMode:
                 print('%s atterra! ' % self.name)
-                self.statoDiVolo = 'landing'
                 ld = threading.Thread(name=self.name+'_landingThread',target=landing_sequence).start()
                 # ld.join()
             else:
                 print('%s can\'t land! (not flying)' % self.name)
         else:
-            if self.isFlying:
+            if self.isFlying or self.isTestMode:
                 print('%s atterra! ' % self.name)
                 self.statoDiVolo = 'landing'
                 ld = threading.Thread(name=self.name+'_landingThread',target=fake_landing_sequence).start()
@@ -472,7 +484,7 @@ class Drogno(threading.Thread):
     def goTo(self,x,y,z, yaw=0, duration=0.5):  #la zeta è in alto!
         self.commandsCount += 1
         duration = GB.commandsFrequency*3
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             if GB.CLAMPING:
                 common_utils.clamp(x, -GB.BOX_X, GB.BOX_X)
                 common_utils.clamp(y, -GB.BOX_Y, GB.BOX_Y)
@@ -483,42 +495,42 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'hovering'
    
     def goLeft(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newX = float(self.x) - float(quanto)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
             print('va bene, vado a %s' % newX)
             self.statoDiVolo = 'hovering'
             
     def goRight(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newX = float(self.x) + float(quanto)
             print('va bene, vado a %s' % newX)
             self._cf.high_level_commander.go_to(newX, self.y, self.z, 0, 1)
             self.statoDiVolo = 'hovering'
 
     def goForward(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newY = float(self.y) + float(quanto)
             print('va bene, vado a %s' % newY)
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
             self.statoDiVolo = 'hovering'
 
     def goBack(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newY = float(self.y) - float(quanto)
             print('va bene, vado a %s' % newY)
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, newY, self.z, 0, 1)
             self.statoDiVolo = 'hovering'
     def goUp(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newZ = float(self.z) + float(quanto)
             print('va bene, salgo a %s' % newZ)
             self.statoDiVolo = 'moving'
             self._cf.high_level_commander.go_to(self.x, self.y, newZ, 0, 1)
             self.statoDiVolo = 'hovering'
     def goDown(self, quanto=0.3):
-        if self.isFlying:
+        if self.isFlying or self.isTestMode:
             newZ = float(self.z) - float(quanto)
             print('va bene, scendo a %s' % newZ)
             self.statoDiVolo = 'moving'
@@ -526,40 +538,45 @@ class Drogno(threading.Thread):
             self.statoDiVolo = 'hovering'
 
     def goHome(self, speed=0.5):
-        if self.isFlying:                
+        if self.isFlying or self.isTestMode:                
             self._cf.high_level_commander.go_to(0,0,1, 0, 1)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna go home to %s %s' % (self.name, self.starting_x, self.starting_y ) )
     
     def goToStart(self, speed=0.5):
-        if self.isFlying:                
+        if self.isFlying or self.isTestMode:                
             self._cf.high_level_commander.go_to(self.starting_x,self.starting_y,1.5, 180, 2, False)
         print(Fore.LIGHTCYAN_EX + 'Guys, I\'m %s, and I\'m gonna get a fresh start toward %s %s' % (self.name, self.starting_x, self.starting_y ) )
+    ####################################################################     sequences
   
     def testSequence(self,requested_sequenceNumber):
-
-        print('startTestSequence con la sequenza %s, attualmente e\' in esecuzione la %s' % (requested_sequenceNumber, self.current_sequence))
+        print('Sequenza test attuale %s, nuova %s ' % (self.current_sequence, requested_sequenceNumber))
         if GB.WE_ARE_FAKING_IT:
             self.statoDiVolo = 'sequenza simulata!'
             return
         ## se nessuna sequenza in volo parte la scelta
         if self.current_sequence is None and requested_sequenceNumber <= len (sequenze_test):
-            self.currentSequence_killingPill.clear()
             self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
-            print ('eseguo la sequenza %s' % requested_sequenceNumber)
+            print ('starting test sequence %s' % requested_sequenceNumber)
             self.current_sequence       = requested_sequenceNumber
-            self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
-
-        ## se in volo la stessa la si stoppa
-        elif requested_sequenceNumber == self.current_sequence:
+            self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self]).start()
+        elif self.current_sequence == requested_sequenceNumber:     ## se in volo la stessa la si stopp
+            print('stopping test sequence %s' % requested_sequenceNumber)
             self.currentSequence_killingPill.set()
-            print('stoppo la sequenza test' + requested_sequenceNumber)
-            self.current_sequence = None
-
-        ## se in volo un'altra la si cambia
-        elif requested_sequenceNumber != self.current_sequence and requested_sequenceNumber <= len (sequenze_test):
+        elif requested_sequenceNumber != self.current_sequence and requested_sequenceNumber <= len (sequenze_test):    ## se in volo un'altra la si cambia
             self.currentSequence_killingPill.set()
-            print('stoppo la sequenza test' + requested_sequenceNumber)
-            self.current_sequence = None
+            print('stoppin test sequence %s, then starting %s' % (self.current_sequence, requested_sequenceNumber))
+            def start_it():
+                while self.current_sequence != None:
+                    print('Still trying to stop sequence!')
+                    time.sleep(1)
+                print ('eventually starting %s as promised' % requested_sequenceNumber)
+                self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
+                self.current_sequence       = requested_sequenceNumber
+                self.currentSequenceThread  = threading.Thread(target=sequenze_test[requested_sequenceNumber-1],args=[self] ,daemon=True,).start()
+            wait_and_start = threading.Thread(target=start_it).start()
+        else:
+            print('porco cazzo')
+
     ####################################################################     management
 
     def setRingColor(self, vr, vg, vb, speed=0.25):
@@ -594,6 +611,7 @@ class Drogno(threading.Thread):
         self._cf.param.set_value('ring.solidBlue', '{}'.format(b))
         print ('vado al colore %s %s %s' % (r,g, b))
 
+    
     def evaluateBattery(self):
         while not self.killingPill.is_set() and not GB.eventi.get_process_exit_event().is_set() and self.is_connected:
             ### non so se  questo è il posto giusto per 'sta roba ma almeno è l'unico thread a venire sempre eseguito:
@@ -601,19 +619,18 @@ class Drogno(threading.Thread):
                 self.flyingTime = int(time.time() - self.scramblingTime)
             else:
                 self.flyingTime = 0
-            print(f'flying time: {self.flyingTime}')
-            
+            # print(f'flying time: {self.flyingTime}')
             level = 0.0
             if self.batteryVoltage == 'n.p.':
                 level = 99.
             else:
                 level  = float(self.batteryVoltage)
-            if level < GB.BATTERY_WARNING_LEVEL:
+            if level < GB.BATTERY_WARNING_LEVEL and not self.isTestMode:
                 self._cf.param.set_value('ring.effect', '13')
                 print (Fore.YELLOW + 'WARNING, sono il drone %s e comincio ad avere la batteria un po\' scarica (%s)' % (self.ID, level))
                 if (GB.FILE_LOGGING_ENABLED):  self.LoggerObject.warning("battery under %sv" % GB.BATTERY_WARNING_LEVEL)
                 # self.isReadyToFly = False
-            if level < GB.BATTERY_DRAINED_LEVEL:
+            if level < GB.BATTERY_DRAINED_LEVEL and not self.isTestMode:
                 self._cf.param.set_value('ring.effect', '11')  #alert
                 if self.statoDiVolo == 'landed':
                     print ('ciao, sono il drone %s e sono così scarico che non posso più far nulla. (%s)' %  (self.ID, level))
@@ -632,11 +649,12 @@ class Drogno(threading.Thread):
         # del self.killingPill
         del self.batteryThread
     def check_out_of_boxiness(self):
-        if abs(self.x) > (GB.BOX_X + 1.0) or abs(self.y) > (GB.BOX_Y+1.0) or self.z > (GB.BOX_Y + 0.5):
-                    print(Fore.RED + 'Landing due trespassing!')
-                    self.currentSequence_killingPill.set()
-                    self.LoggerObject.info("Landing due trespassing!")
-                    self.land(thenGoToSleep=True)
+        if  self.isTestMode == False:
+            if abs(self.x) > (GB.BOX_X + 1.0) or abs(self.y) > (GB.BOX_Y+1.0) or self.z > (GB.BOX_Y + 0.5):
+                        print(Fore.RED + f'Landing due trespassing! -> x: {self.x}\ty: {self.y}\tz: {self.z}')
+                        self.currentSequence_killingPill.set()
+                        self.LoggerObject.info("Landing due trespassing!")
+                        self.land(thenGoToSleep=True)
  
     ####################################################################     wake / sleep
  
@@ -647,15 +665,15 @@ class Drogno(threading.Thread):
         self.goToSleep()
         self.exit()
     def goToSleep(self):
+        self.statoDiVolo = 'stand by'
         self.is_connected = False
         self.standBy = True
         self.isFlying = False
-        # self.killingPill.set()
         self.currentSequence_killingPill.set()
+        self.logger_manager.set_logging_level(-1)
         time.sleep(0.2)
-            # self._cf.close_link()
         self.exit()
-        self.statoDiVolo = 'stand by'
+
     def wakeUp(self):
         def wakeUpProcedure():
             print('mi sveglio')
@@ -690,7 +708,10 @@ class Drogno(threading.Thread):
             time.sleep(0.2)
             PowerSwitch(self.link_uri).close()
             time.sleep(0.2)
+            try:
+                PowerSwitch(self.link_uri).stm_power_down()
+            except Exception as e:
+                print('could not switch down %s!'% self.name)
 
-            PowerSwitch(self.link_uri).stm_power_down()
 
         
