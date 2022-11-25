@@ -1,5 +1,5 @@
 ############    Generic Imports
-import threading, time, sys, importlib, os
+import threading, time, sys, importlib, os, subprocess
 
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH         = os.environ.get('CFLIB_PATH')
@@ -25,6 +25,7 @@ sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
 ############    Local Imports
 from   test_single_cf_grounded                    import test_link
 from   common_utils                               import convert_motor_pass
+import GLOBALS as GB
 
 class Test_Container():
     def __init__(self, parent_drogno, cf, ID, link_uri):
@@ -61,28 +62,34 @@ class Test_Container():
         self.cf.param.set_value('ring.solidBlue', '0')
 
     def test_over_checker(self):
-        while not self.parent_drogno.is_testing_over:
-            if not (all ( x != 0 for x in self.parent_drogno.test_tracker)):
-                time.sleep(1)
-                pass
-            else:
-                self.parent_drogno.is_testing_over = True
-                if self.parent_drogno.battery_test_passed and self.parent_drogno.propeller_test_passed:
-                    self.fai_verde()
-                    time.sleep(10)
-                    self.parent_drogno.lampeggio_finito = True
+        def thread_over_checker():
+            while not self.parent_drogno.is_testing_over:
+                if not (all ( x != 0 for x in self.parent_drogno.test_tracker)):
+                    # print("test over sta")
+                    time.sleep(1)
+                    pass
                 else:
-                    for i in range(20):
-                        if i % 2 == 0:
-                            self.fai_rosso()
-                            time.sleep(0.5)
-                        else:
-                            self.spegni_led()
-                            time.sleep(0.5)
-                    self.lampeggio_finito = True
-                print ("test finiti per CF %s " % self.parent_drogno.name)
-                print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.parent_drogno.firmware_revision0, self.parent_drogno.firmware_revision1, self.parent_drogno.firmware_modified))
-                self.parent_drogno.close_link()
+                    self.parent_drogno.is_testing_over = True
+                    if self.parent_drogno.battery_test_passed and self.parent_drogno.propeller_test_passed:
+                        self.fai_verde()
+                        time.sleep(10)
+                        self.parent_drogno.lampeggio_finito = True
+                    else:
+                        for i in range(20):
+                            if i % 2 == 0:
+                                self.fai_rosso()
+                                time.sleep(0.5)
+                            else:
+                                self.spegni_led()
+                                time.sleep(0.5)
+                        self.parent_drogno.lampeggio_finito = True
+                    print ("test finiti per CF %s " % self.parent_drogno.name)
+                    print ("Il firmware corrente è una roba tipo: %s %s modificato? -> %s" %(self.parent_drogno.firmware_revision0, self.parent_drogno.firmware_revision1, self.parent_drogno.firmware_modified))
+                    
+                    print ("Controlliamo un po' i firmware e se serve aggiorniamoli... ")
+
+                    # self.cf.close_link()
+        threading.Thread(target=thread_over_checker).start()
     
     def radio_test(self):
         self.parent_drogno.bandwidth = self.parent_drogno.test_link.bandwidth(self.link_uri)
@@ -96,6 +103,7 @@ class Test_Container():
         time.sleep(3)
         self.spegni_led()
         self.parent_drogno.test_tracker[3] = 1
+        print(self.parent_drogno.test_tracker)
 
     def led_test(self):
         def led_test_sequence():
@@ -123,6 +131,7 @@ class Test_Container():
             # time.sleep(1)
             print('led test finito')
             self.parent_drogno.test_tracker[2] = 1   # led test completato
+            print(self.parent_drogno.test_tracker)
         threading.Thread(target=led_test_sequence).start()
 
     def battery_test(self):
@@ -140,6 +149,7 @@ class Test_Container():
             else:
                 print("battery test per CF %s NON passato. il valore è %s" %  (self.parent_drogno.name, self.parent_drogno.battery_sag))
             self.parent_drogno.test_tracker[1] = 1   # battery test completato
+            print(self.parent_drogno.test_tracker)
         threading.Thread(target=batt_control_loop).start()
 
     def propeller_test(self):
@@ -159,6 +169,7 @@ class Test_Container():
                 
 
             self.parent_drogno.test_tracker[0] = 1   ##propeller test completato
+            print(self.parent_drogno.test_tracker)
         threading.Thread(target=prop_control_loop).start()
      
     def configura_log(self):
@@ -175,25 +186,29 @@ class Test_Container():
 
     def start_sequenza_test(self):       ### sequenza principale con tempi
 
-        self.fai_blu()                   ### Blue is for testing
+        def thread_sequenza_test():
 
-        print("il drone %s configura il log... " % self.parent_drogno.name)
-        self.configura_log()
+            self.fai_blu()                   ### Blue is for testing
 
-        print("il drone %s inizia il Propeller Test... " % self.parent_drogno.name)
-        self.propeller_test()
+            print("il drone %s configura il log... " % self.parent_drogno.name)
+            self.configura_log()
 
-        time.sleep(7)
+            print("il drone %s inizia il Propeller Test... " % self.parent_drogno.name)
+            self.propeller_test()
 
-        print("il drone %s inizia il battery test... " % self.parent_drogno.name)
-        self.battery_test()
+            time.sleep(7)
 
-        time.sleep(1.5)
+            print("il drone %s inizia il battery test... " % self.parent_drogno.name)
+            self.battery_test()
 
-        print("il drone %s inizia il led test... " % self.parent_drogno.name)
-        self.led_test()
+            time.sleep(1.5)
 
-        time.sleep(10)                                                 ### Attende che il test led sia finito prima di chiamare test radio
+            print("il drone %s inizia il led test... " % self.parent_drogno.name)
+            self.led_test()
 
-        print("il drone %s inizia i test radio... " % self.parent_drogno.name)
-        self.radio_test()   
+            time.sleep(10)                                                 ### Attende che il test led sia finito prima di chiamare test radio
+
+            print("il drone %s inizia i test radio... " % self.parent_drogno.name)
+            self.radio_test()
+        
+        threading.Thread(target=thread_sequenza_test).start()

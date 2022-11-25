@@ -2,7 +2,7 @@
 ### extratech 2022
 ### test iniziale:
 ############   standard libraries 
-import   time, os, sys, signal, threading, importlib
+import   time, os, sys, signal, threading, importlib, subprocess
 
 ############   dependencies
 import   GLOBALS                                    as     GB
@@ -66,7 +66,7 @@ def main():
     signal.signal(signal.SIGINT, exit_signal_handler)
     
     istanziaClassi()
-    check_if_completed = threading.Thread(target=check_if_test_is_completed).start()
+    check_if_test_is_completed()
 
 if __name__ == '__main__':
     try:

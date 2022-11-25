@@ -72,10 +72,8 @@ class dataDrone(threading.Thread):
         print('Parametri scaricati per %s' % self.name)
         print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
         self.is_connected = True
-        self.test_thread = threading.Thread(target = self.test_manager.start_sequenza_test)
-        self.test_thread_checker = threading.Thread(target = self.test_manager.test_over_checker)
-        self.test_thread.start()
-        self.test_thread_checker.start()
+        self.test_manager.start_sequenza_test()
+        self.test_manager.test_over_checker()
 
     def _fully_connected(self, link_uri):   ## callback con tutto scaricato, fa partire la sequenza test
         
