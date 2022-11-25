@@ -1,11 +1,6 @@
 ############    Generic Imports
 import threading, time, sys, importlib, os, subprocess
 
-############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
-CFLIB_PATH         = os.environ.get('CFLIB_PATH')
-# print(CFLIB_PATH)
-sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
-
 ############    CrazyFlie Imports
 import cflib
 import cflib.crtp

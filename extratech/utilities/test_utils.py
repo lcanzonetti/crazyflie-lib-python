@@ -14,11 +14,6 @@ from     flash_util                                             import flasha_fi
 from     dotenv                                               import load_dotenv
 load_dotenv()
 
-############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
-CFLIB_PATH         = os.environ.get('CFLIB_PATH')
-# print(CFLIB_PATH)
-sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
-
 ############    CrazyFlie Imports
 import cflib
 import cflib.crtp
@@ -91,8 +86,8 @@ def check_if_test_is_completed():
             display(df1)
             print()
             display(df2)
-            df1.to_json(sys.path[3] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
-            df2.to_json(sys.path[3] + '/Test_resultsss/Risultati_rev_'  + oggieora + '.json', orient='index', indent=4)
+            df1.to_json(sys.path[5] + '/Test_Resultsss/Risultati_mech_' + oggieora + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
+            df2.to_json(sys.path[5] + '/Test_resultsss/Risultati_rev_'  + oggieora + '.json', orient='index', indent=4)
             # df = df.align()
             print()
             print('tutti i test sono stati completati')

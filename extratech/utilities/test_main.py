@@ -36,8 +36,10 @@ import   wakeUppatore, stenBaiatore
 from     common_utils                               import IDFromURI, exit_signal_handler
 from     test_utils                                 import istanziaClassi, check_if_test_is_completed, scan_for_crazyflies
 
-isExist    = os.path.exists(sys.path[3] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
-if not isExist: os.makedirs(sys.path[3] + '/Test_Resultsss')
+proj_path = [x for x in sys.path if x.endswith("utilities")]
+
+isExist    = os.path.exists(proj_path[0] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+if not isExist: os.makedirs(proj_path[0] + '/Test_Resultsss')
 
 def print_greetings():
     text   = "EXTRATECH TESTING PLATFORM"
