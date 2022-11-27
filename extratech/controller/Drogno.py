@@ -444,8 +444,11 @@ class Drogno(threading.Thread):
                 self.statoDiVolo = 'landing'
                 if with_motion_commander:
                     self.motionCommander.stop()
-                    time.sleep(1)
-                    self.motionCommander.land(0.3)
+                    time.sleep(0.5)
+                    try:
+                        self.motionCommander.land(0.3)
+                    except Exception as e:
+                        print('%s could not complete landing with motion commander (%s)'%(self.name,e))
                 else: ## with standard high level motion commander
                     self._cf.high_level_commander.land(absolute_height_m=landing_height, duration_s=speed)
                 time.sleep(speed)
@@ -564,8 +567,8 @@ class Drogno(threading.Thread):
             print('stoppin test sequence %s, then starting %s' % (self.current_sequence, requested_sequenceNumber))
             def start_it():
                 while self.current_sequence != None:
-                    print('.')
-                    time.sleep(0.1)
+                    print('Still trying to stop sequence!')
+                    time.sleep(1)
                 print ('eventually starting %s as promised' % requested_sequenceNumber)
                 self.statoDiVolo = 'sequenza_' + str(requested_sequenceNumber)
                 self.current_sequence       = requested_sequenceNumber
@@ -662,16 +665,15 @@ class Drogno(threading.Thread):
         self.goToSleep()
         self.exit()
     def goToSleep(self):
+        self.statoDiVolo = 'stand by'
         self.is_connected = False
         self.standBy = True
         self.isFlying = False
-        # self.killingPill.set()
         self.currentSequence_killingPill.set()
         self.logger_manager.set_logging_level(-1)
         time.sleep(0.2)
-            # self._cf.close_link()
         self.exit()
-        self.statoDiVolo = 'stand by'
+
     def wakeUp(self):
         def wakeUpProcedure():
             print('mi sveglio')

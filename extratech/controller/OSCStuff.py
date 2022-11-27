@@ -201,8 +201,10 @@ def kill      (coddii, chi):
 def standBy   (coddii, chi):
     if chi == 'all':    
         print('addormenterei tutti' )
+        print('Attualmente nello sciame: %s' % GB.drogni)
+
         for drogno in GB.drogni:
-            GB.drogni[drogno].goToSleep()
+            GB.drogni[drogno].exit()
         ## svuotone!
         GB.drogni         = []
         GB.connected_uris = []
@@ -214,8 +216,8 @@ def standBy   (coddii, chi):
             connections.add_just_one_crazyflie(GB.uri_map[str(chi)])
             print( '-----------------booooooooooom')
         else:
-            # print ( 'Il drogno %s che vuoi è già in lista, lo mettiamo in standby.' % chi)
-            if GB.drogni[int(chi)].standBy == False:
+            print ( 'Il drogno %s che vuoi è già in lista.' % chi)
+            if GB.drogni[int(chi)].standBy == False or GB.drogni[int(chi)].is_connected == False:
                 print('addormento %s' % chi)
                 GB.drogni[int(chi)].goToSleep()
                 del GB.drogni[int(chi)]
