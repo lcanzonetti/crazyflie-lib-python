@@ -8,7 +8,7 @@ from   multiprocessing.connection import Listener
 from   multiprocessing import Process, Queue, Event
 import queue
 from   random                import random, uniform
-import time, os
+import time
 import numpy as np
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
