@@ -1,20 +1,30 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#rf 2023
 
-import time, sys, threading, logging
-from getkey import getkey, keys
+import time, sys, threading, logging, csv, signal, math
 from itertools import cycle
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
 from   osc4py3               import oscbuildparse
+import pandas as pd
+from time import perf_counter
+from timeloop import Timeloop
+from datetime import timedelta
+tl = Timeloop()
 
-porta = 9200
-loop = cycle(r"-\|/")
+drogni            = 10
+intervallo        = 0.04
+porta             = 9200
+
+
+loop              = cycle(r"-\|/")
 bufferone         = {}
 timecode          = '00:00:00:00'
+start_time        = 0
+finished          = False
 
-# replace with your function
-def func():
+def runnnn():
     print("running ...", next(loop), end='\r', flush=True)
 
 def setRequestedPos(address, args):
@@ -29,9 +39,10 @@ def setRequestedPos(address, args):
     # timecode   = args[0]
     print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
 
-    bufferone[iddio].requested_X = round(float(args[1]),3)
-    bufferone[iddio].requested_Y = round(float(args[2]),3)
-    bufferone[iddio].requested_Z = round(float(args[3]),3)
+    bufferone[iddio].x = round(float(args[0]),3)
+    bufferone[iddio].y = round(float(args[1]),3)
+    bufferone[iddio].z = round(float(args[2]),3)
+    print(bufferone[iddio])
     
 def setRequestedCol(address, args):
     # print(address)
@@ -40,12 +51,10 @@ def setRequestedCol(address, args):
     y = x[2].split('_')
     iddio = int(y[1])
 
-    bufferone[iddio].requested_R = args[0]
-    bufferone[iddio].requested_G = args[1]
-    bufferone[iddio].requested_B = args[2]
+    bufferone[iddio].r = args[0]
+    bufferone[iddio].g = args[1]
+    bufferone[iddio].b = args[2]
     print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
-
-
 
 def recorda():
     try:
@@ -58,16 +67,14 @@ def recorda():
         osc_udp_server("0.0.0.0", porta,   "receivingServer")
         ###########################  single fella requested position
         osc_method("/notch/drone*/pos",   setRequestedPos,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/col", setRequestedCol,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        print("Recording Server started on port %d. Press q terminate and save." % (porta))
+        osc_method("/notch/drone*/col",   setRequestedCol,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        # print("Recording Server started on port %d. Press q terminate and save." % (porta))
     except Exception as err:
          print(str(err))
-
-
-    while True:
+    while not finished:
         try:
             time.sleep(0.05)
-            func()
+            runnnn()
             osc_process()
             
         except KeyboardInterrupt:
@@ -77,25 +84,77 @@ def recorda():
  
 def faiIlBufferon():
     global bufferone
-    for i in range (0,20):
+    for i in range (0,drogni):
+        bufferone[i] = bufferDrone(i)
+def quando_passa_il_tempo_mettiamo_una_linea():
+
+    def salva_una_riga():
+        il_tempo_dall_inizio = math.floor((perf_counter() - start_time)*1000)
+        for drogno in bufferone:
+            d = bufferone[drogno] 
+            d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
+            print(f"{il_tempo_dall_inizio=}, {d.x=}")
+    def conta():
+        print("comincio a registrare!")
+        while not finished:
+            time.sleep(intervallo)
+            # il_tempo_dall_inizio = math.floor(start_time - (time.time()*1000))
+            # print (f"{il_tempo_dall_inizio=}")
+            # if ( il_tempo_dall_inizio % intervallo) == 0:
+            salva_una_riga()
+        print("ho smesso di registrare!")
+    cc = threading.Thread(target=conta).start()
+
+def faiIlBufferon():
+    global bufferone
+    for i in range (0,drogni):
         bufferone[i] = bufferDrone(i)
 
 class bufferDrone():
-    def __init__(self, ID, ):
+    def __init__(self, ID ):
         self.ID          = int(ID)
         self.name        = 'bufferDrone'+str(ID)
-        self.requested_X            = 0.0
-        self.requested_Y            = 0.0
-        self.requested_Z            = 1.0
-        self.requested_R            = 0
-        self.requested_G            = 0
-        self.requested_B            = 0
-        self.yaw                   = 0.0
+        self.x           = 0.0
+        self.y           = 0.0
+        self.z           = 1.0
+        self.r           = 0
+        self.g           = 0
+        self.b           = 0
+        self.headers     = pd.DataFrame(columns = ["Time","x", "y", "z", "Red", "Green", "Blue"])
+        self.records     = []
+        
+def ciao_ciao(signum, frame):
+    global finished
+    print('Bye bye. \n%s' % signum)
+    finished = True
+    time.sleep(1)
+    for drogno in bufferone:
+        print ('drogno numero: %s:'% bufferone[drogno].name)
+        # print(bufferone[drogno].records)
+        bufferone[drogno].df      = pd.DataFrame.from_records(bufferone[drogno].records)
+        bufferone[drogno].listone = pd.concat([bufferone[drogno].headers, bufferone[drogno].df])
+        print(bufferone[drogno].listone)
+
+    sys.exit("Putin merda")
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare il ciao, ciao 
     faiIlBufferon()
+    start_time = perf_counter()
     OSCRefreshThread      = threading.Thread(target=recorda).start()
+    
+    quando_passa_il_tempo_mettiamo_una_linea()
+
+    # start_time = round(time.time()*1000)
+
+    for drogno in bufferone:
+        bufferone[drogno].records.append( { 'Time' : 0, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
+        bufferone[drogno].records.append( { 'Time' : 1, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
+        bufferone[drogno].records.append( { 'Time' : 2, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
+        bufferone[drogno].records.append( { 'Time' : 3, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
+        bufferone[drogno].records.append( { 'Time' : 4, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
+         
     # sendPose()
-    while True:
-        time.sleep(1)
+    while not finished:
+        time.sleep(0.1)
         pass
