@@ -27,19 +27,23 @@ def setRequestedPos(address, args):
     iddio = int(y[1])
     # print(iddio)
     # timecode   = args[0]
-    print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s!!' %(iddio,round(float(args[1]),3), round(float(args[2]),3), round(float(args[3]),3)))
+    print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
 
     bufferone[iddio].requested_X = round(float(args[1]),3)
     bufferone[iddio].requested_Y = round(float(args[2]),3)
     bufferone[iddio].requested_Z = round(float(args[3]),3)
     
 def setRequestedCol(address, args):
-    global msgCount
-    # iddio     = int(address[-7])
-    # msgCount += 1
-    # bufferone[iddio].requested_R = args[1]
-    # bufferone[iddio].requested_G = args[2]
-    # bufferone[iddio].requested_B = args[3]
+    # print(address)
+    # print(args)
+    x = address.split('/')
+    y = x[2].split('_')
+    iddio = int(y[1])
+
+    bufferone[iddio].requested_R = args[0]
+    bufferone[iddio].requested_G = args[1]
+    bufferone[iddio].requested_B = args[2]
+    print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
 
 
 
@@ -54,7 +58,7 @@ def recorda():
         osc_udp_server("0.0.0.0", porta,   "receivingServer")
         ###########################  single fella requested position
         osc_method("/notch/drone*/pos",   setRequestedPos,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/color", setRequestedCol,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        osc_method("/notch/drone*/col", setRequestedCol,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         print("Recording Server started on port %d. Press q terminate and save." % (porta))
     except Exception as err:
          print(str(err))
@@ -65,10 +69,7 @@ def recorda():
             time.sleep(0.05)
             func()
             osc_process()
-            # print(".")
-            key = getkey(blocking=False)
-            if key == 'q':
-              break
+            
         except KeyboardInterrupt:
             print('Recording Done')
             osc_terminate()
