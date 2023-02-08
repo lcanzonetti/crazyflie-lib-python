@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #rf 2023
 
-import time, sys, threading, logging, csv, signal, math
+import time, sys, threading, logging, signal, math, datetime, os, pathlib
 from itertools import cycle
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
@@ -12,6 +12,20 @@ from time import perf_counter
 from timeloop import Timeloop
 from datetime import timedelta
 tl = Timeloop()
+
+nowa                 = datetime.datetime.now()
+dt_string            = nowa.strftime("%d-%m-%Y_%H-%M-%S")
+registrazione        = 'registrazione_'+dt_string
+nomeRegistrazione    = pathlib.Path(registrazione).stem
+
+print (nomeRegistrazione)
+OUTPUT_DIR           = 'registrazioniOSC'
+if not pathlib.Path(OUTPUT_DIR).exists():
+  os.mkdir(OUTPUT_DIR)
+os.chdir(OUTPUT_DIR)
+if not pathlib.Path(nomeRegistrazione).exists():
+  os.mkdir(nomeRegistrazione)
+os.chdir('..')
 
 drogni            = 10
 intervallo        = 0.04
@@ -28,25 +42,17 @@ def runnnn():
     print("running ...", next(loop), end='\r', flush=True)
 
 def setRequestedPos(address, args):
-    # print(address)
-    # print(args)
     global timecode
     x = address.split('/')
-    # print (x)
     y = x[2].split('_')
     iddio = int(y[1])
-    # print(iddio)
-    # timecode   = args[0]
     print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
 
     bufferone[iddio].x = round(float(args[0]),3)
     bufferone[iddio].y = round(float(args[1]),3)
     bufferone[iddio].z = round(float(args[2]),3)
-    print(bufferone[iddio])
     
 def setRequestedCol(address, args):
-    # print(address)
-    # print(args)
     x = address.split('/')
     y = x[2].split('_')
     iddio = int(y[1])
@@ -86,6 +92,7 @@ def faiIlBufferon():
     global bufferone
     for i in range (0,drogni):
         bufferone[i] = bufferDrone(i)
+
 def quando_passa_il_tempo_mettiamo_una_linea():
 
     def salva_una_riga():
@@ -93,7 +100,7 @@ def quando_passa_il_tempo_mettiamo_una_linea():
         for drogno in bufferone:
             d = bufferone[drogno] 
             d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
-            print(f"{il_tempo_dall_inizio=}, {d.x=}")
+            # print(f"{il_tempo_dall_inizio=}, {d.x=}")
     def conta():
         print("comincio a registrare!")
         while not finished:
@@ -104,11 +111,6 @@ def quando_passa_il_tempo_mettiamo_una_linea():
             salva_una_riga()
         print("ho smesso di registrare!")
     cc = threading.Thread(target=conta).start()
-
-def faiIlBufferon():
-    global bufferone
-    for i in range (0,drogni):
-        bufferone[i] = bufferDrone(i)
 
 class bufferDrone():
     def __init__(self, ID ):
@@ -128,6 +130,8 @@ def ciao_ciao(signum, frame):
     print('Bye bye. \n%s' % signum)
     finished = True
     time.sleep(1)
+       
+
     for drogno in bufferone:
         print ('drogno numero: %s:'% bufferone[drogno].name)
         # print(bufferone[drogno].records)
@@ -135,6 +139,14 @@ def ciao_ciao(signum, frame):
         bufferone[drogno].listone = pd.concat([bufferone[drogno].headers, bufferone[drogno].df])
         print(bufferone[drogno].listone)
 
+        nomeFile = 'drone_' + str(bufferone[drogno].ID)+'.csv'
+        print (OUTPUT_DIR)
+        print (nomeRegistrazione)
+        print (nomeFile)
+        patto = os.path.join(os.getcwd(),OUTPUT_DIR, nomeRegistrazione, nomeFile)
+        print (patto)
+        bufferone[drogno].listone.to_csv(patto, index=False)
+        
     sys.exit("Putin merda")
 
 if __name__ == '__main__':
@@ -144,17 +156,7 @@ if __name__ == '__main__':
     OSCRefreshThread      = threading.Thread(target=recorda).start()
     
     quando_passa_il_tempo_mettiamo_una_linea()
-
-    # start_time = round(time.time()*1000)
-
-    for drogno in bufferone:
-        bufferone[drogno].records.append( { 'Time' : 0, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
-        bufferone[drogno].records.append( { 'Time' : 1, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
-        bufferone[drogno].records.append( { 'Time' : 2, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
-        bufferone[drogno].records.append( { 'Time' : 3, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
-        bufferone[drogno].records.append( { 'Time' : 4, 'x' : 0, 'y' : 0, 'z' :0, 'Red' : 100, 'Green' :100, 'Blue' : 100 } )
-         
-    # sendPose()
+  
     while not finished:
         time.sleep(0.1)
         pass
