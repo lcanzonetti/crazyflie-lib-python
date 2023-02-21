@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #rf 2023
 
-import time, sys, threading, logging, signal, math, datetime, os, pathlib
+import time, sys, threading, logging, signal, math, datetime, os, pathlib, shutil
 from itertools import cycle
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
@@ -29,9 +29,7 @@ os.chdir('..')
 
 drogni            = 10
 intervallo        = 0.04
-porta             = 9200
-
-
+porta             = 9200  
 loop              = cycle(r"-\|/")
 bufferone         = {}
 timecode          = '00:00:00:00'
@@ -62,25 +60,31 @@ def setRequestedCol(address, args):
     bufferone[iddio].b = args[2]
     print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
 
-def recorda():
+def keyboard_init():
+    input("press enter to start recording or send a \"/recorder/start 1\" OSC message")
+
+def record_init():
     try:
-        input("press enter to start recording and q to stop")
         # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '  '%(levelname)s - %(message)s')
         # logger = logging.getLogger("osc")
         # logger.setLevel(logging.DEBUG)
         # osc_startup(logger=logger)
         osc_startup()
-        osc_udp_server("0.0.0.0", porta,   "receivingServer")
-        ###########################  single fella requested position
+        osc_udp_server("0.0.0.0", porta,   "receivingServer") 
         osc_method("/notch/drone*/pos",   setRequestedPos,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/col",   setRequestedCol,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        # print("Recording Server started on port %d. Press q terminate and save." % (porta))
+        osc_method("/recorder/start",     start_recorder,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        osc_method("/recorder/stop",      stop_recorder,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+
+        print("Recording Server started on port %d. Press q terminate and save." % (porta))
+        time.sleep(0.2)
+        record_routine()
+
     except Exception as err:
          print(str(err))
     while not finished:
         try:
             time.sleep(0.05)
-            runnnn()
             osc_process()
             
         except KeyboardInterrupt:
@@ -88,13 +92,7 @@ def recorda():
             osc_terminate()
             sys.exit()
  
-def faiIlBufferon():
-    global bufferone
-    for i in range (0,drogni):
-        bufferone[i] = bufferDrone(i)
-
-def quando_passa_il_tempo_mettiamo_una_linea():
-
+def record_routine():
     def salva_una_riga():
         il_tempo_dall_inizio = math.floor((perf_counter() - start_time)*1000)
         for drogno in bufferone:
@@ -112,6 +110,10 @@ def quando_passa_il_tempo_mettiamo_una_linea():
         print("ho smesso di registrare!")
     cc = threading.Thread(target=conta).start()
 
+def faiIlBufferon():
+    global bufferone
+    for i in range (0,drogni):
+        bufferone[i] = bufferDrone(i)
 class bufferDrone():
     def __init__(self, ID ):
         self.ID          = int(ID)
@@ -124,13 +126,22 @@ class bufferDrone():
         self.b           = 0
         self.headers     = pd.DataFrame(columns = ["Time","x", "y", "z", "Red", "Green", "Blue"])
         self.records     = []
-        
+
+def start_recorder(*args):
+    print (args)
+    print('\nsavvio la registrazione!\n')
+    record_routine()
+
+def stop_recorder(*args):
+    print (args)
+    print('\nstoppo la registrazione\n')
+    ciao_ciao()
+
 def ciao_ciao(signum, frame):
     global finished
     print('Bye bye. \n%s' % signum)
     finished = True
     time.sleep(1)
-       
 
     for drogno in bufferone:
         print ('drogno numero: %s:'% bufferone[drogno].name)
@@ -146,6 +157,8 @@ def ciao_ciao(signum, frame):
         patto = os.path.join(os.getcwd(),OUTPUT_DIR, nomeRegistrazione, nomeFile)
         print (patto)
         bufferone[drogno].listone.to_csv(patto, index=False)
+    shutil.make_archive(base_name=os.path.join(os.getcwd(),OUTPUT_DIR, nomeRegistrazione), format= 'zip', root_dir=os.path.join(os.getcwd(),OUTPUT_DIR, nomeRegistrazione))
+    
         
     sys.exit("Putin merda")
 
@@ -153,10 +166,8 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare il ciao, ciao 
     faiIlBufferon()
     start_time = perf_counter()
-    OSCRefreshThread      = threading.Thread(target=recorda).start()
-    
-    quando_passa_il_tempo_mettiamo_una_linea()
-  
+    OSC_init      = threading.Thread(target=record_init).start()
+    keyboard_init = threading.Thread(target=keyboard_init).start()
     while not finished:
         time.sleep(0.1)
         pass
