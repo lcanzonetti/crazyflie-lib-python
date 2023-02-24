@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #rf 2023
 
-import time, sys, threading, logging, signal, math, datetime, os, pathlib, shutil
+import time, sys, threading, logging, signal, math, datetime, os, pathlib, shutil, msvcrt
 from itertools import cycle
 from   osc4py3.as_eventloop  import *
 from   osc4py3               import oscmethod as osm
@@ -35,7 +35,7 @@ bufferone         = {}
 timecode          = '00:00:00:00'
 start_time        = 0
 finished          = False
-
+recording         = False 
 def runnnn():
     print("running ...", next(loop), end='\r', flush=True)
 
@@ -44,7 +44,7 @@ def setRequestedPos(address, args):
     x = address.split('/')
     y = x[2].split('_')
     iddio = int(y[1])
-    print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
+    # print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
 
     bufferone[iddio].x = round(float(args[0]),3)
     bufferone[iddio].y = round(float(args[1]),3)
@@ -58,10 +58,35 @@ def setRequestedCol(address, args):
     bufferone[iddio].r = args[0]
     bufferone[iddio].g = args[1]
     bufferone[iddio].b = args[2]
-    print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
+    # print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
 
 def keyboard_init():
-    input("press enter to start recording or send a \"/recorder/start 1\" OSC message")
+    def nnamo():
+        while not finished:
+            # print('Press key [combination] (Kill console to quit): ', end='', flush=True)
+            key = msvcrt.getwch()
+            num = ord(key)
+            if num in (0, 224):
+                ext = msvcrt.getwch()
+                print(f'prefix: {num}   -   key: {ext!r}   -   unicode: {ord(ext)}')
+            else:
+                print(f'key: {key!r}   -   unicode: {ord(key)}')
+            if ord(msvcrt.getwch()) == 13 and recording == False:
+                start_recorder()
+            else:
+                print ('already recording')
+            if ord(msvcrt.getwch()) == 113 and recording == True:
+                stop_recorder()
+            elif ord(msvcrt.getwch()) == 113 and recording == False:
+                print ('not started')
+            
+            
+            if ord(msvcrt.getwch()) == 3 and recording == True:
+                stop_recorder()
+    print("Recording Server started on port %d. Press q terminate and save." % (porta))  
+    print("\npress enter to start recording or send a \"/recorder/start 1\" OSC message")  
+    print("Press q terminate and save.")
+    nnamo()
 
 def record_init():
     try:
@@ -76,9 +101,7 @@ def record_init():
         osc_method("/recorder/start",     start_recorder,       argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/recorder/stop",      stop_recorder,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
 
-        print("Recording Server started on port %d. Press q terminate and save." % (porta))
         time.sleep(0.2)
-        record_routine()
 
     except Exception as err:
          print(str(err))
@@ -93,6 +116,8 @@ def record_init():
             sys.exit()
  
 def record_routine():
+    global recording
+    global start_time
     def salva_una_riga():
         il_tempo_dall_inizio = math.floor((perf_counter() - start_time)*1000)
         for drogno in bufferone:
@@ -101,6 +126,7 @@ def record_routine():
             # print(f"{il_tempo_dall_inizio=}, {d.x=}")
     def conta():
         print("comincio a registrare!")
+        start_time = perf_counter()
         while not finished:
             time.sleep(intervallo)
             # il_tempo_dall_inizio = math.floor(start_time - (time.time()*1000))
@@ -109,6 +135,7 @@ def record_routine():
             salva_una_riga()
         print("ho smesso di registrare!")
     cc = threading.Thread(target=conta).start()
+    recording = True
 
 def faiIlBufferon():
     global bufferone
@@ -137,9 +164,11 @@ def stop_recorder(*args):
     print('\nstoppo la registrazione\n')
     ciao_ciao()
 
-def ciao_ciao(signum, frame):
+def ciao_ciao(*args):
     global finished
-    print('Bye bye. \n%s' % signum)
+    global recording
+    recording = False
+    print('Bye bye. \n')
     finished = True
     time.sleep(1)
 
@@ -165,7 +194,6 @@ def ciao_ciao(signum, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, ciao_ciao) ## cattura il control+C e gli fa fare il ciao, ciao 
     faiIlBufferon()
-    start_time = perf_counter()
     OSC_init      = threading.Thread(target=record_init).start()
     keyboard_init = threading.Thread(target=keyboard_init).start()
     while not finished:
