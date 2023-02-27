@@ -28,7 +28,7 @@ tempo_di_inizio        = 0
 finished          = False
 recording         = False 
 righe             = 0
-is_automatic      = False
+is_automatic      = True
 
 
 def runnnn():
@@ -55,15 +55,16 @@ def setRequestedPos_Y(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
     value              = round(float(args[0]),3) 
-    bufferone[iddio].x = value
+    bufferone[iddio].y = value
     # if iddio == 3:
-    #     print(f"{iddio=} {value=}")
     
 def setRequestedPos_Z(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
     value              = round(float(args[0]),3) 
-    bufferone[iddio].x = value
+    bufferone[iddio].z = value
+    # print(f"{iddio=} {value=}")
+
 
 def setRequestedCol_R(address, args):
     drone_stringa      = address.split('/')[2]
@@ -95,10 +96,11 @@ def setRequestedTimecode(address, args):
     # print(args[0])
     # print(args[0])
     if is_automatic:
-        if timecode >= 10 and not recording:
+        if timecode >= 3000 and not recording:
             record_routine()
-        if timecode >= 31000 and recording:
+        if timecode >= 34000 and recording:
             stop_recorder()
+            ciao_ciao()
     
 
 def keyboard_init():
@@ -141,13 +143,13 @@ def OSC_init():
         osc_udp_server("0.0.0.0", porta,   "receivingServer") 
         osc_method("/notch/drone*/pos",    setRequestedPos,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/posX",   setRequestedPos_X,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/posY",   setRequestedPos_Y,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/pos>",   setRequestedPos_Z,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        osc_method("/notch/drone*/posY",   setRequestedPos_Z,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA) # Y and Z inverted for skybrush's sake
+        osc_method("/notch/drone*/posZ",   setRequestedPos_Y,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/col",    setRequestedCol,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/R",      setRequestedCol_R,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/G",      setRequestedCol_G,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/notch/drone*/B",      setRequestedCol_B,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/timecode",     setRequestedTimecode,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
+        osc_method("/notch/timecode",      setRequestedTimecode,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/recorder/start",      record_routine,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         osc_method("/recorder/stop",       stop_recorder,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
         time.sleep(1) 
@@ -179,6 +181,8 @@ def record_routine(*args):
         for drogno in bufferone:
             d = bufferone[drogno] 
             d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
+            print(f"{drogno=} {il_tempo_dall_inizio=} {d.x=} {d.y=} {d.z=} {d.r=} {d.g=} {d.b=}")
+
             
     def ricorda():
         global righe
@@ -227,7 +231,7 @@ class bufferDrone():
         self.name        = 'bufferDrone'+str(ID)
         self.x           = 0.0
         self.y           = 0.0
-        self.z           = 1.0
+        self.z           = 0.0
         self.r           = 0
         self.g           = 0
         self.b           = 0
