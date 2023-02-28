@@ -98,7 +98,7 @@ def setRequestedTimecode(address, args):
     if is_automatic:
         if timecode >= 3000 and not recording:
             record_routine()
-        if timecode >= 34000 and recording:
+        if timecode >= 33220 and recording:
             stop_recorder()
             ciao_ciao()
     
