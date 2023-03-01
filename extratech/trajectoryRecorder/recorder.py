@@ -14,11 +14,11 @@ from datetime import timedelta
 tl = Timeloop()
 cartella_registrazioni           = 'registrazioniOSC'
 if not pathlib.Path(cartella_registrazioni).exists():
-  os.mkdir(cartella_registrazioni)
-# os.chdir(cartella_registrazioni)
+  os.mkdir(cartella_registrazioni) 
 
-
-numero_drogni     = 4
+lead_IN           = 2000
+lead_OUT          = 119000
+numero_drogni     = 9
 intervallo        = 0.1
 porta             = 9202
 loop              = cycle(r"-\|/")
@@ -96,9 +96,9 @@ def setRequestedTimecode(address, args):
     # print(args[0])
     # print(args[0])
     if is_automatic:
-        if timecode >= 3000 and not recording:
+        if timecode >= lead_IN and not recording:
             record_routine()
-        if timecode >= 33220 and recording:
+        if timecode >= lead_OUT and recording:
             stop_recorder()
             ciao_ciao()
     
