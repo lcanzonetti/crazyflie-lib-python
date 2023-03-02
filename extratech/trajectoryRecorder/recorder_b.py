@@ -4,9 +4,13 @@
 
 import time, sys, threading, logging, signal, math, datetime, os, pathlib, shutil, msvcrt
 from itertools import cycle
-from   osc4py3.as_eventloop  import *
-from   osc4py3               import oscmethod as osm
-from   osc4py3               import oscbuildparse
+
+import argparse
+import math
+
+from pythonosc.dispatcher import Dispatcher
+from pythonosc import osc_server
+
 import pandas as pd
 from time import perf_counter
 from timeloop import Timeloop
@@ -20,7 +24,7 @@ tab = '\t'
 
 lead_IN           = 2000
 lead_OUT          = 119000
-numero_drogni     = 5
+numero_drogni     = 9
 intervallo        = 0.1
 porta             = 9202
 loop              = cycle(r"-\|/")
@@ -35,70 +39,39 @@ is_automatic      = True
 def runnnn():
     print("running ...", next(loop), end='\r', flush=True)
 
-def setRequestedPos(address, args):
-    global timecode
-    x = address.split('/')
-    y = x[2].split('_')
-    iddio = int(y[1])
-    # print('Ciao sono il drone %s e dovrei andare a X %s, Y %s, Z %s' %(iddio,round(float(args[0]),3), round(float(args[1]),3), round(float(args[2]),3)))
-    bufferone[iddio].x = round(float(args[0]),3)
-    bufferone[iddio].y = round(float(args[1]),3)
-    bufferone[iddio].z = round(float(args[2]),3)
-
-def setRequestedPos_X(address, args):
-    drone_stringa      = address.split('/')[2]
+def setRequestedPos_X(add, roba):
+    drone_stringa      = add.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    # value = round(float(args[0]),3) 
-    # bufferone[iddio].x = value
-    bufferone[iddio].x =  args[0]
-
-   
+    bufferone[iddio].x =  roba
     
-def setRequestedPos_Y(address, args):
-    drone_stringa      = address.split('/')[2]
+def setRequestedPos_Y(add, roba):
+    drone_stringa      = add.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    # value              = round(float(args[0]),3) 
-    # value              = args[0]
-    bufferone[iddio].y =  args[0]
-    # if iddio == 7:
-    #     tempY = args[0]
+    bufferone[iddio].y =  roba
 
-def setRequestedPos_Z(address, args):
-    drone_stringa      = address.split('/')[2]
+def setRequestedPos_Z(add, roba):
+    drone_stringa      = add.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    # value              = round(float(args[0]),3) 
-    # bufferone[iddio].z = value
-    # print(f"{iddio=} {value=}")
-    bufferone[iddio].z =  args[0]
-
+    bufferone[iddio].z =  roba
 
 def setRequestedCol_R(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].r= int(args[0]) 
+    bufferone[iddio].r= int(args) 
 
 def setRequestedCol_G(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].g= int(args[0]) 
+    bufferone[iddio].g= int(args) 
 
 def setRequestedCol_B(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].b= int(args[0]) 
-
-def setRequestedCol(address, args):
-    x = address.split('/')
-    y = x[2].split('_')
-    iddio = int(y[1])
-    bufferone[iddio].r = args[0]
-    bufferone[iddio].g = args[1]
-    bufferone[iddio].b = args[2]
-    # print('Ciao sono il drone %s e dovrei avere il colore R %s, G %s, B %s' %(iddio, args[0],  args[1], args[2] ))
-
+    bufferone[iddio].b= int(args) 
+ 
 def setRequestedTimecode(address, args):
     global timecode
-    timecode = int(args[0])
+    timecode = int(args)
     # print(args[0])
     # print(args[0])
     if is_automatic:
@@ -108,7 +81,6 @@ def setRequestedTimecode(address, args):
             stop_recorder()
             ciao_ciao()
     
-
 def keyboard_init():
     def nnamo():
         while not finished:
@@ -141,37 +113,38 @@ def keyboard_init():
 
 def OSC_init():
     try:
-        # logging.basicConfig(format='%(asctime)s - %(threadName)s ø %(name)s - '  '%(levelname)s - %(message)s')
-        # logger = logging.getLogger("osc")
-        # logger.setLevel(logging.DEBUG)
-        # osc_startup(logger=logger)
-        osc_startup()
-        osc_udp_server("0.0.0.0", porta,   "receivingServer") 
-        # osc_method("/notch/drone*/pos",    setRequestedPos,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/posX",   setRequestedPos_X,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/posY",   setRequestedPos_Z,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA) # Y and Z inverted for skybrush's sake
-        osc_method("/notch/drone*/posZ",   setRequestedPos_Y,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        # osc_method("/notch/drone*/col",    setRequestedCol,        argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/R",      setRequestedCol_R,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/G",      setRequestedCol_G,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/drone*/B",      setRequestedCol_B,      argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/notch/timecode",      setRequestedTimecode,   argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/recorder/start",      record_routine,         argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osc_method("/recorder/stop",       stop_recorder,          argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATA)
-        osm.OSCARG_DATAUNPACK
+        parser   = argparse.ArgumentParser()
+        parser.add_argument("--ip", default="0.0.0.0", help="The ip to listen on")
+        parser.add_argument("--port",type=int, default=porta, help="The port to listen on")
+        args = parser.parse_args()
+
+        dispatcher = Dispatcher()
+        # dispatcher.map("/filter", print)
+        # dispatcher.map("/volume", print_volume_handler, "Volume")
+        # dispatcher.map("/logvolume", print_compute_handler, "Log volume", math.log)
+        dispatcher.map("/notch/drone*/posX", setRequestedPos_X)
+        dispatcher.map("/notch/drone*/posZ", setRequestedPos_Y)
+        dispatcher.map("/notch/drone*/posY", setRequestedPos_Z)
+        dispatcher.map("/notch/drone*/R", setRequestedCol_R)
+        dispatcher.map("/notch/drone*/G", setRequestedCol_G)
+        dispatcher.map("/notch/drone*/B", setRequestedCol_B)
+        dispatcher.map("/notch/timecode", setRequestedTimecode)
+        server = osc_server.ThreadingOSCUDPServer( (args.ip, args.port), dispatcher)
+        print("Serving on {}".format(server.server_address))
+        server.serve_forever()
         time.sleep(1) 
     except Exception as err:
          print(str(err))
 
-    def OSC_read():
-        while not finished:
-            try:
-                time.sleep(0.0001)
-                osc_process()      
-            except KeyboardInterrupt:
-                print('stopping OSC')
-                osc_terminate()
-    OSC_thread = threading.Thread(target=OSC_read).start()
+    # def OSC_read():
+    #     while not finished:
+    #         try:
+    #             time.sleep(0.0001)
+    #             osc_process()      
+    #         except KeyboardInterrupt:
+    #             print('stopping OSC')
+    #             osc_terminate()
+    # OSC_thread = threading.Thread(target=OSC_read).start()
  
 def record_routine(*args):
     global recording
@@ -187,9 +160,9 @@ def record_routine(*args):
         righe += 1
         for drogno in bufferone:
             d = bufferone[drogno] 
-            # d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
+            d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
             # print(f"{drogno=} {il_tempo_dall_inizio=} {d.x=} {d.y=} {d.z=} {d.r=} {d.g=} {d.b=}")
-            if drogno==4:
+            if drogno==8:
                 print(f"{drogno=}{tab}{il_tempo_dall_inizio=}{tab}{timecode=}{tab}{d.x=}{tab}{d.y=}{tab}{d.z=}{tab}{d.r=}{tab}{d.g=}{tab}{d.b=}")
 
             
@@ -228,8 +201,6 @@ def record_routine(*args):
         inf  = threading.Thread(target=informami).start()
         ric  = threading.Thread(target=ricorda).start()
 
-
-
 def faiIlBufferon():
     global bufferone
     for i in range (0,numero_drogni):
@@ -259,8 +230,6 @@ def ciao_ciao(*args):
     recording = False
     finished  = True
     print('Bye bye. \n')
-    
-    time.sleep(1)
     sys.exit("Putin merda")
 
 if __name__ == '__main__':
