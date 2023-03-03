@@ -75,7 +75,7 @@ def setRequestedTimecode(address, args):
     # print(args[0])
     # print(args[0])
     if is_automatic:
-        if timecode >= lead_IN and not recording:
+        if timecode >= lead_IN and not recording and not finished:
             record_routine()
         if timecode >= lead_OUT and recording:
             stop_recorder()
@@ -155,15 +155,16 @@ def record_routine(*args):
 
     def salva_una_riga():
         global righe
-        il_tempo_dall_inizio = math.floor(time.time_ns()/1000000 - tempo_di_inizio)
-        # il_tempo_dall_inizio = math.floor((perf_counter() - tempo_di_inizio)*1000)
-        righe += 1
-        for drogno in bufferone:
-            d = bufferone[drogno] 
-            d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
-            # print(f"{drogno=} {il_tempo_dall_inizio=} {d.x=} {d.y=} {d.z=} {d.r=} {d.g=} {d.b=}")
-            if drogno==8:
-                print(f"{drogno=}{tab}{il_tempo_dall_inizio=}{tab}{timecode=}{tab}{d.x=}{tab}{d.y=}{tab}{d.z=}{tab}{d.r=}{tab}{d.g=}{tab}{d.b=}")
+        if recording:
+            il_tempo_dall_inizio = math.floor(time.time_ns()/1000000 - tempo_di_inizio)
+            # il_tempo_dall_inizio = math.floor((perf_counter() - tempo_di_inizio)*1000)
+            righe += 1
+            for drogno in bufferone:
+                d = bufferone[drogno] 
+                d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
+                # print(f"{drogno=} {il_tempo_dall_inizio=} {d.x=} {d.y=} {d.z=} {d.r=} {d.g=} {d.b=}")
+                if drogno==8:
+                    print(f"{drogno=}{tab}{il_tempo_dall_inizio=}{tab}{timecode=}{tab}{d.x=}{tab}{d.y=}{tab}{d.z=}{tab}{d.r=}{tab}{d.g=}{tab}{d.b=}")
 
             
     def ricorda():
