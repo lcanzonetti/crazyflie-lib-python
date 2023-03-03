@@ -22,8 +22,8 @@ if not pathlib.Path(cartella_registrazioni).exists():
 
 tab = '\t'
 
-lead_IN           = 2000
-lead_OUT          = 119000
+lead_IN           = 200
+lead_OUT          = 118500
 numero_drogni     = 9
 intervallo        = 0.1
 porta             = 9202
