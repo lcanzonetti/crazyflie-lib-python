@@ -23,7 +23,7 @@ sys.path = [SYS_TEST_PATH, SINGLE_CF_GROUNDED, *sys.path]
 ############    Local Imports
 import test_container
 from   test_single_cf_grounded                    import test_link
-from   common_utils                               import convert_motor_pass
+from   common_utils                               import convert_motor_pass, write
 
  
 class dataDrone(threading.Thread):
@@ -65,15 +65,17 @@ class dataDrone(threading.Thread):
 
     def _connected(self, link_uri):   ## callback allo scaricamento del TOC
         # self._cf.is_connected = True
-        print("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
-        print('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
+        write("Mi sono connesso al drone %s all'indirizzo %s" %(self.ID, self.link_uri))
+        write('TOC scaricata per il %s, in attesa dei parametri.' % (self.name))
    
     def _all_params_there(self):
-        print('Parametri scaricati per %s' % self.name)
-        print(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
+        write('Parametri scaricati per %s' % self.name)
+        write(Fore.LIGHTGREEN_EX + '%s connesso, it took %s seconds'% (self.name, round(time.time()-self.connection_time,2)))
         self.is_connected = True
-        self.test_manager.start_sequenza_test()
-        self.test_manager.test_over_checker()
+        write("il drone %s configura il log... " % self.ID)
+        self.test_manager.configura_log()
+        # self.test_manager.start_sequenza_test()
+        # self.test_manager.test_over_checker()
 
     def _fully_connected(self, link_uri):   ## callback con tutto scaricato, fa partire la sequenza test
         
@@ -82,7 +84,7 @@ class dataDrone(threading.Thread):
         self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
  
     def connect(self):
-        print("provo a connettermi al drone %s " % self.name)
+        write("provo a connettermi al drone %s " % self.name)
         def connection():
             self._cf.open_link(self.link_uri)
             self.connection_time = time.time()
@@ -90,9 +92,9 @@ class dataDrone(threading.Thread):
 
     def close_link(self):
         self._cf.close_link()
-        print("Ora chiudo con %s" %(self.ID))
+        write("Ora chiudo con %s" %(self.ID))
         secondi = time.time() - self.connection_time
-        print ("i test di %s sono durati %s secondi" % (self.name, secondi))
+        # write ("i test di %s sono durati %s secondi" % (self.name, secondi))
     
     def _crazyflie_logData_receiver(self, timestamp, data, logconf):
         # qualche assegnazione di variabile:

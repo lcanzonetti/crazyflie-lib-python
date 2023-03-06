@@ -6,6 +6,10 @@ import   time, os, sys, signal, threading, importlib, subprocess
 
 ############   dependencies
 import   GLOBALS                                    as     GB
+from common_utils import write
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QLineEdit, QTextEdit
+# import   GUI
 import   pandas                                     as     pd
 import   numpy                                      as     np
 from     PIL                                        import Image, ImageDraw, ImageFont 
@@ -18,7 +22,6 @@ load_dotenv()
 ############    CFLIB_PATH è assoluto e va specificato nel file .env su ogni macchina
 CFLIB_PATH         = os.environ.get('CFLIB_PATH')
 sys.path = [CFLIB_PATH, *sys.path]                  ### Mette CFLIB_PATH all'inizio dele variabili d'ambiente
-
 
 import   cflib     
 
@@ -36,28 +39,12 @@ import   wakeUppatore, stenBaiatore
 from     common_utils                               import IDFromURI, exit_signal_handler
 from     test_utils                                 import istanziaClassi, check_if_test_is_completed, scan_for_crazyflies
 
-proj_path = [x for x in sys.path if x.endswith("utilities")]
+# proj_path = [x for x in sys.path if x.endswith("utilities")]
 
-isExist    = os.path.exists(proj_path[0] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
-if not isExist: os.makedirs(proj_path[0] + '/Test_Resultsss')
-
-def print_greetings():
-    text   = "EXTRATECH TESTING PLATFORM"
-    myfont = ImageFont.truetype("verdana.ttf", 8, encoding="unic")
-    text_width, text_height   = myfont.getsize(text)
-    img    = Image.new("1",(text_width, text_height),"black")
-    draw   = ImageDraw.Draw(img)
-    draw.text((0, 0), text, "white", font=myfont)
-    pixels = np.array(img, dtype=np.uint8)
-    chars = np.array([' ','#'], dtype="U1")[pixels]
-    strings = chars.view('U' + str(chars.shape[1])).flatten()
-    print( "\n".join(strings))
-    print('\n')
+# isExist    = os.path.exists(proj_path[0] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+# if not isExist: os.makedirs(proj_path[0] + '/Test_Resultsss')
 
 def main():
-    print_greetings()
-
-    time.sleep(2)
     
     cflib.crtp.init_drivers()
     wakeUppatore.wekappa()
@@ -65,19 +52,22 @@ def main():
         scan_for_crazyflies()
     except Exception as e:
         print(".")
-    signal.signal(signal.SIGINT, exit_signal_handler)
+    # signal.signal(signal.SIGINT, exit_signal_handler)
     
     istanziaClassi()
-    check_if_test_is_completed()
+    # check_if_test_is_completed()
 
 if __name__ == '__main__':
     try:
+        # threading.Thread(target=window).start()
+
         main()
+        
         while not GB.is_test_completed:
             time.sleep(1)
             pass
     except KeyboardInterrupt:
-        print('Interrupted')
+        write('Interrupted')
         try:
             sys.exit(0)
         except SystemExit:

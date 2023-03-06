@@ -4,34 +4,39 @@ import time
 
 #custom modules
 from stenBaiatore import create_CF_list
+
 #cf modules
 from   cflib.utils.power_switch import PowerSwitch
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
+from   common_utils          import write
+
 coloInit(convert=True)
 
-droni = 9
+droni = 50
 radio = 1
 
 def wekappa():
-    print('Waking up devices')
+    write('Waking up devices')
     for uri in create_CF_list(droni, radio):
         try:
             PowerSwitch(uri).stm_power_up()
-            print(Fore.GREEN + '%s has been woke upped!' % uri)
+            write('%s has been woke upped!' % uri)
         except Exception:
-            print(Fore.RED + '%s is not there to be woke up' % uri)
-    time.sleep(1)
-    print ('Done. Ciao.')
+            write('%s is not there to be woke up' % uri)
+    time.sleep(0.3)
+    write ('Done. Ciao.')
 
 def wakeUpSingle(uri):
-    print('Waking up device %s' % uri)
+    write('Waking up device %s' % uri)
     try:
         PowerSwitch(uri).stm_power_up()
-        print(Fore.GREEN + '%s has been woke upped!' % uri)
+        write('%s has been woke upped!' % uri)
+
     except Exception:
-        print(Fore.RED + '%s is not there to be woke up' % uri)
- 
+        write('%s is not there to be woke up' % uri)
+    time.sleep(1)
+    write("Svegliati!")
 if __name__ == '__main__':
     wekappa()
 

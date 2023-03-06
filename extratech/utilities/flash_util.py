@@ -7,7 +7,7 @@ from     colorama              import init as coloInit
 available = [
     "radio://0/80/2M/E7E7E7E7E1",
   # "radio://0/100/2M/E7E7E7E7E6",
-    "radio://0/100/2M/E7E7E7E7E8"
+  # "radio://0/100/2M/E7E7E7E7E8"
 ]
 
 # def fai_cose_in_wsl():
@@ -17,7 +17,7 @@ available = [
 
 def flasha_firmware_subprocess():
 
-    print(Fore.CYAN + "Adesso flashiamo tutti i droni che ne hanno bisogno!")
+    print("Adesso flashiamo tutti i droni che ne hanno bisogno!")
     print('\n')
 
     for drogno in available:

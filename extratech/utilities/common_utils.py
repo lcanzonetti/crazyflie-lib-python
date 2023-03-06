@@ -7,6 +7,13 @@ import GLOBALS                                    as GB
 ############    CrazyFlie Imports
 from   cflib.utils.power_switch                   import PowerSwitch
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+def write(message):
+    with open(os.path.join(__location__, "log.txt"), mode="a") as f:
+        print(message, file=f)
+    
+
 def IDFromURI(uri):
     # Get the address part of the uri
     address = uri.rsplit('/', 1)[-1]

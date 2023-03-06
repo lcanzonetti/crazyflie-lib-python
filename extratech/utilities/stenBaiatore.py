@@ -1,10 +1,11 @@
 #rf 2021
-#ciao
+#ciaod
 import time
 #custom modules
 from   cflib.utils.power_switch import PowerSwitch
 from   colorama              import Fore, Back, Style
 from   colorama              import init as coloInit  
+from   common_utils          import write
 coloInit(convert=True)
 
 droni = 8
@@ -15,33 +16,34 @@ import cflib.crtp
 def cercaya():
     cflib.crtp.init_drivers()
 
-    print('Scanning interfaces for Crazyflies...')
+    write('Scanning interfaces for Crazyflies...')
     available = cflib.crtp.scan_interfaces() 
-    print('Crazyflies found:')
+    write('Crazyflies found:')
     for i in available:
-        print(i[0])
+        write(i[0])
 
 
 def stenbaya():
-    print ("creating CF list")
+    write ("creating CF list")
     uris = create_CF_list(droni, radio)
-    print('StandBying devices')
+    write('StandBying devices')
     for uri in uris:
         try:
             PowerSwitch(uri).stm_power_down()
-            print(Fore.GREEN + '%s has been standbyied!' % uri)
+            write('%s has been standbyied!' % uri)
         except Exception:
-            print(Fore.RED + '%s is not there to be standByied' % uri)
+            write('%s is not there to be standByied' % uri)
     time.sleep(1)
-    print ('Done. Ciao.')
+    write ('Done. Ciao.')
 
 def standBySingle(uri):
-    print(Fore.WHITE + 'StandBying device %s' % uri)
+    # write('StandBying device %s' % uri)
     try:
         PowerSwitch(uri).stm_power_down()
-        print(Fore.GREEN + '%s has been standbyied!' % uri)
+        write('%s has been standbyied!' % uri)
     except Exception:
-        print(Fore.RED + '%s is not there to be standByied' % uri)
+        write('%s is not there to be standByied' % uri)
+    # time.sleep(1)
  
 def create_CF_list(numero_massimo_droni = 10, radio_installate = 1):
     canali_radio = [80, 90, 100]
