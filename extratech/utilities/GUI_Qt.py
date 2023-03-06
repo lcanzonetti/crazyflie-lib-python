@@ -50,13 +50,9 @@ class MyWindow(QMainWindow):
         )
         self.textbox.setFont(QFont('Arial', 12))
         self.textbox.resize(400, 1200)
+        self.text_function()
 
         #### Buttons
-
-        ###### Wakeup and connect to all available drones
-        self.wake_button = QtWidgets.QPushButton(self)
-        self.wake_button.setText("Connessione Iniziale")
-        self.wake_button.clicked.connect(self.fai_main)
 
         ###### PROPELLER TESTING SECTION
 
@@ -133,29 +129,28 @@ class MyWindow(QMainWindow):
         self.clearlog_button.setText("Pulisci Log")
         self.clearlog_button.clicked.connect(self.clear_log)
 
-        ######
+        ###### Write json with results
         self.writejson_button = QtWidgets.QPushButton(self)
         self.writejson_button.setText("Scrivi Json con Risultati")
         self.writejson_button.clicked.connect(self.scrivi_json)
 
         #### Add Widgets to grid
-        self.grid.addWidget(self.wake_button, 0, 0, 1, 4)
-        self.grid.addWidget(self.prop_label, 1, 0, 1, 4)
-        self.grid.addWidget(self.prop_button, 2, 0, 1, 4)
-        self.grid.addWidget(self.proline_label, 3, 0, 1, 4)
-        self.grid.addWidget(self.prop_line, 4, 0, 1, 4)
-        self.grid.addWidget(self.batt_label, 5, 0, 1, 4)
-        self.grid.addWidget(self.batt_button, 6, 0, 1, 4)
-        self.grid.addWidget(self.battline_label, 7, 0, 1, 4)
-        self.grid.addWidget(self.batt_line, 8, 0, 1, 4)
-        self.grid.addWidget(self.radio_label, 9, 0, 1, 4)
-        self.grid.addWidget(self.radio_button, 10, 0, 1, 4)
-        self.grid.addWidget(self.radline_label, 11, 0, 1, 4)
-        self.grid.addWidget(self.radio_line, 12, 0, 1, 4)
-        self.grid.addWidget(self.standby_button, 13, 0, 1, 4)
-        self.grid.addWidget(self.wakeup_button, 14, 0, 1, 4)
+        self.grid.addWidget(self.prop_label, 0, 0, 1, 4)
+        self.grid.addWidget(self.prop_button, 1, 0, 1, 4)
+        self.grid.addWidget(self.proline_label, 2, 0, 1, 4)
+        self.grid.addWidget(self.prop_line, 3, 0, 1, 4)
+        self.grid.addWidget(self.batt_label, 4, 0, 1, 4)
+        self.grid.addWidget(self.batt_button, 5, 0, 1, 4)
+        self.grid.addWidget(self.battline_label, 6, 0, 1, 4)
+        self.grid.addWidget(self.batt_line, 7, 0, 1, 4)
+        self.grid.addWidget(self.radio_label, 8, 0, 1, 4)
+        self.grid.addWidget(self.radio_button, 9, 0, 1, 4)
+        self.grid.addWidget(self.radline_label, 10, 0, 1, 4)
+        self.grid.addWidget(self.radio_line, 11, 0, 1, 4)
+        self.grid.addWidget(self.standby_button, 12, 0, 1, 4)
+        self.grid.addWidget(self.wakeup_button, 13, 0, 1, 4)
         self.grid.addWidget(self.clearlog_button, 18, 6, 1, 1)
-        self.grid.addWidget(self.textbox, 0, 5, 16, 1)
+        self.grid.addWidget(self.textbox, 0, 5, 15, 1)
         self.grid.addWidget(self.writejson_button, 17, 6, 1, 1)
 
         self.widget.setLayout(self.grid)
@@ -169,47 +164,20 @@ class MyWindow(QMainWindow):
 
     #### Main?
 
-    def fai_main(self):
-        self.worker_thread = QThread()
+    def text_function(self):
         self.text_thread = QThread()
 
-        self.worker = Worker()
         self.reader = Reader()
 
-        self.worker.moveToThread(self.worker_thread)
         self.reader.moveToThread(self.text_thread)
 
         self.reader.testo.connect(self.update_text)
         self.text_requested.connect(self.reader.leggi)
 
-        self.worker_thread.started.connect(self.worker.run)
         self.text_thread.started.connect(self.reader.leggi)
-        self.worker.finished.connect(self.worker_thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.worker_thread.finished.connect(self.worker_thread.deleteLater)
 
-        self.worker_thread.start()
         self.text_thread.start()
 
-
-        ###### Disable Buttons while connecting
-        self.wake_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.wake_button.setEnabled(True))
-        self.prop_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.prop_button.setEnabled(True))
-        self.standby_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.standby_button.setEnabled(True))
-        self.prop_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.prop_line.setEnabled(True))
-        self.wakeup_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.wakeup_button.setEnabled(True))
-        self.radio_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.radio_button.setEnabled(True))
-
-
-        self.worker_thread.finished.connect(
-            lambda: self.wake_button.setText("Connesso ad un po' di drogni.")
-        )
     
     #### FUNCTIONS
 
@@ -283,7 +251,25 @@ class MyWindow(QMainWindow):
         self.worker_thread.finished.connect(self.worker_thread.deleteLater)
 
         self.worker_thread.start()
+
+        ###### Disable Buttons while connecting
         
+        self.prop_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.prop_button.setEnabled(True))
+        self.standby_button.setEnabled(False)
+        self.batt_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.batt_button.setEnabled(True))
+        self.batt_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.batt_line.setEnabled(True))
+        self.worker_thread.finished.connect(lambda: self.standby_button.setEnabled(True))
+        self.prop_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.prop_line.setEnabled(True))
+        self.wakeup_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.wakeup_button.setEnabled(True))
+        self.radio_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.radio_button.setEnabled(True))
+        self.radio_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))        
 
     def standby_for_all(self):
         for uro in GB.available:

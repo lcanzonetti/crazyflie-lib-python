@@ -48,10 +48,13 @@ def main():
     
     cflib.crtp.init_drivers()
     wakeUppatore.wekappa()
-    try:
-        scan_for_crazyflies()
-    except Exception as e:
-        print(".")
+
+    #### NON LO USIAMO STO CACCHIO DI SCAN FOR CRAZYFLIES
+
+    # try:
+    #     scan_for_crazyflies()
+    # except Exception as e:
+    #     print(".")
     # signal.signal(signal.SIGINT, exit_signal_handler)
     
     istanziaClassi()

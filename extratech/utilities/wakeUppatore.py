@@ -1,6 +1,7 @@
 #rf 2021
 #ciao
 import time
+import GLOBALS as GB
 
 #custom modules
 from stenBaiatore import create_CF_list
@@ -17,11 +18,13 @@ droni = 10
 radio = 1
 
 def wekappa():
+    GB.available = []
     write('Waking up devices')
     for uri in create_CF_list(droni, radio):
         try:
             PowerSwitch(uri).stm_power_up()
             write('%s has been woke upped!' % uri)
+            GB.available.append(uri)
         except Exception:
             write('%s is not there to be woke up' % uri)
     time.sleep(0.3)

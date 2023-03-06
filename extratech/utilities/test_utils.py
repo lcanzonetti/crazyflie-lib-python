@@ -34,7 +34,6 @@ is_test_completed = False
 
 def istanziaClassi():
     # cancellami = DataDrogno.dataDrone(IDFromURI('E7E7E7E7E1'),'E7E7E7E7E1')
-
     for uro in GB.available:
         iddio = IDFromURI(uro)
         GB.data_d[iddio] = DataDrogno.dataDrone(iddio, uro)
@@ -43,7 +42,7 @@ def istanziaClassi():
 def scan_for_crazyflies():
     GB.available.clear()
     write(GB.available)
-    write(Fore.WHITE + "Scanning for available radios...")
+    write("Scanning for available radios...")
     for i in GB.paginegialle:
         GB.available.append(cflib.crtp.scan_interfaces(address=int(i, 16)))
     GB.available = list(filter(None, GB.available))
