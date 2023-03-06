@@ -13,7 +13,7 @@ from   common_utils          import write
 
 coloInit(convert=True)
 
-droni = 50
+droni = 10
 radio = 1
 
 def wekappa():
