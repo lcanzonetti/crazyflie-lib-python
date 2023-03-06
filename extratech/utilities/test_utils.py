@@ -55,21 +55,43 @@ def scan_for_crazyflies():
     write("\n")
     return GB.available
 
-def write_json():
+def write_json(location):
     dati_mech = []
     dati_rev = []
     def thread_json():
         for drogno in GB.data_d:
             i = 0
+            if GB.data_d[drogno].battery_sag == 0: 
+                batt_sag = 'Not Tested'
+                batt_test_passed = 'Not Tested'
+            else: 
+                batt_sag = GB.data_d[drogno].battery_sag
+                batt_test_passed = GB.data_d[drogno].battery_test_passed
+            if GB.data_d[drogno].propeller_test_result == [0,0,0,0]:
+                prop_test_result = GB.data_d[drogno].propeller_test_result
+                prop_test_passed = 'Not passed, but probably not tested. Could all the motors possibly have failed?'
+            else: 
+                prop_test_result = GB.data_d[drogno].propeller_test_result
+                prop_test_passed = GB.data_d[drogno].propeller_test_passed
+            if GB.data_d[drogno].bandwidth == None:
+                bandwidth_0 = 0
+                bandwidth_1 = 0
+                latency = 0
+            else:
+                bandwidth_0 = GB.data_d[drogno].bandwidth[0]
+                bandwidth_1 = GB.data_d[drogno].bandwidth[1]
+                latency = GB.data_d[drogno].latency
+
+
             data_mech = pd.DataFrame({'Indirizzo'            : [GB.data_d[drogno].link_uri], 
-                                    'Battery Sag'            : [GB.data_d[drogno].battery_sag],
+                                    'Battery Sag'            : [batt_sag],
                                     'Battery Voltage'        : [GB.data_d[drogno].battery_voltage],
-                                    'Battery Test Pass'      : [GB.data_d[drogno].battery_test_passed],
-                                    'Propeller Test'         : [GB.data_d[drogno].propeller_test_result],
-                                    'Propeller Test Pass'    : [GB.data_d[drogno].propeller_test_passed],
+                                    'Battery Test Pass'      : [batt_test_passed],
+                                    'Propeller Test'         : [prop_test_result],
+                                    'Propeller Test Pass'    : [prop_test_passed],
                                     'RSSI'                   : [GB.data_d[drogno].RSSI],
-                                    'Bandwidth'              : ['%s pkg/s %s kB/s' %(float("{:.2f}".format(GB.data_d[drogno].bandwidth[0])), float("{:.2f}".format(GB.data_d[drogno].bandwidth[1])))],
-                                    'Latency'                : ['%s ms' %float("{:.2f}".format(GB.data_d[drogno].latency))]},
+                                    'Bandwidth'              : ['%s pkg/s %s kB/s' %(float("{:.2f}".format(bandwidth_0)), float("{:.2f}".format(bandwidth_1)))],
+                                    'Latency'                : ['%s ms' %float("{:.2f}".format(latency))]},
                                     index                    = ['Drone ' + str(drogno)])
             dati_mech.append(data_mech)
             data_rev = pd.DataFrame({'Revisione Firmware (1)' : [GB.data_d[drogno].firmware_revision0],
@@ -83,8 +105,8 @@ def write_json():
             display(df1)
             # write("\n")
             display(df2)
-            df1.to_json(sys.path[5] + '/Test_Resultsss/Risultati_mech_' + misaidirelora() + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
-            df2.to_json(sys.path[5] + '/Test_resultsss/Risultati_rev_'  + misaidirelora() + '.json', orient='index', indent=4)
+            df1.to_json(location + '/Test_Resultsss/Risultati_mech_' + misaidirelora() + '.json', orient='index', indent=4)         ### Scrive un file json con i risultati
+            df2.to_json(location + '/Test_resultsss/Risultati_rev_'  + misaidirelora() + '.json', orient='index', indent=4)
         except ValueError:
             write('mi sa che \'sto test è ito buco')
             # sys.exit(0)

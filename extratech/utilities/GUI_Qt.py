@@ -19,6 +19,13 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 file_to_delete = open(os.path.join(__location__, "log.txt"), mode = "w")
 file_to_delete.close()
 
+dir_exists = os.path.exists(__location__ + './Test_Resultsss')
+
+if not dir_exists: os.makedirs(__location__ + './Test_Resultsss')
+
+# isExist    = os.path.exists(proj_path[0] + '/Test_Resultsss')                  ### Chekka se esiste cartella dove scrivere json dei risultati, se no la crea
+# if not isExist: os.makedirs(proj_path[0] + '/Test_Resultsss')
+
 class MyWindow(QMainWindow):
     text_requested = Signal(str)
 
@@ -48,7 +55,7 @@ class MyWindow(QMainWindow):
 
         ###### Wakeup and connect to all available drones
         self.wake_button = QtWidgets.QPushButton(self)
-        self.wake_button.setText("Connettiti a tutti i Droni disponibili")
+        self.wake_button.setText("Connessione Iniziale")
         self.wake_button.clicked.connect(self.fai_main)
 
         ###### PROPELLER TESTING SECTION
@@ -207,9 +214,12 @@ class MyWindow(QMainWindow):
     #### FUNCTIONS
 
     def all_prop_test(self):
-        for uro in GB.available:
-            id = IDFromURI(uro)
-            GB.data_d[id].test_manager.single_drone_prop_test()
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_drone_prop_test()
+        except KeyError:
+            write("No Drones connected!")
 
     def single_prop_test(self, id):
         try:        
@@ -218,9 +228,12 @@ class MyWindow(QMainWindow):
             write("Drone ID not in swarm!")
 
     def all_batt_test(self):
-        for uro in GB.available:
-            id = IDFromURI(uro)
-            GB.data_d[id].test_manager.single_drone_batt_test()
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_drone_batt_test()
+        except KeyError:
+            write("No Drones connected!")
     
     def single_batt_test(self, id):
         try:
@@ -284,7 +297,7 @@ class MyWindow(QMainWindow):
         clear_text.close()
     
     def scrivi_json(self):
-        write_json()
+        write_json(__location__)
 
 #### Test Main Worker
 
