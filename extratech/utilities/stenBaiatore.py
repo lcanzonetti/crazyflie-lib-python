@@ -8,7 +8,7 @@ from   colorama              import init as coloInit
 from   common_utils          import write
 coloInit(convert=True)
 
-droni = 8
+droni = 9
 radio = 1
 import cflib.crtp
 
@@ -46,9 +46,9 @@ def standBySingle(uri):
     # time.sleep(1)
  
 def create_CF_list(numero_massimo_droni = 10, radio_installate = 1):
-    canali_radio = [80, 90, 100]
+    canali_radio = [80]
     list = []
-    numero = 996028180448   ## E7E7E7E7E0
+    numero = 996028180224   ## E7E7E7E7E0
     for drone_potenziale in range (numero, numero + numero_massimo_droni):
         for canale in canali_radio:
             for radio in range(radio_installate):
@@ -57,9 +57,9 @@ def create_CF_list(numero_massimo_droni = 10, radio_installate = 1):
     return list
 
 def create_CF_list_address_only(numero_massimo_droni = 10, radio_installate = 1):
-    canali_radio = [80, 90, 100]
+    canali_radio = [80]
     list = []
-    numero = 996028180448   ## E7E7E7E7E0
+    numero = 996028180224   ## E7E7E7E7E0
     for drone_potenziale in range (numero, numero + numero_massimo_droni):
         for canale in canali_radio:
             for radio in range(radio_installate):

@@ -14,7 +14,7 @@ from   common_utils          import write
 
 coloInit(convert=True)
 
-droni = 10
+droni = 9
 radio = 1
 
 def wekappa():
