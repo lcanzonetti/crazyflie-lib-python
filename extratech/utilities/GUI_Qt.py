@@ -73,6 +73,11 @@ class MyWindow(QMainWindow):
         self.proline_label = QtWidgets.QLabel(self)
         self.proline_label.setText("    Type Drone ID to test")
 
+        ######## Take off and land
+        self.takeoff_button = QtWidgets.QPushButton(self)
+        self.takeoff_button.setText("Fai decollare i droni, poi atterrano")
+        self.takeoff_button.clicked.connect(self.all_takeoff)
+
         ###### BATTERY TESTING SECTION
 
         self.batt_label = QtWidgets.QLabel(self)
@@ -149,8 +154,9 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.radio_line, 11, 0, 1, 4)
         self.grid.addWidget(self.standby_button, 12, 0, 1, 4)
         self.grid.addWidget(self.wakeup_button, 13, 0, 1, 4)
+        self.grid.addWidget(self.takeoff_button, 14, 0, 1, 4)
         self.grid.addWidget(self.clearlog_button, 18, 6, 1, 1)
-        self.grid.addWidget(self.textbox, 0, 5, 15, 1)
+        self.grid.addWidget(self.textbox, 0, 5, 16, 1)
         self.grid.addWidget(self.writejson_button, 17, 6, 1, 1)
 
         self.widget.setLayout(self.grid)
@@ -281,6 +287,11 @@ class MyWindow(QMainWindow):
         self.textbox.clear()
         clear_text = open(os.path.join(__location__, "log.txt"), mode = "w")
         clear_text.close()
+
+    def all_takeoff(self):
+        for uro in GB.available:
+            id = IDFromURI(uro)
+            GB.data_d[id].test_manager.decollo_atterraggio()
     
     def scrivi_json(self):
         write_json(__location__)

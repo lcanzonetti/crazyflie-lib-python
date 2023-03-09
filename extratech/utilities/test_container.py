@@ -228,6 +228,11 @@ class Test_Container():
         print("Il drone %s ha configurato il log." % self.ID)
         # time.sleep(2)
 
+    def decollo_atterraggio(self):
+        self.cf.motionCommander.take_off(height = 1.0, velocity = 0.3)
+        time.sleep(5)
+        self.cf.motionCommande.land(velocity = 0.3)
+
     def start_sequenza_test(self):       ### sequenza principale con tempi
 
         def thread_sequenza_test():

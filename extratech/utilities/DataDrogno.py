@@ -10,6 +10,7 @@ coloInit(convert=True)
 from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
 from   cflib.crazyflie.log                        import LogConfig
+from   cflib.positioning.motion_commander         import MotionCommander
 
 ############    Environment Imports
 from   dotenv                                     import load_dotenv
@@ -57,7 +58,8 @@ class dataDrone(threading.Thread):
         self.test_link              = test_link.TestLink()
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self.test_manager           = test_container.Test_Container(self, self._cf, self.ID, self.link_uri)
-        
+        self.motionCommander        = None
+
         self._cf.connected.add_callback(self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there)
         self._cf.fully_connected.add_callback(self._fully_connected)
@@ -78,7 +80,13 @@ class dataDrone(threading.Thread):
         # self.test_manager.test_over_checker()
 
     def _fully_connected(self, link_uri):   ## callback con tutto scaricato, fa partire la sequenza test
-        
+        # self._cf.param.set_value('commander.enHighLevel', '1')
+
+        self.motionCommander = MotionCommander(
+            self._cf,
+            default_height=1.0
+        )
+
         self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
         self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
         self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
