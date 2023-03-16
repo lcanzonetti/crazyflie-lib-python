@@ -202,20 +202,26 @@ class Test_Container():
         # write("il drone %s configura il log... " % self.parent_drogno.name)
         # self.configura_log()
             
-        self.cf.param.set_value('health.startPropTest', '1')
-
+        # self.cf.param.set_value('health.startPropTest', '1')
+        pwm = 0
         def single_prop_control_loop():
-            while self.parent_drogno.new_motorTestCount     == None                           or \
-                  self.parent_drogno.current_motorTestCount == None:
-                time.sleep(0.3)
-            while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
-                # write(self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount, end='\r')
-                time.sleep(0.3)
-            write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
-            self.parent_drogno.new_motorTestCount = None
-            self.parent_drogno.current_motorTestCount = None
+            while pwm < 10000:
+                pwm = pwm + 100
+                self.cf.param.set_value('health.propTestPWMRatio', str(pwm))
+                self.cf.param.set_value('health.startPropTest', '1')
+                while self.parent_drogno.new_motorTestCount     == None                           or \
+                      self.parent_drogno.current_motorTestCount == None:
+                    time.sleep(0.3)
+                while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
+                    # write(self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount, end='\r')
+                    time.sleep(0.3)
+                    print("l\'attuale pwm è %s" % pwm)
+                write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
+                self.parent_drogno.new_motorTestCount     = None
+                self.parent_drogno.current_motorTestCount = None
         prop_thread = threading.Thread(target=single_prop_control_loop)
         prop_thread.start()
+
      
     def configura_log(self):
         log_conf = LogConfig(name='MotorPass', period_in_ms = 500)
