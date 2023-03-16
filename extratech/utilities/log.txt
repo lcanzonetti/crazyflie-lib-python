@@ -13,6 +13,6 @@ provo a connettermi al drone dataDrone 7
 Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
 TOC scaricata per il dataDrone 7, in attesa dei parametri.
 Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 5.24 seconds
+[92mdataDrone 7 connesso, it took 1.87 seconds
 il drone 7 configura il log... 
 Il drone 7 ha configurato il log.

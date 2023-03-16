@@ -203,8 +203,9 @@ class Test_Container():
         # self.configura_log()
             
         # self.cf.param.set_value('health.startPropTest', '1')
-        pwm = 0
+        
         def single_prop_control_loop():
+            pwm = 0
             while pwm < 10000:
                 pwm = pwm + 100
                 self.cf.param.set_value('health.propTestPWMRatio', str(pwm))
@@ -215,7 +216,7 @@ class Test_Container():
                 while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
                     # write(self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount, end='\r')
                     time.sleep(0.3)
-                    print("l\'attuale pwm è %s" % pwm)
+                print("l\'attuale pwm è %s" % pwm)
                 write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
                 self.parent_drogno.new_motorTestCount     = None
                 self.parent_drogno.current_motorTestCount = None
