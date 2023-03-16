@@ -48,6 +48,7 @@ def main():
     
     cflib.crtp.init_drivers()
     wakeUppatore.wekappa()
+    time.sleep(2)
 
     #### NON LO USIAMO STO CACCHIO DI SCAN FOR CRAZYFLIES
 

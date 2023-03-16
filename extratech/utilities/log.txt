@@ -6,29 +6,13 @@ radio://0/80/2M/E7E7E7E703 is not there to be woke up
 radio://0/80/2M/E7E7E7E704 is not there to be woke up
 radio://0/80/2M/E7E7E7E705 is not there to be woke up
 radio://0/80/2M/E7E7E7E706 is not there to be woke up
-radio://0/80/2M/E7E7E7E707 is not there to be woke up
-radio://0/80/2M/E7E7E7E708 has been woke upped!
+radio://0/80/2M/E7E7E7E707 has been woke upped!
+radio://0/80/2M/E7E7E7E708 is not there to be woke up
 Done. Ciao.
-provo a connettermi al drone dataDrone 8 
-Ora chiudo con 8
-radio://0/80/2M/E7E7E7E708 has been standbyied!
-Waking up devices
-radio://0/80/2M/E7E7E7E700 is not there to be woke up
-radio://0/80/2M/E7E7E7E701 is not there to be woke up
-radio://0/80/2M/E7E7E7E702 is not there to be woke up
-radio://0/80/2M/E7E7E7E703 is not there to be woke up
-radio://0/80/2M/E7E7E7E704 is not there to be woke up
-radio://0/80/2M/E7E7E7E705 is not there to be woke up
-radio://0/80/2M/E7E7E7E706 is not there to be woke up
-radio://0/80/2M/E7E7E7E707 is not there to be woke up
-radio://0/80/2M/E7E7E7E708 has been woke upped!
-Done. Ciao.
-provo a connettermi al drone dataDrone 8 
-Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
-TOC scaricata per il dataDrone 8, in attesa dei parametri.
-Parametri scaricati per dataDrone 8
-[92mdataDrone 8 connesso, it took 6.0 seconds
-il drone 8 configura il log... 
-il drone dataDrone 8 ha finito il Porpeller Test. Il risultato è [0, 1, 1, 0]
-Ora chiudo con 8
-radio://0/80/2M/E7E7E7E708 has been standbyied!
+provo a connettermi al drone dataDrone 7 
+Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
+TOC scaricata per il dataDrone 7, in attesa dei parametri.
+Parametri scaricati per dataDrone 7
+[92mdataDrone 7 connesso, it took 5.24 seconds
+il drone 7 configura il log... 
+Il drone 7 ha configurato il log.

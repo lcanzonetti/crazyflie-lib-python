@@ -38,6 +38,7 @@ def istanziaClassi():
         iddio = IDFromURI(uro)
         GB.data_d[iddio] = DataDrogno.dataDrone(iddio, uro)
         GB.data_d[iddio].connect()
+        time.sleep(0.1)
 
 def scan_for_crazyflies():
     GB.available.clear()

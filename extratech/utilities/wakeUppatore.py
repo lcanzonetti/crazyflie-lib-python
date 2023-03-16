@@ -14,7 +14,7 @@ from   common_utils          import write
 
 coloInit(convert=True)
 
-droni = 9
+droni = GB.numero_droni
 radio = 1
 
 def wekappa():
@@ -27,7 +27,7 @@ def wekappa():
             GB.available.append(uri)
         except Exception:
             write('%s is not there to be woke up' % uri)
-    time.sleep(0.3)
+        time.sleep(1)
     write ('Done. Ciao.')
 
 def wakeUpSingle(uri):

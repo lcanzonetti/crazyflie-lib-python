@@ -140,7 +140,7 @@ class Test_Container():
             # time.sleep(1)
             write('led test finito')
             self.parent_drogno.test_tracker[2] = 1   # led test completato
-            write(self.parent_drogno.test_tracker)
+            # write(self.parent_drogno.test_tracker)
         threading.Thread(target=led_test_sequence).start()
 
     def battery_test(self):
@@ -225,7 +225,7 @@ class Test_Container():
         log_conf.add_variable('health.batterySag', 'FP16')
         self.cf.log.add_config(log_conf)
         log_conf.start()
-        print("Il drone %s ha configurato il log." % self.ID)
+        write("Il drone %s ha configurato il log." % self.ID)
         # time.sleep(2)
 
     def decollo_atterraggio(self):

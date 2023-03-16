@@ -73,11 +73,6 @@ class MyWindow(QMainWindow):
         self.proline_label = QtWidgets.QLabel(self)
         self.proline_label.setText("    Type Drone ID to test")
 
-        ######## Take off and land
-        self.takeoff_button = QtWidgets.QPushButton(self)
-        self.takeoff_button.setText("Fai decollare i droni, poi atterrano")
-        self.takeoff_button.clicked.connect(self.all_takeoff)
-
         ###### BATTERY TESTING SECTION
 
         self.batt_label = QtWidgets.QLabel(self)
@@ -115,7 +110,33 @@ class MyWindow(QMainWindow):
         self.radline_label = QtWidgets.QLabel(self)
         self.radline_label.setText("    Type Drone ID to test")
 
-        #### CONNECTION SECTION 
+        #### LED SECTION
+        self.led_label = QtWidgets.QLabel(self)
+        self.led_label.setText("Led Testing:")
+        self.led_label.setStyleSheet("border: 1px solid black;")
+
+        ###### Led Test for everyone
+        self.all_led_button = QtWidgets.QPushButton(self)
+        self.all_led_button.setText("Test LED per tutti")
+        self.all_led_button.clicked.connect(self.all_ledtest)
+
+        #### STABILITY SECTION
+
+        self.takeoff_label = QtWidgets.QLabel(self)
+        self.takeoff_label.setText("Stability Section:")
+        self.takeoff_label.setStyleSheet("border: 1px solid black;")
+
+        ###### Take off and land
+
+        self.takeoff_button = QtWidgets.QPushButton(self)
+        self.takeoff_button.setText("Fai decollare i droni, poi atterrano")
+        self.takeoff_button.clicked.connect(self.all_takeoff)
+
+        #### CONNECTION SECTION
+
+        self.connection_label = QtWidgets.QLabel(self)
+        self.connection_label.setText("Connection Section:")
+        self.connection_label.setStyleSheet("border: 1px solid black;")
 
         ###### Standby Everyone
         self.standby_button = QtWidgets.QPushButton(self)
@@ -152,12 +173,16 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.radio_button, 9, 0, 1, 4)
         self.grid.addWidget(self.radline_label, 10, 0, 1, 4)
         self.grid.addWidget(self.radio_line, 11, 0, 1, 4)
-        self.grid.addWidget(self.standby_button, 12, 0, 1, 4)
-        self.grid.addWidget(self.wakeup_button, 13, 0, 1, 4)
-        self.grid.addWidget(self.takeoff_button, 14, 0, 1, 4)
-        self.grid.addWidget(self.clearlog_button, 18, 6, 1, 1)
-        self.grid.addWidget(self.textbox, 0, 5, 16, 1)
-        self.grid.addWidget(self.writejson_button, 17, 6, 1, 1)
+        self.grid.addWidget(self.led_label, 12, 0, 1, 4)
+        self.grid.addWidget(self.all_led_button, 13, 0, 1, 4)
+        self.grid.addWidget(self.takeoff_label, 14, 0, 1, 4)
+        self.grid.addWidget(self.takeoff_button, 15, 0, 1, 4)
+        self.grid.addWidget(self.connection_label, 16, 0, 1, 4)
+        self.grid.addWidget(self.standby_button, 17, 0, 1, 4)
+        self.grid.addWidget(self.wakeup_button, 18, 0, 1, 4)
+        self.grid.addWidget(self.clearlog_button, 20, 6, 1, 1)
+        self.grid.addWidget(self.textbox, 0, 5, 19, 1)
+        self.grid.addWidget(self.writejson_button, 19, 6, 1, 1)
 
         self.widget.setLayout(self.grid)
         self.setCentralWidget(self.widget)
@@ -275,7 +300,9 @@ class MyWindow(QMainWindow):
         self.radio_button.setEnabled(False)
         self.worker_thread.finished.connect(lambda: self.radio_button.setEnabled(True))
         self.radio_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))        
+        self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))  
+        self.takeoff_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.takeoff_button.setEnabled(True))      
 
     def standby_for_all(self):
         for uro in GB.available:
@@ -289,10 +316,35 @@ class MyWindow(QMainWindow):
         clear_text.close()
 
     def all_takeoff(self):
-        for uro in GB.available:
-            id = IDFromURI(uro)
-            GB.data_d[id].test_manager.decollo_atterraggio()
+        self.alltakeoff_thread = QThread()
+        self.alltakeoff = TakeOFF()
+
+        self.alltakeoff.moveToThread(self.alltakeoff_thread)
+
+        self.alltakeoff_thread.started.connect(self.alltakeoff.takeoff_all)
+        self.alltakeoff.finished.connect(self.alltakeoff_thread.quit)
+        self.alltakeoff.finished.connect(self.alltakeoff.deleteLater)
+        self.alltakeoff_thread.finished.connect(self.alltakeoff_thread.deleteLater)
+
+        self.alltakeoff_thread.start()
+
+        # for uro in GB.available:
+        #     id = IDFromURI(uro)
+        #     GB.data_d[id].test_manager.decollo_atterraggio()
     
+    def all_ledtest(self):
+        self.allledtest_thread = QThread()
+        self.allledtest = ledTest()
+
+        self.allledtest.moveToThread(self.allledtest_thread)
+
+        self.allledtest_thread.started.connect(self.allledtest.ledtest_all)
+        self.allledtest.finished.connect(self.allledtest_thread.quit)
+        self.allledtest.finished.connect(self.allledtest.deleteLater)
+        self.allledtest_thread.finished.connect(self.allledtest_thread.deleteLater)
+
+        self.allledtest_thread.start()
+
     def scrivi_json(self):
         write_json(__location__)
 
@@ -345,6 +397,34 @@ class SingleRadio(QObject):
             GB.data_d[id_totest].test_manager.single_drone_radio_test()
         except KeyError:
             write("Drone ID not in swarm!")
+        self.finished.emit()
+
+#### TAKEOFF Workers
+
+class TakeOFF(QObject):
+    finished = pyqtSignal()
+
+    def takeoff_all(self):
+        for uro in GB.available:
+            try:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.decollo_atterraggio()
+            except KeyError:
+                write("Something went wrong for drone %s, really wrong!" % id)
+        self.finished.emit()
+
+#### LED Workers
+
+class ledTest(QObject):
+    finished = pyqtSignal()
+
+    def ledtest_all(self):
+        for uro in GB.available:
+            try:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.led_test()
+            except KeyError:
+                write("Led Test did not go well for drone %s" % id)
         self.finished.emit()
 
 #### Window initialization
