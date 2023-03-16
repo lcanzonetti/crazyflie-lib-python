@@ -228,6 +228,7 @@ class Test_Container():
                 print("1")
                 time.sleep(1)
                 pwm = pwm + 1000
+                
                 print("l\'attuale pwm è %s" % pwm)
                 write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
                 self.parent_drogno.new_motorTestCount     = None
