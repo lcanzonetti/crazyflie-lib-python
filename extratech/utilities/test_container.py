@@ -145,6 +145,7 @@ class Test_Container():
 
     def battery_test(self):
         try:
+            # self.cf.param.set_value('health.batTestPWMRatio', '2000')
             self.cf.param.set_value('health.startBatTest', '1')
         except IndexError:
             write()
@@ -177,6 +178,7 @@ class Test_Container():
         threading.Thread(target=single_batt_loop).start()
 
     def propeller_test(self):
+        # self.cf.param.set_value('health.propTestPWMRatio', '2000')
         self.cf.param.set_value('health.startPropTest', '1')
         def prop_control_loop():
             while   self.parent_drogno.new_motorTestCount     == None                         or  \
