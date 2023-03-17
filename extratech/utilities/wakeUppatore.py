@@ -27,7 +27,7 @@ def wekappa():
             GB.available.append(uri)
         except Exception:
             write('%s is not there to be woke up' % uri)
-        time.sleep(1)
+        time.sleep(0.3)
     write ('Done. Ciao.')
 
 def wakeUpSingle(uri):
@@ -38,7 +38,7 @@ def wakeUpSingle(uri):
 
     except Exception:
         write('%s is not there to be woke up' % uri)
-    time.sleep(1)
+    time.sleep(0.3)
     write("Svegliati!")
 if __name__ == '__main__':
     wekappa()

@@ -41,6 +41,8 @@ class MyWindow(QMainWindow):
         self.grid = QGridLayout()
         self.onlyInt = QIntValidator()
         self.onlyInt.setRange(0, 99)
+        self.powerMax = QIntValidator()
+        self.powerMax.setRange(0, 65534)
 
         #### Log
 
@@ -64,6 +66,36 @@ class MyWindow(QMainWindow):
         self.prop_button = QtWidgets.QPushButton(self)
         self.prop_button.setText("Esegui Test Propellers per tutti")
         self.prop_button.clicked.connect(self.all_prop_test)
+
+        ######## Testa solo un motore
+
+        ## Power select
+        self.power_line = QtWidgets.QLineEdit(self)
+        self.power_line.setValidator(self.powerMax)
+        self.power_line.returnPressed.connect(lambda: self.change_power(int(self.power_line.text())))
+
+        self.powerline_label = QtWidgets.QLabel(self)
+        self.powerline_label.setText("    Type motor power to test")
+        
+        ## M1
+        self.motore1_button = QtWidgets.QPushButton(self)
+        self.motore1_button.setText("Test Motor 1")
+        self.motore1_button.clicked.connect(self.motore1)
+
+        ## M2
+        self.motore2_button = QtWidgets.QPushButton(self)
+        self.motore2_button.setText("Test Motor 2")
+        self.motore2_button.clicked.connect(self.motore2)
+
+        ## M3
+        self.motore3_button = QtWidgets.QPushButton(self)
+        self.motore3_button.setText("Test Motor 3")
+        self.motore3_button.clicked.connect(self.motore3)
+
+        ## M4
+        self.motore4_button = QtWidgets.QPushButton(self)
+        self.motore4_button.setText("Test Motor 4")
+        self.motore4_button.clicked.connect(self.motore4)
 
         ######## Type ID and proptest just one Drone
         self.prop_line = QtWidgets.QLineEdit(self)
@@ -183,6 +215,12 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.clearlog_button, 20, 6, 1, 1)
         self.grid.addWidget(self.textbox, 0, 5, 19, 1)
         self.grid.addWidget(self.writejson_button, 19, 6, 1, 1)
+        self.grid.addWidget(self.powerline_label, 20, 0, 1, 4)
+        self.grid.addWidget(self.power_line, 21, 0, 1, 4)
+        self.grid.addWidget(self.motore1_button, 22, 0, 1, 1)
+        self.grid.addWidget(self.motore2_button, 22, 1, 1, 1)
+        self.grid.addWidget(self.motore3_button, 23, 0, 1, 1)
+        self.grid.addWidget(self.motore4_button, 23, 1, 1, 1)
 
         self.widget.setLayout(self.grid)
         self.setCentralWidget(self.widget)
@@ -208,7 +246,6 @@ class MyWindow(QMainWindow):
         self.text_thread.started.connect(self.reader.leggi)
 
         self.text_thread.start()
-
     
     #### FUNCTIONS
 
@@ -225,6 +262,45 @@ class MyWindow(QMainWindow):
             GB.data_d[id].test_manager.single_drone_prop_test()
         except KeyError:
             write("Drone ID not in swarm!")
+
+    def change_power(self, power):
+        GB.power = power
+    
+    def motore1(self):
+        motore = 1
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_motor_test(motore)
+        except KeyError:
+            write("Boh ma che è successo?")
+
+    def motore2(self):
+        motore = 2
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_motor_test(motore)
+        except KeyError:
+            write("Boh ma che è successo?")
+
+    def motore3(self):
+        motore = 3
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_motor_test(motore)
+        except KeyError:
+            write("Boh ma che è successo?")
+
+    def motore4(self):
+        motore = 4
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_motor_test(motore)
+        except KeyError:
+            write("Boh ma che è successo?")
 
     def all_batt_test(self):
         try:

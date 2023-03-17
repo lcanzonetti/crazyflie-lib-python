@@ -204,24 +204,80 @@ class Test_Container():
             
         # self.cf.param.set_value('health.startPropTest', '1')
         
+        
         def single_prop_control_loop():
-            pwm = 0
-            while pwm < 10000:
-                pwm = pwm + 100
-                self.cf.param.set_value('health.propTestPWMRatio', str(pwm))
-                self.cf.param.set_value('health.startPropTest', '1')
-                while self.parent_drogno.new_motorTestCount     == None                           or \
-                      self.parent_drogno.current_motorTestCount == None:
-                    time.sleep(0.3)
-                while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
-                    # write(self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount, end='\r')
-                    time.sleep(0.3)
-                print("l\'attuale pwm è %s" % pwm)
-                write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
-                self.parent_drogno.new_motorTestCount     = None
-                self.parent_drogno.current_motorTestCount = None
+            pwm = 6000 
+            # self.cf.param.set_value('powerDist.idleThrust', '3000')
+            # self.cf.param.set_value('healt.propTestPWMRatio', str(pwm))
+            self.cf.param.set_value('health.startPropTest', '1')
+
+            #### I while servono perché altrimenti scrive subito risultato prima di aver terminato il test (quindi falsato). Sostituibili empiricamente con
+            #### time.sleep()
+
+            while self.parent_drogno.new_motorTestCount     == None                           or \
+                  self.parent_drogno.current_motorTestCount == None:
+                time.sleep(0.3)
+            while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
+                time.sleep(0.3)
+            self.parent_drogno.new_motorTestCount     = None
+            self.parent_drogno.current_motorTestCount = None
+            write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
+
+
+            # while pwm < 36000:
+            #     pwm = pwm + 1000
+            #     self.cf.param.set_value('health.propTestPWMRatio', str(pwm))
+            #     self.cf.param.set_value('health.startPropTest', '1')
+            #     # while self.parent_drogno.new_motorTestCount     == None                           or \
+            #     #       self.parent_drogno.current_motorTestCount == None:
+            #     #     time.sleep(0.3)
+            #     # while (self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount) != 1:
+            #     #     # write(self.parent_drogno.new_motorTestCount - self.parent_drogno.current_motorTestCount, end='\r')
+            #     #     time.sleep(0.3)
+            #     time.sleep(1)
+            #     print("4")
+            #     time.sleep(1)
+            #     print("3")
+            #     time.sleep(1)
+            #     print("2")
+            #     time.sleep(1)
+            #     print("1")
+            #     time.sleep(1)
+            #     pwm = pwm + 1000
+                
+            #     print("l\'attuale pwm è %s" % pwm)
+            #     write("il drone %s ha finito il Porpeller Test. Il risultato è %s" %(self.parent_drogno.name, self.parent_drogno.propeller_test_result))
+            #     self.parent_drogno.new_motorTestCount     = None
+            #     self.parent_drogno.current_motorTestCount = None
         prop_thread = threading.Thread(target=single_prop_control_loop)
         prop_thread.start()
+
+    def single_motor_test(self, motor):
+        power = GB.power
+        self.cf.param.set_value('powerDist.idleThrust', '4000')
+        self.cf.param.set_value('motorPowerSet.enable', '1')
+
+        if motor == 1:
+            write("Testo il motore 1 a potenza %s" % power)
+            self.cf.param.set_value('motorPowerSet.m1', str(power))
+            time.sleep(2)
+            self.cf.param.set_value('motorPowerSet.m1', '0')        
+        elif motor == 2:
+            write("Testo il motore 2 a potenza %s" % power)
+            self.cf.param.set_value('motorPowerSet.m2', str(power))
+            time.sleep(2)
+            self.cf.param.set_value('motorPowerSet.m2', '0')
+        elif motor == 3:
+            write("Testo il motore 3 a potenza %s" % power)
+            self.cf.param.set_value('motorPowerSet.m3', str(power))
+            time.sleep(2)
+            self.cf.param.set_value('motorPowerSet.m3', '0')
+        elif motor == 4:
+            write("Testo il motore 4 a potenza %s" % power)
+            self.cf.param.set_value('motorPowerSet.m4', str(power))
+            time.sleep(2)
+            self.cf.param.set_value('motorPowerSet.m4', '0')
+        
 
      
     def configura_log(self):

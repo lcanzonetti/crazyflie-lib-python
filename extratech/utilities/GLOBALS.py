@@ -6,6 +6,8 @@ primo_avvio_prop = True
 numero_droni = 9
 canali_radio = [80]
 
+power = 5000
+
 ## Questo se indirizzi partono da E7E7E7E700
 numero = 996028180224
 
