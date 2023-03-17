@@ -4,6 +4,7 @@
 import threading, time, sys, importlib, os
 from   colorama             import Fore, Back, Style
 from   colorama             import init as coloInit
+import GLOBALS as GB
 coloInit(convert=True)
 
 ############    CrazyFlie Imports
@@ -11,6 +12,7 @@ from   cflib.crazyflie                            import Crazyflie
 from   cflib.crazyflie.mem                        import MemoryElement
 from   cflib.crazyflie.log                        import LogConfig
 from   cflib.positioning.motion_commander         import MotionCommander
+from   cflib.positioning.position_hl_commander    import PositionHlCommander
 
 ############    Environment Imports
 from   dotenv                                     import load_dotenv
@@ -59,6 +61,7 @@ class dataDrone(threading.Thread):
         self._cf                    = Crazyflie(rw_cache='./extratech/utilities/cache_drogno_%s' %(self.ID))
         self.test_manager           = test_container.Test_Container(self, self._cf, self.ID, self.link_uri)
         self.motionCommander        = None
+        self.highLevelCommander     = None
 
         self._cf.connected.add_callback(self._connected)
         self._cf.param.all_updated.add_callback(self._all_params_there)
@@ -85,6 +88,12 @@ class dataDrone(threading.Thread):
         self.motionCommander = MotionCommander(
             self._cf,
             default_height=1.0
+        )
+
+        self.highLevelCommander = PositionHlCommander(
+            self._cf,
+            default_height= GB.default_height,
+            default_velocity= GB.default_velocity
         )
 
         self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
