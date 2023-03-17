@@ -5,6 +5,8 @@ PRINTRATE  = 1
 primo_avvio_prop = True
 numero_droni = 9
 canali_radio = [80]
+default_height = 1.0
+default_velocity = 0.3
 
 power = 5000
 

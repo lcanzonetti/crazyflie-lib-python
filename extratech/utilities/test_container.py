@@ -297,9 +297,9 @@ class Test_Container():
 
     def decollo_atterraggio(self):
         def decollo_atterraggio_thread():
-            self.parent_drogno.motionCommander.take_off(height = 1.0, velocity = 0.3)
+            self.parent_drogno.highLevelCommander.take_off(height = 1.0, velocity = 0.3)
             time.sleep(5)
-            self.parent_drogno.motionCommander.land(velocity = 0.3)
+            self.parent_drogno.highLevelCommander.land(absolute_height_m=0.05, duration_s=3)
         threading.Thread(target=decollo_atterraggio_thread).start()
 
     def start_sequenza_test(self):       ### sequenza principale con tempi
