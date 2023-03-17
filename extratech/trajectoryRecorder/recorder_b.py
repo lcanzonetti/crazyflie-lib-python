@@ -23,8 +23,8 @@ if not pathlib.Path(cartella_registrazioni).exists():
 tab = '\t'
 
 lead_IN           = 200
-lead_OUT          = 118500
-numero_drogni     = 9
+lead_OUT          = 119500
+numero_drogni     = 8
 intervallo        = 0.1
 porta             = 9202
 loop              = cycle(r"-\|/")
@@ -163,7 +163,7 @@ def record_routine(*args):
                 d = bufferone[drogno] 
                 d.records.append( { 'Time' : il_tempo_dall_inizio, 'x' : d.x, 'y' : d.y, 'z' : d.z, 'Red' : d.r, 'Green' : d.g, 'Blue' : d.b })
                 # print(f"{drogno=} {il_tempo_dall_inizio=} {d.x=} {d.y=} {d.z=} {d.r=} {d.g=} {d.b=}")
-                if drogno==8:
+                if drogno==0:
                     print(f"{drogno=}{tab}{il_tempo_dall_inizio=}{tab}{timecode=}{tab}{d.x=}{tab}{d.y=}{tab}{d.z=}{tab}{d.r=}{tab}{d.g=}{tab}{d.b=}")
 
             
