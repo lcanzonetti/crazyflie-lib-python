@@ -1,0 +1,130 @@
+{
+    "Drone 0":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E700",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":3.96484375,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            1,
+            1,
+            1,
+            0
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":44.0,
+        "Bandwidth":"47.94 pkg\/s 0.19 kB\/s",
+        "Latency":"42.0 ms"
+    },
+    "Drone 1":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E701",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":4.02734375,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            1,
+            0,
+            1,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":53.0,
+        "Bandwidth":"48.65 pkg\/s 0.19 kB\/s",
+        "Latency":"62.54 ms"
+    },
+    "Drone 2":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E702",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":4.04296875,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            0,
+            0,
+            1,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":57.0,
+        "Bandwidth":"48.64 pkg\/s 0.19 kB\/s",
+        "Latency":"59.97 ms"
+    },
+    "Drone 3":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E703",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":3.931640625,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            0,
+            1,
+            0,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":62.0,
+        "Bandwidth":"48.55 pkg\/s 0.19 kB\/s",
+        "Latency":"44.6 ms"
+    },
+    "Drone 4":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E704",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":4.0859375,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            0,
+            1,
+            1,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":55.0,
+        "Bandwidth":"48.28 pkg\/s 0.19 kB\/s",
+        "Latency":"41.76 ms"
+    },
+    "Drone 5":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E705",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":4.0390625,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            1,
+            1,
+            1,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":44.0,
+        "Bandwidth":"46.49 pkg\/s 0.18 kB\/s",
+        "Latency":"43.44 ms"
+    },
+    "Drone 6":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E706",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":4.0390625,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            1,
+            1,
+            0,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":53.0,
+        "Bandwidth":"47.48 pkg\/s 0.19 kB\/s",
+        "Latency":"61.87 ms"
+    },
+    "Drone 7":{
+        "Indirizzo":"radio:\/\/0\/80\/2M\/E7E7E7E707",
+        "Battery Sag":"Not Tested",
+        "Battery Voltage":3.912109375,
+        "Battery Test Pass":"Not Tested",
+        "Propeller Test":[
+            0,
+            1,
+            0,
+            1
+        ],
+        "Propeller Test Pass":false,
+        "RSSI":40.0,
+        "Bandwidth":"47.23 pkg\/s 0.18 kB\/s",
+        "Latency":"58.21 ms"
+    }
+}

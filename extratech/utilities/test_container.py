@@ -101,18 +101,20 @@ class Test_Container():
         write(self.parent_drogno.test_tracker)
     
     def single_drone_radio_test(self):
-        self.parent_drogno.bandwidth = self.parent_drogno.test_link.bandwidth(self.link_uri)
-        self.parent_drogno.latency   = self.parent_drogno.test_link.latency(self.link_uri)
-        write("Drone %s: %s packets/s; %s kB/s" %(self.ID, round(self.parent_drogno.bandwidth[0], 2), round(self.parent_drogno.bandwidth[1], 2)))
-        write("%s ms" % round(self.parent_drogno.latency, 2))
-        write("Radio test finito per il Drone %s" % self.ID)
+        def single_drone_radio_test():
+            self.parent_drogno.bandwidth = self.parent_drogno.test_link.bandwidth(self.link_uri)
+            self.parent_drogno.latency   = self.parent_drogno.test_link.latency(self.link_uri)
+            write("Drone %s: %s packets/s; %s kB/s" %(self.ID, round(self.parent_drogno.bandwidth[0], 2), round(self.parent_drogno.bandwidth[1], 2)))
+            write("%s ms" % round(self.parent_drogno.latency, 2))
+            write("Radio test finito per il Drone %s" % self.ID)
 
-        self.cf.param.set_value('ring.effect', '7')            ### Fai violetto se test radio finito
-        self.cf.param.set_value('ring.solidRed', '100')
-        self.cf.param.set_value('ring.solidGreen', '0')
-        self.cf.param.set_value('ring.solidBlue', '100')
-        time.sleep(3)
-        self.spegni_led()
+            self.cf.param.set_value('ring.effect', '7')            ### Fai violetto se test radio finito
+            self.cf.param.set_value('ring.solidRed', '100')
+            self.cf.param.set_value('ring.solidGreen', '0')
+            self.cf.param.set_value('ring.solidBlue', '100')
+            time.sleep(3)
+            self.spegni_led()
+        threading.Thread(target=single_drone_radio_test).start()
 
     def led_test(self):
         def led_test_sequence():

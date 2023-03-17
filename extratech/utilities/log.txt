@@ -34,27 +34,27 @@ TOC scaricata per il dataDrone 6, in attesa dei parametri.
 Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
 TOC scaricata per il dataDrone 7, in attesa dei parametri.
 Parametri scaricati per dataDrone 0
-[92mdataDrone 0 connesso, it took 15.75 seconds
+[92mdataDrone 0 connesso, it took 15.72 seconds
 il drone 0 configura il log... 
 Il drone 0 ha configurato il log.
 Parametri scaricati per dataDrone 1
-[92mdataDrone 1 connesso, it took 16.09 seconds
+[92mdataDrone 1 connesso, it took 16.13 seconds
 il drone 1 configura il log... 
 Il drone 1 ha configurato il log.
 Parametri scaricati per dataDrone 2
-[92mdataDrone 2 connesso, it took 16.37 seconds
+[92mdataDrone 2 connesso, it took 16.36 seconds
 il drone 2 configura il log... 
 Il drone 2 ha configurato il log.
 Parametri scaricati per dataDrone 3
-[92mdataDrone 3 connesso, it took 16.53 seconds
+[92mdataDrone 3 connesso, it took 16.51 seconds
 il drone 3 configura il log... 
 Il drone 3 ha configurato il log.
 Parametri scaricati per dataDrone 4
-[92mdataDrone 4 connesso, it took 16.52 seconds
+[92mdataDrone 4 connesso, it took 16.51 seconds
 il drone 4 configura il log... 
 Il drone 4 ha configurato il log.
 Parametri scaricati per dataDrone 5
-[92mdataDrone 5 connesso, it took 16.51 seconds
+[92mdataDrone 5 connesso, it took 16.5 seconds
 il drone 5 configura il log... 
 Il drone 5 ha configurato il log.
 Parametri scaricati per dataDrone 6
@@ -62,9 +62,41 @@ Parametri scaricati per dataDrone 6
 il drone 6 configura il log... 
 Il drone 6 ha configurato il log.
 Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 16.56 seconds
+[92mdataDrone 7 connesso, it took 16.55 seconds
 il drone 7 configura il log... 
 Il drone 7 ha configurato il log.
+Drone 2: 48.64 packets/s; 0.19 kB/s
+59.97 ms
+Radio test finito per il Drone 2
+Drone 1: 48.65 packets/s; 0.19 kB/s
+62.54 ms
+Radio test finito per il Drone 1
+Drone 3: 48.55 packets/s; 0.19 kB/s
+44.6 ms
+Radio test finito per il Drone 3
+Drone 4: 48.28 packets/s; 0.19 kB/s
+41.76 ms
+Radio test finito per il Drone 4
+Drone 0: 47.94 packets/s; 0.19 kB/s
+42.0 ms
+Radio test finito per il Drone 0
+Drone 5: 46.49 packets/s; 0.18 kB/s
+43.44 ms
+Radio test finito per il Drone 5
+Drone 6: 47.48 packets/s; 0.19 kB/s
+61.87 ms
+Radio test finito per il Drone 6
+Drone 7: 47.23 packets/s; 0.18 kB/s
+58.21 ms
+Radio test finito per il Drone 7
+il drone dataDrone 5 ha finito il Porpeller Test. Il risultato è [1, 1, 1, 1]
+il drone dataDrone 4 ha finito il Porpeller Test. Il risultato è [0, 1, 1, 1]
+il drone dataDrone 0 ha finito il Porpeller Test. Il risultato è [1, 1, 1, 0]
+il drone dataDrone 1 ha finito il Porpeller Test. Il risultato è [1, 0, 1, 1]
+il drone dataDrone 6 ha finito il Porpeller Test. Il risultato è [1, 1, 0, 1]
+il drone dataDrone 7 ha finito il Porpeller Test. Il risultato è [0, 1, 0, 1]
+il drone dataDrone 2 ha finito il Porpeller Test. Il risultato è [0, 0, 1, 1]
+il drone dataDrone 3 ha finito il Porpeller Test. Il risultato è [0, 1, 0, 1]
 Ora chiudo con 0
 radio://0/80/2M/E7E7E7E700 has been standbyied!
 Ora chiudo con 1

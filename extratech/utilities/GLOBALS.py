@@ -15,8 +15,8 @@ numero = 996028180224
 # numero = 996028180448
 
 CF_FIRMWARE_PATH = "/mnt/c/users/produ/documents/github_repos/crazyflie-firmware"
-TEST_FLASH_PATH = "D:/GITHUB_REPOS/crazyflie-lib-python/extratech/utilities"
-SYS_TEST_PATH = "D:/GITHUB_REPOS/crazyflie-lib-python"
-SINGLE_CF_GROUNDED = "D:/GITHUB_REPOS/crazyflie-lib-python/sys_test"
+TEST_FLASH_PATH = "C:/Users/ricca/Desktop/crazy_repos/crazyflie-lib-python/extratech/utilities"
+SYS_TEST_PATH = "C:/Users/ricca/Desktop/crazy_repos/crazyflie-lib-python"
+SINGLE_CF_GROUNDED = "C:/Users/ricca/Desktop/crazy_repos/crazyflie-lib-python/sys_test"
 firmware_attuale = 60877
 is_test_completed = False
