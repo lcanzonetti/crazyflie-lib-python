@@ -482,11 +482,9 @@ class TakeOFF(QObject):
 
     def takeoff_all(self):
         for uro in GB.available:
-            try:
-                id = IDFromURI(uro)
-                GB.data_d[id].test_manager.decollo_atterraggio()
-            except KeyError:
-                write("Something went wrong for drone %s, really wrong!" % id)
+            id = IDFromURI(uro)
+            GB.data_d[id].test_manager.decollo_atterraggio()
+            
         self.finished.emit()
 
 #### LED Workers
