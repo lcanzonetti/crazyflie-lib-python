@@ -294,9 +294,9 @@ class Test_Container():
         # time.sleep(2)
 
     def decollo_atterraggio(self):
-        self.cf.motionCommander.take_off(height = 1.0, velocity = 0.3)
+        self.parent_drogno.motionCommander.take_off(height = 1.0, velocity = 0.3)
         time.sleep(5)
-        self.cf.motionCommande.land(velocity = 0.3)
+        self.parent_drogno.motionCommander.land(velocity = 0.3)
 
     def start_sequenza_test(self):       ### sequenza principale con tempi
 

@@ -1,26 +1,19 @@
 Waking up devices
-radio://0/80/2M/E7E7E7E700 is not there to be woke up
+radio://0/80/2M/E7E7E7E700 has been woke upped!
 radio://0/80/2M/E7E7E7E701 is not there to be woke up
 radio://0/80/2M/E7E7E7E702 is not there to be woke up
 radio://0/80/2M/E7E7E7E703 is not there to be woke up
 radio://0/80/2M/E7E7E7E704 is not there to be woke up
 radio://0/80/2M/E7E7E7E705 is not there to be woke up
 radio://0/80/2M/E7E7E7E706 is not there to be woke up
-radio://0/80/2M/E7E7E7E707 has been woke upped!
+radio://0/80/2M/E7E7E7E707 is not there to be woke up
 radio://0/80/2M/E7E7E7E708 is not there to be woke up
 Done. Ciao.
-provo a connettermi al drone dataDrone 7 
-Ora chiudo con 7
-radio://0/80/2M/E7E7E7E707 has been standbyied!
-Waking up devices
-radio://0/80/2M/E7E7E7E700 is not there to be woke up
-radio://0/80/2M/E7E7E7E701 is not there to be woke up
-radio://0/80/2M/E7E7E7E702 is not there to be woke up
-radio://0/80/2M/E7E7E7E703 is not there to be woke up
-radio://0/80/2M/E7E7E7E704 is not there to be woke up
-radio://0/80/2M/E7E7E7E705 is not there to be woke up
-radio://0/80/2M/E7E7E7E706 is not there to be woke up
-radio://0/80/2M/E7E7E7E707 has been woke upped!
-radio://0/80/2M/E7E7E7E708 is not there to be woke up
-Done. Ciao.
-provo a connettermi al drone dataDrone 7 
+provo a connettermi al drone dataDrone 0 
+Mi sono connesso al drone 0 all'indirizzo radio://0/80/2M/E7E7E7E700
+TOC scaricata per il dataDrone 0, in attesa dei parametri.
+Parametri scaricati per dataDrone 0
+[92mdataDrone 0 connesso, it took 1.95 seconds
+il drone 0 configura il log... 
+Il drone 0 ha configurato il log.
+led test finito
