@@ -56,6 +56,18 @@ class MyWindow(QMainWindow):
 
         #### Buttons
 
+        ###### HOW MANY DRONES SECTION
+
+        self.howmany_label = QtWidgets.QLabel(self)
+        self.howmany_label.setText("Quanti Droni abbiamo?")
+        self.howmany_label.setStyleSheet("border: 1px solid black;")
+
+        ######## Scrivi quanti droni abbiamo
+
+        self.howmany_line = QtWidgets.QLineEdit(self)
+        self.howmany_line.setValidator(self.onlyInt)
+        self.howmany_line.returnPressed.connect(lambda: self.set_howmany(int(self.howmany_line.text())))
+
         ###### PROPELLER TESTING SECTION
 
         self.prop_label = QtWidgets.QLabel(self)
@@ -212,6 +224,8 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.connection_label, 16, 0, 1, 4)
         self.grid.addWidget(self.standby_button, 17, 0, 1, 4)
         self.grid.addWidget(self.wakeup_button, 18, 0, 1, 4)
+        self.grid.addWidget(self.howmany_label, 0, 6, 1, 1)
+        self.grid.addWidget(self.howmany_line, 1, 6, 1, 1)
         self.grid.addWidget(self.clearlog_button, 20, 6, 1, 1)
         self.grid.addWidget(self.textbox, 0, 5, 19, 1)
         self.grid.addWidget(self.writejson_button, 19, 6, 1, 1)
@@ -248,6 +262,10 @@ class MyWindow(QMainWindow):
         self.text_thread.start()
     
     #### FUNCTIONS
+
+    def set_howmany(self, quanti):
+        GB.numero_droni = quanti
+        write(GB.numero_droni)
 
     def all_prop_test(self):
         try:
@@ -378,7 +396,20 @@ class MyWindow(QMainWindow):
         self.radio_line.setEnabled(False)
         self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))  
         self.takeoff_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.takeoff_button.setEnabled(True))      
+        self.worker_thread.finished.connect(lambda: self.takeoff_button.setEnabled(True))
+        self.motore1_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore1_button.setEnabled(True))
+        self.motore2_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore2_button.setEnabled(True))
+        self.motore3_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore3_button.setEnabled(True))
+        self.motore4_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore4_button.setEnabled(True))
+        self.power_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.power_line.setEnabled(True))
+        self.all_led_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.all_led_button.setEnabled(True))
+
 
     def standby_for_all(self):
         for uro in GB.available:

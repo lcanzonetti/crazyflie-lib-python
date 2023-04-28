@@ -47,7 +47,7 @@ from     test_utils                                 import istanziaClassi, check
 def main():
     
     cflib.crtp.init_drivers()
-    wakeUppatore.wekappa()
+    wakeUppatore.wekappa(GB.numero_droni)
     time.sleep(2)
 
     #### NON LO USIAMO STO CACCHIO DI SCAN FOR CRAZYFLIES
