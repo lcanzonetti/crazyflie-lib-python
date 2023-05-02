@@ -17,10 +17,10 @@ coloInit(convert=True)
 droni = GB.numero_droni
 radio = 1
 
-def wekappa():
+def wekappa(quantidroni):
     GB.available = []
     write('Waking up devices')
-    for uri in create_CF_list(droni, radio):
+    for uri in create_CF_list(quantidroni, radio):
         try:
             PowerSwitch(uri).stm_power_up()
             write('%s has been woke upped!' % uri)
