@@ -1,9 +1,9 @@
 Waking up devices
 radio://0/80/2M/E7E7E7E700 has been woke upped!
 radio://0/80/2M/E7E7E7E701 has been woke upped!
-radio://0/80/2M/E7E7E7E702 has been woke upped!
+radio://0/80/2M/E7E7E7E702 is not there to be woke up
 radio://0/80/2M/E7E7E7E703 has been woke upped!
-radio://0/80/2M/E7E7E7E704 is not there to be woke up
+radio://0/80/2M/E7E7E7E704 has been woke upped!
 radio://0/80/2M/E7E7E7E705 has been woke upped!
 radio://0/80/2M/E7E7E7E706 has been woke upped!
 radio://0/80/2M/E7E7E7E707 has been woke upped!
@@ -11,8 +11,8 @@ radio://0/80/2M/E7E7E7E708 has been woke upped!
 Done. Ciao.
 provo a connettermi al drone dataDrone 0 
 provo a connettermi al drone dataDrone 1 
-provo a connettermi al drone dataDrone 2 
 provo a connettermi al drone dataDrone 3 
+provo a connettermi al drone dataDrone 4 
 provo a connettermi al drone dataDrone 5 
 provo a connettermi al drone dataDrone 6 
 provo a connettermi al drone dataDrone 7 
@@ -21,58 +21,58 @@ Mi sono connesso al drone 0 all'indirizzo radio://0/80/2M/E7E7E7E700
 TOC scaricata per il dataDrone 0, in attesa dei parametri.
 Mi sono connesso al drone 1 all'indirizzo radio://0/80/2M/E7E7E7E701
 TOC scaricata per il dataDrone 1, in attesa dei parametri.
-Mi sono connesso al drone 2 all'indirizzo radio://0/80/2M/E7E7E7E702
-TOC scaricata per il dataDrone 2, in attesa dei parametri.
 Mi sono connesso al drone 3 all'indirizzo radio://0/80/2M/E7E7E7E703
 TOC scaricata per il dataDrone 3, in attesa dei parametri.
+Mi sono connesso al drone 4 all'indirizzo radio://0/80/2M/E7E7E7E704
+TOC scaricata per il dataDrone 4, in attesa dei parametri.
 Mi sono connesso al drone 5 all'indirizzo radio://0/80/2M/E7E7E7E705
 TOC scaricata per il dataDrone 5, in attesa dei parametri.
+Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
+TOC scaricata per il dataDrone 8, in attesa dei parametri.
 Mi sono connesso al drone 6 all'indirizzo radio://0/80/2M/E7E7E7E706
 TOC scaricata per il dataDrone 6, in attesa dei parametri.
 Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
 TOC scaricata per il dataDrone 7, in attesa dei parametri.
-Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
-TOC scaricata per il dataDrone 8, in attesa dei parametri.
 Parametri scaricati per dataDrone 0
-[92mdataDrone 0 connesso, it took 15.65 seconds
+[92mdataDrone 0 connesso, it took 15.5 seconds
 il drone 0 configura il log... 
 Il drone 0 ha configurato il log.
 Parametri scaricati per dataDrone 1
-[92mdataDrone 1 connesso, it took 16.07 seconds
+[92mdataDrone 1 connesso, it took 15.85 seconds
 il drone 1 configura il log... 
 Il drone 1 ha configurato il log.
-Parametri scaricati per dataDrone 2
-[92mdataDrone 2 connesso, it took 16.35 seconds
-il drone 2 configura il log... 
-Il drone 2 ha configurato il log.
 Parametri scaricati per dataDrone 3
-[92mdataDrone 3 connesso, it took 16.65 seconds
+[92mdataDrone 3 connesso, it took 16.23 seconds
 il drone 3 configura il log... 
 Il drone 3 ha configurato il log.
+Parametri scaricati per dataDrone 4
+[92mdataDrone 4 connesso, it took 16.27 seconds
+il drone 4 configura il log... 
+Il drone 4 ha configurato il log.
 Parametri scaricati per dataDrone 5
-[92mdataDrone 5 connesso, it took 16.62 seconds
+[92mdataDrone 5 connesso, it took 16.3 seconds
 il drone 5 configura il log... 
 Il drone 5 ha configurato il log.
+Parametri scaricati per dataDrone 8
+[92mdataDrone 8 connesso, it took 16.34 seconds
+il drone 8 configura il log... 
+Il drone 8 ha configurato il log.
 Parametri scaricati per dataDrone 6
-[92mdataDrone 6 connesso, it took 16.54 seconds
+[92mdataDrone 6 connesso, it took 16.59 seconds
 il drone 6 configura il log... 
 Il drone 6 ha configurato il log.
 Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 16.51 seconds
+[92mdataDrone 7 connesso, it took 16.56 seconds
 il drone 7 configura il log... 
 Il drone 7 ha configurato il log.
-Parametri scaricati per dataDrone 8
-[92mdataDrone 8 connesso, it took 16.63 seconds
-il drone 8 configura il log... 
-Il drone 8 ha configurato il log.
 Ora chiudo con 0
 radio://0/80/2M/E7E7E7E700 has been standbyied!
 Ora chiudo con 1
 radio://0/80/2M/E7E7E7E701 has been standbyied!
-Ora chiudo con 2
-radio://0/80/2M/E7E7E7E702 has been standbyied!
 Ora chiudo con 3
 radio://0/80/2M/E7E7E7E703 has been standbyied!
+Ora chiudo con 4
+radio://0/80/2M/E7E7E7E704 has been standbyied!
 Ora chiudo con 5
 radio://0/80/2M/E7E7E7E705 has been standbyied!
 Ora chiudo con 6
@@ -84,9 +84,9 @@ radio://0/80/2M/E7E7E7E708 has been standbyied!
 Waking up devices
 radio://0/80/2M/E7E7E7E700 has been woke upped!
 radio://0/80/2M/E7E7E7E701 has been woke upped!
-radio://0/80/2M/E7E7E7E702 has been woke upped!
+radio://0/80/2M/E7E7E7E702 is not there to be woke up
 radio://0/80/2M/E7E7E7E703 has been woke upped!
-radio://0/80/2M/E7E7E7E704 is not there to be woke up
+radio://0/80/2M/E7E7E7E704 has been woke upped!
 radio://0/80/2M/E7E7E7E705 has been woke upped!
 radio://0/80/2M/E7E7E7E706 has been woke upped!
 radio://0/80/2M/E7E7E7E707 has been woke upped!
@@ -94,8 +94,8 @@ radio://0/80/2M/E7E7E7E708 has been woke upped!
 Done. Ciao.
 provo a connettermi al drone dataDrone 0 
 provo a connettermi al drone dataDrone 1 
-provo a connettermi al drone dataDrone 2 
 provo a connettermi al drone dataDrone 3 
+provo a connettermi al drone dataDrone 4 
 provo a connettermi al drone dataDrone 5 
 provo a connettermi al drone dataDrone 6 
 provo a connettermi al drone dataDrone 7 
@@ -104,10 +104,10 @@ Mi sono connesso al drone 0 all'indirizzo radio://0/80/2M/E7E7E7E700
 TOC scaricata per il dataDrone 0, in attesa dei parametri.
 Mi sono connesso al drone 1 all'indirizzo radio://0/80/2M/E7E7E7E701
 TOC scaricata per il dataDrone 1, in attesa dei parametri.
-Mi sono connesso al drone 2 all'indirizzo radio://0/80/2M/E7E7E7E702
-TOC scaricata per il dataDrone 2, in attesa dei parametri.
 Mi sono connesso al drone 3 all'indirizzo radio://0/80/2M/E7E7E7E703
 TOC scaricata per il dataDrone 3, in attesa dei parametri.
+Mi sono connesso al drone 4 all'indirizzo radio://0/80/2M/E7E7E7E704
+TOC scaricata per il dataDrone 4, in attesa dei parametri.
 Mi sono connesso al drone 5 all'indirizzo radio://0/80/2M/E7E7E7E705
 TOC scaricata per il dataDrone 5, in attesa dei parametri.
 Mi sono connesso al drone 6 all'indirizzo radio://0/80/2M/E7E7E7E706
@@ -117,61 +117,45 @@ TOC scaricata per il dataDrone 7, in attesa dei parametri.
 Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
 TOC scaricata per il dataDrone 8, in attesa dei parametri.
 Parametri scaricati per dataDrone 0
-[92mdataDrone 0 connesso, it took 15.78 seconds
+[92mdataDrone 0 connesso, it took 15.62 seconds
 il drone 0 configura il log... 
 Il drone 0 ha configurato il log.
 Parametri scaricati per dataDrone 1
-[92mdataDrone 1 connesso, it took 16.12 seconds
+[92mdataDrone 1 connesso, it took 16.02 seconds
 il drone 1 configura il log... 
 Il drone 1 ha configurato il log.
-Parametri scaricati per dataDrone 2
-[92mdataDrone 2 connesso, it took 16.42 seconds
-il drone 2 configura il log... 
-Il drone 2 ha configurato il log.
 Parametri scaricati per dataDrone 3
-[92mdataDrone 3 connesso, it took 16.52 seconds
+[92mdataDrone 3 connesso, it took 16.2 seconds
 il drone 3 configura il log... 
 Il drone 3 ha configurato il log.
+Parametri scaricati per dataDrone 4
+[92mdataDrone 4 connesso, it took 16.31 seconds
+il drone 4 configura il log... 
+Il drone 4 ha configurato il log.
 Parametri scaricati per dataDrone 5
-[92mdataDrone 5 connesso, it took 16.56 seconds
+[92mdataDrone 5 connesso, it took 16.3 seconds
 il drone 5 configura il log... 
 Il drone 5 ha configurato il log.
 Parametri scaricati per dataDrone 6
-[92mdataDrone 6 connesso, it took 16.58 seconds
+[92mdataDrone 6 connesso, it took 16.33 seconds
 il drone 6 configura il log... 
 Il drone 6 ha configurato il log.
 Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 16.59 seconds
+[92mdataDrone 7 connesso, it took 16.37 seconds
 il drone 7 configura il log... 
 Il drone 7 ha configurato il log.
 Parametri scaricati per dataDrone 8
-[92mdataDrone 8 connesso, it took 16.51 seconds
+[92mdataDrone 8 connesso, it took 16.34 seconds
 il drone 8 configura il log... 
 Il drone 8 ha configurato il log.
-il drone dataDrone 5 ha finito il Battery Test. 
-il drone dataDrone 3 ha finito il Battery Test. 
-battery test per il Drone 5 passato! il valore è 0.69
-battery test per il Drone 3 passato! il valore è 0.58
-il drone dataDrone 0 ha finito il Battery Test. 
-battery test per il Drone 0 passato! il valore è 0.54
-il drone dataDrone 2 ha finito il Battery Test. 
-il drone dataDrone 1 ha finito il Battery Test. 
-battery test per il Drone 1 passato! il valore è 0.54
-battery test per il Drone 2 passato! il valore è 0.62
-il drone dataDrone 6 ha finito il Battery Test. 
-il drone dataDrone 8 ha finito il Battery Test. 
-battery test per il Drone 6 passato! il valore è 0.51
-il drone dataDrone 7 ha finito il Battery Test. 
-battery test per il Drone 8 passato! il valore è 0.49
-battery test per il Drone 7 passato! il valore è 0.59
 Ora chiudo con 0
 radio://0/80/2M/E7E7E7E700 has been standbyied!
 Ora chiudo con 1
 radio://0/80/2M/E7E7E7E701 has been standbyied!
-Ora chiudo con 2
-radio://0/80/2M/E7E7E7E702 has been standbyied!
 Ora chiudo con 3
 radio://0/80/2M/E7E7E7E703 has been standbyied!
+Ora chiudo con 4
+radio://0/80/2M/E7E7E7E704 has been standbyied!
 Ora chiudo con 5
 radio://0/80/2M/E7E7E7E705 has been standbyied!
 Ora chiudo con 6
