@@ -280,6 +280,8 @@ class Test_Container():
             time.sleep(2)
             self.cf.param.set_value('motorPowerSet.m4', '0')
         
+        self.cf.param.set_value('motorPowerSet.enable', '0')
+        
 
      
     def configura_log(self):
