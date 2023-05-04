@@ -19,6 +19,5 @@ def flasha_firmware_subprocess(drogno):
 
 if __name__ == "__main__":
     # fai_cose_in_wsl()
-    for drogno in GB.available:
     
-      flasha_firmware_subprocess(drogno)
+    flasha_firmware_subprocess('radio://0/80/2M/E7E7E7E702')

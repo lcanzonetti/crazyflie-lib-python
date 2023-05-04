@@ -207,6 +207,12 @@ class MyWindow(QMainWindow):
 
         #### FLASH
 
+        ###### Prepare Drogni to Flash
+
+        self.prepare_button = QtWidgets.QPushButton(self)
+        self.prepare_button.setText("Prepara i Drogni al Flashaggio")
+        self.prepare_button.clicked.connect(self.prepare_for_flashing)
+
         ###### Select drogno to Flash
         self.flash_line = QtWidgets.QLineEdit(self)
         self.flash_line.setValidator(self.onlyInt)
@@ -233,6 +239,7 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.standby_button, 17, 0, 1, 4)
         self.grid.addWidget(self.wakeup_button, 18, 0, 1, 4)
         self.grid.addWidget(self.flash_line, 2, 6, 1, 1)
+        self.grid.addWidget(self.prepare_button, 3, 6, 1, 1)
         self.grid.addWidget(self.howmany_label, 0, 6, 1, 1)
         self.grid.addWidget(self.howmany_line, 1, 6, 1, 1)
         self.grid.addWidget(self.clearlog_button, 20, 6, 1, 1)
@@ -367,6 +374,19 @@ class MyWindow(QMainWindow):
 
         self.worker_thread.start()
     
+    def prepare_for_flashing(self):
+        self.prepare_thread = QThread()
+        self.prepare = prepareFlashing()
+
+        self.prepare.moveToThread(self.prepare_thread)
+        
+        self.prepare_thread.started.connect(self.prepare.prepariamo_drogni)
+        self.prepare.finished.connect(self.prepare_thread.quit)
+        self.prepare.finished.connect(self.prepare.deleteLater)
+        self.prepare_thread.finished.connect(self.prepare_thread.deleteLater)
+
+        self.prepare_thread.start()
+    
     def standby_for_all(self):
         for uro in GB.available:
             id = IDFromURI(uro)
@@ -413,7 +433,7 @@ class MyWindow(QMainWindow):
 
         drogno_to_flash = drogno
 
-        self.flashing_drogno_thread =()
+        self.flashing_drogno_thread = QThread()
         self.flashing_drogno = flashDrogno()
 
         self.flashing_drogno.moveToThread(self.flashing_drogno_thread)
@@ -562,6 +582,21 @@ class singleMotor(QObject):
         self.finished.emit()
 
 #### FLASH Workers
+
+class prepareFlashing(QObject):
+    finished = pyqtSignal()
+
+    def prepariamo_drogni(self):
+        for uro in GB.available:
+            id = IDFromURI(uro)
+            GB.data_d[id].close_link()
+            stenBaiatore.standBySingle(uro)
+        
+        wakeUppatore.wekappa(GB.numero_droni)
+
+        self.finished.emit()
+        
+
 
 class flashDrogno(QObject):
     finished = pyqtSignal()
