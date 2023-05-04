@@ -24,7 +24,7 @@ tab = '\t'
 
 lead_IN           = 200
 lead_OUT          = 119500
-numero_drogni     = 8
+numero_drogni     = 4
 intervallo        = 0.1
 porta             = 9202
 loop              = cycle(r"-\|/")
@@ -57,18 +57,21 @@ def setRequestedPos_Z(add, roba):
 def setRequestedCol_R(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].r= int(args) 
+    valore             = int(math.floor(args * 255))
+    bufferone[iddio].r = valore if valore <= 255 else 255
 
 def setRequestedCol_G(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].g= int(args) 
+    valore             = int(math.floor(args * 255))
+    bufferone[iddio].g = valore if valore <= 255 else 255
 
 def setRequestedCol_B(address, args):
     drone_stringa      = address.split('/')[2]
     iddio              = int(drone_stringa[5:])
-    bufferone[iddio].b= int(args) 
- 
+    valore             = int(math.floor(args * 255))
+    bufferone[iddio].b = valore if valore <= 255 else 255
+
 def setRequestedTimecode(address, args):
     global timecode
     timecode = int(args)
@@ -136,15 +139,6 @@ def OSC_init():
     except Exception as err:
          print(str(err))
 
-    # def OSC_read():
-    #     while not finished:
-    #         try:
-    #             time.sleep(0.0001)
-    #             osc_process()      
-    #         except KeyboardInterrupt:
-    #             print('stopping OSC')
-    #             osc_terminate()
-    # OSC_thread = threading.Thread(target=OSC_read).start()
  
 def record_routine(*args):
     global recording
