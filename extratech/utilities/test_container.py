@@ -254,33 +254,39 @@ class Test_Container():
         prop_thread = threading.Thread(target=single_prop_control_loop)
         prop_thread.start()
 
-    def single_motor_test(self, motor):
-        power = GB.power
-        self.cf.param.set_value('powerDist.idleThrust', '4000')
-        self.cf.param.set_value('motorPowerSet.enable', '1')
+    def single_motor_test(self):
+        def motor_sequence():
+            power = GB.power
+            motor = GB.qualemotore
+            self.cf.param.set_value('powerDist.idleThrust', '4000')
+            self.cf.param.set_value('motorPowerSet.enable', '1')
+            if motor == 1:
+                write("Testo il motore 1 a potenza %s" % power)
+                self.cf.param.set_value('motorPowerSet.m1', str(power))
+                time.sleep(3)
+                self.cf.param.set_value('motorPowerSet.m1', '0')        
+            elif motor == 2:
+                write("Testo il motore 2 a potenza %s" % power)
+                self.cf.param.set_value('motorPowerSet.m2', str(power))
+                time.sleep(3)
+                self.cf.param.set_value('motorPowerSet.m2', '0')
+            elif motor == 3:
+                write("Testo il motore 3 a potenza %s" % power)
+                self.cf.param.set_value('motorPowerSet.m3', str(power))
+                time.sleep(3)
+                self.cf.param.set_value('motorPowerSet.m3', '0')
+            elif motor == 4:
+                write("Testo il motore 4 a potenza %s" % power)
+                self.cf.param.set_value('motorPowerSet.m4', str(power))
+                time.sleep(3)
+                self.cf.param.set_value('motorPowerSet.m4', '0')
 
-        if motor == 1:
-            write("Testo il motore 1 a potenza %s" % power)
-            self.cf.param.set_value('motorPowerSet.m1', str(power))
-            time.sleep(2)
-            self.cf.param.set_value('motorPowerSet.m1', '0')        
-        elif motor == 2:
-            write("Testo il motore 2 a potenza %s" % power)
-            self.cf.param.set_value('motorPowerSet.m2', str(power))
-            time.sleep(2)
-            self.cf.param.set_value('motorPowerSet.m2', '0')
-        elif motor == 3:
-            write("Testo il motore 3 a potenza %s" % power)
-            self.cf.param.set_value('motorPowerSet.m3', str(power))
-            time.sleep(2)
-            self.cf.param.set_value('motorPowerSet.m3', '0')
-        elif motor == 4:
-            write("Testo il motore 4 a potenza %s" % power)
-            self.cf.param.set_value('motorPowerSet.m4', str(power))
-            time.sleep(2)
-            self.cf.param.set_value('motorPowerSet.m4', '0')
+            self.cf.param.set_value('powerDist.idleThrust', '0')        
+            self.cf.param.set_value('motorPowerSet.enable', '0')
+
+        threading.Thread(target=motor_sequence).start()
+
         
-        self.cf.param.set_value('motorPowerSet.enable', '0')
         
 
      

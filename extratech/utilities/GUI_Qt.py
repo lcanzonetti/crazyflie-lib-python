@@ -92,22 +92,22 @@ class MyWindow(QMainWindow):
         ## M1
         self.motore1_button = QtWidgets.QPushButton(self)
         self.motore1_button.setText("Test Motor 1")
-        self.motore1_button.clicked.connect(self.motore1)
+        self.motore1_button.clicked.connect(lambda: self.testa_un_motore(1))
 
-        ## M2
+        ## M21
         self.motore2_button = QtWidgets.QPushButton(self)
         self.motore2_button.setText("Test Motor 2")
-        self.motore2_button.clicked.connect(self.motore2)
+        self.motore2_button.clicked.connect(lambda: self.testa_un_motore(2))
 
         ## M3
         self.motore3_button = QtWidgets.QPushButton(self)
         self.motore3_button.setText("Test Motor 3")
-        self.motore3_button.clicked.connect(self.motore3)
+        self.motore3_button.clicked.connect(lambda: self.testa_un_motore(3))
 
         ## M4
         self.motore4_button = QtWidgets.QPushButton(self)
         self.motore4_button.setText("Test Motor 4")
-        self.motore4_button.clicked.connect(self.motore4)
+        self.motore4_button.clicked.connect(lambda: self.testa_un_motore(4))
 
         ######## Type ID and proptest just one Drone
         self.prop_line = QtWidgets.QLineEdit(self)
@@ -283,42 +283,6 @@ class MyWindow(QMainWindow):
 
     def change_power(self, power):
         GB.power = power
-    
-    def motore1(self):
-        motore = 1
-        try:
-            for uro in GB.available:
-                id = IDFromURI(uro)
-                GB.data_d[id].test_manager.single_motor_test(motore)
-        except KeyError:
-            write("Boh ma che è successo?")
-
-    def motore2(self):
-        motore = 2
-        try:
-            for uro in GB.available:
-                id = IDFromURI(uro)
-                GB.data_d[id].test_manager.single_motor_test(motore)
-        except KeyError:
-            write("Boh ma che è successo?")
-
-    def motore3(self):
-        motore = 3
-        try:
-            for uro in GB.available:
-                id = IDFromURI(uro)
-                GB.data_d[id].test_manager.single_motor_test(motore)
-        except KeyError:
-            write("Boh ma che è successo?")
-
-    def motore4(self):
-        motore = 4
-        try:
-            for uro in GB.available:
-                id = IDFromURI(uro)
-                GB.data_d[id].test_manager.single_motor_test(motore)
-        except KeyError:
-            write("Boh ma che è successo?")
 
     def all_batt_test(self):
         try:
@@ -346,6 +310,23 @@ class MyWindow(QMainWindow):
         self.allradio_thread.finished.connect(self.allradio_thread.deleteLater)
 
         self.allradio_thread.start()
+
+    def testa_un_motore(self, motore):
+
+        GB.qualemotore = motore
+
+        self.single_motor_thread = QThread(parent=self)
+        self.single_motor = singleMotor()
+
+        self.single_motor.moveToThread(self.single_motor_thread)
+
+        self.single_motor_thread.started.connect(self.single_motor.justonemotor)
+        self.single_motor.finished.connect(self.single_motor_thread.quit)
+        self.single_motor.finished.connect(self.single_motor.deleteLater)
+        self.single_motor_thread.finished.connect(self.single_motor_thread.deleteLater)
+        
+        self.single_motor_thread.start()
+
     
     def single_radio_test(self, id):
         global id_totest
@@ -376,41 +357,7 @@ class MyWindow(QMainWindow):
         self.worker_thread.finished.connect(self.worker_thread.deleteLater)
 
         self.worker_thread.start()
-
-        ###### Disable Buttons while connecting
-        
-        self.prop_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.prop_button.setEnabled(True))
-        self.standby_button.setEnabled(False)
-        self.batt_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.batt_button.setEnabled(True))
-        self.batt_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.batt_line.setEnabled(True))
-        self.worker_thread.finished.connect(lambda: self.standby_button.setEnabled(True))
-        self.prop_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.prop_line.setEnabled(True))
-        self.wakeup_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.wakeup_button.setEnabled(True))
-        self.radio_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.radio_button.setEnabled(True))
-        self.radio_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))  
-        self.takeoff_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.takeoff_button.setEnabled(True))
-        self.motore1_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.motore1_button.setEnabled(True))
-        self.motore2_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.motore2_button.setEnabled(True))
-        self.motore3_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.motore3_button.setEnabled(True))
-        self.motore4_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.motore4_button.setEnabled(True))
-        self.power_line.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.power_line.setEnabled(True))
-        self.all_led_button.setEnabled(False)
-        self.worker_thread.finished.connect(lambda: self.all_led_button.setEnabled(True))
-
-
+    
     def standby_for_all(self):
         for uro in GB.available:
             id = IDFromURI(uro)
@@ -454,6 +401,39 @@ class MyWindow(QMainWindow):
 
     def scrivi_json(self):
         write_json(__location__)
+
+        ###### Disable Buttons while connecting
+        
+        self.prop_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.prop_button.setEnabled(True))
+        self.standby_button.setEnabled(False)
+        self.batt_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.batt_button.setEnabled(True))
+        self.batt_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.batt_line.setEnabled(True))
+        self.worker_thread.finished.connect(lambda: self.standby_button.setEnabled(True))
+        self.prop_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.prop_line.setEnabled(True))
+        self.wakeup_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.wakeup_button.setEnabled(True))
+        self.radio_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.radio_button.setEnabled(True))
+        self.radio_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.radio_line.setEnabled(True))  
+        self.takeoff_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.takeoff_button.setEnabled(True))
+        self.motore1_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore1_button.setEnabled(True))
+        self.motore2_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore2_button.setEnabled(True))
+        self.motore3_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore3_button.setEnabled(True))
+        self.motore4_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.motore4_button.setEnabled(True))
+        self.power_line.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.power_line.setEnabled(True))
+        self.all_led_button.setEnabled(False)
+        self.worker_thread.finished.connect(lambda: self.all_led_button.setEnabled(True))
 
 #### Test Main Worker
 
@@ -531,6 +511,21 @@ class ledTest(QObject):
             except KeyError:
                 write("Led Test did not go well for drone %s" % id)
         self.finished.emit()
+
+#### MOTOR Workers
+
+class singleMotor(QObject):
+    finished = pyqtSignal()
+
+    def justonemotor(self):
+        for uro in GB.available:
+            try:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.single_motor_test()
+            except KeyError:
+                write("Single Motor Test did not go well for drone %s" % id)
+        self.finished.emit()
+
 
 #### Window initialization
 

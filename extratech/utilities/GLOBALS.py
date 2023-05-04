@@ -9,6 +9,7 @@ default_height = 1.0
 default_velocity = 0.3
 
 power = 5000
+qualemotore = 1
 
 ## Questo se indirizzi partono da E7E7E7E700
 numero = 996028180224
