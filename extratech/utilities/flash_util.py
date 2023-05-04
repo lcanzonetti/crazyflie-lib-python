@@ -3,27 +3,22 @@ import subprocess
 import GLOBALS as GB
 from     colorama              import Fore, Back, Style
 from     colorama              import init as coloInit 
+from     common_utils          import write, IDFromURI
+import threading
 
-available = [
-    "radio://0/80/2M/E7E7E7E7E1",
-  # "radio://0/100/2M/E7E7E7E7E6",
-  # "radio://0/100/2M/E7E7E7E7E8"
-]
+def flasha_firmware_subprocess(drogno):
+  def flasha_thread():
+    write("Adesso flashiamo tutti i droni che ne hanno bisogno!")
+    write('\n')
 
-# def fai_cose_in_wsl():
-#     # os.system('wsl -e sh -c "cd {}; make cload"'.format(GB.CF_FIRMWARE_PATH))
-#     os.system('wsl cd {}'.format(GB.CF_FIRMWARE_PATH))
-#     # os.system('wsl make menuconfig')
+    subprocess.run(['wsl', 'cd', '{}'.format(GB.CF_FIRMWARE_PATH), ';', 'make', 'cload', 'CLOAD_CMDS=-w {}'.format(drogno)],   shell=True)
+    write('\n')
+    write("Drone %s flashato!" % IDFromURI(drogno))
 
-def flasha_firmware_subprocess():
-
-    print("Adesso flashiamo tutti i droni che ne hanno bisogno!")
-    print('\n')
-
-    for drogno in available:
-        subprocess.run(['wsl', 'cd', '{}'.format(GB.CF_FIRMWARE_PATH), ';', 'make', 'cload', 'CLOAD_CMDS=-w {}'.format(drogno)], shell=True)
-        print('\n')
+  threading.Thread(target=flasha_thread).start()
 
 if __name__ == "__main__":
     # fai_cose_in_wsl()
-    flasha_firmware_subprocess()
+    for drogno in GB.available:
+    
+      flasha_firmware_subprocess(drogno)

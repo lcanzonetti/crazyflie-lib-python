@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont, QIntValidator
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot as Slot
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QDir, pyqtSlot as Slot
 from PyQt5.QtCore import pyqtSignal as Signal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QLineEdit, QTextEdit, QFormLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QLineEdit, QTextEdit, QFormLayout, QFileDialog
 import sys, threading
 from PIL import Image, ImageTk
 import os, time, signal
@@ -11,6 +11,7 @@ import GLOBALS as GB
 import stenBaiatore, wakeUppatore
 from common_utils import IDFromURI, exit_signal_handler, write
 from test_utils import write_json
+from flash_util import flasha_firmware_subprocess
 
 #### VARIABLES
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -204,6 +205,13 @@ class MyWindow(QMainWindow):
         self.writejson_button.setText("Scrivi Json con Risultati")
         self.writejson_button.clicked.connect(self.scrivi_json)
 
+        #### FLASH
+
+        ###### Select drogno to Flash
+        self.flash_line = QtWidgets.QLineEdit(self)
+        self.flash_line.setValidator(self.onlyInt)
+        self.flash_line.returnPressed.connect(lambda: self.flash_crazyflie(int(self.flash_line.text())))
+        
         #### Add Widgets to grid
         self.grid.addWidget(self.prop_label, 0, 0, 1, 4)
         self.grid.addWidget(self.prop_button, 1, 0, 1, 4)
@@ -224,6 +232,7 @@ class MyWindow(QMainWindow):
         self.grid.addWidget(self.connection_label, 16, 0, 1, 4)
         self.grid.addWidget(self.standby_button, 17, 0, 1, 4)
         self.grid.addWidget(self.wakeup_button, 18, 0, 1, 4)
+        self.grid.addWidget(self.flash_line, 2, 6, 1, 1)
         self.grid.addWidget(self.howmany_label, 0, 6, 1, 1)
         self.grid.addWidget(self.howmany_line, 1, 6, 1, 1)
         self.grid.addWidget(self.clearlog_button, 20, 6, 1, 1)
@@ -398,6 +407,32 @@ class MyWindow(QMainWindow):
         self.allledtest_thread.finished.connect(self.allledtest_thread.deleteLater)
 
         self.allledtest_thread.start()
+    
+    def flash_crazyflie(self, drogno):
+        global drogno_to_flash
+
+        drogno_to_flash = drogno
+
+        self.flashing_drogno_thread =()
+        self.flashing_drogno = flashDrogno()
+
+        self.flashing_drogno.moveToThread(self.flashing_drogno_thread)
+
+        self.flashing_drogno_thread.started.connect(self.flashing_drogno.flash_drogno)
+        self.flashing_drogno.finished.connect(self.flashing_drogno_thread.quit)
+        self.flashing_drogno.finished.connect(self.flashing_drogno.deleteLater)
+        self.flashing_drogno_thread.finished.connect(self.flashing_drogno_thread.deleteLater)
+
+        self.flashing_drogno_thread.start()
+
+    # def whereisfirmware(self):
+    #     self.filepaths = []
+    #     self.filter_name = 'All files (*.*)'
+    #     self.dirpath = QDir.currentPath()
+    #     self.filepaths.append(QFileDialog.getOpenFileName(self, caption='Choose File',
+    #                                                       directory = self.dirpath,
+    #                                                       filter = self.filter_name)[0])
+    #     write("Selected file at path: %s" % self.filepaths)
 
     def scrivi_json(self):
         write_json(__location__)
@@ -526,6 +561,17 @@ class singleMotor(QObject):
                 write("Single Motor Test did not go well for drone %s" % id)
         self.finished.emit()
 
+#### FLASH Workers
+
+class flashDrogno(QObject):
+    finished = pyqtSignal()
+    
+    def flash_drogno(self):
+        drogno = GB.available[drogno_to_flash]
+        write('Flashing firmware to drone %s ' % drogno)
+        flasha_firmware_subprocess(drogno)
+
+        self.finished.emit()
 
 #### Window initialization
 
