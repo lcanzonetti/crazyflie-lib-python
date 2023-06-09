@@ -57,7 +57,6 @@ class MyWindow(QMainWindow):
         self.textbox.setFont(QFont('Arial', 12))
         self.textbox.resize(400, 1200)
         self.text_function()
-        # self.giveme_battery()
 
         #### Buttons
 
@@ -737,9 +736,9 @@ class MyWindow(QMainWindow):
 
     def reportVoltage(self, data):
         try:
-            GB.button_array[data[1]].setFormat("Drone %s: %s" % (IDFromURI(GB.available[data[1]]), round(data[0], 2)))
+            GB.button_array[data[1]].setFormat("Drone %s: %s" % (IDFromURI(GB.available[data[1]]), np.round(data[0], 2)))
             GB.button_array[data[1]].setAlignment(QtCore.Qt.AlignCenter)
-            GB.button_array[data[1]].setValue(round(data[0], 2))
+            GB.button_array[data[1]].setValue(np.round(data[0], 2))
         except IndexError:
             pass
 
