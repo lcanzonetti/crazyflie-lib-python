@@ -41,5 +41,5 @@ def wakeUpSingle(uri):
     time.sleep(0.3)
     write("Svegliati!")
 if __name__ == '__main__':
-    wekappa()
+    wekappa(10)
 

@@ -164,3 +164,27 @@ Ora chiudo con 7
 radio://0/80/2M/E7E7E7E707 has been standbyied!
 Ora chiudo con 8
 radio://0/80/2M/E7E7E7E708 has been standbyied!
+creating CF list
+StandBying devices
+radio://0/80/2M/E7E7E7E700 is not there to be standByied
+radio://0/80/2M/E7E7E7E701 is not there to be standByied
+radio://0/80/2M/E7E7E7E702 is not there to be standByied
+radio://0/80/2M/E7E7E7E703 is not there to be standByied
+radio://0/80/2M/E7E7E7E704 is not there to be standByied
+radio://0/80/2M/E7E7E7E705 is not there to be standByied
+radio://0/80/2M/E7E7E7E706 is not there to be standByied
+radio://0/80/2M/E7E7E7E707 is not there to be standByied
+radio://0/80/2M/E7E7E7E708 is not there to be standByied
+Done. Ciao.
+Waking up devices
+radio://0/80/2M/E7E7E7E700 is not there to be woke up
+radio://0/80/2M/E7E7E7E701 is not there to be woke up
+radio://0/80/2M/E7E7E7E702 is not there to be woke up
+radio://0/80/2M/E7E7E7E703 is not there to be woke up
+radio://0/80/2M/E7E7E7E704 is not there to be woke up
+radio://0/80/2M/E7E7E7E705 is not there to be woke up
+radio://0/80/2M/E7E7E7E706 is not there to be woke up
+radio://0/80/2M/E7E7E7E707 is not there to be woke up
+radio://0/80/2M/E7E7E7E708 is not there to be woke up
+radio://0/80/2M/E7E7E7E709 is not there to be woke up
+Done. Ciao.
