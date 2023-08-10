@@ -258,7 +258,7 @@ class Test_Container():
         def motor_sequence():
             power = GB.power
             motor = GB.qualemotore
-            self.cf.param.set_value('powerDist.idleThrust', '4000')
+            self.cf.param.set_value('powerDist.idleThrust', '11000')
             self.cf.param.set_value('motorPowerSet.enable', '1')
             if motor == 1:
                 write("Testo il motore 1 a potenza %s" % power)
@@ -311,6 +311,10 @@ class Test_Container():
             time.sleep(3)
             self.parent_drogno.highLevelCommander.stop()
         threading.Thread(target=decollo_atterraggio_thread).start()
+    
+    def get_battery_voltage(self):
+        voltage = self.parent_drogno.battery_voltage
+        return voltage
 
     def start_sequenza_test(self):       ### sequenza principale con tempi
 
