@@ -340,6 +340,7 @@ class Drogno(threading.Thread):
         self.setRingColor(0,0,255)
 
         self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
+        self._cf.param.set_value('powerDist.idleThrust', GB.IDLE_TRUST)
 
         self.positionHLCommander = PositionHlCommander(
             self._cf,
