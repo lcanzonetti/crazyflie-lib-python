@@ -46,7 +46,7 @@ SPACING                     = 0.4
 CLAMPING                    = True   ## si 'clampa' dentro il BOX un comando ODC che porterebbe a una posizione fuori BOX
 LIGHTHOUSE_METHOD           = '0'    ## forse andrebbe fatto un esperimento su quale sia il metodo miglior con più lighthouse
 RING_INTENSITY              = 0.1
-IDLE_TRUST                  = 6000
+IDLE_TRUST                  = 15000
 
 ##################################################  constant global rates:
 LOGGING_FREQUENCY                = 1000

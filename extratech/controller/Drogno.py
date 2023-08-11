@@ -341,6 +341,7 @@ class Drogno(threading.Thread):
 
         self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
         self._cf.param.set_value('powerDist.idleThrust', GB.IDLE_TRUST)
+        
 
         self.positionHLCommander = PositionHlCommander(
             self._cf,
