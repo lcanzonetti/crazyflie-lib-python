@@ -1,0 +1,142 @@
+INFO: 18-11-2022 20:05:19 __init__(113) -- This is drone log from Drogno_3
+INFO: 18-11-2022 20:05:22 log_status(196) -- Logger started
+INFO: 18-11-2022 20:05:23 log_status(200) -- Drogno_3: ready	battery: 4.19                    	kalman var: 0.01 0.01 0.001                    	batterySag: 0.5	link quality: 40	flight time: 0s                    	pos 0.03 0.01 -0.00	yaw: -0.00	msg/s 0.9
+INFO: 18-11-2022 20:05:24 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.041 0.041 0.002                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 0.14 0.03 -0.00	yaw: -0.00	msg/s 0.0
+INFO: 18-11-2022 20:05:25 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.109 0.109 0.003                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 0.34 0.09 -0.00	yaw: 0.00	msg/s 0.0
+INFO: 18-11-2022 20:05:26 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.195 0.195 0.004                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 0.59 0.15 -0.01	yaw: 0.01	msg/s 0.0
+INFO: 18-11-2022 20:05:28 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.333 0.333 0.006                    	batterySag: 0.5	link quality: 40	flight time: 0s                    	pos 0.96 0.25 -0.01	yaw: 0.00	msg/s 0.0
+INFO: 18-11-2022 20:05:29 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.515 0.515 0.007                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 1.43 0.38 -0.02	yaw: 0.00	msg/s 0.0
+INFO: 18-11-2022 20:05:30 log_status(200) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.702 0.702 0.008                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 1.89 0.51 -0.03	yaw: -0.00	msg/s 0.0
+INFO: 18-11-2022 20:05:31 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 0.855 0.817 0.323                    	batterySag: 0.5	link quality: 37	flight time: 0s                    	pos 2.52 0.70 -0.01	yaw: -26.11	msg/s 0.0
+INFO: 18-11-2022 20:05:32 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 1.317 1.327 0.044                    	batterySag: 0.5	link quality: 46	flight time: 0s                    	pos 3.03 1.02 0.02	yaw: -67.38	msg/s 0.0
+INFO: 18-11-2022 20:05:33 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 1.636 1.646 0.214                    	batterySag: 0.5	link quality: 38	flight time: 0s                    	pos 3.58 1.98 -0.06	yaw: -21.48	msg/s 0.0
+INFO: 18-11-2022 20:05:34 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 1.675 2.176 0.404                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos 3.93 3.45 -0.21	yaw: -25.48	msg/s 0.0
+INFO: 18-11-2022 20:05:35 log_status(200) -- Drogno_3: out of BOX	battery: 4.2                    	kalman var: 2.559 2.605 0.17                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 3.78 6.25 -0.41	yaw: -22.64	msg/s 0.0
+INFO: 18-11-2022 20:05:36 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 2.932 3.094 0.233                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos 2.97 9.11 -0.56	yaw: -17.78	msg/s 0.0
+INFO: 18-11-2022 20:05:37 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 3.535 3.619 0.347                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 1.03 12.84 -0.74	yaw: -16.36	msg/s 0.0
+INFO: 18-11-2022 20:05:39 log_status(200) -- Drogno_3: out of BOX	battery: 4.19                    	kalman var: 4.086 4.199 0.357                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -1.56 15.91 -0.92	yaw: -14.92	msg/s 0.0
+INFO: 18-11-2022 20:05:40 log_status(200) -- Drogno_3: ready	battery: 4.2                    	kalman var: 4.816 4.938 0.385                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos -5.99 19.23 -1.23	yaw: -13.23	msg/s 0.0
+INFO: 18-11-2022 20:05:41 log_status(200) -- Drogno_3: ready	battery: 4.19                    	kalman var: 5.531 5.707 0.276                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos -10.91 21.52 -1.59	yaw: -11.42	msg/s 0.0
+INFO: 18-11-2022 20:05:42 log_status(200) -- Drogno_3: ready	battery: 3.53                    	kalman var: 6.434 6.594 0.285                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos -18.11 23.64 -2.21	yaw: -11.66	msg/s 0.0
+INFO: 18-11-2022 20:05:43 log_status(200) -- Drogno_3: ready	battery: 3.54                    	kalman var: 7.18 7.5 0.269                    	batterySag: 0.5	link quality: 42	flight time: 1s                    	pos -23.78 25.94 -3.01	yaw: -9.94	msg/s 0.0
+INFO: 18-11-2022 20:05:44 log_status(200) -- Drogno_3: hovering	battery: 3.49                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 43	flight time: 2s                    	pos -26.83 27.50 -3.62	yaw: -9.75	msg/s 0.0
+INFO: 18-11-2022 20:05:45 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 44	flight time: 3s                    	pos 31.95 31.95 31.95	yaw: -8.26	msg/s 0.0
+INFO: 18-11-2022 20:05:46 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 46	flight time: 4s                    	pos 29.01 29.01 29.01	yaw: -7.93	msg/s 0.0
+INFO: 18-11-2022 20:05:47 log_status(200) -- Drogno_3: ready	battery: 3.3                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -0.02 -0.02 -0.02	yaw: -0.74	msg/s 0.0
+INFO: 18-11-2022 20:05:48 log_status(200) -- Drogno_3: ready	battery: 3.31                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 45	flight time: 1s                    	pos -0.33 -0.33 -0.33	yaw: -0.79	msg/s 0.0
+INFO: 18-11-2022 20:05:50 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 46	flight time: 2s                    	pos -1.00 -1.00 -1.00	yaw: 0.08	msg/s 0.0
+INFO: 18-11-2022 20:05:51 log_status(200) -- Drogno_3: ready	battery: 3.36                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 49	flight time: 3s                    	pos -1.76 -1.76 -1.76	yaw: 0.27	msg/s 0.0
+INFO: 18-11-2022 20:05:52 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 54	flight time: 4s                    	pos -2.45 -2.45 -2.45	yaw: 1.78	msg/s 0.0
+INFO: 18-11-2022 20:05:53 log_status(200) -- Drogno_3: ready	battery: 3.45                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 47	flight time: 5s                    	pos -2.79 -2.79 -2.79	yaw: -0.63	msg/s 0.0
+INFO: 18-11-2022 20:05:54 log_status(200) -- Drogno_3: ready	battery: 3.45                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 45	flight time: 6s                    	pos -3.54 -3.54 -3.54	yaw: -5.07	msg/s 0.0
+INFO: 18-11-2022 20:05:55 log_status(200) -- Drogno_3: ready	battery: 3.44                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 46	flight time: 7s                    	pos -5.32 -5.32 -5.32	yaw: -4.22	msg/s 0.0
+INFO: 18-11-2022 20:05:56 log_status(200) -- Drogno_3: idle	battery: 3.44                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 48	flight time: 9s                    	pos -8.08 -8.08 -8.08	yaw: -2.54	msg/s 0.0
+INFO: 18-11-2022 20:05:57 log_status(200) -- Drogno_3: landed	battery: 3.4                    	kalman var: 7.668 8.039 0.278                    	batterySag: 0.5	link quality: 46	flight time: 10s                    	pos -11.37 -11.37 -11.37	yaw: -5.23	msg/s 0.0
+INFO: 18-11-2022 20:05:58 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 1.781 1.753 0.059                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -15.51 -4.22 -16.83	yaw: -7.65	msg/s 0.0
+INFO: 18-11-2022 20:05:59 log_status(200) -- Drogno_3: ready	battery: 3.43                    	kalman var: 2.227 2.25 0.035                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -20.61 -2.55 -20.62	yaw: -4.82	msg/s 0.0
+INFO: 18-11-2022 20:06:01 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 2.68 2.682 0.017                    	batterySag: 0.5	link quality: 58	flight time: 0s                    	pos -25.80 -1.02 -23.98	yaw: -4.63	msg/s 0.0
+INFO: 18-11-2022 20:06:02 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 3.256 3.258 0.017                    	batterySag: 0.5	link quality: 56	flight time: 0s                    	pos -32.38 0.55 -28.22	yaw: -5.23	msg/s 0.0
+INFO: 18-11-2022 20:06:03 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 3.764 3.795 0.047                    	batterySag: 0.5	link quality: 47	flight time: 0s                    	pos -37.88 1.71 -32.03	yaw: -6.46	msg/s 0.0
+INFO: 18-11-2022 20:06:04 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 4.438 4.504 0.093                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -45.72 2.96 -36.81	yaw: -7.11	msg/s 0.0
+WARNING: 18-11-2022 20:06:04 exit(703) -- closing Drogno_3
+INFO: 18-11-2022 20:07:16 __init__(113) -- This is drone log from Drogno_3
+INFO: 18-11-2022 20:07:19 log_status(196) -- Logger started
+INFO: 18-11-2022 20:07:20 log_status(200) -- Drogno_3: ready	battery: 4.1                    	kalman var: 0.007 0.007 0.001                    	batterySag: 0.5	link quality: 74	flight time: 0s                    	pos -0.18 -0.20 0.00	yaw: -38.91	msg/s 0.9
+INFO: 18-11-2022 20:07:21 log_status(200) -- Drogno_3: ready	battery: 4.09                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 73	flight time: 0s                    	pos -0.18 -0.21 -0.00	yaw: -40.66	msg/s 0.0
+INFO: 18-11-2022 20:07:22 log_status(200) -- Drogno_3: ready	battery: 4.1                    	kalman var: 0.001 0.001 0.001                    	batterySag: 0.5	link quality: 75	flight time: 0s                    	pos -0.19 -0.22 0.01	yaw: -39.41	msg/s 0.0
+INFO: 18-11-2022 20:07:24 log_status(200) -- Drogno_3: ready	battery: 4.1                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 75	flight time: 0s                    	pos -0.18 -0.21 -0.01	yaw: -40.56	msg/s 0.0
+INFO: 18-11-2022 20:07:25 log_status(200) -- Drogno_3: ready	battery: 3.66                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 79	flight time: 0s                    	pos -0.20 -0.24 0.01	yaw: -42.66	msg/s 0.0
+INFO: 18-11-2022 20:07:26 log_status(200) -- Drogno_3: ready	battery: 3.61                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 1s                    	pos -0.21 -0.24 0.49	yaw: -6.31	msg/s 0.0
+INFO: 18-11-2022 20:07:27 log_status(200) -- Drogno_3: ready	battery: 3.58                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 65	flight time: 2s                    	pos -0.20 -0.20 -0.20	yaw: -0.72	msg/s 0.0
+INFO: 18-11-2022 20:07:28 log_status(200) -- Drogno_3: ready	battery: 3.55                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 3s                    	pos -0.18 -0.18 -0.18	yaw: -0.22	msg/s 0.0
+INFO: 18-11-2022 20:07:29 log_status(200) -- Drogno_3: ready	battery: 3.49                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 4s                    	pos -0.19 -0.19 -0.19	yaw: 0.27	msg/s 0.0
+INFO: 18-11-2022 20:07:30 log_status(200) -- Drogno_3: ready	battery: 3.52                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 66	flight time: 6s                    	pos -0.20 -0.20 -0.20	yaw: 0.43	msg/s 0.0
+INFO: 18-11-2022 20:07:31 log_status(200) -- Drogno_3: ready	battery: 3.5                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 69	flight time: 7s                    	pos -0.17 -0.17 -0.17	yaw: 0.45	msg/s 0.0
+INFO: 18-11-2022 20:07:32 log_status(200) -- Drogno_3: ready	battery: 3.45                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 69	flight time: 8s                    	pos -0.17 -0.17 -0.17	yaw: 0.59	msg/s 0.0
+INFO: 18-11-2022 20:07:33 log_status(200) -- Drogno_3: ready	battery: 3.54                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 9s                    	pos -0.18 -0.18 -0.18	yaw: 1.03	msg/s 0.0
+INFO: 18-11-2022 20:07:35 log_status(200) -- Drogno_3: ready	battery: 3.48                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 65	flight time: 10s                    	pos -0.20 -0.20 -0.20	yaw: 0.53	msg/s 0.0
+WARNING: 18-11-2022 20:07:36 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:36 log_status(200) -- Drogno_3: ready	battery: 3.43                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 11s                    	pos -0.18 -0.18 -0.18	yaw: -0.05	msg/s 0.0
+WARNING: 18-11-2022 20:07:37 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:37 log_status(200) -- Drogno_3: ready	battery: 3.44                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 71	flight time: 12s                    	pos -0.19 -0.19 -0.19	yaw: 0.45	msg/s 0.0
+INFO: 18-11-2022 20:07:38 log_status(200) -- Drogno_3: ready	battery: 3.45                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 67	flight time: 13s                    	pos -0.20 -0.20 -0.20	yaw: 0.72	msg/s 0.0
+WARNING: 18-11-2022 20:07:39 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:39 log_status(200) -- Drogno_3: ready	battery: 3.47                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 81	flight time: 14s                    	pos -0.18 -0.18 -0.18	yaw: 0.34	msg/s 0.0
+WARNING: 18-11-2022 20:07:39 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:40 log_status(200) -- Drogno_3: ready	battery: 3.41                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 71	flight time: 15s                    	pos -0.18 -0.18 -0.18	yaw: 0.71	msg/s 0.0
+WARNING: 18-11-2022 20:07:40 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:41 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:41 log_status(200) -- Drogno_3: ready	battery: 3.44                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 16s                    	pos -0.18 -0.18 -0.18	yaw: 0.91	msg/s 0.0
+WARNING: 18-11-2022 20:07:41 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:42 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:42 log_status(200) -- Drogno_3: ready	battery: 3.44                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 60	flight time: 18s                    	pos -0.20 -0.20 -0.20	yaw: 0.52	msg/s 0.0
+WARNING: 18-11-2022 20:07:43 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:43 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:43 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 19s                    	pos -0.19 -0.19 -0.19	yaw: 0.16	msg/s 0.0
+WARNING: 18-11-2022 20:07:44 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:44 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:44 log_status(200) -- Drogno_3: ready	battery: 3.43                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 20s                    	pos -0.19 -0.19 -0.19	yaw: -0.20	msg/s 0.0
+WARNING: 18-11-2022 20:07:45 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:45 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:46 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 21s                    	pos -0.19 -0.19 -0.19	yaw: 0.24	msg/s 0.0
+WARNING: 18-11-2022 20:07:46 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:46 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:47 log_status(200) -- Drogno_3: ready	battery: 3.41                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 22s                    	pos -0.19 -0.19 -0.19	yaw: 0.22	msg/s 0.0
+WARNING: 18-11-2022 20:07:47 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:47 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:48 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:48 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 23s                    	pos -0.19 -0.19 -0.19	yaw: 0.38	msg/s 0.0
+WARNING: 18-11-2022 20:07:48 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:49 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:49 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 24s                    	pos -0.19 -0.19 -0.19	yaw: 0.30	msg/s 0.0
+WARNING: 18-11-2022 20:07:49 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:50 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:50 log_status(200) -- Drogno_3: ready	battery: 3.4                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 25s                    	pos -0.19 -0.19 -0.19	yaw: 0.29	msg/s 0.0
+WARNING: 18-11-2022 20:07:50 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:51 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:51 log_status(200) -- Drogno_3: ready	battery: 3.39                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 26s                    	pos -0.19 -0.19 -0.19	yaw: 0.58	msg/s 0.0
+WARNING: 18-11-2022 20:07:51 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:52 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:52 log_status(200) -- Drogno_3: ready	battery: 3.39                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 27s                    	pos -0.19 -0.19 -0.19	yaw: 0.47	msg/s 0.0
+WARNING: 18-11-2022 20:07:52 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:53 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:53 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:53 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 29s                    	pos -0.19 -0.19 -0.19	yaw: 0.40	msg/s 0.0
+WARNING: 18-11-2022 20:07:54 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:54 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:54 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 30s                    	pos -0.19 -0.19 -0.19	yaw: 0.31	msg/s 0.0
+WARNING: 18-11-2022 20:07:55 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:55 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:55 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 63	flight time: 31s                    	pos -0.19 -0.19 -0.19	yaw: 0.36	msg/s 0.0
+WARNING: 18-11-2022 20:07:56 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:56 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:57 log_status(200) -- Drogno_3: ready	battery: 3.38                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 32s                    	pos -0.19 -0.19 -0.19	yaw: 0.23	msg/s 0.0
+WARNING: 18-11-2022 20:07:57 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:57 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:58 log_status(200) -- Drogno_3: ready	battery: 3.37                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 33s                    	pos -0.19 -0.19 -0.19	yaw: 0.33	msg/s 0.0
+WARNING: 18-11-2022 20:07:58 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:58 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:07:59 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:07:59 log_status(200) -- Drogno_3: ready	battery: 3.36                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 60	flight time: 34s                    	pos -0.19 -0.19 -0.19	yaw: 0.23	msg/s 0.0
+WARNING: 18-11-2022 20:07:59 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:00 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:00 log_status(200) -- Drogno_3: ready	battery: 3.36                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 35s                    	pos -0.19 -0.19 -0.19	yaw: 0.03	msg/s 0.0
+WARNING: 18-11-2022 20:08:00 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:01 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:01 log_status(200) -- Drogno_3: ready	battery: 3.36                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 36s                    	pos -0.19 -0.19 -0.19	yaw: 0.24	msg/s 0.0
+WARNING: 18-11-2022 20:08:01 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:02 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:02 log_status(200) -- Drogno_3: ready	battery: 3.36                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 61	flight time: 37s                    	pos -0.19 -0.19 -0.19	yaw: -0.12	msg/s 0.0
+WARNING: 18-11-2022 20:08:02 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:03 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:03 log_status(200) -- Drogno_3: ready	battery: 3.42                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 38s                    	pos -0.19 -0.19 -0.19	yaw: 0.72	msg/s 0.0
+WARNING: 18-11-2022 20:08:03 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:04 evaluateBattery(631) -- battery under 3.45v
+WARNING: 18-11-2022 20:08:04 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:04 log_status(200) -- Drogno_3: landed	battery: 3.3                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 62	flight time: 40s                    	pos -0.19 -0.19 -0.19	yaw: 2.16	msg/s 0.0
+WARNING: 18-11-2022 20:08:05 evaluateBattery(631) -- battery under 3.45v
+INFO: 18-11-2022 20:08:05 log_status(200) -- Drogno_3: ready	battery: 3.88                    	kalman var: 0.001 0.001 0.001                    	batterySag: 0.5	link quality: 72	flight time: 0s                    	pos -0.18 -0.22 0.00	yaw: -0.80	msg/s 0.0
+INFO: 18-11-2022 20:08:06 log_status(200) -- Drogno_3: ready	battery: 3.89                    	kalman var: 0.001 0.001 0.001                    	batterySag: 0.5	link quality: 73	flight time: 0s                    	pos -0.18 -0.21 0.01	yaw: -0.76	msg/s 0.0
+WARNING: 18-11-2022 20:08:07 exit(703) -- closing Drogno_3
+INFO: 18-11-2022 20:08:20 __init__(113) -- This is drone log from Drogno_3
+WARNING: 18-11-2022 20:08:33 exit(703) -- closing Drogno_3

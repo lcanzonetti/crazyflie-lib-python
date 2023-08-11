@@ -34,6 +34,7 @@ import xml.etree.cElementTree as ET
 from threading import Thread
 
 import qtm
+from scipy.spatial.transform import Rotation
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -51,7 +52,11 @@ uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 rigid_body_name = 'cf'
 
 # True: send position and orientation; False: send position only
-send_full_pose = False
+send_full_pose = True
+
+# When using full pose, the estimator can be sensitive to noise in the orientation data when yaw is close to +/- 90
+# degrees. If this is a problem, increase orientation_std_dev a bit. The default value in the firmware is 4.5e-3.
+orientation_std_dev = 8.0e-3
 
 # The trajectory to fly
 # See https://github.com/whoenig/uav_trajectories for a tool to generate
@@ -149,31 +154,6 @@ class QtmWrapper(Thread):
         self.connection.disconnect()
 
 
-class Uploader:
-    def __init__(self):
-        self._is_done = False
-        self._success = True
-
-    def upload(self, trajectory_mem):
-        print('Uploading data')
-        trajectory_mem.write_data(self._upload_done, write_failed_cb=self._upload_failed)
-
-        while not self._is_done:
-            time.sleep(0.2)
-
-        return self._success
-
-    def _upload_done(self, mem, addr):
-        print('Data uploaded')
-        self._is_done = True
-        self._success = True
-
-    def _upload_failed(self, mem, addr):
-        print('Data upload failed')
-        self._is_done = True
-        self._success = False
-
-
 def wait_for_position_estimator(scf):
     print('Waiting for estimator to find position...')
 
@@ -231,16 +211,10 @@ def send_extpose_rot_matrix(cf, x, y, z, rot):
     rotaton matrix. This is going to be forwarded to the Crazyflie's
     position estimator.
     """
-    qw = _sqrt(1 + rot[0][0] + rot[1][1] + rot[2][2]) / 2
-    qx = _sqrt(1 + rot[0][0] - rot[1][1] - rot[2][2]) / 2
-    qy = _sqrt(1 - rot[0][0] + rot[1][1] - rot[2][2]) / 2
-    qz = _sqrt(1 - rot[0][0] - rot[1][1] + rot[2][2]) / 2
-
-    # Normalize the quaternion
-    ql = math.sqrt(qx ** 2 + qy ** 2 + qz ** 2 + qw ** 2)
+    quat = Rotation.from_matrix(rot).as_quat()
 
     if send_full_pose:
-        cf.extpos.send_extpose(x, y, z, qx / ql, qy / ql, qz / ql, qw / ql)
+        cf.extpos.send_extpose(x, y, z, quat[0], quat[1], quat[2], quat[3])
     else:
         cf.extpos.send_extpos(x, y, z)
 
@@ -254,16 +228,16 @@ def reset_estimator(cf):
     wait_for_position_estimator(cf)
 
 
+def adjust_orientation_sensitivity(cf):
+    cf.param.set_value('locSrv.extQuatStdDev', orientation_std_dev)
+
+
 def activate_kalman_estimator(cf):
     cf.param.set_value('stabilizer.estimator', '2')
 
     # Set the std deviation for the quaternion data pushed into the
     # kalman filter. The default value seems to be a bit too low.
     cf.param.set_value('locSrv.extQuatStdDev', 0.06)
-
-
-def activate_high_level_commander(cf):
-    cf.param.set_value('commander.enHighLevel', '1')
 
 
 def activate_mellinger_controller(cf):
@@ -284,7 +258,7 @@ def upload_trajectory(cf, trajectory_id, trajectory):
         trajectory_mem.trajectory.append(Poly4D(duration, x, y, z, yaw))
         total_duration += duration
 
-    Uploader().upload(trajectory_mem)
+    trajectory_mem.write_data_sync()
     cf.high_level_commander.define_trajectory(trajectory_id, 0, len(trajectory_mem.trajectory))
     return total_duration
 
@@ -316,8 +290,8 @@ if __name__ == '__main__':
         qtm_wrapper.on_pose = lambda pose: send_extpose_rot_matrix(
             cf, pose[0], pose[1], pose[2], pose[3])
 
+        adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
-        activate_high_level_commander(cf)
         # activate_mellinger_controller(cf)
         duration = upload_trajectory(cf, trajectory_id, figure8)
         print('The sequence is {:.1f} seconds long'.format(duration))

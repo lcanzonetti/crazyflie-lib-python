@@ -1,0 +1,10 @@
+INFO: 18-11-2022 19:52:01 __init__(113) -- This is drone log from Drogno_3
+INFO: 18-11-2022 19:52:04 log_status(192) -- Logger started
+INFO: 18-11-2022 19:52:05 log_status(196) -- Drogno_3: ready	battery: 4.19                    	kalman var: 0.01 0.01 0.001                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 0.03 0.01 -0.00	yaw: -0.01	msg/s 0.9
+INFO: 18-11-2022 19:52:06 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.041 0.041 0.002                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 0.14 0.03 -0.00	yaw: -0.03	msg/s 0.0
+INFO: 18-11-2022 19:52:07 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.109 0.109 0.003                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 0.36 0.08 0.00	yaw: -0.04	msg/s 0.0
+INFO: 18-11-2022 19:52:08 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.214 0.214 0.005                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 0.68 0.15 0.00	yaw: -0.04	msg/s 0.0
+INFO: 18-11-2022 19:52:09 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.332 0.332 0.006                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 1.01 0.21 0.01	yaw: -0.05	msg/s 0.0
+INFO: 18-11-2022 19:52:10 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.515 0.515 0.007                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 1.51 0.31 0.02	yaw: -0.06	msg/s 0.0
+INFO: 18-11-2022 19:52:11 log_status(196) -- Drogno_3: BAD kalman	battery: 4.19                    	kalman var: 0.7 0.7 0.008                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 2.00 0.40 0.03	yaw: -0.06	msg/s 0.0
+WARNING: 18-11-2022 19:52:13 exit(707) -- closing Drogno_3

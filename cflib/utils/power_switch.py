@@ -65,10 +65,7 @@ class PowerSwitch:
 
     def stm_power_up(self):
         """ Power up (boot) the STM MCU and decks."""
-        try:
-            self._send(self.BOOTLOADER_CMD_SYSON)
-        except Exception:
-            raise Exception
+        self._send(self.BOOTLOADER_CMD_SYSON)
 
     def stm_power_cycle(self):
         """ Restart the STM MCU by powering it off and on.
