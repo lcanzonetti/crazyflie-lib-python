@@ -17,6 +17,7 @@ from trajectories import sequenze_test
 #crazyflie's
 import logging
 from   cflib.crazyflie                            import Crazyflie
+from   cflib.crazyflie                            import PlatformService
 from   cflib.positioning.position_hl_commander    import PositionHlCommander
 from   cflib.positioning.motion_commander         import MotionCommander
 from   cflib.crazyflie.mem                        import MemoryElement
@@ -340,6 +341,11 @@ class Drogno(threading.Thread):
         self.setRingColor(0,0,255)
 
         self._cf.param.set_value('lighthouse.method', GB.LIGHTHOUSE_METHOD)
+        self._cf.param.set_value('powerDist.idleThrust', GB.IDLE_TRUST)
+        self.platformService = PlatformService(self._cf)
+        self.platformService.send_arming_request(do_arm=True)
+       
+        
 
         self.positionHLCommander = PositionHlCommander(
             self._cf,
@@ -352,6 +358,7 @@ class Drogno(threading.Thread):
             self._cf,
             default_height=1.0
         )
+
         self.resetEstimator()
         self.isReadyToFly = self.evaluateFlyness()
        

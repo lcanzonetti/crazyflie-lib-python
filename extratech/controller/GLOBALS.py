@@ -46,6 +46,7 @@ SPACING                     = 0.4
 CLAMPING                    = True   ## si 'clampa' dentro il BOX un comando ODC che porterebbe a una posizione fuori BOX
 LIGHTHOUSE_METHOD           = '0'    ## forse andrebbe fatto un esperimento su quale sia il metodo miglior con più lighthouse
 RING_INTENSITY              = 0.1
+IDLE_TRUST                  = 15000
 
 ##################################################  constant global rates:
 LOGGING_FREQUENCY                = 1000
@@ -99,11 +100,11 @@ uris = [
         # 'radio://0/90/2M/E7E7E7E7E0',
         # 'radio://0/80/2M/E7E7E7E7E1',
         # 'radio://0/80/2M/E7E7E7E7E2',
-        'radio://0/90/2M/E7E7E7E7E3',
+        # 'radio://0/90/2M/E7E7E7E7E3',
         # 'radio://1/120/2M/E7E7E7E7E4', 
         # 'radio://0/80/2M/E7E7E7E7E5',
         # 'radio://0/100/2M/E7E7E7E7E6',
-        # 'radio://3/100/2M/E7E7E7E7E7',
+        'radio://0/80/2M/E7E7E7E7E7',
         # 'radio://1/100/2M/E7E7E7E7E8', 
         # 'radio://2/110/2M/E7E7E7E7E9',
         # 'radio://0/110/2M/E7E7E7E7EA',

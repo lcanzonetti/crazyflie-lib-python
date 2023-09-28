@@ -33,7 +33,7 @@ parser.add_argument(
 # by default my crazyflie uses channel 80
 parser.add_argument(
     '-channel', '--channel', dest='channel', type=int,
-    default=90, help='the default channel in crazyflie'
+    default=80, help='the default channel in crazyflie'
 )
 # by default my crazyflie uses datarate 2M
 parser.add_argument(

@@ -1,0 +1,324 @@
+INFO: 31-10-2022 16:30:37 __init__(113) -- This is drone log from Drogno_1
+INFO: 31-10-2022 16:30:40 log_status(191) -- Logger started
+INFO: 31-10-2022 16:30:41 log_status(195) -- Drogno_1: ready	battery: 3.74                    	kalman var: 0.01 0.01 0.001                    	batterySag: 0.5	link quality: 46	flight time: 0s                    	pos -0.03 -0.08 0.00	yaw: 0.01	msg/s 0.9
+INFO: 31-10-2022 16:30:42 log_status(195) -- Drogno_1: BAD kalman	battery: 3.74                    	kalman var: 0.041 0.041 0.002                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -0.13 -0.34 0.00	yaw: 0.00	msg/s 0.0
+INFO: 31-10-2022 16:30:44 log_status(195) -- Drogno_1: BAD kalman	battery: 3.74                    	kalman var: 0.108 0.108 0.003                    	batterySag: 0.5	link quality: 46	flight time: 0s                    	pos -0.34 -0.89 0.00	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:45 log_status(195) -- Drogno_1: BAD kalman	battery: 3.74                    	kalman var: 0.213 0.213 0.005                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -0.66 -1.68 0.01	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:46 log_status(195) -- Drogno_1: BAD kalman	battery: 3.74                    	kalman var: 0.331 0.331 0.006                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -1.00 -2.53 0.01	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:30:47 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 0.512 0.512 0.007                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -1.50 -3.78 0.02	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:30:48 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 0.698 0.698 0.008                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -1.99 -5.00 0.02	yaw: -0.03	msg/s 0.0
+INFO: 31-10-2022 16:30:49 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 0.968 0.968 0.009                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -2.68 -6.69 0.02	yaw: -0.03	msg/s 0.0
+INFO: 31-10-2022 16:30:50 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 1.232 1.232 0.01                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -3.32 -8.28 0.03	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:30:51 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 1.603 1.603 0.012                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -4.18 -10.41 0.04	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:52 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 1.956 1.956 0.013                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -4.98 -12.34 0.04	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:53 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 2.438 2.438 0.014                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -6.03 -14.89 0.05	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:55 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 2.889 2.889 0.015                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -6.98 -17.19 0.06	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:30:56 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 3.494 3.494 0.016                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -8.21 -20.17 0.07	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:57 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 4.055 4.055 0.017                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -9.31 -22.81 0.08	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:58 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 4.793 4.793 0.018                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -10.71 -26.22 0.09	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:30:59 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 5.473 5.473 0.02                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos -11.95 -29.22 0.10	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:31:00 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 6.352 6.352 0.021                    	batterySag: 0.5	link quality: 43	flight time: 0s                    	pos -13.52 -33.00 0.11	yaw: -0.02	msg/s 0.0
+INFO: 31-10-2022 16:31:01 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 6.988 6.605 0.861                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -14.89 -36.44 0.14	yaw: -36.88	msg/s 0.0
+INFO: 31-10-2022 16:31:02 log_status(195) -- Drogno_1: out of BOX	battery: 3.71                    	kalman var: 8.016 6.605 1.845                    	batterySag: 0.5	link quality: 53	flight time: 0s                    	pos -16.30 -40.62 0.27	yaw: -36.97	msg/s 0.0
+INFO: 31-10-2022 16:31:03 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 8.984 7.277 1.982                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -16.95 -43.81 0.48	yaw: -38.94	msg/s 0.0
+INFO: 31-10-2022 16:31:04 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 10.094 8.234 2.189                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -16.84 -46.69 0.75	yaw: -35.16	msg/s 0.0
+INFO: 31-10-2022 16:31:06 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 11.086 9.117 2.355                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -15.90 -47.88 0.90	yaw: -32.09	msg/s 0.0
+INFO: 31-10-2022 16:31:07 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 12.375 10.297 2.506                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -13.66 -47.34 0.83	yaw: -28.64	msg/s 0.0
+INFO: 31-10-2022 16:31:08 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 13.531 11.367 2.629                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -10.85 -44.91 0.44	yaw: -25.95	msg/s 0.0
+INFO: 31-10-2022 16:31:09 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 15.008 12.766 2.746                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -6.38 -39.19 -0.57	yaw: -23.08	msg/s 0.0
+INFO: 31-10-2022 16:31:10 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 16.312 14.008 2.854                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos -1.76 -31.83 -1.98	yaw: -20.94	msg/s 0.0
+INFO: 31-10-2022 16:31:11 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.009 0.009 0.001                    	batterySag: 0.5	link quality: 52	flight time: 0s                    	pos 0.51 1.92 -0.49	yaw: -0.03	msg/s 0.0
+INFO: 31-10-2022 16:31:12 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 0.04 0.04 0.002                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 2.14 8.08 -2.05	yaw: -0.09	msg/s 0.0
+INFO: 31-10-2022 16:31:13 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.006 0.006 0.001                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 0.34 1.32 -0.33	yaw: -0.00	msg/s 0.0
+INFO: 31-10-2022 16:31:14 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 0.033 0.033 0.002                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 1.73 6.79 -1.71	yaw: -0.26	msg/s 0.0
+INFO: 31-10-2022 16:31:15 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.004 0.004 0.001                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 0.21 0.83 -0.21	yaw: -0.05	msg/s 0.0
+INFO: 31-10-2022 16:31:17 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 0.028 0.028 0.002                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 1.42 5.61 -1.42	yaw: -0.09	msg/s 0.0
+INFO: 31-10-2022 16:31:18 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.002 0.002 0.001                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 0.11 0.47 -0.12	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:31:19 log_status(195) -- Drogno_1: out of BOX	battery: 3.74                    	kalman var: 0.022 0.022 0.002                    	batterySag: 0.5	link quality: 52	flight time: 0s                    	pos 1.10 4.59 -1.15	yaw: -1.51	msg/s 0.0
+INFO: 31-10-2022 16:31:20 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.002 0.002 0.001                    	batterySag: 0.5	link quality: 47	flight time: 0s                    	pos 0.05 0.32 -0.08	yaw: -3.70	msg/s 0.0
+INFO: 31-10-2022 16:31:21 log_status(195) -- Drogno_1: out of BOX	battery: 3.72                    	kalman var: 0.02 0.018 0.003                    	batterySag: 0.5	link quality: 51	flight time: 0s                    	pos 0.71 4.28 -1.14	yaw: -6.00	msg/s 0.0
+INFO: 31-10-2022 16:31:22 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 53	flight time: 0s                    	pos 0.01 0.12 -0.05	yaw: 1.50	msg/s 0.0
+INFO: 31-10-2022 16:31:23 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 0.015 0.015 0.001                    	batterySag: 0.5	link quality: 52	flight time: 0s                    	pos 0.33 4.71 -1.88	yaw: 1.15	msg/s 0.0
+INFO: 31-10-2022 16:31:24 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.008 0.008 0.002                    	batterySag: 0.5	link quality: 47	flight time: 0s                    	pos 0.26 2.54 -0.97	yaw: -2.52	msg/s 0.0
+INFO: 31-10-2022 16:31:25 log_status(195) -- Drogno_1: ready	battery: 3.73                    	kalman var: 0.002 0.002 0.001                    	batterySag: 0.5	link quality: 47	flight time: 0s                    	pos 0.04 0.32 -0.07	yaw: 1.49	msg/s 0.0
+INFO: 31-10-2022 16:31:26 log_status(195) -- Drogno_1: out of BOX	battery: 3.73                    	kalman var: 0.027 0.027 0.002                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 0.68 4.85 -1.01	yaw: 12.10	msg/s 0.0
+INFO: 31-10-2022 16:31:28 log_status(195) -- Drogno_1: out of BOX	battery: 3.82                    	kalman var: 0.072 0.072 0.003                    	batterySag: 0.5	link quality: 46	flight time: 0s                    	pos 1.94 12.66 -2.62	yaw: 10.93	msg/s 0.0
+INFO: 31-10-2022 16:31:29 log_status(195) -- Drogno_1: ready	battery: 3.82                    	kalman var: 0.008 0.008 0.002                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos 1.21 1.25 -0.45	yaw: 1.85	msg/s 0.0
+INFO: 31-10-2022 16:31:30 log_status(195) -- Drogno_1: out of BOX	battery: 3.82                    	kalman var: 0.033 0.033 0.009                    	batterySag: 0.5	link quality: 41	flight time: 0s                    	pos 5.54 5.66 -1.82	yaw: -0.47	msg/s 0.0
+INFO: 31-10-2022 16:31:31 log_status(195) -- Drogno_1: out of BOX	battery: 3.83                    	kalman var: 0.099 0.101 0.007                    	batterySag: 0.5	link quality: 49	flight time: 0s                    	pos 14.66 14.90 -4.31	yaw: 0.80	msg/s 0.0
+INFO: 31-10-2022 16:31:32 log_status(195) -- Drogno_1: ready	battery: 3.83                    	kalman var: 0.006 0.006 0.001                    	batterySag: 0.5	link quality: 45	flight time: 0s                    	pos 0.37 1.24 -0.31	yaw: -0.73	msg/s 0.0
+INFO: 31-10-2022 16:31:33 log_status(195) -- Drogno_1: out of BOX	battery: 3.82                    	kalman var: 0.039 0.035 0.01                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 2.44 7.94 -1.92	yaw: 10.57	msg/s 0.0
+INFO: 31-10-2022 16:31:34 log_status(195) -- Drogno_1: ready	battery: 3.82                    	kalman var: 0.0 0.0 0.0                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 0.00 -0.00 0.00	yaw: -0.00	msg/s 0.0
+INFO: 31-10-2022 16:31:35 log_status(195) -- Drogno_1: BAD kalman	battery: 3.83                    	kalman var: 0.018 0.018 0.001                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos 0.07 -0.15 0.00	yaw: 3.82	msg/s 0.0
+INFO: 31-10-2022 16:31:36 log_status(195) -- Drogno_1: BAD kalman	battery: 3.83                    	kalman var: 0.056 0.051 0.009                    	batterySag: 0.5	link quality: 48	flight time: 0s                    	pos 0.21 -0.44 0.01	yaw: -1.81	msg/s 0.0
+INFO: 31-10-2022 16:31:37 log_status(195) -- Drogno_1: BAD kalman	battery: 3.83                    	kalman var: 0.134 0.124 0.017                    	batterySag: 0.5	link quality: 49	flight time: 0s                    	pos 0.50 -0.68 -0.02	yaw: -0.06	msg/s 0.0
+INFO: 31-10-2022 16:31:39 log_status(195) -- Drogno_1: BAD kalman	battery: 3.83                    	kalman var: 0.227 0.21 0.027                    	batterySag: 0.5	link quality: 49	flight time: 0s                    	pos 0.96 -0.48 -0.10	yaw: 0.66	msg/s 0.0
+INFO: 31-10-2022 16:31:40 log_status(195) -- Drogno_1: BAD kalman	battery: 3.83                    	kalman var: 0.376 0.345 0.045                    	batterySag: 0.5	link quality: 49	flight time: 0s                    	pos 1.93 0.63 -0.29	yaw: 0.83	msg/s 0.0
+INFO: 31-10-2022 16:31:41 log_status(195) -- Drogno_1: out of BOX	battery: 3.83                    	kalman var: 0.535 0.492 0.06                    	batterySag: 0.5	link quality: 49	flight time: 0s                    	pos 3.16 2.56 -0.59	yaw: 0.83	msg/s 0.0
+INFO: 31-10-2022 16:31:42 log_status(195) -- Drogno_1: out of BOX	battery: 3.83                    	kalman var: 0.767 0.707 0.079                    	batterySag: 0.5	link quality: 50	flight time: 0s                    	pos 5.22 6.38 -1.18	yaw: 0.75	msg/s 0.0
+INFO: 31-10-2022 16:31:43 log_status(195) -- Drogno_1: out of BOX	battery: 3.83                    	kalman var: 0.999 0.926 0.095                    	batterySag: 0.5	link quality: 50	flight time: 0s                    	pos 7.54 11.09 -1.95	yaw: 0.73	msg/s 0.0
+INFO: 31-10-2022 16:31:44 log_status(195) -- Drogno_1: out of BOX	battery: 3.83                    	kalman var: 1.327 1.24 0.112                    	batterySag: 0.5	link quality: 50	flight time: 0s                    	pos 11.09 18.83 -3.26	yaw: 0.63	msg/s 0.0
+INFO: 31-10-2022 16:31:45 log_status(195) -- Drogno_1: out of BOX	battery: 3.84                    	kalman var: 1.644 1.542 0.129                    	batterySag: 0.5	link quality: 50	flight time: 0s                    	pos 14.77 27.25 -4.76	yaw: 0.57	msg/s 0.0
+INFO: 31-10-2022 16:31:46 log_status(195) -- Drogno_1: ready	battery: 3.16                    	kalman var: 0.004 0.004 0.001                    	batterySag: 0.5	link quality: 54	flight time: 0s                    	pos 0.10 0.28 -0.14	yaw: -8.18	msg/s 0.0
+INFO: 31-10-2022 16:31:47 log_status(195) -- Drogno_1: BAD kalman	battery: 3.29                    	kalman var: 0.027 0.027 0.003                    	batterySag: 0.5	link quality: 51	flight time: 1s                    	pos -0.06 1.17 -0.95	yaw: 0.16	msg/s 0.0
+INFO: 31-10-2022 16:31:49 log_status(195) -- Drogno_1: hovering	battery: 3.3                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 51	flight time: 2s                    	pos -0.74 2.31 -1.75	yaw: 0.42	msg/s 0.0
+INFO: 31-10-2022 16:31:49 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:49 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:49 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 log_status(195) -- Drogno_1: out of BOX	battery: 3.28                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 53	flight time: 3s                    	pos -4.54 -4.54 -4.54	yaw: 0.64	msg/s 0.0
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:50 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 log_status(195) -- Drogno_1: out of BOX	battery: 3.28                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 46	flight time: 4s                    	pos -8.49 -8.49 -8.49	yaw: -1.38	msg/s 0.0
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:51 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 log_status(195) -- Drogno_1: out of BOX	battery: 3.27                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 46	flight time: 6s                    	pos -13.14 -13.14 -13.14	yaw: -1.91	msg/s 0.0
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:52 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:53 log_status(195) -- Drogno_1: BAD kalman	battery: 3.27                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 46	flight time: 7s                    	pos 0.00 0.00 0.00	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:31:54 log_status(195) -- Drogno_1: BAD kalman	battery: 3.26                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 8s                    	pos -0.04 -0.04 -0.04	yaw: -1.16	msg/s 0.0
+INFO: 31-10-2022 16:31:55 log_status(195) -- Drogno_1: BAD kalman	battery: 3.24                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 9s                    	pos 0.57 0.57 0.57	yaw: -4.00	msg/s 0.0
+INFO: 31-10-2022 16:31:56 log_status(195) -- Drogno_1: BAD kalman	battery: 3.25                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 10s                    	pos 2.25 2.25 2.25	yaw: -6.86	msg/s 0.0
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 log_status(195) -- Drogno_1: out of BOX	battery: 3.24                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 11s                    	pos 5.22 5.22 5.22	yaw: -4.15	msg/s 0.0
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:57 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:58 log_status(195) -- Drogno_1: out of BOX	battery: 3.24                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 12s                    	pos 9.09 9.09 9.09	yaw: -4.66	msg/s 0.0
+INFO: 31-10-2022 16:31:58 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:31:59 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 log_status(195) -- Drogno_1: out of BOX	battery: 3.23                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 13s                    	pos 14.20 14.20 14.20	yaw: -4.65	msg/s 0.0
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:00 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 log_status(195) -- Drogno_1: out of BOX	battery: 3.23                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 14s                    	pos 20.46 20.46 20.46	yaw: -4.52	msg/s 0.0
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:01 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 0s                    	pos 27.79 27.79 27.79	yaw: -4.46	msg/s 0.0
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:02 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:03 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:03 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:03 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:03 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 42	flight time: 1s                    	pos -29.38 -29.38 -29.38	yaw: -4.27	msg/s 0.0
+INFO: 31-10-2022 16:32:03 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:03 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 log_status(195) -- Drogno_1: out of BOX	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 2s                    	pos -20.46 -20.46 -20.46	yaw: -4.42	msg/s 0.0
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:04 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 43	flight time: 3s                    	pos -10.38 -10.38 -10.38	yaw: -4.10	msg/s 0.0
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:05 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:06 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:06 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:06 log_status(195) -- Drogno_1: BAD kalman	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 43	flight time: 4s                    	pos 0.35 0.35 0.35	yaw: -3.96	msg/s 0.0
+INFO: 31-10-2022 16:32:06 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:07 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 43	flight time: 5s                    	pos 11.65 11.65 11.65	yaw: -3.88	msg/s 0.0
+INFO: 31-10-2022 16:32:07 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:08 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -0.01 -0.01 -0.01	yaw: 0.05	msg/s 0.0
+INFO: 31-10-2022 16:32:09 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 1s                    	pos -0.05 -0.05 -0.05	yaw: 0.09	msg/s 0.0
+INFO: 31-10-2022 16:32:11 log_status(195) -- Drogno_1: BAD kalman	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 2s                    	pos -0.17 -0.17 -0.17	yaw: 0.12	msg/s 0.0
+INFO: 31-10-2022 16:32:12 log_status(195) -- Drogno_1: BAD kalman	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 3s                    	pos -0.36 -0.36 -0.36	yaw: 0.10	msg/s 0.0
+INFO: 31-10-2022 16:32:13 log_status(195) -- Drogno_1: BAD kalman	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 4s                    	pos -0.66 -0.66 -0.66	yaw: 0.09	msg/s 0.0
+INFO: 31-10-2022 16:32:14 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 6s                    	pos -1.07 -1.07 -1.07	yaw: 0.06	msg/s 0.0
+INFO: 31-10-2022 16:32:15 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 7s                    	pos -1.56 -1.56 -1.56	yaw: 0.08	msg/s 0.0
+INFO: 31-10-2022 16:32:16 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 0s                    	pos -2.06 -2.06 -2.06	yaw: 0.17	msg/s 0.9
+INFO: 31-10-2022 16:32:17 log_status(195) -- Drogno_1: out of BOX	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 1s                    	pos -2.63 -2.63 -2.63	yaw: -0.07	msg/s 0.0
+INFO: 31-10-2022 16:32:18 log_status(195) -- Drogno_1: out of BOX	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 2s                    	pos -3.30 -3.30 -3.30	yaw: 0.09	msg/s 0.0
+INFO: 31-10-2022 16:32:18 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 log_status(195) -- Drogno_1: out of BOX	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 4s                    	pos -4.23 -4.23 -4.23	yaw: 0.27	msg/s 0.9
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:19 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:20 log_status(195) -- Drogno_1: out of BOX	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 5s                    	pos -5.52 -5.52 -5.52	yaw: 0.52	msg/s 0.0
+INFO: 31-10-2022 16:32:20 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:21 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 6s                    	pos -7.14 -7.14 -7.14	yaw: 2.12	msg/s 0.0
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:22 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 log_status(195) -- Drogno_1: out of BOX	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 57	flight time: 7s                    	pos -9.15 -9.15 -9.15	yaw: 2.40	msg/s 0.9
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:23 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 log_status(195) -- Drogno_1: out of BOX	battery: 3.19                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 8s                    	pos -11.31 -11.31 -11.31	yaw: 2.64	msg/s 0.0
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:24 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:25 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:25 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:25 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:25 log_status(195) -- Drogno_1: out of BOX	battery: 3.19                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 0s                    	pos -13.85 -13.85 -13.85	yaw: 2.60	msg/s 0.9
+INFO: 31-10-2022 16:32:25 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:25 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:26 log_status(195) -- Drogno_1: BAD kalman	battery: 3.19                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 1s                    	pos 0.01 0.01 0.01	yaw: 0.94	msg/s 0.0
+INFO: 31-10-2022 16:32:27 log_status(195) -- Drogno_1: BAD kalman	battery: 3.19                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 54	flight time: 2s                    	pos 0.00 0.00 0.00	yaw: 1.45	msg/s 0.0
+INFO: 31-10-2022 16:32:28 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 3s                    	pos -0.09 -0.09 -0.09	yaw: 1.68	msg/s 0.0
+INFO: 31-10-2022 16:32:29 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 4s                    	pos -0.29 -0.29 -0.29	yaw: 2.06	msg/s 0.0
+INFO: 31-10-2022 16:32:30 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 56	flight time: 6s                    	pos -0.60 -0.60 -0.60	yaw: 2.48	msg/s 0.0
+INFO: 31-10-2022 16:32:31 log_status(195) -- Drogno_1: BAD kalman	battery: 3.21                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 54	flight time: 7s                    	pos 0.00 0.00 0.00	yaw: 0.18	msg/s 0.0
+INFO: 31-10-2022 16:32:33 log_status(195) -- Drogno_1: BAD kalman	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 44	flight time: 8s                    	pos -0.06 -0.06 -0.06	yaw: -4.63	msg/s 0.0
+INFO: 31-10-2022 16:32:34 log_status(195) -- Drogno_1: BAD kalman	battery: 3.15                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 46	flight time: 9s                    	pos -0.01 -0.01 -0.01	yaw: -1.80	msg/s 0.0
+INFO: 31-10-2022 16:32:35 log_status(195) -- Drogno_1: BAD kalman	battery: 3.2                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 53	flight time: 10s                    	pos -0.84 -0.84 -0.84	yaw: -2.05	msg/s 0.0
+INFO: 31-10-2022 16:32:36 log_status(195) -- Drogno_1: idle	battery: 3.15                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 51	flight time: 11s                    	pos -3.21 -3.21 -3.21	yaw: -2.36	msg/s 0.0
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:36 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 log_status(195) -- Drogno_1: out of BOX	battery: 3.15                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 51	flight time: 12s                    	pos -7.26 -7.26 -7.26	yaw: -3.75	msg/s 0.0
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:37 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:38 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:38 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:38 check_out_of_boxiness(636) -- Landing due trespassing!
+INFO: 31-10-2022 16:32:38 log_status(195) -- Drogno_1: BAD kalman	battery: 3.22                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 51	flight time: 13s                    	pos 0.00 0.00 0.00	yaw: -0.01	msg/s 0.0
+INFO: 31-10-2022 16:32:39 log_status(195) -- Drogno_1: BAD kalman	battery: 3.31                    	kalman var: 0.052 0.052 0.004                    	batterySag: 0.5	link quality: 53	flight time: 14s                    	pos -0.14 -0.14 -0.14	yaw: 0.27	msg/s 0.0
+WARNING: 31-10-2022 16:32:40 exit(683) -- closing Drogno_1
+INFO: 31-10-2022 16:44:28 __init__(113) -- This is drone log from Drogno_1
+WARNING: 31-10-2022 16:44:33 exit(683) -- closing Drogno_1
