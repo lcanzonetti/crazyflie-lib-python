@@ -99,6 +99,8 @@ class dataDrone(threading.Thread):
         self.firmware_revision0 = self._cf.param.get_value('firmware.revision0', 'uint32_t')
         self.firmware_revision1 = self._cf.param.get_value('firmware.revision1', 'uint16_t')
         self.firmware_modified  = self._cf.param.get_value('firmware.revision1', 'uint8_t')
+        # self.robustTdoa = self._cf.param.get_value('kalman.robustTdoa', 'uint8_t')
+        # write(self.robustTdoa)
  
     def connect(self):
         write("provo a connettermi al drone %s " % self.name)

@@ -258,36 +258,42 @@ class Test_Container():
         def motor_sequence():
             power = GB.power
             motor = GB.qualemotore
-            self.cf.param.set_value('powerDist.idleThrust', '11000')
+            # self.cf.param.set_value('powerDist.idleThrust', '11000')
             self.cf.param.set_value('motorPowerSet.enable', '1')
             if motor == 1:
                 write("Testo il motore 1 a potenza %s" % power)
                 self.cf.param.set_value('motorPowerSet.m1', str(power))
-                time.sleep(3)
+                time.sleep(5)
                 self.cf.param.set_value('motorPowerSet.m1', '0')        
             elif motor == 2:
                 write("Testo il motore 2 a potenza %s" % power)
                 self.cf.param.set_value('motorPowerSet.m2', str(power))
-                time.sleep(3)
+                time.sleep(5)
                 self.cf.param.set_value('motorPowerSet.m2', '0')
             elif motor == 3:
                 write("Testo il motore 3 a potenza %s" % power)
                 self.cf.param.set_value('motorPowerSet.m3', str(power))
-                time.sleep(3)
+                time.sleep(5)
                 self.cf.param.set_value('motorPowerSet.m3', '0')
             elif motor == 4:
                 write("Testo il motore 4 a potenza %s" % power)
                 self.cf.param.set_value('motorPowerSet.m4', str(power))
-                time.sleep(3)
+                time.sleep(5)
                 self.cf.param.set_value('motorPowerSet.m4', '0')
 
             self.cf.param.set_value('powerDist.idleThrust', '0')        
             self.cf.param.set_value('motorPowerSet.enable', '0')
 
         threading.Thread(target=motor_sequence).start()
+    
+    def idle_thrust(self):
+        idle_power = GB.idle_power
+        self.cf.param.set_value('powerDist.idleThrust', str(idle_power))
 
         
-        
+    # def robust_Tdoa(self):
+    #     tdoa = GB.robustTdoa
+    #     self.cf.param.set_value('kalman.robustTdoa', str(tdoa))
 
      
     def configura_log(self):
@@ -298,6 +304,7 @@ class Test_Container():
         log_conf.add_variable('pm.vbat', 'FP16')
         log_conf.add_variable('radio.rssi', 'uint8_t')
         log_conf.add_variable('health.batterySag', 'FP16')
+        # log_conf.add_variable('kalman.robustTdoa', 'uint8_t')
         self.cf.log.add_config(log_conf)
         log_conf.start()
         write("Il drone %s ha configurato il log." % self.ID)

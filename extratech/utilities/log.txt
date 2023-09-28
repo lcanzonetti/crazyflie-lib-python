@@ -1,166 +1,396 @@
+50
 Waking up devices
-radio://0/80/2M/E7E7E7E700 has been woke upped!
-radio://0/80/2M/E7E7E7E701 has been woke upped!
+0XE7E7E7E700
+0XE7E7E7E700
+0XE7E7E7E700
+0XE7E7E7E700
+0XE7E7E7E701
+0XE7E7E7E701
+0XE7E7E7E701
+0XE7E7E7E701
+0XE7E7E7E702
+0XE7E7E7E702
+0XE7E7E7E702
+0XE7E7E7E702
+0XE7E7E7E703
+0XE7E7E7E703
+0XE7E7E7E703
+0XE7E7E7E703
+0XE7E7E7E704
+0XE7E7E7E704
+0XE7E7E7E704
+0XE7E7E7E704
+0XE7E7E7E705
+0XE7E7E7E705
+0XE7E7E7E705
+0XE7E7E7E705
+0XE7E7E7E706
+0XE7E7E7E706
+0XE7E7E7E706
+0XE7E7E7E706
+0XE7E7E7E707
+0XE7E7E7E707
+0XE7E7E7E707
+0XE7E7E7E707
+0XE7E7E7E708
+0XE7E7E7E708
+0XE7E7E7E708
+0XE7E7E7E708
+0XE7E7E7E709
+0XE7E7E7E709
+0XE7E7E7E709
+0XE7E7E7E709
+0XE7E7E7E70A
+0XE7E7E7E70A
+0XE7E7E7E70A
+0XE7E7E7E70A
+0XE7E7E7E70B
+0XE7E7E7E70B
+0XE7E7E7E70B
+0XE7E7E7E70B
+0XE7E7E7E70C
+0XE7E7E7E70C
+0XE7E7E7E70C
+0XE7E7E7E70C
+0XE7E7E7E70D
+0XE7E7E7E70D
+0XE7E7E7E70D
+0XE7E7E7E70D
+0XE7E7E7E70E
+0XE7E7E7E70E
+0XE7E7E7E70E
+0XE7E7E7E70E
+0XE7E7E7E70F
+0XE7E7E7E70F
+0XE7E7E7E70F
+0XE7E7E7E70F
+0XE7E7E7E710
+0XE7E7E7E710
+0XE7E7E7E710
+0XE7E7E7E710
+0XE7E7E7E711
+0XE7E7E7E711
+0XE7E7E7E711
+0XE7E7E7E711
+0XE7E7E7E712
+0XE7E7E7E712
+0XE7E7E7E712
+0XE7E7E7E712
+0XE7E7E7E713
+0XE7E7E7E713
+0XE7E7E7E713
+0XE7E7E7E713
+0XE7E7E7E714
+0XE7E7E7E714
+0XE7E7E7E714
+0XE7E7E7E714
+0XE7E7E7E715
+0XE7E7E7E715
+0XE7E7E7E715
+0XE7E7E7E715
+0XE7E7E7E716
+0XE7E7E7E716
+0XE7E7E7E716
+0XE7E7E7E716
+0XE7E7E7E717
+0XE7E7E7E717
+0XE7E7E7E717
+0XE7E7E7E717
+0XE7E7E7E718
+0XE7E7E7E718
+0XE7E7E7E718
+0XE7E7E7E718
+0XE7E7E7E719
+0XE7E7E7E719
+0XE7E7E7E719
+0XE7E7E7E719
+0XE7E7E7E71A
+0XE7E7E7E71A
+0XE7E7E7E71A
+0XE7E7E7E71A
+0XE7E7E7E71B
+0XE7E7E7E71B
+0XE7E7E7E71B
+0XE7E7E7E71B
+0XE7E7E7E71C
+0XE7E7E7E71C
+0XE7E7E7E71C
+0XE7E7E7E71C
+0XE7E7E7E71D
+0XE7E7E7E71D
+0XE7E7E7E71D
+0XE7E7E7E71D
+0XE7E7E7E71E
+0XE7E7E7E71E
+0XE7E7E7E71E
+0XE7E7E7E71E
+0XE7E7E7E71F
+0XE7E7E7E71F
+0XE7E7E7E71F
+0XE7E7E7E71F
+0XE7E7E7E720
+0XE7E7E7E720
+0XE7E7E7E720
+0XE7E7E7E720
+0XE7E7E7E721
+0XE7E7E7E721
+0XE7E7E7E721
+0XE7E7E7E721
+0XE7E7E7E722
+0XE7E7E7E722
+0XE7E7E7E722
+0XE7E7E7E722
+0XE7E7E7E723
+0XE7E7E7E723
+0XE7E7E7E723
+0XE7E7E7E723
+0XE7E7E7E724
+0XE7E7E7E724
+0XE7E7E7E724
+0XE7E7E7E724
+0XE7E7E7E725
+0XE7E7E7E725
+0XE7E7E7E725
+0XE7E7E7E725
+0XE7E7E7E726
+0XE7E7E7E726
+0XE7E7E7E726
+0XE7E7E7E726
+0XE7E7E7E727
+0XE7E7E7E727
+0XE7E7E7E727
+0XE7E7E7E727
+0XE7E7E7E728
+0XE7E7E7E728
+0XE7E7E7E728
+0XE7E7E7E728
+0XE7E7E7E729
+0XE7E7E7E729
+0XE7E7E7E729
+0XE7E7E7E729
+0XE7E7E7E72A
+0XE7E7E7E72A
+0XE7E7E7E72A
+0XE7E7E7E72A
+0XE7E7E7E72B
+0XE7E7E7E72B
+0XE7E7E7E72B
+0XE7E7E7E72B
+0XE7E7E7E72C
+0XE7E7E7E72C
+0XE7E7E7E72C
+0XE7E7E7E72C
+0XE7E7E7E72D
+0XE7E7E7E72D
+0XE7E7E7E72D
+0XE7E7E7E72D
+0XE7E7E7E72E
+0XE7E7E7E72E
+0XE7E7E7E72E
+0XE7E7E7E72E
+0XE7E7E7E72F
+0XE7E7E7E72F
+0XE7E7E7E72F
+0XE7E7E7E72F
+0XE7E7E7E730
+0XE7E7E7E730
+0XE7E7E7E730
+0XE7E7E7E730
+0XE7E7E7E731
+0XE7E7E7E731
+0XE7E7E7E731
+0XE7E7E7E731
+radio://0/80/2M/E7E7E7E700 is not there to be woke up
+radio://0/90/2M/E7E7E7E700 is not there to be woke up
+radio://0/100/2M/E7E7E7E700 is not there to be woke up
+radio://0/110/2M/E7E7E7E700 is not there to be woke up
+radio://0/80/2M/E7E7E7E701 is not there to be woke up
+radio://0/90/2M/E7E7E7E701 is not there to be woke up
+radio://0/100/2M/E7E7E7E701 is not there to be woke up
+radio://0/110/2M/E7E7E7E701 is not there to be woke up
 radio://0/80/2M/E7E7E7E702 is not there to be woke up
-radio://0/80/2M/E7E7E7E703 has been woke upped!
-radio://0/80/2M/E7E7E7E704 has been woke upped!
-radio://0/80/2M/E7E7E7E705 has been woke upped!
-radio://0/80/2M/E7E7E7E706 has been woke upped!
-radio://0/80/2M/E7E7E7E707 has been woke upped!
-radio://0/80/2M/E7E7E7E708 has been woke upped!
-Done. Ciao.
-provo a connettermi al drone dataDrone 0 
-provo a connettermi al drone dataDrone 1 
-provo a connettermi al drone dataDrone 3 
-provo a connettermi al drone dataDrone 4 
-provo a connettermi al drone dataDrone 5 
-provo a connettermi al drone dataDrone 6 
-provo a connettermi al drone dataDrone 7 
-provo a connettermi al drone dataDrone 8 
-Mi sono connesso al drone 0 all'indirizzo radio://0/80/2M/E7E7E7E700
-TOC scaricata per il dataDrone 0, in attesa dei parametri.
-Mi sono connesso al drone 1 all'indirizzo radio://0/80/2M/E7E7E7E701
-TOC scaricata per il dataDrone 1, in attesa dei parametri.
-Mi sono connesso al drone 3 all'indirizzo radio://0/80/2M/E7E7E7E703
-TOC scaricata per il dataDrone 3, in attesa dei parametri.
-Mi sono connesso al drone 4 all'indirizzo radio://0/80/2M/E7E7E7E704
-TOC scaricata per il dataDrone 4, in attesa dei parametri.
-Mi sono connesso al drone 5 all'indirizzo radio://0/80/2M/E7E7E7E705
-TOC scaricata per il dataDrone 5, in attesa dei parametri.
-Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
-TOC scaricata per il dataDrone 8, in attesa dei parametri.
-Mi sono connesso al drone 6 all'indirizzo radio://0/80/2M/E7E7E7E706
-TOC scaricata per il dataDrone 6, in attesa dei parametri.
-Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
-TOC scaricata per il dataDrone 7, in attesa dei parametri.
-Parametri scaricati per dataDrone 0
-[92mdataDrone 0 connesso, it took 15.5 seconds
-il drone 0 configura il log... 
-Il drone 0 ha configurato il log.
-Parametri scaricati per dataDrone 1
-[92mdataDrone 1 connesso, it took 15.85 seconds
-il drone 1 configura il log... 
-Il drone 1 ha configurato il log.
-Parametri scaricati per dataDrone 3
-[92mdataDrone 3 connesso, it took 16.23 seconds
-il drone 3 configura il log... 
-Il drone 3 ha configurato il log.
-Parametri scaricati per dataDrone 4
-[92mdataDrone 4 connesso, it took 16.27 seconds
-il drone 4 configura il log... 
-Il drone 4 ha configurato il log.
-Parametri scaricati per dataDrone 5
-[92mdataDrone 5 connesso, it took 16.3 seconds
-il drone 5 configura il log... 
-Il drone 5 ha configurato il log.
-Parametri scaricati per dataDrone 8
-[92mdataDrone 8 connesso, it took 16.34 seconds
-il drone 8 configura il log... 
-Il drone 8 ha configurato il log.
-Parametri scaricati per dataDrone 6
-[92mdataDrone 6 connesso, it took 16.59 seconds
-il drone 6 configura il log... 
-Il drone 6 ha configurato il log.
-Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 16.56 seconds
-il drone 7 configura il log... 
-Il drone 7 ha configurato il log.
-Ora chiudo con 0
-radio://0/80/2M/E7E7E7E700 has been standbyied!
-Ora chiudo con 1
-radio://0/80/2M/E7E7E7E701 has been standbyied!
-Ora chiudo con 3
-radio://0/80/2M/E7E7E7E703 has been standbyied!
-Ora chiudo con 4
-radio://0/80/2M/E7E7E7E704 has been standbyied!
-Ora chiudo con 5
-radio://0/80/2M/E7E7E7E705 has been standbyied!
-Ora chiudo con 6
-radio://0/80/2M/E7E7E7E706 has been standbyied!
-Ora chiudo con 7
-radio://0/80/2M/E7E7E7E707 has been standbyied!
-Ora chiudo con 8
-radio://0/80/2M/E7E7E7E708 has been standbyied!
-Waking up devices
-radio://0/80/2M/E7E7E7E700 has been woke upped!
-radio://0/80/2M/E7E7E7E701 has been woke upped!
-radio://0/80/2M/E7E7E7E702 is not there to be woke up
-radio://0/80/2M/E7E7E7E703 has been woke upped!
-radio://0/80/2M/E7E7E7E704 has been woke upped!
-radio://0/80/2M/E7E7E7E705 has been woke upped!
-radio://0/80/2M/E7E7E7E706 has been woke upped!
-radio://0/80/2M/E7E7E7E707 has been woke upped!
-radio://0/80/2M/E7E7E7E708 has been woke upped!
-Done. Ciao.
-provo a connettermi al drone dataDrone 0 
-provo a connettermi al drone dataDrone 1 
-provo a connettermi al drone dataDrone 3 
-provo a connettermi al drone dataDrone 4 
-provo a connettermi al drone dataDrone 5 
-provo a connettermi al drone dataDrone 6 
-provo a connettermi al drone dataDrone 7 
-provo a connettermi al drone dataDrone 8 
-Mi sono connesso al drone 0 all'indirizzo radio://0/80/2M/E7E7E7E700
-TOC scaricata per il dataDrone 0, in attesa dei parametri.
-Mi sono connesso al drone 1 all'indirizzo radio://0/80/2M/E7E7E7E701
-TOC scaricata per il dataDrone 1, in attesa dei parametri.
-Mi sono connesso al drone 3 all'indirizzo radio://0/80/2M/E7E7E7E703
-TOC scaricata per il dataDrone 3, in attesa dei parametri.
-Mi sono connesso al drone 4 all'indirizzo radio://0/80/2M/E7E7E7E704
-TOC scaricata per il dataDrone 4, in attesa dei parametri.
-Mi sono connesso al drone 5 all'indirizzo radio://0/80/2M/E7E7E7E705
-TOC scaricata per il dataDrone 5, in attesa dei parametri.
-Mi sono connesso al drone 6 all'indirizzo radio://0/80/2M/E7E7E7E706
-TOC scaricata per il dataDrone 6, in attesa dei parametri.
-Mi sono connesso al drone 7 all'indirizzo radio://0/80/2M/E7E7E7E707
-TOC scaricata per il dataDrone 7, in attesa dei parametri.
-Mi sono connesso al drone 8 all'indirizzo radio://0/80/2M/E7E7E7E708
-TOC scaricata per il dataDrone 8, in attesa dei parametri.
-Parametri scaricati per dataDrone 0
-[92mdataDrone 0 connesso, it took 15.62 seconds
-il drone 0 configura il log... 
-Il drone 0 ha configurato il log.
-Parametri scaricati per dataDrone 1
-[92mdataDrone 1 connesso, it took 16.02 seconds
-il drone 1 configura il log... 
-Il drone 1 ha configurato il log.
-Parametri scaricati per dataDrone 3
-[92mdataDrone 3 connesso, it took 16.2 seconds
-il drone 3 configura il log... 
-Il drone 3 ha configurato il log.
-Parametri scaricati per dataDrone 4
-[92mdataDrone 4 connesso, it took 16.31 seconds
-il drone 4 configura il log... 
-Il drone 4 ha configurato il log.
-Parametri scaricati per dataDrone 5
-[92mdataDrone 5 connesso, it took 16.3 seconds
-il drone 5 configura il log... 
-Il drone 5 ha configurato il log.
-Parametri scaricati per dataDrone 6
-[92mdataDrone 6 connesso, it took 16.33 seconds
-il drone 6 configura il log... 
-Il drone 6 ha configurato il log.
-Parametri scaricati per dataDrone 7
-[92mdataDrone 7 connesso, it took 16.37 seconds
-il drone 7 configura il log... 
-Il drone 7 ha configurato il log.
-Parametri scaricati per dataDrone 8
-[92mdataDrone 8 connesso, it took 16.34 seconds
-il drone 8 configura il log... 
-Il drone 8 ha configurato il log.
-Ora chiudo con 0
-radio://0/80/2M/E7E7E7E700 has been standbyied!
-Ora chiudo con 1
-radio://0/80/2M/E7E7E7E701 has been standbyied!
-Ora chiudo con 3
-radio://0/80/2M/E7E7E7E703 has been standbyied!
-Ora chiudo con 4
-radio://0/80/2M/E7E7E7E704 has been standbyied!
-Ora chiudo con 5
-radio://0/80/2M/E7E7E7E705 has been standbyied!
-Ora chiudo con 6
-radio://0/80/2M/E7E7E7E706 has been standbyied!
-Ora chiudo con 7
-radio://0/80/2M/E7E7E7E707 has been standbyied!
-Ora chiudo con 8
-radio://0/80/2M/E7E7E7E708 has been standbyied!
+radio://0/90/2M/E7E7E7E702 is not there to be woke up
+radio://0/100/2M/E7E7E7E702 is not there to be woke up
+radio://0/110/2M/E7E7E7E702 is not there to be woke up
+radio://0/80/2M/E7E7E7E703 is not there to be woke up
+radio://0/90/2M/E7E7E7E703 is not there to be woke up
+radio://0/100/2M/E7E7E7E703 is not there to be woke up
+radio://0/110/2M/E7E7E7E703 is not there to be woke up
+radio://0/80/2M/E7E7E7E704 is not there to be woke up
+radio://0/90/2M/E7E7E7E704 is not there to be woke up
+radio://0/100/2M/E7E7E7E704 is not there to be woke up
+radio://0/110/2M/E7E7E7E704 is not there to be woke up
+radio://0/80/2M/E7E7E7E705 is not there to be woke up
+radio://0/90/2M/E7E7E7E705 is not there to be woke up
+radio://0/100/2M/E7E7E7E705 is not there to be woke up
+radio://0/110/2M/E7E7E7E705 is not there to be woke up
+radio://0/80/2M/E7E7E7E706 is not there to be woke up
+radio://0/90/2M/E7E7E7E706 is not there to be woke up
+radio://0/100/2M/E7E7E7E706 is not there to be woke up
+radio://0/110/2M/E7E7E7E706 is not there to be woke up
+radio://0/80/2M/E7E7E7E707 is not there to be woke up
+radio://0/90/2M/E7E7E7E707 is not there to be woke up
+radio://0/100/2M/E7E7E7E707 is not there to be woke up
+radio://0/110/2M/E7E7E7E707 is not there to be woke up
+radio://0/80/2M/E7E7E7E708 is not there to be woke up
+radio://0/90/2M/E7E7E7E708 is not there to be woke up
+radio://0/100/2M/E7E7E7E708 is not there to be woke up
+radio://0/110/2M/E7E7E7E708 is not there to be woke up
+radio://0/80/2M/E7E7E7E709 is not there to be woke up
+radio://0/90/2M/E7E7E7E709 is not there to be woke up
+radio://0/100/2M/E7E7E7E709 is not there to be woke up
+radio://0/110/2M/E7E7E7E709 is not there to be woke up
+radio://0/80/2M/E7E7E7E70A is not there to be woke up
+radio://0/90/2M/E7E7E7E70A is not there to be woke up
+radio://0/100/2M/E7E7E7E70A is not there to be woke up
+radio://0/110/2M/E7E7E7E70A is not there to be woke up
+radio://0/80/2M/E7E7E7E70B is not there to be woke up
+radio://0/90/2M/E7E7E7E70B is not there to be woke up
+radio://0/100/2M/E7E7E7E70B is not there to be woke up
+radio://0/110/2M/E7E7E7E70B is not there to be woke up
+radio://0/80/2M/E7E7E7E70C is not there to be woke up
+radio://0/90/2M/E7E7E7E70C is not there to be woke up
+radio://0/100/2M/E7E7E7E70C is not there to be woke up
+radio://0/110/2M/E7E7E7E70C is not there to be woke up
+radio://0/80/2M/E7E7E7E70D is not there to be woke up
+radio://0/90/2M/E7E7E7E70D is not there to be woke up
+radio://0/100/2M/E7E7E7E70D is not there to be woke up
+radio://0/110/2M/E7E7E7E70D is not there to be woke up
+radio://0/80/2M/E7E7E7E70E is not there to be woke up
+radio://0/90/2M/E7E7E7E70E is not there to be woke up
+radio://0/100/2M/E7E7E7E70E is not there to be woke up
+radio://0/110/2M/E7E7E7E70E is not there to be woke up
+radio://0/80/2M/E7E7E7E70F is not there to be woke up
+radio://0/90/2M/E7E7E7E70F is not there to be woke up
+radio://0/100/2M/E7E7E7E70F is not there to be woke up
+radio://0/110/2M/E7E7E7E70F is not there to be woke up
+radio://0/80/2M/E7E7E7E710 is not there to be woke up
+radio://0/90/2M/E7E7E7E710 is not there to be woke up
+radio://0/100/2M/E7E7E7E710 is not there to be woke up
+radio://0/110/2M/E7E7E7E710 is not there to be woke up
+radio://0/80/2M/E7E7E7E711 is not there to be woke up
+radio://0/90/2M/E7E7E7E711 is not there to be woke up
+radio://0/100/2M/E7E7E7E711 is not there to be woke up
+radio://0/110/2M/E7E7E7E711 is not there to be woke up
+radio://0/80/2M/E7E7E7E712 is not there to be woke up
+radio://0/90/2M/E7E7E7E712 is not there to be woke up
+radio://0/100/2M/E7E7E7E712 is not there to be woke up
+radio://0/110/2M/E7E7E7E712 is not there to be woke up
+radio://0/80/2M/E7E7E7E713 is not there to be woke up
+radio://0/90/2M/E7E7E7E713 is not there to be woke up
+radio://0/100/2M/E7E7E7E713 is not there to be woke up
+radio://0/110/2M/E7E7E7E713 is not there to be woke up
+radio://0/80/2M/E7E7E7E714 is not there to be woke up
+radio://0/90/2M/E7E7E7E714 is not there to be woke up
+radio://0/100/2M/E7E7E7E714 is not there to be woke up
+radio://0/110/2M/E7E7E7E714 is not there to be woke up
+radio://0/80/2M/E7E7E7E715 is not there to be woke up
+radio://0/90/2M/E7E7E7E715 is not there to be woke up
+radio://0/100/2M/E7E7E7E715 is not there to be woke up
+radio://0/110/2M/E7E7E7E715 is not there to be woke up
+radio://0/80/2M/E7E7E7E716 is not there to be woke up
+radio://0/90/2M/E7E7E7E716 is not there to be woke up
+radio://0/100/2M/E7E7E7E716 is not there to be woke up
+radio://0/110/2M/E7E7E7E716 is not there to be woke up
+radio://0/80/2M/E7E7E7E717 is not there to be woke up
+radio://0/90/2M/E7E7E7E717 is not there to be woke up
+radio://0/100/2M/E7E7E7E717 is not there to be woke up
+radio://0/110/2M/E7E7E7E717 is not there to be woke up
+radio://0/80/2M/E7E7E7E718 is not there to be woke up
+radio://0/90/2M/E7E7E7E718 is not there to be woke up
+radio://0/100/2M/E7E7E7E718 is not there to be woke up
+radio://0/110/2M/E7E7E7E718 is not there to be woke up
+radio://0/80/2M/E7E7E7E719 is not there to be woke up
+radio://0/90/2M/E7E7E7E719 is not there to be woke up
+radio://0/100/2M/E7E7E7E719 is not there to be woke up
+radio://0/110/2M/E7E7E7E719 is not there to be woke up
+radio://0/80/2M/E7E7E7E71A is not there to be woke up
+radio://0/90/2M/E7E7E7E71A is not there to be woke up
+radio://0/100/2M/E7E7E7E71A is not there to be woke up
+radio://0/110/2M/E7E7E7E71A is not there to be woke up
+radio://0/80/2M/E7E7E7E71B is not there to be woke up
+radio://0/90/2M/E7E7E7E71B is not there to be woke up
+radio://0/100/2M/E7E7E7E71B is not there to be woke up
+radio://0/110/2M/E7E7E7E71B is not there to be woke up
+radio://0/80/2M/E7E7E7E71C is not there to be woke up
+radio://0/90/2M/E7E7E7E71C is not there to be woke up
+radio://0/100/2M/E7E7E7E71C is not there to be woke up
+radio://0/110/2M/E7E7E7E71C is not there to be woke up
+radio://0/80/2M/E7E7E7E71D is not there to be woke up
+radio://0/90/2M/E7E7E7E71D is not there to be woke up
+radio://0/100/2M/E7E7E7E71D is not there to be woke up
+radio://0/110/2M/E7E7E7E71D is not there to be woke up
+radio://0/80/2M/E7E7E7E71E is not there to be woke up
+radio://0/90/2M/E7E7E7E71E is not there to be woke up
+radio://0/100/2M/E7E7E7E71E is not there to be woke up
+radio://0/110/2M/E7E7E7E71E is not there to be woke up
+radio://0/80/2M/E7E7E7E71F is not there to be woke up
+radio://0/90/2M/E7E7E7E71F is not there to be woke up
+radio://0/100/2M/E7E7E7E71F is not there to be woke up
+radio://0/110/2M/E7E7E7E71F is not there to be woke up
+radio://0/80/2M/E7E7E7E720 is not there to be woke up
+radio://0/90/2M/E7E7E7E720 is not there to be woke up
+radio://0/100/2M/E7E7E7E720 is not there to be woke up
+radio://0/110/2M/E7E7E7E720 is not there to be woke up
+radio://0/80/2M/E7E7E7E721 is not there to be woke up
+radio://0/90/2M/E7E7E7E721 is not there to be woke up
+radio://0/100/2M/E7E7E7E721 is not there to be woke up
+radio://0/110/2M/E7E7E7E721 is not there to be woke up
+radio://0/80/2M/E7E7E7E722 is not there to be woke up
+radio://0/90/2M/E7E7E7E722 is not there to be woke up
+radio://0/100/2M/E7E7E7E722 is not there to be woke up
+radio://0/110/2M/E7E7E7E722 is not there to be woke up
+radio://0/80/2M/E7E7E7E723 is not there to be woke up
+radio://0/90/2M/E7E7E7E723 is not there to be woke up
+radio://0/100/2M/E7E7E7E723 is not there to be woke up
+radio://0/110/2M/E7E7E7E723 is not there to be woke up
+radio://0/80/2M/E7E7E7E724 is not there to be woke up
+radio://0/90/2M/E7E7E7E724 is not there to be woke up
+radio://0/100/2M/E7E7E7E724 is not there to be woke up
+radio://0/110/2M/E7E7E7E724 is not there to be woke up
+radio://0/80/2M/E7E7E7E725 is not there to be woke up
+radio://0/90/2M/E7E7E7E725 is not there to be woke up
+radio://0/100/2M/E7E7E7E725 is not there to be woke up
+radio://0/110/2M/E7E7E7E725 is not there to be woke up
+radio://0/80/2M/E7E7E7E726 is not there to be woke up
+radio://0/90/2M/E7E7E7E726 is not there to be woke up
+radio://0/100/2M/E7E7E7E726 is not there to be woke up
+radio://0/110/2M/E7E7E7E726 is not there to be woke up
+radio://0/80/2M/E7E7E7E727 is not there to be woke up
+radio://0/90/2M/E7E7E7E727 is not there to be woke up
+radio://0/100/2M/E7E7E7E727 is not there to be woke up
+radio://0/110/2M/E7E7E7E727 is not there to be woke up
+radio://0/80/2M/E7E7E7E728 is not there to be woke up
+radio://0/90/2M/E7E7E7E728 is not there to be woke up
+radio://0/100/2M/E7E7E7E728 is not there to be woke up
+radio://0/110/2M/E7E7E7E728 is not there to be woke up
+radio://0/80/2M/E7E7E7E729 is not there to be woke up
+radio://0/90/2M/E7E7E7E729 is not there to be woke up
+radio://0/100/2M/E7E7E7E729 is not there to be woke up
+radio://0/110/2M/E7E7E7E729 is not there to be woke up
+radio://0/80/2M/E7E7E7E72A is not there to be woke up
+radio://0/90/2M/E7E7E7E72A is not there to be woke up
+radio://0/100/2M/E7E7E7E72A is not there to be woke up
+radio://0/110/2M/E7E7E7E72A is not there to be woke up
+radio://0/80/2M/E7E7E7E72B is not there to be woke up
+radio://0/90/2M/E7E7E7E72B is not there to be woke up
+radio://0/100/2M/E7E7E7E72B is not there to be woke up
+radio://0/110/2M/E7E7E7E72B is not there to be woke up
+radio://0/80/2M/E7E7E7E72C is not there to be woke up
+radio://0/90/2M/E7E7E7E72C is not there to be woke up
+radio://0/100/2M/E7E7E7E72C is not there to be woke up
+radio://0/110/2M/E7E7E7E72C is not there to be woke up
+radio://0/80/2M/E7E7E7E72D is not there to be woke up
+radio://0/90/2M/E7E7E7E72D is not there to be woke up
+radio://0/100/2M/E7E7E7E72D is not there to be woke up
+radio://0/110/2M/E7E7E7E72D is not there to be woke up
+radio://0/80/2M/E7E7E7E72E is not there to be woke up
+radio://0/90/2M/E7E7E7E72E is not there to be woke up
+radio://0/100/2M/E7E7E7E72E is not there to be woke up
+radio://0/110/2M/E7E7E7E72E is not there to be woke up
+radio://0/80/2M/E7E7E7E72F is not there to be woke up
+radio://0/90/2M/E7E7E7E72F is not there to be woke up
+radio://0/100/2M/E7E7E7E72F is not there to be woke up
+radio://0/110/2M/E7E7E7E72F is not there to be woke up
+radio://0/80/2M/E7E7E7E730 is not there to be woke up
+radio://0/90/2M/E7E7E7E730 is not there to be woke up

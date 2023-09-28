@@ -45,6 +45,13 @@ def standBySingle(uri):
     except Exception:
         write('%s is not there to be standByied' % uri)
     # time.sleep(1)
+
+def powerdownSingle(uri):
+    try:
+        PowerSwitch(uri).platform_power_down()
+        write('%s has been powered down!' % uri)
+    except Exception:
+        write('%s is not there to be powered down' % uri)
  
 def create_CF_list(numero_massimo_droni = 10, radio_installate = 1):
     canali_radio = GB.canali_radio

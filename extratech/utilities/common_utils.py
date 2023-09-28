@@ -19,7 +19,7 @@ def IDFromURI(uri):
     address = uri.rsplit('/', 1)[-1]
     try:
         # print(int(address, 16) - 996028180448)
-        return int(address, 16) - GB.numero
+        return int(address, 16) - 996028180224
     except ValueError:
         print('address is not hexadecimal! (%s)' % address, file=sys.stderr)
         return None

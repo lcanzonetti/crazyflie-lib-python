@@ -2,10 +2,9 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QFont, QIntValidator
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, QDir, pyqtSlot as Slot
 from PyQt5.QtCore import pyqtSignal as Signal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QLineEdit, QTextEdit, QFormLayout, QFileDialog, QToolTip
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QLineEdit, QTextEdit, QFormLayout, QFileDialog, QToolTip, QStackedLayout, QComboBox
 import sys, threading
 import numpy as np
-from PIL import Image, ImageTk
 import os, time, signal, math
 from test_main import main
 import GLOBALS as GB
@@ -41,12 +40,23 @@ class MyWindow(QMainWindow):
 
         QToolTip.setFont(QFont('Arial', 10))
 
-        self.widget = QWidget()
+        self.widget_cf = QWidget()
+        self.widget_bolt = QWidget()
         self.grid = QGridLayout()
+        self.stackedLayout = QStackedLayout()
         self.onlyInt = QIntValidator()
         self.onlyInt.setRange(0, 99)
         self.powerMax = QIntValidator()
         self.powerMax.setRange(0, 65534)
+
+        self.stackedLayout.addWidget(self.widget_cf)
+        self.stackedLayout.addWidget(self.widget_bolt)
+
+        ###### SET CRAZYFLIE OR BOLT
+
+        self.pageCombo = QComboBox()
+        self.pageCombo.addItems(["Crazyflie", "Bolt"])
+        self.pageCombo.activated.connect(self.switch_page)
        
         #### Log
 
@@ -66,7 +76,15 @@ class MyWindow(QMainWindow):
         self.howmany_label.setText("How many Drognos we have?")
         self.howmany_label.setStyleSheet("border: 1px solid black;")
 
+        self.minimum_label = QtWidgets.QLabel(self)
+        self.minimum_label.setText("Starting Drone ID")
+        self.minimum_label.setStyleSheet("border: 1px solid black;")
+
         ######## Scrivi quanti droni abbiamo
+
+        self.setminimum_line = QtWidgets.QLineEdit(self)
+        self.setminimum_line.setValidator(self.onlyInt)
+        self.setminimum_line.returnPressed.connect(lambda: self.set_minumum(int(self.setminimum_line.text())))
 
         self.howmany_line = QtWidgets.QLineEdit(self)
         self.howmany_line.setValidator(self.onlyInt)
@@ -84,6 +102,15 @@ class MyWindow(QMainWindow):
         self.prop_button.setText("Propellers Test for Everyone")
         self.prop_button.clicked.connect(self.all_prop_test)
         self.prop_button.setToolTip("Execute Propeller Test for each and every succesfully connected drone in the swarm.")
+
+        ######## Idle Thrust
+        self.idlethrust_label = QtWidgets.QPushButton(self)
+        self.idlethrust_label.setText("Set Idle Thrust:")
+        self.idlethrust_label.setStyleSheet("border: 1px solid black;")
+
+        self.idlethrust_line = QtWidgets.QLineEdit(self)
+        self.idlethrust_line.setValidator(self.powerMax)
+        self.idlethrust_line.returnPressed.connect(lambda: self.start_idleThrust(int(self.idlethrust_line.text())))
 
         ######## Testa solo un motore
 
@@ -207,6 +234,12 @@ class MyWindow(QMainWindow):
         self.standby_button.setText("Standby Everyone")
         self.standby_button.clicked.connect(self.standby_for_all)
         self.standby_button.setToolTip("When clicked, Standby all succesfully connected drones in the swarm.")
+        
+        ###### Power Down Everyone
+        self.powerdown_button = QtWidgets.QPushButton(self)
+        self.powerdown_button.setText("Powerdown Everyone")
+        self.powerdown_button.clicked.connect(self.powerdown_all)
+        self.powerdown_button.setToolTip("When clicked, Power Down all succesfully connected drones in the swarm.")
 
         ###### Wakeup Everyone
         self.wakeup_button = QtWidgets.QPushButton(self)
@@ -258,7 +291,7 @@ class MyWindow(QMainWindow):
         ###### Select drogno to Flash
         self.flash_line = QtWidgets.QLineEdit(self)
         self.flash_line.setPlaceholderText("Write precise addresses")
-        self.flash_line.setValidator(self.onlyInt)
+        # self.flash_line.setValidator(self.onlyInt)
         self.flash_line.returnPressed.connect(lambda: self.flash_crazyflie(self.flash_line.text()))
         self.flash_line.setToolTip("You have to write the 'exact' drone ID for this to work. For example Drone ID '1' should be written as '01' and so on.")
 
@@ -267,46 +300,55 @@ class MyWindow(QMainWindow):
 
         
         #### Add Widgets to grid
-        self.grid.addWidget(self.prop_label, 0, 0, 1, 4)
-        self.grid.addWidget(self.prop_button, 1, 0, 1, 4)
-        self.grid.addWidget(self.proline_label, 2, 0, 1, 4)
-        self.grid.addWidget(self.prop_line, 3, 0, 1, 4)
-        self.grid.addWidget(self.batt_label, 4, 0, 1, 4)
-        self.grid.addWidget(self.batt_button, 5, 0, 1, 4)
-        self.grid.addWidget(self.battline_label, 6, 0, 1, 4)
-        self.grid.addWidget(self.batt_line, 7, 0, 1, 4)
-        self.grid.addWidget(self.radio_label, 8, 0, 1, 4)
-        self.grid.addWidget(self.radio_button, 9, 0, 1, 4)
-        self.grid.addWidget(self.radline_label, 10, 0, 1, 4)
-        self.grid.addWidget(self.radio_line, 11, 0, 1, 4)
-        self.grid.addWidget(self.led_label, 12, 0, 1, 4)
-        self.grid.addWidget(self.all_led_button, 13, 0, 1, 4)
-        self.grid.addWidget(self.takeoff_label, 14, 0, 1, 4)
-        self.grid.addWidget(self.takeoff_button, 15, 0, 1, 4)
-        self.grid.addWidget(self.connection_label, 16, 0, 1, 4)
-        self.grid.addWidget(self.standby_button, 17, 0, 1, 4)
-        self.grid.addWidget(self.wakeup_button, 18, 0, 1, 4)
-        self.grid.addWidget(self.flash_label, 2, 16, 1, 2)
-        self.grid.addWidget(self.flashline_label, 6, 16, 1, 2)
-        self.grid.addWidget(self.flash_line, 7, 16, 1, 2)
-        self.grid.addWidget(self.prepare_button, 3, 16, 1, 2)
-        self.grid.addWidget(self.trovafile_button, 4, 16, 1, 2)
-        self.grid.addWidget(self.flashatutti_button, 5, 16, 1, 2)
-        self.grid.addWidget(self.howmany_label, 0, 16, 1, 2)
-        self.grid.addWidget(self.howmany_line, 1, 16, 1, 2)
-        self.grid.addWidget(self.clearlog_button, 20, 16, 1, 2)
-        self.grid.addWidget(self.askbatt_button, 21, 16, 1, 2)
-        self.grid.addWidget(self.textbox, 0, 5, 19, 10)
-        self.grid.addWidget(self.writejson_button, 19, 16, 1, 2)
-        self.grid.addWidget(self.powerline_label, 20, 0, 1, 4)
-        self.grid.addWidget(self.power_line, 21, 0, 1, 4)
-        self.grid.addWidget(self.motore1_button, 22, 0, 1, 1)
-        self.grid.addWidget(self.motore2_button, 22, 1, 1, 1)
-        self.grid.addWidget(self.motore3_button, 23, 0, 1, 1)
-        self.grid.addWidget(self.motore4_button, 23, 1, 1, 1)
+        self.grid.addWidget(self.pageCombo, 0, 0, 1, 1)
+        self.grid.addWidget(self.prop_label, 1, 0, 1, 2)
+        self.grid.addWidget(self.prop_button, 2, 0, 1, 2)
+        self.grid.addWidget(self.proline_label, 3, 0, 1, 2)
+        self.grid.addWidget(self.prop_line, 4, 0, 1, 2)
+        self.grid.addWidget(self.batt_label, 5, 0, 1, 2)
+        self.grid.addWidget(self.batt_button, 6, 0, 1, 2)
+        self.grid.addWidget(self.battline_label, 7, 0, 1, 2)
+        self.grid.addWidget(self.batt_line, 8, 0, 1, 2)
+        self.grid.addWidget(self.radio_label, 9, 0, 1, 2)
+        self.grid.addWidget(self.radio_button, 10, 0, 1, 2)
+        self.grid.addWidget(self.radline_label, 11, 0, 1, 2)
+        self.grid.addWidget(self.radio_line, 12, 0, 1, 2)
+        self.grid.addWidget(self.led_label, 13, 0, 1, 2)
+        self.grid.addWidget(self.all_led_button, 14, 0, 1, 2)
+        self.grid.addWidget(self.takeoff_label, 15, 0, 1, 2)
+        self.grid.addWidget(self.takeoff_button, 16, 0, 1, 2)
+        self.grid.addWidget(self.connection_label, 17, 0, 1, 2)
+        self.grid.addWidget(self.standby_button, 18, 0, 1, 2)
+        self.grid.addWidget(self.wakeup_button, 19, 0, 1, 2)
+        self.grid.addWidget(self.flash_label, 5, 16, 1, 2)
+        self.grid.addWidget(self.flashline_label, 9, 16, 1, 2)
+        self.grid.addWidget(self.flash_line, 10, 16, 1, 2)
+        self.grid.addWidget(self.prepare_button, 6, 16, 1, 2)
+        self.grid.addWidget(self.trovafile_button, 7, 16, 1, 2)
+        self.grid.addWidget(self.flashatutti_button, 8, 16, 1, 2)
+        self.grid.addWidget(self.howmany_label, 1, 16, 1, 2)
+        self.grid.addWidget(self.minimum_label, 3, 16, 1, 2)
+        self.grid.addWidget(self.setminimum_line, 4, 16, 1, 2)
+        self.grid.addWidget(self.howmany_line, 2, 16, 1, 2)
+        self.grid.addWidget(self.clearlog_button, 21, 16, 1, 2)
+        self.grid.addWidget(self.askbatt_button, 22, 16, 1, 2)
+        self.grid.addWidget(self.textbox, 1, 1, 19, 10)
+        self.grid.addWidget(self.writejson_button, 20, 16, 1, 2)
+        self.grid.addWidget(self.powerline_label, 21, 0, 1, 1)
+        self.grid.addWidget(self.power_line, 22, 0, 1, 1)
+        self.grid.addWidget(self.powerdown_button, 23, 0, 1, 1)
+        self.grid.addWidget(self.motore1_button, 24, 0, 1, 1)
+        self.grid.addWidget(self.motore2_button, 24, 1, 1, 1)
+        self.grid.addWidget(self.motore3_button, 25, 0, 1, 1)
+        self.grid.addWidget(self.motore4_button, 25, 1, 1, 1)
+        self.grid.addWidget(self.idlethrust_label, 26, 0, 1, 1)
+        self.grid.addWidget(self.idlethrust_line, 27, 0, 1, 1)
 
-        self.widget.setLayout(self.grid)
-        self.setCentralWidget(self.widget)
+        self.widget_cf.setLayout(self.grid)
+        self.setCentralWidget(self.widget_cf)
+
+    def switch_page(self):
+        self.stackedLayout.setCurrentIndex(self.pageCombo.currentIndex())
             
 
     #### Write log to TextBox
@@ -360,6 +402,10 @@ class MyWindow(QMainWindow):
     def set_howmany(self, quanti):
         GB.numero_droni = quanti
         write(GB.numero_droni)
+
+    def set_minumum(self, minimo):
+        GB.numero = 996028180224
+        GB.numero = GB.numero + minimo
 
     ###### Propeller test functions
     def all_prop_test(self):
@@ -442,6 +488,16 @@ class MyWindow(QMainWindow):
         
         self.single_motor_thread.start()
 
+    def start_idleThrust(self, pwm):
+        GB.idle_power = pwm
+        time.sleep(0.5)
+        try:
+            for uro in GB.available:
+                id = IDFromURI(uro)
+                GB.data_d[id].test_manager.idle_thrust()
+        except KeyError:
+            write("No Drones Connected!")
+
     ###### Wakeup/Standby functions
     def wake_up_all(self):
 
@@ -501,6 +557,15 @@ class MyWindow(QMainWindow):
         self.worker_thread.finished.connect(lambda: self.flashatutti_button.setEnabled(True))
         self.flash_line.setEnabled(False)
         self.worker_thread.finished.connect(lambda: self.flash_line.setEnabled(True))
+
+    def powerdown_all(self):
+        for uro in GB.available:
+            id = IDFromURI(uro)
+            try:
+                GB.data_d[id].close_link()
+                stenBaiatore.powerdownSingle(uro)
+            except KeyError as e:
+                write("Non puoi spegnere se prima non ti connetti per bene!")
 
     def standby_for_all(self):
         for uro in GB.available:
@@ -901,6 +966,10 @@ class flashTuttiDrogni(QObject):
 def window():
     app = QApplication(sys.argv)
     win = MyWindow()
+
+    with open("style.qss", "r") as f:
+        _style = f.read()
+        app.setStyleSheet(_style)
 
     signal.signal(signal.SIGINT, exit_signal_handler)
 
